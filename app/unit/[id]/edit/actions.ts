@@ -1,0 +1,45 @@
+"use server";
+
+import { UnitStatus } from "@prisma/client";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { requireRole } from "@/lib/session";
+
+function text(formData: FormData, key: string) {
+  return String(formData.get(key) ?? "").trim();
+}
+
+function numberValue(formData: FormData, key: string, fallback = 0) {
+  const value = Number(formData.get(key));
+  return Number.isFinite(value) ? value : fallback;
+}
+
+export async function updateUnitAction(unitId: string, formData: FormData) {
+  requireRole(["admin"]);
+
+  await prisma.unit.update({
+    where: { id: unitId },
+    data: {
+      nomorUnit: text(formData, "nomorUnit"),
+      model: text(formData, "model"),
+      processor: text(formData, "processor"),
+      ram: text(formData, "ram"),
+      ssd: text(formData, "ssd"),
+      ssdSerial: text(formData, "ssdSerial"),
+      lcdSize: text(formData, "lcdSize"),
+      lcdResolution: text(formData, "lcdResolution"),
+      isTouchscreen: text(formData, "isTouchscreen") === "Ya",
+      hargaModal: numberValue(formData, "hargaModal"),
+      hargaJualRekomendasi: numberValue(formData, "hargaJualRekomendasi"),
+      ssdHealth: numberValue(formData, "ssdHealth"),
+      batteryHealth: numberValue(formData, "batteryHealth"),
+      statusObservasi: text(formData, "statusObservasi") as UnitStatus
+    }
+  });
+
+  revalidatePath("/batch-psi");
+  revalidatePath(`/unit/${unitId}`);
+  revalidatePath("/");
+  redirect(`/unit/${unitId}`);
+}

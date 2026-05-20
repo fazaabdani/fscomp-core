@@ -38,6 +38,13 @@ export async function getBatchesForPage() {
         ram: unit.ram,
         ssd: unit.ssd,
         hargaModal: unit.hargaModal,
+        hargaJualRekomendasi: unit.hargaJualRekomendasi,
+        ssdSerial: unit.ssdSerial ?? "",
+        lcdSize: unit.lcdSize ?? "",
+        lcdResolution: unit.lcdResolution ?? "",
+        isTouchscreen: unit.isTouchscreen,
+        ssdHealth: unit.ssdHealth ?? 0,
+        batteryHealth: unit.batteryHealth ?? 0,
         statusObservasi: unit.statusObservasi.replaceAll("_", " ")
       }))
     }));
@@ -46,6 +53,40 @@ export async function getBatchesForPage() {
       ...batch,
       units: demoUnits.filter((unit) => unit.batchId === batch.id)
     }));
+  }
+}
+
+export async function getUnitForEdit(id: string) {
+  try {
+    const unit = await prisma.unit.findUnique({ where: { id }, include: { batch: true } });
+    if (!unit) return null;
+
+    return {
+      id: unit.id,
+      nomorUnit: unit.nomorUnit,
+      batchId: unit.batchId,
+      batchName: unit.batch.nomorBatch,
+      model: unit.model,
+      processor: unit.processor,
+      ram: unit.ram,
+      ssd: unit.ssd,
+      ssdSerial: unit.ssdSerial ?? "",
+      lcdSize: unit.lcdSize ?? "",
+      lcdResolution: unit.lcdResolution ?? "",
+      isTouchscreen: unit.isTouchscreen,
+      hargaModal: unit.hargaModal,
+      hargaJualRekomendasi: unit.hargaJualRekomendasi,
+      batteryHealth: unit.batteryHealth ?? 0,
+      ssdHealth: unit.ssdHealth ?? 0,
+      statusObservasi: unit.statusObservasi
+    };
+  } catch {
+    const unit = demoUnits.find((item) => item.id === id);
+    if (!unit) return null;
+    return {
+      ...unit,
+      batchName: demoBatches.find((batch) => batch.id === unit.batchId)?.nomorBatch ?? "-"
+    };
   }
 }
 

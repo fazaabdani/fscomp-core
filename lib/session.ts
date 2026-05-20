@@ -5,8 +5,8 @@ import { demoUsers, type User } from "./auth";
 const sessionCookieName = "fscomp_user";
 
 export function getCurrentUser(): User | null {
-  const name = cookies().get(sessionCookieName)?.value;
-  return demoUsers.find((user) => user.name === name) ?? null;
+  const username = cookies().get(sessionCookieName)?.value;
+  return demoUsers.find((user) => user.username === username) ?? null;
 }
 
 export function requireUser() {

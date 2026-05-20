@@ -23,10 +23,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </span>
           </Link>
           <nav>
-            <Link href="/">Dashboard</Link>
-            <Link href="/batch-psi">Batch PSI</Link>
-            <Link href="/qc-harian">QC Harian</Link>
-            <Link href="/label">Label QR</Link>
+            {currentUser ? (
+              <>
+                <Link href="/">Dashboard</Link>
+                <Link href="/batch-psi">Batch PSI</Link>
+                <Link href="/qc-harian">QC Harian</Link>
+                <Link href="/label">Label QR</Link>
+              </>
+            ) : null}
             <Link href="/login">{currentUser ? `${currentUser.name} (${currentUser.role})` : "Login"}</Link>
           </nav>
         </header>

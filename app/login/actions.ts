@@ -6,14 +6,15 @@ import { demoUsers } from "@/lib/auth";
 import { getSessionCookieName } from "@/lib/session";
 
 export async function loginAction(formData: FormData) {
-  const userName = String(formData.get("userName") ?? "");
-  const user = demoUsers.find((item) => item.name === userName);
+  const username = String(formData.get("username") ?? "").trim().toLowerCase();
+  const password = String(formData.get("password") ?? "");
+  const user = demoUsers.find((item) => item.username === username && item.password === password);
 
   if (!user) {
-    redirect("/login?error=user");
+    redirect("/login?error=login");
   }
 
-  cookies().set(getSessionCookieName(), user.name, {
+  cookies().set(getSessionCookieName(), user.username, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",

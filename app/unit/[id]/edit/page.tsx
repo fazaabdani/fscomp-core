@@ -1,0 +1,71 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { getUnitForEdit } from "@/lib/db-data";
+import { requireRole } from "@/lib/session";
+import { updateUnitAction } from "./actions";
+
+export default async function EditUnitPage({ params }: { params: { id: string } }) {
+  requireRole(["admin"]);
+  const unit = await getUnitForEdit(params.id);
+  if (!unit) notFound();
+
+  const action = updateUnitAction.bind(null, unit.id);
+
+  return (
+    <section className="pageStack">
+      <Link className="backLink" href="/batch-psi"><ArrowLeft size={16} /> Kembali ke Batch PSI</Link>
+      <div className="sectionTitle">
+        <div>
+          <p className="eyebrow">Edit Unit</p>
+          <h1>Unit {unit.nomorUnit} - {unit.model}</h1>
+        </div>
+      </div>
+
+      <form className="panel formGrid" action={action}>
+        <div className="numberGrid">
+          <label>Nomor Unit<input name="nomorUnit" defaultValue={unit.nomorUnit} required /></label>
+          <label>Batch<input defaultValue={unit.batchName} disabled /></label>
+        </div>
+        <div className="numberGrid">
+          <label>Model<input name="model" defaultValue={unit.model} required /></label>
+          <label>Processor<input name="processor" defaultValue={unit.processor} required /></label>
+        </div>
+        <div className="numberGrid">
+          <label>RAM<input name="ram" defaultValue={unit.ram} required /></label>
+          <label>SSD<input name="ssd" defaultValue={unit.ssd} required /></label>
+        </div>
+        <div className="numberGrid">
+          <label>Seri SSD<input name="ssdSerial" defaultValue={unit.ssdSerial} /></label>
+          <label>Status QC
+            <select name="statusObservasi" defaultValue={unit.statusObservasi}>
+              <option value="VERIFIED">VERIFIED</option>
+              <option value="VERIFIED_WITH_NOTES">VERIFIED WITH NOTES</option>
+              <option value="RECHECK">RECHECK</option>
+              <option value="CANDIDATE_RETUR">CANDIDATE RETUR</option>
+            </select>
+          </label>
+        </div>
+        <div className="numberGrid">
+          <label>Harga Modal<input name="hargaModal" type="number" defaultValue={unit.hargaModal} /></label>
+          <label>Harga Jual<input name="hargaJualRekomendasi" type="number" defaultValue={unit.hargaJualRekomendasi} required /></label>
+        </div>
+        <div className="numberGrid">
+          <label>Ukuran LCD<input name="lcdSize" defaultValue={unit.lcdSize} /></label>
+          <label>Resolusi Layar<input name="lcdResolution" defaultValue={unit.lcdResolution} /></label>
+        </div>
+        <div className="numberGrid">
+          <label>SSD Health (%)<input name="ssdHealth" type="number" min="0" max="100" defaultValue={unit.ssdHealth} /></label>
+          <label>Battery Health (%)<input name="batteryHealth" type="number" min="0" max="100" defaultValue={unit.batteryHealth} /></label>
+        </div>
+        <label>Touchscreen
+          <select name="isTouchscreen" defaultValue={unit.isTouchscreen ? "Ya" : "Tidak"}>
+            <option>Tidak</option>
+            <option>Ya</option>
+          </select>
+        </label>
+        <button className="primaryButton" type="submit">Simpan Perubahan Unit</button>
+      </form>
+    </section>
+  );
+}

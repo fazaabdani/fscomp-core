@@ -4,27 +4,33 @@ import { ArrowLeft, CalendarClock, Cpu, HardDrive, QrCode, ShieldCheck } from "l
 import { formatRupiah } from "@/lib/api";
 import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
+import { getCurrentUser } from "@/lib/session";
 
 export default async function UnitDetailPage({ params }: { params: { id: string } }) {
   const unit = await getUnitForDetail(params.id);
   if (!unit) notFound();
 
+  const currentUser = getCurrentUser();
+  const isInternalUser = Boolean(currentUser);
   const dailyHistory = unit.dailyHistory;
   const qcAwal = unit.qcAwal;
+  const visibleHardware = qcAwal
+    ? Object.entries(qcAwal.hardware).filter(([key]) => isInternalUser || key !== "Seri SSD")
+    : [];
 
   return (
     <section className="pageStack">
-      <Link className="backLink" href="/"><ArrowLeft size={16} /> Kembali</Link>
+      {isInternalUser ? <Link className="backLink" href="/"><ArrowLeft size={16} /> Kembali</Link> : null}
 
       <div className="unitHero">
         <div>
-          <p className="eyebrow">Unit {unit.nomorUnit}</p>
+          <p className="eyebrow">{isInternalUser ? `Unit ${unit.nomorUnit}` : "Hasil pengecekan FS Comp"}</p>
           <h1>{unit.model}</h1>
           <p className="heroCopy">{unit.processor} / {unit.ram} / {unit.ssd}</p>
         </div>
         <div className="unitHeroActions">
           <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
-          <Link className="primaryButton" href={`/label?unit=${unit.id}`}><QrCode size={17} /> Generate Label</Link>
+          {isInternalUser ? <Link className="primaryButton" href={`/label?unit=${unit.id}`}><QrCode size={17} /> Generate Label</Link> : null}
         </div>
       </div>
 
@@ -40,7 +46,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
           <div className="qcColumns">
             <div>
               <h3>Hardware</h3>
-              {qcAwal ? Object.entries(qcAwal.hardware).map(([key, value]) => (
+              {qcAwal ? visibleHardware.map(([key, value]) => (
                 <div className="kv" key={key}><span>{key}</span><strong>{value}</strong></div>
               )) : <p className="bodyText">QC awal belum diisi.</p>}
             </div>
@@ -69,9 +75,9 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
             <div><HardDrive size={16} /> SSD health {unit.ssdHealth}%</div>
             <div><CalendarClock size={16} /> Tempo {unit.tempo}</div>
           </div>
-          <div className="kv"><span>Batch</span><strong>{unit.batch.nomorBatch}</strong></div>
-          <div className="kv"><span>Supplier</span><strong>{unit.supplier}</strong></div>
-          <div className="kv"><span>Seri SSD</span><strong>{unit.ssdSerial}</strong></div>
+          {isInternalUser ? <div className="kv"><span>Batch</span><strong>{unit.batch.nomorBatch}</strong></div> : null}
+          {isInternalUser ? <div className="kv"><span>Supplier</span><strong>{unit.supplier}</strong></div> : null}
+          {isInternalUser ? <div className="kv"><span>Seri SSD</span><strong>{unit.ssdSerial}</strong></div> : null}
           <div className="kv"><span>LCD</span><strong>{unit.lcdSize}</strong></div>
           <div className="kv"><span>Resolusi</span><strong>{unit.lcdResolution}</strong></div>
           <div className="kv"><span>Touchscreen</span><strong>{unit.isTouchscreen ? "Ya" : "Tidak"}</strong></div>
@@ -80,7 +86,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
         </aside>
       </div>
 
-      <section className="panel">
+      {isInternalUser ? <section className="panel">
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Reminder OS & aplikasi</p>
@@ -90,7 +96,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
         <div className="reminderGrid">
           {(qcAwal?.reminder ?? []).map((item) => <span key={item}>{item}</span>)}
         </div>
-      </section>
+      </section> : null}
 
       <section className="panel">
         <div className="panelHeader">

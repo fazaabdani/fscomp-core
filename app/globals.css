@@ -296,7 +296,7 @@ main {
 
 .unitRow {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr) auto;
+  grid-template-columns: 52px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 12px;
   padding: 12px;
@@ -393,6 +393,12 @@ main {
   gap: 10px;
   flex-wrap: wrap;
   margin-top: 16px;
+}
+
+.compactButton {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
 }
 
 .qcLayout,
@@ -563,6 +569,14 @@ textarea {
   border: 1px solid rgba(255, 111, 97, 0.4);
   background: rgba(255, 111, 97, 0.12);
   color: #ffd1cc;
+}
+
+.successBox {
+  padding: 12px;
+  border: 1px solid rgba(40, 232, 154, 0.38);
+  border-radius: 8px;
+  background: rgba(40, 232, 154, 0.12);
+  color: #b8ffdf;
 }
 
 .emptyState {

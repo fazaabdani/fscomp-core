@@ -1,19 +1,22 @@
-import { BatteryCharging, Bluetooth, CheckCircle2, HardDrive, Keyboard, Monitor, Wifi } from "lucide-react";
+import { Bluetooth, CheckCircle2, HardDrive, Keyboard, Monitor, Wifi } from "lucide-react";
 import Link from "next/link";
+import { demoUsers } from "@/lib/auth";
 import { getQcHarianPageData } from "@/lib/db-data";
+import { getCurrentUser } from "@/lib/session";
+import { createDailyQcAction } from "./actions";
 
 const checklist = [
-  { label: "Nyala normal", icon: CheckCircle2 },
-  { label: "Booting", icon: Monitor },
-  { label: "Keyboard", icon: Keyboard },
-  { label: "SSD", icon: HardDrive },
-  { label: "Battery", icon: BatteryCharging },
-  { label: "WiFi", icon: Wifi },
-  { label: "Bluetooth", icon: Bluetooth }
+  { label: "Nyala normal", name: "nyalaNormal", icon: CheckCircle2 },
+  { label: "Booting", name: "booting", icon: Monitor },
+  { label: "Keyboard", name: "keyboard", icon: Keyboard },
+  { label: "SSD", name: "ssd", icon: HardDrive },
+  { label: "WiFi", name: "wifi", icon: Wifi },
+  { label: "Bluetooth", name: "bluetooth", icon: Bluetooth }
 ];
 
-export default async function QcHarianPage() {
+export default async function QcHarianPage({ searchParams }: { searchParams?: { saved?: string; error?: string } }) {
   const { units, dailyQcs } = await getQcHarianPageData();
+  const currentUser = getCurrentUser();
   const firstUnit = units[0];
 
   return (
@@ -26,7 +29,7 @@ export default async function QcHarianPage() {
       </div>
 
       <div className="qcLayout">
-        <form className="panel qcForm">
+        <form className="panel qcForm" action={createDailyQcAction}>
           <div className="panelHeader">
             <div>
               <p className="eyebrow">Input cepat</p>
@@ -35,18 +38,28 @@ export default async function QcHarianPage() {
           </div>
           <label>
             Unit
-            <select name="unitId" defaultValue={firstUnit?.id}>
+            <select name="unitId" defaultValue={firstUnit?.id} required>
               {units.map((unit) => (
                 <option value={unit.id} key={unit.id}>Unit {unit.nomorUnit} - {unit.model}</option>
               ))}
             </select>
           </label>
+          <label>
+            Nama checker
+            <select name="checkerName" defaultValue={currentUser?.name} required>
+              {demoUsers.map((user) => (
+                <option value={user.name} key={user.name}>{user.name} - {user.role}</option>
+              ))}
+            </select>
+          </label>
+          {searchParams?.saved ? <div className="successBox">QC harian berhasil disimpan.</div> : null}
+          {searchParams?.error ? <div className="infoBox dangerInfo">QC gagal disimpan: {searchParams.error}</div> : null}
           <div className="checkGrid">
             {checklist.map((item) => {
               const Icon = item.icon;
               return (
                 <label className="checkTile" key={item.label}>
-                  <input type="checkbox" defaultChecked />
+                  <input name={item.name} type="checkbox" defaultChecked />
                   <Icon size={18} />
                   <span>{item.label}</span>
                 </label>
@@ -65,7 +78,7 @@ export default async function QcHarianPage() {
           </div>
           <label>
             Status
-            <select defaultValue="Lolos">
+            <select name="masihLolos" defaultValue="Lolos">
               <option>Lolos</option>
               <option>Lolos dengan catatan</option>
               <option>Tidak Lolos</option>
@@ -73,9 +86,9 @@ export default async function QcHarianPage() {
           </label>
           <label>
             Catatan harian
-            <textarea placeholder="Contoh: booting normal, battery turun 6 persen dalam 20 menit." />
+            <textarea name="catatan" placeholder="Contoh: booting normal, battery turun 6 persen dalam 20 menit." />
           </label>
-          <button className="primaryButton" type="button">Simpan QC Harian</button>
+          <button className="primaryButton" type="submit" disabled={units.length === 0}>Simpan QC Harian</button>
         </form>
 
         <section className="panel">
@@ -86,7 +99,9 @@ export default async function QcHarianPage() {
             </div>
           </div>
           <div className="noteList">
-            {dailyQcs.map((qc) => {
+            {dailyQcs.length === 0 ? (
+              <div className="emptyState">Belum ada hasil QC harian. Simpan QC pertama dari form di kiri.</div>
+            ) : dailyQcs.map((qc) => {
               return (
                 <Link className="note linkNote" href={`/unit/${qc.unitId}`} key={qc.id}>
                   <strong>Unit {qc.unit?.nomorUnit} - {qc.masihLolos}</strong>

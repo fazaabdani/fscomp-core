@@ -1,7 +1,7 @@
 import { CalendarDays, FileClock, Plus, ReceiptText } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
-import { canEditBatch } from "@/lib/auth";
+import { canEditBatch, canEditUnit } from "@/lib/auth";
 import { getBatchesForPage } from "@/lib/db-data";
 import { getCurrentUser } from "@/lib/session";
 import { statusTone } from "@/lib/constants";
@@ -9,6 +9,7 @@ import { statusTone } from "@/lib/constants";
 export default async function BatchPsiPage() {
   const currentUser = getCurrentUser();
   const canManageBatch = currentUser ? canEditBatch(currentUser) : false;
+  const canManageUnit = currentUser ? canEditUnit(currentUser) : false;
   const batches = await getBatchesForPage();
 
   return (
@@ -48,14 +49,15 @@ export default async function BatchPsiPage() {
 
               <div className="tableLike compact">
                 {batchUnits.map((unit) => (
-                  <Link className="unitRow" href={`/unit/${unit.id}`} key={unit.id}>
+                  <div className="unitRow" key={unit.id}>
                     <span className="unitNumber">{unit.nomorUnit}</span>
                     <span>
-                      <strong>{unit.model}</strong>
+                      <Link href={`/unit/${unit.id}`}><strong>{unit.model}</strong></Link>
                       <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
                     </span>
                     <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
-                  </Link>
+                    {canManageUnit ? <Link className="secondaryButton compactButton" href={`/unit/${unit.id}/edit`}>Edit Unit</Link> : null}
+                  </div>
                 ))}
               </div>
 

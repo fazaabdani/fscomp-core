@@ -37,12 +37,12 @@ export default function LoginPage() {
           <LockKeyhole size={22} />
         </div>
         <label>
-          Pilih User
-          <select name="userName" defaultValue="Faza">
-            {demoUsers.map((user) => (
-              <option value={user.name} key={user.name}>{user.name} - {user.role}</option>
-            ))}
-          </select>
+          Username
+          <input name="username" placeholder="admin / teknisi / pkl" required />
+        </label>
+        <label>
+          Password
+          <input name="password" type="password" placeholder="Masukkan password" required />
         </label>
         <button className="primaryButton" type="submit">Login</button>
       </form>
@@ -61,7 +61,7 @@ export default function LoginPage() {
               <span className="unitNumber">{user.name.charAt(0)}</span>
               <span>
                 <strong>{user.name}</strong>
-                <small>{user.role}</small>
+                <small>{user.username} / {user.role}</small>
               </span>
             </div>
           ))}

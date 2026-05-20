@@ -2,15 +2,15 @@ import { roles, type RoleName } from "./constants";
 
 export type User = {
   name: string;
+  username: string;
+  password: string;
   role: RoleName;
 };
 
 export const demoUsers: User[] = [
-  { name: "Faza", role: "admin" },
-  { name: "Zume", role: "admin" },
-  { name: "Ludfy", role: "teknisi" },
-  { name: "Rosyadi", role: "teknisi" },
-  { name: "Anak Magang", role: "magang" }
+  { name: "Ludfy", username: "admin", password: "admin123", role: "admin" },
+  { name: "Rosyadi", username: "teknisi", password: "admin123", role: "teknisi" },
+  { name: "PKL", username: "pkl", password: "pkl", role: "magang" }
 ];
 
 export function canViewPrice(user: User) {
@@ -27,4 +27,8 @@ export function canEditDailyQc(user: User) {
 
 export function canEditInitialQc(user: User) {
   return user.role === "admin" || user.role === "teknisi";
+}
+
+export function canEditUnit(user: User) {
+  return user.role === "admin";
 }
