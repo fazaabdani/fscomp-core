@@ -395,6 +395,17 @@ main {
   margin-top: 16px;
 }
 
+.noMargin {
+  margin-top: 0;
+}
+
+.spreadsheetPaste {
+  min-height: 260px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .compactButton {
   min-height: 32px;
   padding: 0 10px;
@@ -461,6 +472,126 @@ input:not([type]) {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+}
+
+.qcToolsGrid,
+.downloadGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.qcToolPanel {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.swatchGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.swatchButton {
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.screenOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: start end;
+  padding: 18px;
+}
+
+.screenOverlay button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #111827;
+  border-radius: 8px;
+  background: white;
+  color: #111827;
+  font-weight: 800;
+}
+
+.keyGrid {
+  display: flex;
+  min-height: 118px;
+  align-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(5, 12, 22, 0.86);
+}
+
+.keyGrid span {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid rgba(55, 163, 255, 0.35);
+  border-radius: 8px;
+  background: rgba(55, 163, 255, 0.12);
+  color: #d9f0ff;
+  font-weight: 800;
+}
+
+.keyGrid .emptyKey {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.meterShell {
+  width: 100%;
+  height: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(5, 12, 22, 0.86);
+}
+
+.meterShell span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #28e89a, #37a3ff);
+}
+
+.cameraPreview {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #020617;
+  object-fit: cover;
+}
+
+.downloadCard {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(8, 18, 32, 0.78);
+}
+
+.downloadCard p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.downloadCard span {
+  color: #7cc7ff;
+  font-weight: 800;
 }
 
 .narrowPage {
@@ -732,6 +863,12 @@ textarea {
   color: var(--blue-dark);
 }
 
+.qcCompleteLabel {
+  width: 10cm;
+  height: 7cm;
+  grid-template-rows: auto 1fr auto;
+}
+
 .labelTop,
 .labelFooter {
   display: flex;
@@ -769,6 +906,32 @@ textarea {
 .labelBody span,
 .labelFooter span:last-child {
   font-size: 11px;
+}
+
+.qcMiniGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.qcMiniGrid span {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 2px 3px;
+  border: 1px solid #d8e1ee;
+  border-radius: 3px;
+  font-size: 7px;
+}
+
+.qcMiniGrid em {
+  font-style: normal;
+  color: #42526b;
+}
+
+.qcMiniGrid strong {
+  font-size: 7px;
 }
 
 @media (max-width: 820px) {
@@ -858,6 +1021,16 @@ textarea {
     page-break-inside: avoid;
     border-radius: 0.12cm;
     padding: 0.32cm;
+  }
+
+  .qcCompleteLabel {
+    width: 10cm;
+    height: 7cm;
+  }
+
+  .qcMiniGrid span,
+  .qcMiniGrid strong {
+    font-size: 6pt;
   }
 
   .unitLabel h2 {

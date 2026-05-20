@@ -60,13 +60,19 @@ Total ada **7 tabel utama**:
 
 Data laptop masuk dalam dua tahap:
 
-1. Saat batch PSI dibuat:
-   - Admin atau teknisi input nomor unit, batch, supplier, model, processor, RAM, SSD, harga modal, harga jual awal, tanggal masuk, dan tempo.
+1. Saat batch PSI dibuat atau di-import dari spreadsheet:
+   - Admin atau teknisi input/import merk, seri, processor, RAM, SSD, layar, qty, dan problem awal dari PSI.
+   - Tahap ini hanya memastikan unit yang datang sesuai list PSI.
+   - Unit hasil import otomatis masuk status `RECHECK`, belum siap katalog.
 
 2. Saat QC awal:
    - Teknisi melengkapi data teknis: seri SSD, ukuran LCD, resolusi layar, touchscreen, USB, kamera, touchpad, trackpoint, speaker, mic, body broken, karet bawah, repaint, battery health, SSD health, OS, driver, update, dan catatan.
 
 QC harian tidak membuat unit baru. QC harian hanya update kondisi hari itu.
+
+3. Saat unit sudah lengkap:
+   - Status diubah menjadi `VERIFIED` atau `VERIFIED WITH NOTES`.
+   - Baru boleh masuk katalog dan spreadsheet katalog.
 
 ## User dan Hak Akses
 

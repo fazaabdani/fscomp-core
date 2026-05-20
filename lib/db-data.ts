@@ -225,7 +225,35 @@ export async function getUnitsForLabel() {
       statusObservasi: unit.statusObservasi.replaceAll("_", " "),
       qcAwal: {
         tanggal: unit.qcAwal?.tanggal.toISOString().slice(0, 10) ?? "-",
-        checker: unit.qcAwal?.checker.name ?? "-"
+        checker: unit.qcAwal?.checker.name ?? "-",
+        hardware: unit.qcAwal
+          ? {
+              Body: unit.qcAwal.body,
+              "Body Broken": unit.qcAwal.bodyBroken,
+              "Karet Bawah": unit.qcAwal.karetBawah,
+              Repaint: unit.qcAwal.repaint,
+              Layar: unit.qcAwal.layar,
+              Touchscreen: unit.qcAwal.touchscreen,
+              Keyboard: unit.qcAwal.keyboard,
+              Touchpad: unit.qcAwal.touchpad,
+              Trackpoint: unit.qcAwal.trackpoint,
+              USB: unit.qcAwal.usb,
+              Kamera: unit.qcAwal.kamera,
+              Speaker: unit.qcAwal.speaker,
+              Mic: unit.qcAwal.mic,
+              Battery: unit.qcAwal.battery,
+              SSD: unit.qcAwal.ssd
+            }
+          : {},
+        software: unit.qcAwal
+          ? {
+              OS: unit.qcAwal.osInstalled,
+              "Update OS": unit.qcAwal.updateOs,
+              Driver: unit.qcAwal.driver,
+              "Security Patch": unit.qcAwal.securityPatch,
+              Aplikasi: unit.qcAwal.aplikasiDefault
+            }
+          : {}
       }
     }));
   } catch {

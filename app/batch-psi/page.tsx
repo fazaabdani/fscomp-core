@@ -20,7 +20,10 @@ export default async function BatchPsiPage() {
           <h1>Management batch masuk dan tempo pembayaran</h1>
         </div>
         {canManageBatch ? (
-          <Link className="primaryButton" href="/batch-psi/new"><Plus size={17} /> Tambah Batch</Link>
+          <div className="buttonRow noMargin">
+            <Link className="secondaryButton" href="/batch-psi/import">Import Spreadsheet</Link>
+            <Link className="primaryButton" href="/batch-psi/new"><Plus size={17} /> Tambah Batch</Link>
+          </div>
         ) : (
           <Link className="secondaryButton" href="/login">Login admin/teknisi</Link>
         )}
