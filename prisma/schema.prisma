@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEKNISI
+  MAGANG
+}
+
+enum UnitStatus {
+  VERIFIED
+  VERIFIED_WITH_NOTES
+  RECHECK
+  CANDIDATE_RETUR
+}
+
+enum QcResult {
+  OK
+  NOTES
+  FAIL
+}
+
+enum DailyStatus {
+  LOLOS
+  LOLOS_DENGAN_CATATAN
+  TIDAK_LOLOS
+}
+
+enum PaymentStatus {
+  BELUM_JATUH_TEMPO
+  MENDEKATI_TEMPO
+  BUTUH_FOLLOW_UP
+  LUNAS
+}
+
+enum AiLogStatus {
+  OPEN
+  DONE
+}
+
+enum CatalogSyncStatus {
+  DRAFT
+  READY
+  SYNCED
+  FAILED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  role      Role
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  qcAwal    QcAwal[]
+  qcHarian  QcHarian[]
+}
+
+model BatchPSI {
+  id               String        @id @default(cuid())
+  nomorBatch       String        @unique
+  supplier         String
+  tanggalMasuk     DateTime
+  tanggalTempo     DateTime
+  statusPembayaran PaymentStatus @default(BELUM_JATUH_TEMPO)
+  catatan          String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  units Unit[]
+}
+
+model Unit {
+  id                   String     @id @default(cuid())
+  nomorUnit            String     @unique
+  batchId              String
+  supplier             String
+  model                String
+  processor            String
+  ram                  String
+  ssd                  String
+  ssdSerial            String?
+  lcdSize              String?
+  lcdResolution        String?
+  isTouchscreen        Boolean    @default(false)
+  hargaModal           Int
+  hargaJualRekomendasi Int
+  batteryHealth        Int?
+  ssdHealth            Int?
+  statusObservasi      UnitStatus @default(RECHECK)
+  tanggalMasuk         DateTime
+  tempo                DateTime?
+  catalogLiveUrl       String?
+  soldAt               DateTime?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  batch       BatchPSI      @relation(fields: [batchId], references: [id])
+  qcAwal      QcAwal?
+  qcHarian    QcHarian[]
+  aiLogs      AiLog[]
+  catalogSync CatalogSync[]
+}
+
+model QcAwal {
+  id              String     @id @default(cuid())
+  unitId          String     @unique
+  checkerId       String
+  tanggal         DateTime
+  status          UnitStatus
+
+  body            QcResult
+  bodyBroken      QcResult
+  karetBawah      QcResult
+  repaint         QcResult
+  layar           QcResult
+  ukuranLcd       QcResult
+  resolusiLayar   QcResult
+  touchscreen     QcResult
+  keyboard        QcResult
+  touchpad        QcResult
+  trackpoint      QcResult
+  usb             QcResult
+  kamera          QcResult
+  port            QcResult
+  speaker         QcResult
+  mic             QcResult
+  charger         QcResult
+  battery         QcResult
+  ssd             QcResult
+  seriSsd         QcResult
+
+  osInstalled     QcResult
+  updateOs        QcResult
+  driver          QcResult
+  securityPatch   QcResult
+  aplikasiDefault QcResult
+
+  reminder        String[]
+  catatan         String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  unit            Unit       @relation(fields: [unitId], references: [id])
+  checker         User       @relation(fields: [checkerId], references: [id])
+}
+
+model QcHarian {
+  id              String      @id @default(cuid())
+  unitId          String
+  checkerId       String
+  tanggal         DateTime
+  ssdHealth       Int
+  batteryHealth   Int
+  nyalaNormal     Boolean
+  booting         Boolean
+  layar           Boolean
+  keyboard        Boolean
+  ssd             Boolean
+  battery         Boolean
+  port            Boolean
+  wifi            Boolean
+  bluetooth       Boolean
+  kondisiHariIni  String
+  masihLolos      DailyStatus
+  catatan         String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  unit            Unit        @relation(fields: [unitId], references: [id])
+  checker         User        @relation(fields: [checkerId], references: [id])
+}
+
+model AiLog {
+  id          String      @id @default(cuid())
+  unitId      String
+  tanggal     DateTime    @default(now())
+  rekomendasi String
+  status      AiLogStatus @default(OPEN)
+  source      String      @default("core-ai")
+  createdAt   DateTime    @default(now())
+
+  unit        Unit        @relation(fields: [unitId], references: [id])
+}
+
+model CatalogSync {
+  id          String            @id @default(cuid())
+  unitId      String
+  status      CatalogSyncStatus @default(DRAFT)
+  catalogUrl  String?
+  lastSyncedAt DateTime?
+  error       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  unit        Unit              @relation(fields: [unitId], references: [id])
+}

@@ -17,6 +17,14 @@ npm run dev
 
 Buka `http://localhost:3000`.
 
+## Database
+
+Database production disarankan memakai PostgreSQL di Coolify dan Prisma sebagai penghubung dari Next.js.
+
+Lihat detailnya di `docs/DATABASE_AI_PLAN.md`.
+
+Total tabel utama: `User`, `BatchPSI`, `Unit`, `QcAwal`, `QcHarian`, `AiLog`, dan `CatalogSync`.
+
 ## Deploy Coolify / Nixpacks
 
 - Build command: `npm run build`

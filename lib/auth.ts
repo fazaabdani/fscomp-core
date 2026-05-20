@@ -6,25 +6,25 @@ export type User = {
 };
 
 export const demoUsers: User[] = [
-  { name: "Faza", role: "owner" },
-  { name: "Zume", role: "owner" },
-  { name: "Ludfy", role: "qcAwal" },
-  { name: "Rosyadi", role: "qcAwal" },
+  { name: "Faza", role: "admin" },
+  { name: "Zume", role: "admin" },
+  { name: "Ludfy", role: "teknisi" },
+  { name: "Rosyadi", role: "teknisi" },
   { name: "Anak Magang", role: "magang" }
 ];
 
 export function canViewPrice(user: User) {
-  return (roles.owner as readonly string[]).includes(user.name);
+  return user.role === "admin";
 }
 
 export function canEditBatch(user: User) {
-  return user.role === "owner" || user.role === "qcAwal";
+  return user.role === "admin" || user.role === "teknisi";
 }
 
 export function canEditDailyQc(user: User) {
-  return user.role === "owner" || user.role === "magang";
+  return user.role === "admin" || user.role === "teknisi" || user.role === "magang";
 }
 
 export function canEditInitialQc(user: User) {
-  return user.role === "owner" || user.role === "qcAwal";
+  return user.role === "admin" || user.role === "teknisi";
 }

@@ -70,8 +70,11 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
           </div>
           <div className="kv"><span>Batch</span><strong>{batch?.nomorBatch}</strong></div>
           <div className="kv"><span>Supplier</span><strong>{unit.supplier}</strong></div>
+          <div className="kv"><span>Seri SSD</span><strong>{unit.ssdSerial}</strong></div>
+          <div className="kv"><span>LCD</span><strong>{unit.lcdSize}</strong></div>
+          <div className="kv"><span>Resolusi</span><strong>{unit.lcdResolution}</strong></div>
+          <div className="kv"><span>Touchscreen</span><strong>{unit.isTouchscreen ? "Ya" : "Tidak"}</strong></div>
           <div className="kv"><span>Battery</span><strong>{unit.batteryHealth}%</strong></div>
-          <div className="kv"><span>Harga modal</span><strong>{formatRupiah(unit.hargaModal)}</strong></div>
           <div className="kv"><span>Harga jual</span><strong>{formatRupiah(unit.hargaJualRekomendasi)}</strong></div>
         </aside>
       </div>
@@ -100,6 +103,10 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
             <div className="note" key={qc.id}>
               <strong>{qc.tanggal} - {qc.masihLolos}</strong>
               <p>{qc.kondisiHariIni}</p>
+              <div className="miniMetrics">
+                <span>SSD {qc.ssdHealth}%</span>
+                <span>Battery {qc.batteryHealth}%</span>
+              </div>
               <small>{qc.catatan} / {qc.checker}</small>
             </div>
           ))}

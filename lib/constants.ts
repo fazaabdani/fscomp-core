@@ -1,6 +1,6 @@
 export const roles = {
-  owner: ["Faza", "Zume"],
-  qcAwal: ["Ludfy", "Rosyadi"],
+  admin: ["Faza", "Zume"],
+  teknisi: ["Ludfy", "Rosyadi"],
   magang: ["Anak Magang"]
 } as const;
 
@@ -20,6 +20,12 @@ export const dailyStatuses = [
   "Lolos dengan catatan",
   "Tidak Lolos"
 ] as const;
+
+export type DailyStatus = (typeof dailyStatuses)[number];
+
+export const qcResultOptions = ["OK", "NOTES", "FAIL"] as const;
+
+export type QcResult = (typeof qcResultOptions)[number];
 
 export const statusTone: Record<UnitStatus, "green" | "yellow" | "red"> = {
   VERIFIED: "green",

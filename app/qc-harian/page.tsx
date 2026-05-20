@@ -50,6 +50,16 @@ export default function QcHarianPage() {
               );
             })}
           </div>
+          <div className="numberGrid">
+            <label>
+              SSD Health (%)
+              <input type="number" min="0" max="100" defaultValue="95" />
+            </label>
+            <label>
+              Battery Health (%)
+              <input type="number" min="0" max="100" defaultValue="80" />
+            </label>
+          </div>
           <label>
             Status
             <select defaultValue="Lolos">
@@ -79,6 +89,10 @@ export default function QcHarianPage() {
                 <Link className="note linkNote" href={`/unit/${qc.unitId}`} key={qc.id}>
                   <strong>Unit {unit?.nomorUnit} - {qc.masihLolos}</strong>
                   <p>{qc.kondisiHariIni}</p>
+                  <div className="miniMetrics">
+                    <span>SSD {qc.ssdHealth}%</span>
+                    <span>Battery {qc.batteryHealth}%</span>
+                  </div>
                   <small>{qc.tanggal} oleh {qc.checker}</small>
                 </Link>
               );

@@ -1,4 +1,4 @@
-import { catalogReadyStatuses, type UnitStatus } from "./constants";
+import { catalogReadyStatuses, type DailyStatus, type QcResult, type UnitStatus } from "./constants";
 
 export type BatchPSI = {
   id: string;
@@ -13,8 +13,8 @@ export type BatchPSI = {
 export type InitialQC = {
   checker: string;
   tanggal: string;
-  hardware: Record<string, "OK" | "NOTES" | "FAIL">;
-  software: Record<string, "OK" | "NOTES" | "FAIL">;
+  hardware: Record<string, QcResult>;
+  software: Record<string, QcResult>;
   status: UnitStatus;
   reminder: string[];
   catatan: string;
@@ -25,8 +25,10 @@ export type DailyQC = {
   unitId: string;
   tanggal: string;
   checker: string;
+  ssdHealth: number;
+  batteryHealth: number;
   kondisiHariIni: string;
-  masihLolos: "Lolos" | "Lolos dengan catatan" | "Tidak Lolos";
+  masihLolos: DailyStatus;
   catatan: string;
 };
 
@@ -39,6 +41,10 @@ export type Unit = {
   processor: string;
   ram: string;
   ssd: string;
+  ssdSerial: string;
+  lcdSize: string;
+  lcdResolution: string;
+  isTouchscreen: boolean;
   hargaModal: number;
   hargaJualRekomendasi: number;
   batteryHealth: number;
@@ -88,6 +94,10 @@ export const units: Unit[] = [
     processor: "Intel Core i5 Gen 8",
     ram: "16GB DDR4",
     ssd: "256GB NVMe",
+    ssdSerial: "SN-T480-256-8F2A",
+    lcdSize: "14 inch",
+    lcdResolution: "1920x1080",
+    isTouchscreen: false,
     hargaModal: 2850000,
     hargaJualRekomendasi: 3650000,
     batteryHealth: 84,
@@ -100,14 +110,26 @@ export const units: Unit[] = [
       tanggal: "2026-05-16",
       hardware: {
         Body: "OK",
+        "Body Broken": "OK",
+        "Karet Bawah": "OK",
+        Repaint: "OK",
         Layar: "OK",
+        "Ukuran LCD": "OK",
+        "Resolusi Layar": "OK",
+        Touchscreen: "OK",
         Keyboard: "OK",
         Touchpad: "OK",
+        Trackpoint: "OK",
+        USB: "OK",
+        Kamera: "OK",
         Port: "OK",
         "Speaker/Mic": "OK",
+        Speaker: "OK",
+        Mic: "OK",
         Charger: "OK",
         Battery: "OK",
-        SSD: "OK"
+        SSD: "OK",
+        "Seri SSD": "OK"
       },
       software: {
         OS: "OK",
@@ -130,6 +152,10 @@ export const units: Unit[] = [
     processor: "Intel Core i5 Gen 8",
     ram: "8GB DDR4",
     ssd: "256GB SATA",
+    ssdSerial: "HP840G5-SATA-731Q",
+    lcdSize: "14 inch",
+    lcdResolution: "1920x1080",
+    isTouchscreen: false,
     hargaModal: 2550000,
     hargaJualRekomendasi: 3350000,
     batteryHealth: 71,
@@ -142,14 +168,26 @@ export const units: Unit[] = [
       tanggal: "2026-05-16",
       hardware: {
         Body: "NOTES",
+        "Body Broken": "OK",
+        "Karet Bawah": "NOTES",
+        Repaint: "OK",
         Layar: "OK",
+        "Ukuran LCD": "OK",
+        "Resolusi Layar": "OK",
+        Touchscreen: "OK",
         Keyboard: "OK",
         Touchpad: "OK",
+        Trackpoint: "OK",
+        USB: "OK",
+        Kamera: "OK",
         Port: "OK",
         "Speaker/Mic": "OK",
+        Speaker: "OK",
+        Mic: "OK",
         Charger: "OK",
         Battery: "NOTES",
-        SSD: "OK"
+        SSD: "OK",
+        "Seri SSD": "OK"
       },
       software: {
         OS: "OK",
@@ -172,6 +210,10 @@ export const units: Unit[] = [
     processor: "Intel Core i5 Gen 8",
     ram: "8GB DDR4",
     ssd: "512GB NVMe",
+    ssdSerial: "DL5490-NVME-52CZ",
+    lcdSize: "14 inch",
+    lcdResolution: "1366x768",
+    isTouchscreen: false,
     hargaModal: 2750000,
     hargaJualRekomendasi: 3550000,
     batteryHealth: 62,
@@ -184,14 +226,26 @@ export const units: Unit[] = [
       tanggal: "2026-05-19",
       hardware: {
         Body: "OK",
+        "Body Broken": "OK",
+        "Karet Bawah": "OK",
+        Repaint: "NOTES",
         Layar: "OK",
+        "Ukuran LCD": "OK",
+        "Resolusi Layar": "NOTES",
+        Touchscreen: "OK",
         Keyboard: "NOTES",
         Touchpad: "OK",
+        Trackpoint: "OK",
+        USB: "OK",
+        Kamera: "OK",
         Port: "OK",
         "Speaker/Mic": "OK",
+        Speaker: "OK",
+        Mic: "OK",
         Charger: "OK",
         Battery: "NOTES",
-        SSD: "NOTES"
+        SSD: "NOTES",
+        "Seri SSD": "OK"
       },
       software: {
         OS: "OK",
@@ -214,6 +268,10 @@ export const units: Unit[] = [
     processor: "Intel Core i5 Gen 7",
     ram: "8GB DDR4",
     ssd: "128GB SATA",
+    ssdSerial: "ACERP249-128-19ZX",
+    lcdSize: "14 inch",
+    lcdResolution: "1366x768",
+    isTouchscreen: false,
     hargaModal: 1850000,
     hargaJualRekomendasi: 2550000,
     batteryHealth: 39,
@@ -226,14 +284,26 @@ export const units: Unit[] = [
       tanggal: "2026-05-19",
       hardware: {
         Body: "NOTES",
+        "Body Broken": "NOTES",
+        "Karet Bawah": "FAIL",
+        Repaint: "NOTES",
         Layar: "OK",
+        "Ukuran LCD": "OK",
+        "Resolusi Layar": "OK",
+        Touchscreen: "OK",
         Keyboard: "OK",
         Touchpad: "FAIL",
+        Trackpoint: "OK",
+        USB: "NOTES",
+        Kamera: "OK",
         Port: "OK",
         "Speaker/Mic": "OK",
+        Speaker: "OK",
+        Mic: "OK",
         Charger: "OK",
         Battery: "FAIL",
-        SSD: "NOTES"
+        SSD: "NOTES",
+        "Seri SSD": "OK"
       },
       software: {
         OS: "OK",
@@ -255,6 +325,8 @@ export const dailyQcs: DailyQC[] = [
     unitId: "unit-001",
     tanggal: "2026-05-20",
     checker: "Anak Magang",
+    ssdHealth: 98,
+    batteryHealth: 84,
     kondisiHariIni: "Nyala normal, booting cepat, WiFi aktif.",
     masihLolos: "Lolos",
     catatan: "Tetap siap katalog."
@@ -264,6 +336,8 @@ export const dailyQcs: DailyQC[] = [
     unitId: "unit-001a",
     tanggal: "2026-05-20",
     checker: "Anak Magang",
+    ssdHealth: 94,
+    batteryHealth: 71,
     kondisiHariIni: "Booting normal, battery turun 8 persen dalam 20 menit.",
     masihLolos: "Lolos dengan catatan",
     catatan: "Perlu catatan battery di listing."
@@ -273,6 +347,8 @@ export const dailyQcs: DailyQC[] = [
     unitId: "unit-002",
     tanggal: "2026-05-20",
     checker: "Anak Magang",
+    ssdHealth: 88,
+    batteryHealth: 62,
     kondisiHariIni: "WiFi sempat disconnect saat sleep resume.",
     masihLolos: "Lolos dengan catatan",
     catatan: "Recheck driver WiFi."
@@ -282,6 +358,8 @@ export const dailyQcs: DailyQC[] = [
     unitId: "unit-003",
     tanggal: "2026-05-20",
     checker: "Anak Magang",
+    ssdHealth: 76,
+    batteryHealth: 39,
     kondisiHariIni: "Touchpad masih bermasalah, battery drop.",
     masihLolos: "Tidak Lolos",
     catatan: "Tahan, jangan katalog."

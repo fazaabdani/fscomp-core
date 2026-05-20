@@ -34,6 +34,10 @@ textarea {
   font: inherit;
 }
 
+input {
+  font: inherit;
+}
+
 main {
   max-width: 1180px;
   margin: 0 auto;
@@ -379,7 +383,8 @@ main {
 }
 
 select,
-textarea {
+textarea,
+input[type="number"] {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -387,7 +392,8 @@ textarea {
   color: var(--ink);
 }
 
-select {
+select,
+input[type="number"] {
   min-height: 42px;
   padding: 0 12px;
 }
@@ -402,6 +408,30 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.numberGrid,
+.miniMetrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.numberGrid label {
+  display: grid;
+  gap: 8px;
+}
+
+.miniMetrics span {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--band);
+  color: var(--blue-dark);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .checkTile {
@@ -533,6 +563,11 @@ textarea {
 
 .labelBody strong {
   font-size: 15px;
+}
+
+.labelBody b {
+  color: var(--blue);
+  font-size: 16px;
 }
 
 .labelBody span,

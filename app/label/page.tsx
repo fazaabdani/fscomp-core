@@ -1,5 +1,5 @@
 import { QRCodeSVG } from "qrcode.react";
-import { units } from "@/lib/api";
+import { formatRupiah, units } from "@/lib/api";
 import { statusTone } from "@/lib/constants";
 import { PrintButton } from "./PrintButton";
 
@@ -49,6 +49,7 @@ export default function LabelPage({ searchParams }: { searchParams?: { unit?: st
               <strong>{selected.model}</strong>
               <span>{selected.processor}</span>
               <span>{selected.ram} / {selected.ssd}</span>
+              <b>{formatRupiah(selected.hargaJualRekomendasi)}</b>
             </div>
             <div className="labelFooter">
               <span className={`statusPill ${statusTone[selected.statusObservasi]}`}>{selected.statusObservasi}</span>
