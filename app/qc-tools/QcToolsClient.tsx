@@ -45,12 +45,12 @@ export function QcToolsClient() {
       audioContextRef.current = audioContext;
       setMicStatus("Mic aktif, coba bicara");
 
-      function tick() {
+      const tick = () => {
         analyser.getByteFrequencyData(data);
         const average = data.reduce((sum, value) => sum + value, 0) / data.length;
         setMicLevel(Math.min(100, Math.round(average)));
         animationRef.current = requestAnimationFrame(tick);
-      }
+      };
 
       tick();
     } catch {
