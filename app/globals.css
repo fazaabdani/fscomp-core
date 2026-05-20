@@ -416,6 +416,21 @@ input:not([type]) {
   gap: 8px;
 }
 
+.panelSubsection {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.qcSelectGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .narrowPage {
   max-width: 760px;
   margin: 0 auto;

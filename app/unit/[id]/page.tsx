@@ -1,15 +1,16 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, CalendarClock, Cpu, HardDrive, QrCode, ShieldCheck } from "lucide-react";
-import { formatRupiah, getBatch, getDailyQcByUnit, getUnit } from "@/lib/api";
+import { formatRupiah } from "@/lib/api";
+import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 
-export default function UnitDetailPage({ params }: { params: { id: string } }) {
-  const unit = getUnit(params.id);
+export default async function UnitDetailPage({ params }: { params: { id: string } }) {
+  const unit = await getUnitForDetail(params.id);
   if (!unit) notFound();
 
-  const batch = getBatch(unit.batchId);
-  const dailyHistory = getDailyQcByUnit(unit.id);
+  const dailyHistory = unit.dailyHistory;
+  const qcAwal = unit.qcAwal;
 
   return (
     <section className="pageStack">
@@ -22,7 +23,7 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
           <p className="heroCopy">{unit.processor} / {unit.ram} / {unit.ssd}</p>
         </div>
         <div className="unitHeroActions">
-          <span className={`statusPill ${statusTone[unit.statusObservasi]}`}>{unit.statusObservasi}</span>
+          <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
           <Link className="primaryButton" href={`/label?unit=${unit.id}`}><QrCode size={17} /> Generate Label</Link>
         </div>
       </div>
@@ -39,20 +40,20 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
           <div className="qcColumns">
             <div>
               <h3>Hardware</h3>
-              {Object.entries(unit.qcAwal.hardware).map(([key, value]) => (
+              {qcAwal ? Object.entries(qcAwal.hardware).map(([key, value]) => (
                 <div className="kv" key={key}><span>{key}</span><strong>{value}</strong></div>
-              ))}
+              )) : <p className="bodyText">QC awal belum diisi.</p>}
             </div>
             <div>
               <h3>Software</h3>
-              {Object.entries(unit.qcAwal.software).map(([key, value]) => (
+              {qcAwal ? Object.entries(qcAwal.software).map(([key, value]) => (
                 <div className="kv" key={key}><span>{key}</span><strong>{value}</strong></div>
-              ))}
+              )) : <p className="bodyText">QC software belum diisi.</p>}
             </div>
           </div>
           <div className="infoBox">
             <strong>Catatan QC</strong>
-            <p>{unit.qcAwal.catatan}</p>
+            <p>{qcAwal?.catatan ?? "-"}</p>
           </div>
         </section>
 
@@ -68,7 +69,7 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
             <div><HardDrive size={16} /> SSD health {unit.ssdHealth}%</div>
             <div><CalendarClock size={16} /> Tempo {unit.tempo}</div>
           </div>
-          <div className="kv"><span>Batch</span><strong>{batch?.nomorBatch}</strong></div>
+          <div className="kv"><span>Batch</span><strong>{unit.batch.nomorBatch}</strong></div>
           <div className="kv"><span>Supplier</span><strong>{unit.supplier}</strong></div>
           <div className="kv"><span>Seri SSD</span><strong>{unit.ssdSerial}</strong></div>
           <div className="kv"><span>LCD</span><strong>{unit.lcdSize}</strong></div>
@@ -87,7 +88,7 @@ export default function UnitDetailPage({ params }: { params: { id: string } }) {
           </div>
         </div>
         <div className="reminderGrid">
-          {unit.qcAwal.reminder.map((item) => <span key={item}>{item}</span>)}
+          {(qcAwal?.reminder ?? []).map((item) => <span key={item}>{item}</span>)}
         </div>
       </section>
 
