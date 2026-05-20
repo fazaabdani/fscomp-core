@@ -1,1 +1,1 @@
-// Placeholder for lib/auth.ts
+export const checkRole = (role: string) => { return true; }

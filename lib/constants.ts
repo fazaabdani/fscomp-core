@@ -1,1 +1,1 @@
-// Placeholder for lib/constants.ts
+export const roles = ['Admin','QC','Magang'];

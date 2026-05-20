@@ -1,1 +1,1 @@
-// Placeholder for lib/api.ts
+export const fetchUnits = () => { return [{id:'1A', model:'ThinkPad X280'}]; }
