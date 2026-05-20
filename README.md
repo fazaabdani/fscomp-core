@@ -22,6 +22,7 @@ Buka `http://localhost:3000`.
 Database production disarankan memakai PostgreSQL di Coolify dan Prisma sebagai penghubung dari Next.js.
 
 Lihat detailnya di `docs/DATABASE_AI_PLAN.md`.
+Panduan klik Coolify, n8n WhatsApp, dan sync spreadsheet ada di `docs/COOLIFY_N8N_CATALOG.md`.
 
 Total tabel utama: `User`, `BatchPSI`, `Unit`, `QcAwal`, `QcHarian`, `AiLog`, dan `CatalogSync`.
 

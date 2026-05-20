@@ -11,7 +11,7 @@ export default function BatchPsiPage() {
           <p className="eyebrow">Batch PSI</p>
           <h1>Management batch masuk dan tempo pembayaran</h1>
         </div>
-        <button className="primaryButton" type="button"><Plus size={17} /> Tambah Batch</button>
+        <Link className="primaryButton" href="/batch-psi/new"><Plus size={17} /> Tambah Batch</Link>
       </div>
 
       <div className="batchManagement">
@@ -49,9 +49,9 @@ export default function BatchPsiPage() {
               </div>
 
               <div className="buttonRow">
-                <button className="secondaryButton" type="button">Edit Batch</button>
-                <button className="secondaryButton" type="button">Tambah Unit</button>
-                <button className="secondaryButton" type="button">Histori QC</button>
+                <Link className="secondaryButton" href={`/batch-psi/${batch.id}/edit`}>Edit Batch</Link>
+                <Link className="secondaryButton" href={`/unit/new?batch=${batch.id}`}>Tambah Unit</Link>
+                <Link className="secondaryButton" href={`/batch-psi/${batch.id}/history`}>Histori QC</Link>
               </div>
             </article>
           );
