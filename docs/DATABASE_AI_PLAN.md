@@ -38,6 +38,12 @@ npx prisma migrate deploy
 
 Di versi ini, halaman Batch PSI sudah mulai membaca PostgreSQL jika database tersedia. Kalau database kosong atau belum tersambung, halaman masih fallback ke data demo supaya website tidak blank.
 
+Jika `npm run db:migrate` menampilkan `No migration found in prisma/migrations`, berarti versi project yang ter-deploy belum membawa folder migration. Upload versi terbaru yang memiliki folder `prisma/migrations`, redeploy, lalu jalankan lagi:
+
+```bash
+npm run db:migrate
+```
+
 ## Total Tabel Utama
 
 Total ada **7 tabel utama**:
