@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getCurrentUser } from "@/lib/session";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const currentUser = getCurrentUser();
+
   return (
     <html lang="id">
       <body>
@@ -24,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/batch-psi">Batch PSI</Link>
             <Link href="/qc-harian">QC Harian</Link>
             <Link href="/label">Label QR</Link>
-            <Link href="/login">Login</Link>
+            <Link href="/login">{currentUser ? `${currentUser.name} (${currentUser.role})` : "Login"}</Link>
           </nav>
         </header>
         <main>{children}</main>

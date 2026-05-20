@@ -1,9 +1,16 @@
 import { CalendarDays, FileClock, Plus, ReceiptText } from "lucide-react";
 import Link from "next/link";
-import { batches, formatRupiah, getUnitsByBatch } from "@/lib/api";
+import { formatRupiah } from "@/lib/api";
+import { canEditBatch } from "@/lib/auth";
+import { getBatchesForPage } from "@/lib/db-data";
+import { getCurrentUser } from "@/lib/session";
 import { statusTone } from "@/lib/constants";
 
-export default function BatchPsiPage() {
+export default async function BatchPsiPage() {
+  const currentUser = getCurrentUser();
+  const canManageBatch = currentUser ? canEditBatch(currentUser) : false;
+  const batches = await getBatchesForPage();
+
   return (
     <section className="pageStack">
       <div className="sectionTitle">
@@ -11,12 +18,16 @@ export default function BatchPsiPage() {
           <p className="eyebrow">Batch PSI</p>
           <h1>Management batch masuk dan tempo pembayaran</h1>
         </div>
-        <Link className="primaryButton" href="/batch-psi/new"><Plus size={17} /> Tambah Batch</Link>
+        {canManageBatch ? (
+          <Link className="primaryButton" href="/batch-psi/new"><Plus size={17} /> Tambah Batch</Link>
+        ) : (
+          <Link className="secondaryButton" href="/login">Login admin/teknisi</Link>
+        )}
       </div>
 
       <div className="batchManagement">
         {batches.map((batch) => {
-          const batchUnits = getUnitsByBatch(batch.id);
+          const batchUnits = batch.units;
           const totalModal = batchUnits.reduce((sum, unit) => sum + unit.hargaModal, 0);
           return (
             <article className="panel" key={batch.id}>
@@ -43,16 +54,20 @@ export default function BatchPsiPage() {
                       <strong>{unit.model}</strong>
                       <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
                     </span>
-                    <span className={`statusPill ${statusTone[unit.statusObservasi]}`}>{unit.statusObservasi}</span>
+                    <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
                   </Link>
                 ))}
               </div>
 
-              <div className="buttonRow">
-                <Link className="secondaryButton" href={`/batch-psi/${batch.id}/edit`}>Edit Batch</Link>
-                <Link className="secondaryButton" href={`/unit/new?batch=${batch.id}`}>Tambah Unit</Link>
-                <Link className="secondaryButton" href={`/batch-psi/${batch.id}/history`}>Histori QC</Link>
-              </div>
+              {canManageBatch ? (
+                <div className="buttonRow">
+                  <Link className="secondaryButton" href={`/batch-psi/${batch.id}/edit`}>Edit Batch</Link>
+                  <Link className="secondaryButton" href={`/unit/new?batch=${batch.id}`}>Tambah Unit</Link>
+                  <Link className="secondaryButton" href={`/batch-psi/${batch.id}/history`}>Histori QC</Link>
+                </div>
+              ) : (
+                <div className="infoBox">Login sebagai admin atau teknisi untuk edit batch dan tambah unit.</div>
+              )}
             </article>
           );
         })}

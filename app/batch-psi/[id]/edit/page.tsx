@@ -1,11 +1,15 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getBatch } from "@/lib/api";
+import { getBatchForEdit } from "@/lib/db-data";
+import { requireRole } from "@/lib/session";
+import { updateBatchAction } from "../../actions";
 
-export default function EditBatchPage({ params }: { params: { id: string } }) {
-  const batch = getBatch(params.id);
+export default async function EditBatchPage({ params }: { params: { id: string } }) {
+  requireRole(["admin", "teknisi"]);
+  const batch = await getBatchForEdit(params.id);
   if (!batch) notFound();
+  const action = updateBatchAction.bind(null, batch.id);
 
   return (
     <section className="pageStack narrowPage">
@@ -17,23 +21,23 @@ export default function EditBatchPage({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      <form className="panel formGrid">
-        <label>Nomor Batch<input defaultValue={batch.nomorBatch} /></label>
-        <label>Supplier<input defaultValue={batch.supplier} /></label>
+      <form className="panel formGrid" action={action}>
+        <label>Nomor Batch<input name="nomorBatch" defaultValue={batch.nomorBatch} required /></label>
+        <label>Supplier<input name="supplier" defaultValue={batch.supplier} required /></label>
         <div className="numberGrid">
-          <label>Tanggal Masuk<input type="date" defaultValue={batch.tanggalMasuk} /></label>
-          <label>Tanggal Tempo<input type="date" defaultValue={batch.tanggalTempo} /></label>
+          <label>Tanggal Masuk<input name="tanggalMasuk" type="date" defaultValue={batch.tanggalMasuk} required /></label>
+          <label>Tanggal Tempo<input name="tanggalTempo" type="date" defaultValue={batch.tanggalTempo} required /></label>
         </div>
         <label>Status Pembayaran
-          <select defaultValue={batch.statusPembayaran}>
+          <select name="statusPembayaran" defaultValue={batch.statusPembayaran}>
             <option>Belum jatuh tempo</option>
             <option>Mendekati tempo</option>
             <option>Butuh follow up</option>
             <option>Lunas</option>
           </select>
         </label>
-        <label>Catatan<textarea defaultValue={batch.catatan} /></label>
-        <button className="primaryButton" type="button">Simpan Perubahan</button>
+        <label>Catatan<textarea name="catatan" defaultValue={batch.catatan} /></label>
+        <button className="primaryButton" type="submit">Simpan Perubahan</button>
       </form>
     </section>
   );

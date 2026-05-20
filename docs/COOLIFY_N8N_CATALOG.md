@@ -25,6 +25,72 @@ DATABASE_URL="postgresql://user:password@host:5432/fscomp_core"
 
 Intinya: `DATABASE_URL` diisi di app Next.js, bukan di halaman markdown/dokumen.
 
+## Jika Redeploy Database Error Container Name Already In Use
+
+Error seperti ini:
+
+```text
+Conflict. The container name "/ypfup6a4kcje5lrr0gzlhuxu" is already in use
+```
+
+Artinya Coolify/Docker masih punya container lama dengan nama yang sama. Biasanya terjadi karena deploy database sebelumnya berhenti di tengah, lalu Coolify mencoba membuat container baru dengan nama yang sama.
+
+Cara paling aman dari UI Coolify:
+
+1. Buka resource PostgreSQL yang error.
+2. Klik **Stop**.
+3. Jika ada tombol **Restart**, coba Restart dulu.
+4. Jika masih error, buka menu resource database tersebut.
+5. Cari aksi seperti **Delete Resource**, **Remove**, atau **Force Delete**.
+6. Hapus resource database yang gagal itu.
+7. Buat ulang PostgreSQL baru dari **New Resource -> Database -> PostgreSQL**.
+
+Kalau database belum pernah berisi data penting, hapus dan buat ulang adalah cara paling cepat.
+
+Kalau sudah ada data penting, jangan hapus volume/database. Yang perlu dihapus hanya container yang bentrok lewat SSH:
+
+```bash
+docker ps -a | grep ypfup6a4kcje5lrr0gzlhuxu
+docker stop ypfup6a4kcje5lrr0gzlhuxu
+docker rm ypfup6a4kcje5lrr0gzlhuxu
+```
+
+Setelah itu redeploy database dari Coolify.
+
+## Setelah Database PostgreSQL Hidup
+
+Di app `fscomp-core`, isi Environment Variables:
+
+```env
+DATABASE_URL="connection-string-dari-postgresql-coolify"
+```
+
+Lalu di Coolify app `fscomp-core`:
+
+- Build Command:
+
+```bash
+npm run build
+```
+
+- Start Command:
+
+```bash
+npm run start
+```
+
+Untuk migrasi tabel pertama kali, jalankan command ini di terminal app/server:
+
+```bash
+npm run db:migrate
+```
+
+Kalau Coolify punya field **Pre-deploy Command**, isi:
+
+```bash
+npm run db:migrate
+```
+
 ## Perlu Login User?
 
 Ya, untuk production perlu login.

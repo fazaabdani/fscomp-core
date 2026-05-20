@@ -36,6 +36,8 @@ npx prisma migrate deploy
 
 4. Setelah itu data dummy di `lib/api.ts` diganti bertahap menjadi query Prisma dari database.
 
+Di versi ini, halaman Batch PSI sudah mulai membaca PostgreSQL jika database tersedia. Kalau database kosong atau belum tersambung, halaman masih fallback ke data demo supaya website tidak blank.
+
 ## Total Tabel Utama
 
 Total ada **7 tabel utama**:

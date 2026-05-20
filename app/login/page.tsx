@@ -1,7 +1,11 @@
 import { LockKeyhole } from "lucide-react";
 import { demoUsers } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/session";
+import { loginAction, logoutAction } from "./actions";
 
 export default function LoginPage() {
+  const currentUser = getCurrentUser();
+
   return (
     <section className="pageStack narrowPage">
       <div className="sectionTitle">
@@ -11,7 +15,20 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <form className="panel formGrid">
+      {currentUser ? (
+        <form className="panel formGrid" action={logoutAction}>
+          <div className="panelHeader">
+            <div>
+              <p className="eyebrow">Sedang login</p>
+              <h2>{currentUser.name}</h2>
+            </div>
+            <LockKeyhole size={22} />
+          </div>
+          <p className="bodyText">Role aktif: {currentUser.role}. Logout kalau mau ganti user.</p>
+          <button className="secondaryButton" type="submit">Logout</button>
+        </form>
+      ) : (
+      <form className="panel formGrid" action={loginAction}>
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Akses internal</p>
@@ -20,15 +37,16 @@ export default function LoginPage() {
           <LockKeyhole size={22} />
         </div>
         <label>
-          Email
-          <input type="email" placeholder="nama@fscomp.id" />
+          Pilih User
+          <select name="userName" defaultValue="Faza">
+            {demoUsers.map((user) => (
+              <option value={user.name} key={user.name}>{user.name} - {user.role}</option>
+            ))}
+          </select>
         </label>
-        <label>
-          Password
-          <input type="password" placeholder="Masukkan password" />
-        </label>
-        <button className="primaryButton" type="button">Login</button>
+        <button className="primaryButton" type="submit">Login</button>
       </form>
+      )}
 
       <section className="panel">
         <div className="panelHeader">
