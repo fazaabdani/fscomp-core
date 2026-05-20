@@ -7,10 +7,10 @@ import { getDashboardData } from "@/lib/db-data";
 export default async function DashboardPage() {
   const dashboard = await getDashboardData();
   const stats = [
-    { label: "Unit aktif", value: dashboard.stats.unitAktif, icon: Boxes },
-    { label: "Siap katalog", value: dashboard.stats.siapKatalog, icon: ClipboardCheck },
-    { label: "Perlu perhatian", value: dashboard.stats.perluPerhatian, icon: AlertTriangle },
-    { label: "QC harian", value: dashboard.stats.qcHarian, icon: ScanLine }
+    { label: "Unit aktif", value: dashboard.stats.unitAktif, icon: Boxes, tone: "blue" },
+    { label: "Siap katalog", value: dashboard.stats.siapKatalog, icon: ClipboardCheck, tone: "green" },
+    { label: "Perlu perhatian", value: dashboard.stats.perluPerhatian, icon: AlertTriangle, tone: "red" },
+    { label: "QC harian", value: dashboard.stats.qcHarian, icon: ScanLine, tone: "cyan" }
   ];
 
   return (
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <article className="metric" key={stat.label}>
+            <article className={`metric metric-${stat.tone}`} key={stat.label}>
               <Icon size={20} />
               <span>{stat.label}</span>
               <strong>{stat.value}</strong>
@@ -49,7 +49,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="contentGrid">
-        <section className="panel wide">
+        <section className="panel wide dashboardPanel attentionPanel">
           <div className="panelHeader">
             <div>
               <p className="eyebrow">Unit problem terbaru</p>
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        <section className="panel">
+        <section className="panel dashboardPanel assistantPanel">
           <div className="panelHeader">
             <div>
               <p className="eyebrow">Chief Assistant</p>
@@ -94,7 +94,7 @@ export default async function DashboardPage() {
         </section>
       </div>
 
-      <section className="panel">
+      <section className="panel dashboardPanel batchPanel">
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Batch PSI</p>
@@ -119,7 +119,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <section className="panel">
+      <section className="panel dashboardPanel catalogPanel">
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Siap katalog.fscomp.id</p>

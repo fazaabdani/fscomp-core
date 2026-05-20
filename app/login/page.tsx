@@ -1,5 +1,4 @@
 import { LockKeyhole } from "lucide-react";
-import { demoUsers } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { loginAction, logoutAction } from "./actions";
 
@@ -7,16 +6,17 @@ export default function LoginPage() {
   const currentUser = getCurrentUser();
 
   return (
-    <section className="pageStack narrowPage">
-      <div className="sectionTitle">
+    <section className="pageStack narrowPage loginShell">
+      <div className="sectionTitle loginTitle">
         <div>
           <p className="eyebrow">Login User</p>
           <h1>Masuk sesuai role kerja</h1>
+          <p className="bodyText">Akses internal FS Comp Core untuk operasional unit, batch, dan QC.</p>
         </div>
       </div>
 
       {currentUser ? (
-        <form className="panel formGrid" action={logoutAction}>
+        <form className="panel formGrid loginCard" action={logoutAction}>
           <div className="panelHeader">
             <div>
               <p className="eyebrow">Sedang login</p>
@@ -28,7 +28,7 @@ export default function LoginPage() {
           <button className="secondaryButton" type="submit">Logout</button>
         </form>
       ) : (
-      <form className="panel formGrid" action={loginAction}>
+      <form className="panel formGrid loginCard" action={loginAction}>
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Akses internal</p>
@@ -47,26 +47,6 @@ export default function LoginPage() {
         <button className="primaryButton" type="submit">Login</button>
       </form>
       )}
-
-      <section className="panel">
-        <div className="panelHeader">
-          <div>
-            <p className="eyebrow">Role demo</p>
-            <h2>User yang disiapkan</h2>
-          </div>
-        </div>
-        <div className="tableLike">
-          {demoUsers.map((user) => (
-            <div className="unitRow" key={user.name}>
-              <span className="unitNumber">{user.name.charAt(0)}</span>
-              <span>
-                <strong>{user.name}</strong>
-                <small>{user.username} / {user.role}</small>
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
     </section>
   );
 }
