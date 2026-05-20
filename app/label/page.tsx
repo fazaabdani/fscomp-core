@@ -1,9 +1,11 @@
 import { QRCodeSVG } from "qrcode.react";
-import { formatRupiah, units } from "@/lib/api";
+import { formatRupiah } from "@/lib/api";
 import { statusTone } from "@/lib/constants";
+import { getUnitsForLabel } from "@/lib/db-data";
 import { PrintButton } from "./PrintButton";
 
-export default function LabelPage({ searchParams }: { searchParams?: { unit?: string } }) {
+export default async function LabelPage({ searchParams }: { searchParams?: { unit?: string } }) {
+  const units = await getUnitsForLabel();
   const selectedId = searchParams?.unit ?? units[0].id;
   const selected = units.find((unit) => unit.id === selectedId) ?? units[0];
   const detailUrl = `https://core.fscomp.id/unit/${selected.id}`;
@@ -52,7 +54,7 @@ export default function LabelPage({ searchParams }: { searchParams?: { unit?: st
               <b>{formatRupiah(selected.hargaJualRekomendasi)}</b>
             </div>
             <div className="labelFooter">
-              <span className={`statusPill ${statusTone[selected.statusObservasi]}`}>{selected.statusObservasi}</span>
+              <span className={`statusPill ${statusTone[selected.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{selected.statusObservasi}</span>
               <span>QC {selected.qcAwal.tanggal} / {selected.qcAwal.checker}</span>
             </div>
           </article>

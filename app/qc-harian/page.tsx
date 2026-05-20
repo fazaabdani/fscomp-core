@@ -1,6 +1,6 @@
 import { BatteryCharging, Bluetooth, CheckCircle2, HardDrive, Keyboard, Monitor, Wifi } from "lucide-react";
 import Link from "next/link";
-import { dailyQcs, units } from "@/lib/api";
+import { getQcHarianPageData } from "@/lib/db-data";
 
 const checklist = [
   { label: "Nyala normal", icon: CheckCircle2 },
@@ -12,7 +12,10 @@ const checklist = [
   { label: "Bluetooth", icon: Bluetooth }
 ];
 
-export default function QcHarianPage() {
+export default async function QcHarianPage() {
+  const { units, dailyQcs } = await getQcHarianPageData();
+  const firstUnit = units[0];
+
   return (
     <section className="pageStack">
       <div className="sectionTitle">
@@ -32,7 +35,7 @@ export default function QcHarianPage() {
           </div>
           <label>
             Unit
-            <select defaultValue="unit-001">
+            <select name="unitId" defaultValue={firstUnit?.id}>
               {units.map((unit) => (
                 <option value={unit.id} key={unit.id}>Unit {unit.nomorUnit} - {unit.model}</option>
               ))}
@@ -53,11 +56,11 @@ export default function QcHarianPage() {
           <div className="numberGrid">
             <label>
               SSD Health (%)
-              <input type="number" min="0" max="100" defaultValue="95" />
+              <input name="ssdHealth" type="number" min="0" max="100" defaultValue={firstUnit?.ssdHealth ?? 95} />
             </label>
             <label>
               Battery Health (%)
-              <input type="number" min="0" max="100" defaultValue="80" />
+              <input name="batteryHealth" type="number" min="0" max="100" defaultValue={firstUnit?.batteryHealth ?? 80} />
             </label>
           </div>
           <label>
@@ -84,10 +87,10 @@ export default function QcHarianPage() {
           </div>
           <div className="noteList">
             {dailyQcs.map((qc) => {
-              const unit = units.find((item) => item.id === qc.unitId);
               return (
                 <Link className="note linkNote" href={`/unit/${qc.unitId}`} key={qc.id}>
-                  <strong>Unit {unit?.nomorUnit} - {qc.masihLolos}</strong>
+                  <strong>Unit {qc.unit?.nomorUnit} - {qc.masihLolos}</strong>
+                  <small>{qc.unit?.model}</small>
                   <p>{qc.kondisiHariIni}</p>
                   <div className="miniMetrics">
                     <span>SSD {qc.ssdHealth}%</span>

@@ -126,6 +126,7 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
   });
 
   revalidatePath("/batch-psi");
+  revalidatePath("/qc-harian");
   revalidatePath("/");
   redirect(`/unit/${unit.id}`);
 }

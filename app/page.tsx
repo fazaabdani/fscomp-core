@@ -1,21 +1,21 @@
 import { AlertTriangle, Boxes, ClipboardCheck, QrCode, ScanLine, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { aiLogs, batches, dailyQcs, formatRupiah, getCatalogReadyUnits, getProblemUnits, units } from "@/lib/api";
+import { formatRupiah } from "@/lib/api";
 import { statusTone } from "@/lib/constants";
+import { getDashboardData } from "@/lib/db-data";
 
-const stats = [
-  { label: "Unit aktif", value: units.length, icon: Boxes },
-  { label: "Siap katalog", value: getCatalogReadyUnits().length, icon: ClipboardCheck },
-  { label: "Perlu perhatian", value: getProblemUnits().length, icon: AlertTriangle },
-  { label: "QC harian", value: dailyQcs.length, icon: ScanLine }
-];
-
-export default function DashboardPage() {
-  const problemUnits = getProblemUnits();
+export default async function DashboardPage() {
+  const dashboard = await getDashboardData();
+  const stats = [
+    { label: "Unit aktif", value: dashboard.stats.unitAktif, icon: Boxes },
+    { label: "Siap katalog", value: dashboard.stats.siapKatalog, icon: ClipboardCheck },
+    { label: "Perlu perhatian", value: dashboard.stats.perluPerhatian, icon: AlertTriangle },
+    { label: "QC harian", value: dashboard.stats.qcHarian, icon: ScanLine }
+  ];
 
   return (
     <section className="pageStack">
-      <div className="heroBand">
+      <div className="heroBand techHero">
         <div>
           <p className="eyebrow">Operasional hari ini</p>
           <h1>Kontrol unit FS Comp dari PSI sampai siap jual.</h1>
@@ -28,6 +28,12 @@ export default function DashboardPage() {
           <Link className="secondaryButton" href="/label">Cetak Label QR</Link>
         </div>
       </div>
+
+      {!dashboard.connected ? (
+        <div className="infoBox dangerInfo">
+          Database belum bisa dibaca. Cek `DATABASE_URL`, status PostgreSQL, dan redeploy app.
+        </div>
+      ) : null}
 
       <div className="statsGrid">
         {stats.map((stat) => {
@@ -52,14 +58,16 @@ export default function DashboardPage() {
             <AlertTriangle size={22} />
           </div>
           <div className="tableLike">
-            {problemUnits.map((unit) => (
+            {dashboard.problemUnits.length === 0 ? (
+              <div className="emptyState">Belum ada unit RECHECK atau CANDIDATE RETUR dari data Batch PSI.</div>
+            ) : dashboard.problemUnits.map((unit) => (
               <Link className="unitRow" href={`/unit/${unit.id}`} key={unit.id}>
                 <span className="unitNumber">{unit.nomorUnit}</span>
                 <span>
                   <strong>{unit.model}</strong>
                   <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
                 </span>
-                <span className={`statusPill ${statusTone[unit.statusObservasi]}`}>{unit.statusObservasi}</span>
+                <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
               </Link>
             ))}
           </div>
@@ -74,15 +82,14 @@ export default function DashboardPage() {
             <Sparkles size={22} />
           </div>
           <div className="noteList">
-            {aiLogs.map((log) => {
-              const unit = units.find((item) => item.id === log.unitId);
-              return (
+            {dashboard.aiLogs.length === 0 ? (
+              <div className="emptyState">Belum ada AI log dari database.</div>
+            ) : dashboard.aiLogs.map((log) => (
                 <div className="note" key={log.id}>
-                  <strong>Unit {unit?.nomorUnit}</strong>
+                  <strong>Unit {log.unitNomor}</strong>
                   <p>{log.rekomendasi}</p>
                 </div>
-              );
-            })}
+              ))}
           </div>
         </section>
       </div>
@@ -96,13 +103,15 @@ export default function DashboardPage() {
           <Link className="iconButton" href="/batch-psi" title="Buka batch PSI"><QrCode size={18} /></Link>
         </div>
         <div className="batchGrid">
-          {batches.map((batch) => (
+          {dashboard.batches.length === 0 ? (
+            <div className="emptyState">Belum ada Batch PSI di database. Tambahkan batch dulu dari menu Batch PSI.</div>
+          ) : dashboard.batches.map((batch) => (
             <article className="batchCard" key={batch.id}>
               <span className="batchCode">{batch.nomorBatch}</span>
               <h3>{batch.supplier}</h3>
               <p>{batch.catatan}</p>
               <div className="split">
-                <span>Tempo {batch.tanggalTempo}</span>
+                <span>{batch.jumlahUnit} unit / Tempo {batch.tanggalTempo}</span>
                 <strong>{batch.statusPembayaran}</strong>
               </div>
             </article>
@@ -118,7 +127,9 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="catalogGrid">
-          {getCatalogReadyUnits().map((unit) => (
+          {dashboard.catalogReadyUnits.length === 0 ? (
+            <div className="emptyState">Belum ada unit VERIFIED dari database.</div>
+          ) : dashboard.catalogReadyUnits.map((unit) => (
             <Link className="catalogItem" href={`/unit/${unit.id}`} key={unit.id}>
               <span>Unit {unit.nomorUnit}</span>
               <strong>{unit.model}</strong>
