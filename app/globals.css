@@ -579,6 +579,103 @@ textarea {
   color: #b8ffdf;
 }
 
+.paymentHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.paymentHeader h1 {
+  margin: 0;
+}
+
+.paymentHeader p {
+  color: var(--muted);
+}
+
+.paymentSummary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.paymentSummary div,
+.paymentNote {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.paymentSummary span {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.paymentSummary strong {
+  font-size: 20px;
+}
+
+.netTransfer {
+  border-color: rgba(40, 232, 154, 0.5) !important;
+}
+
+.paymentRows {
+  display: grid;
+  gap: 8px;
+}
+
+.paymentRow {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(8, 18, 32, 0.78);
+}
+
+.problemPaymentRow {
+  grid-template-columns: 90px minmax(0, 1fr) auto auto;
+}
+
+.paymentRow span,
+.paymentRow small {
+  color: var(--muted);
+}
+
+.paymentRow b {
+  color: #9bd4ff;
+}
+
+@media print {
+  .paymentPage {
+    color: #111827;
+  }
+
+  .printHidden,
+  .topbar {
+    display: none !important;
+  }
+
+  .paymentSummary div,
+  .paymentNote,
+  .paymentRow,
+  .panel {
+    border-color: #cbd5e1;
+    background: white;
+    color: #111827;
+  }
+
+  .paymentRow b,
+  .paymentSummary strong {
+    color: #111827;
+  }
+}
+
 .emptyState {
   padding: 16px;
   border: 1px dashed rgba(145, 164, 189, 0.34);

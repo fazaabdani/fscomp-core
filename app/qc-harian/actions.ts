@@ -3,7 +3,6 @@
 import { DailyStatus, Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { demoUsers } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 
@@ -40,7 +39,7 @@ async function ensureChecker(name: string, role: "admin" | "teknisi" | "magang")
 export async function createDailyQcAction(formData: FormData) {
   const currentUser = requireRole(["admin", "teknisi", "magang"]);
   const unitId = text(formData, "unitId");
-  const selectedChecker = demoUsers.find((user) => user.name === text(formData, "checkerName")) ?? currentUser;
+  const checkerName = text(formData, "checkerName");
 
   if (!unitId) {
     redirect("/qc-harian?error=unit-required");
@@ -51,7 +50,7 @@ export async function createDailyQcAction(formData: FormData) {
     redirect("/qc-harian?error=unit-not-found");
   }
 
-  const checker = await ensureChecker(selectedChecker.name, selectedChecker.role);
+  const checker = await ensureChecker(checkerName || currentUser.name, "magang");
   const ssdHealth = numberValue(formData, "ssdHealth");
   const batteryHealth = numberValue(formData, "batteryHealth");
   const status = mapDailyStatus(text(formData, "masihLolos"));

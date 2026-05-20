@@ -1,8 +1,6 @@
 import { Bluetooth, CheckCircle2, HardDrive, Keyboard, Monitor, Wifi } from "lucide-react";
 import Link from "next/link";
-import { demoUsers } from "@/lib/auth";
 import { getQcHarianPageData } from "@/lib/db-data";
-import { getCurrentUser } from "@/lib/session";
 import { createDailyQcAction } from "./actions";
 
 const checklist = [
@@ -16,7 +14,6 @@ const checklist = [
 
 export default async function QcHarianPage({ searchParams }: { searchParams?: { saved?: string; error?: string } }) {
   const { units, dailyQcs } = await getQcHarianPageData();
-  const currentUser = getCurrentUser();
   const firstUnit = units[0];
 
   return (
@@ -46,11 +43,7 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
           </label>
           <label>
             Nama checker
-            <select name="checkerName" defaultValue={currentUser?.name} required>
-              {demoUsers.map((user) => (
-                <option value={user.name} key={user.name}>{user.name} - {user.role}</option>
-              ))}
-            </select>
+            <input name="checkerName" placeholder="Contoh: Raka PKL" required />
           </label>
           {searchParams?.saved ? <div className="successBox">QC harian berhasil disimpan.</div> : null}
           {searchParams?.error ? <div className="infoBox dangerInfo">QC gagal disimpan: {searchParams.error}</div> : null}

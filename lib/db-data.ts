@@ -415,3 +415,54 @@ export async function getDashboardData() {
     };
   }
 }
+
+export async function getBatchPaymentSummary(batchId: string) {
+  try {
+    const batch = await prisma.batchPSI.findUnique({
+      where: { id: batchId },
+      include: {
+        units: {
+          orderBy: { nomorUnit: "asc" }
+        }
+      }
+    });
+
+    if (!batch) return null;
+
+    const normalUnits = batch.units.filter((unit) => unit.statusObservasi === "VERIFIED" || unit.statusObservasi === "VERIFIED_WITH_NOTES");
+    const problemUnits = batch.units.filter((unit) => unit.statusObservasi === "RECHECK" || unit.statusObservasi === "CANDIDATE_RETUR");
+    const totalModal = batch.units.reduce((sum, unit) => sum + unit.hargaModal, 0);
+    const totalNormal = normalUnits.reduce((sum, unit) => sum + unit.hargaModal, 0);
+    const totalProblem = problemUnits.reduce((sum, unit) => sum + unit.hargaModal, 0);
+
+    return {
+      id: batch.id,
+      nomorBatch: batch.nomorBatch,
+      supplier: batch.supplier,
+      tanggalMasuk: batch.tanggalMasuk.toISOString().slice(0, 10),
+      tanggalTempo: batch.tanggalTempo.toISOString().slice(0, 10),
+      statusPembayaran: paymentStatusLabel[batch.statusPembayaran],
+      catatan: batch.catatan ?? "",
+      totalModal,
+      totalNormal,
+      totalProblem,
+      netTransfer: totalNormal,
+      normalUnits: normalUnits.map((unit) => ({
+        id: unit.id,
+        nomorUnit: unit.nomorUnit,
+        model: unit.model,
+        hargaModal: unit.hargaModal,
+        statusObservasi: unit.statusObservasi.replaceAll("_", " ")
+      })),
+      problemUnits: problemUnits.map((unit) => ({
+        id: unit.id,
+        nomorUnit: unit.nomorUnit,
+        model: unit.model,
+        hargaModal: unit.hargaModal,
+        statusObservasi: unit.statusObservasi.replaceAll("_", " ")
+      }))
+    };
+  } catch {
+    return null;
+  }
+}
