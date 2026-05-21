@@ -145,6 +145,7 @@ model QcAwal {
   seriSsd         QcResult
 
   osInstalled     QcResult
+  windowsVersion  String     @default("Windows 11")
   updateOs        QcResult
   driver          QcResult
   securityPatch   QcResult
@@ -199,6 +200,7 @@ model Sale {
   paymentMethod String
   buyerName     String?
   buyerPhone    String?
+  buyerAddress  String?
   warrantySoftware String    @default("3 bulan")
   warrantyHardware String    @default("3 minggu")
   soldAt        DateTime     @default(now())

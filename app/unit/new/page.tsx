@@ -76,6 +76,9 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
 
         <div className="panelSubsection">
           <p className="eyebrow">Checklist QC Awal</p>
+          <div className="infoBox compactInfo">
+            Checklist inti, tambahan, dan QC harian mengikuti arahan Ludfy dan Zume supaya alurnya cocok dengan kerja teknisi di toko.
+          </div>
           <div className="qcSelectGrid">
             {["bodyBroken", "karetBawah", "repaint", "touchpad", "trackpoint", "usb", "kamera", "speaker", "mic"].map((field) => (
               <label key={field}>{field}
@@ -86,6 +89,15 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
             ))}
           </div>
         </div>
+
+        <label>Windows saat QC awal
+          <select name="windowsVersion" defaultValue="Windows 11">
+            <option>Windows 11</option>
+            <option>Windows 10</option>
+            <option>Belum install OS</option>
+            <option>OS bermasalah</option>
+          </select>
+        </label>
 
         <div className="infoBox compactInfo">
           Unit Intel Gen 8 ke atas wajib pakai Windows 11. Kalau saat masuk batch masih Windows 10 tidak apa-apa, nanti status siap jual mengikuti input <strong>Seri Windows</strong> di QC harian terbaru.

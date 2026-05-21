@@ -76,15 +76,22 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
           </label>
           <label>
             Metode bayar
-            <input name="paymentMethod" defaultValue="Cash" />
+            <select name="paymentMethod" defaultValue="Cash">
+              <option>Cash</option>
+              <option>Transfer</option>
+            </select>
           </label>
           <label>
             Nama pembeli
-            <input name="buyerName" placeholder="Opsional" />
+            <input name="buyerName" placeholder="Nama pembeli" />
           </label>
           <label>
             No. WhatsApp pembeli
-            <input name="buyerPhone" placeholder="Opsional" />
+            <input name="buyerPhone" placeholder="08xxxxxxxxxx" />
+          </label>
+          <label className="wideField">
+            Alamat pembeli
+            <input name="buyerAddress" placeholder="Alamat pembeli untuk nota" />
           </label>
         </div>
 

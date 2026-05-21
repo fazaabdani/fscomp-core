@@ -55,6 +55,33 @@ function invoiceNumber() {
   return `FS-${date}-${time}-${suffix}`;
 }
 
+function buildCustomerThanksMessage(receiptUrl: string) {
+  return [
+    "Assalamu'alaikum kak.",
+    "",
+    "Terima kasih sudah membeli laptop di FS Comp.",
+    "Semoga laptopnya bermanfaat, awet, dan bisa membantu kebutuhan kerja, sekolah, kuliah, usaha, maupun aktivitas sehari-hari.",
+    "",
+    `Nota digital: ${receiptUrl}`,
+    "",
+    "Supaya laptop second-nya lebih awet, berikut beberapa tips perawatan dari kami:",
+    "",
+    "1. Wajib rutin dipakai / dinyalakan minimal 3 kali seminggu selama 15-30 menit.",
+    "2. Simpan di tempat kering, hindari tempat lembap atau rawan terkena air.",
+    "3. Gunakan charger yang sesuai.",
+    "4. Jangan dipakai di atas kasur, lebih aman di meja atau alas keras.",
+    "5. Jaga agar tidak overheat, beri jeda jika terasa panas.",
+    "6. Matikan laptop dengan benar lewat shutdown Windows.",
+    "7. Jangan biarkan baterai sering habis total, charger saat sekitar 20-30%.",
+    "8. Jauhkan dari cairan seperti air, kopi, teh, dan hujan.",
+    "9. Jangan install aplikasi sembarangan agar aman dari virus atau Windows error.",
+    "10. Segera konsultasi kalau ada gejala aneh seperti panas, keyboard error, layar kedip, baterai boros, atau sering restart.",
+    "",
+    "Kalau ada kendala atau ingin konsultasi, silakan langsung hubungi kami nggih.",
+    "Terima kasih sudah percaya belanja di FS Comp."
+  ].join("\n");
+}
+
 async function notifySaleToN8n(payload: {
   saleId: string;
   invoiceNumber: string;
@@ -65,8 +92,10 @@ async function notifySaleToN8n(payload: {
   paymentMethod: string;
   buyerName: string;
   buyerPhone: string;
+  buyerAddress: string;
 }) {
   const webhookUrl = process.env.N8N_SALES_WEBHOOK_URL;
+  const publicUrl = process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id";
   if (!webhookUrl) return;
 
   try {
@@ -76,7 +105,8 @@ async function notifySaleToN8n(payload: {
       body: JSON.stringify({
         ...payload,
         notifyTo: "0816692428",
-        receiptUrl: `${process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id"}/sales/${payload.saleId}/receipt`,
+        receiptUrl: `${publicUrl}/sales/${payload.saleId}/receipt`,
+        customerReceiptUrl: `${publicUrl}/nota/${payload.saleId}`,
         message: [
           "*FS Comp Core - Penjualan Baru*",
           `Invoice: ${payload.invoiceNumber}`,
@@ -86,8 +116,11 @@ async function notifySaleToN8n(payload: {
           `Profit kotor: Rp ${payload.grossProfit.toLocaleString("id-ID")}`,
           `Pembayaran: ${payload.paymentMethod}`,
           `Pembeli: ${payload.buyerName || "-"}`,
-          `WA pembeli: ${payload.buyerPhone || "-"}`
-        ].join("\n")
+          `WA pembeli: ${payload.buyerPhone || "-"}`,
+          `Alamat: ${payload.buyerAddress || "-"}`
+        ].join("\n"),
+        customerPhone: payload.buyerPhone,
+        customerMessage: buildCustomerThanksMessage(`${publicUrl}/nota/${payload.saleId}`)
       })
     });
   } catch {
@@ -103,6 +136,7 @@ export async function createSaleAction(formData: FormData) {
   const paymentMethod = text(formData, "paymentMethod") || "Cash";
   const buyerName = text(formData, "buyerName");
   const buyerPhone = text(formData, "buyerPhone");
+  const buyerAddress = text(formData, "buyerAddress");
   const notes = text(formData, "notes");
   const location = mapLocation(text(formData, "location"));
   const itemNames = textArray(formData, "itemName");
@@ -175,6 +209,7 @@ export async function createSaleAction(formData: FormData) {
           paymentMethod,
           buyerName: buyerName || null,
           buyerPhone: buyerPhone || null,
+          buyerAddress: buyerAddress || null,
           warrantySoftware: "3 bulan",
           warrantyHardware: "3 minggu",
           notes: notes || null
@@ -213,7 +248,8 @@ export async function createSaleAction(formData: FormData) {
     grossProfit,
     paymentMethod,
     buyerName,
-    buyerPhone
+    buyerPhone,
+    buyerAddress
   });
 
   revalidatePath("/sales");

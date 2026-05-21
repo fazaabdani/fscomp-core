@@ -114,6 +114,7 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
           ssd: ssdHealth < 80 ? "NOTES" : "OK",
           seriSsd: qcOk,
           osInstalled: qcOk,
+          windowsVersion: text(formData, "windowsVersion") || "Windows 11",
           updateOs: "NOTES",
           driver: qcOk,
           securityPatch: "NOTES",

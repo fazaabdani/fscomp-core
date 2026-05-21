@@ -208,6 +208,7 @@ export async function getUnitForDetail(id: string) {
             },
             software: {
               OS: unit.qcAwal.osInstalled,
+              Windows: unit.qcAwal.windowsVersion,
               "Update OS": unit.qcAwal.updateOs,
               Driver: unit.qcAwal.driver,
               "Security Patch": unit.qcAwal.securityPatch,
@@ -284,6 +285,7 @@ export async function getUnitsForLabel() {
         software: unit.qcAwal
           ? {
               OS: unit.qcAwal.osInstalled,
+              Windows: unit.qcAwal.windowsVersion,
               "Update OS": unit.qcAwal.updateOs,
               Driver: unit.qcAwal.driver,
               "Security Patch": unit.qcAwal.securityPatch,
@@ -754,6 +756,7 @@ export async function getSaleReceipt(id: string) {
       paymentMethod: sale.paymentMethod,
       buyerName: sale.buyerName ?? "-",
       buyerPhone: sale.buyerPhone ?? "-",
+      buyerAddress: sale.buyerAddress ?? "-",
       warrantySoftware: sale.warrantySoftware,
       warrantyHardware: sale.warrantyHardware,
       subtotal: sale.subtotal,

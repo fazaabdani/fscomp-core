@@ -848,6 +848,10 @@ textarea {
   gap: 10px;
 }
 
+.wideField {
+  grid-column: 1 / -1;
+}
+
 .qcColumns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

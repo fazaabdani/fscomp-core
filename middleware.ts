@@ -4,6 +4,7 @@ function isPublicPath(pathname: string) {
   if (pathname === "/login") return true;
   const parts = pathname.split("/").filter(Boolean);
   if (parts.length === 2 && parts[0] === "unit" && parts[1] !== "new") return true;
+  if (parts.length === 2 && parts[0] === "nota") return true;
   return false;
 }
 
