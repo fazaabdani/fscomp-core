@@ -27,6 +27,7 @@ export type DailyQC = {
   checker: string;
   ssdHealth: number;
   batteryHealth: number;
+  windowsVersion: string;
   kondisiHariIni: string;
   masihLolos: DailyStatus;
   catatan: string;
@@ -327,6 +328,7 @@ export const dailyQcs: DailyQC[] = [
     checker: "Anak Magang",
     ssdHealth: 98,
     batteryHealth: 84,
+    windowsVersion: "Windows 11",
     kondisiHariIni: "Nyala normal, booting cepat, WiFi aktif.",
     masihLolos: "Lolos",
     catatan: "Tetap siap katalog."
@@ -338,6 +340,7 @@ export const dailyQcs: DailyQC[] = [
     checker: "Anak Magang",
     ssdHealth: 94,
     batteryHealth: 71,
+    windowsVersion: "Windows 11",
     kondisiHariIni: "Booting normal, battery turun 8 persen dalam 20 menit.",
     masihLolos: "Lolos dengan catatan",
     catatan: "Perlu catatan battery di listing."
@@ -349,6 +352,7 @@ export const dailyQcs: DailyQC[] = [
     checker: "Anak Magang",
     ssdHealth: 88,
     batteryHealth: 62,
+    windowsVersion: "Windows 10",
     kondisiHariIni: "WiFi sempat disconnect saat sleep resume.",
     masihLolos: "Lolos dengan catatan",
     catatan: "Recheck driver WiFi."
@@ -360,6 +364,7 @@ export const dailyQcs: DailyQC[] = [
     checker: "Anak Magang",
     ssdHealth: 76,
     batteryHealth: 39,
+    windowsVersion: "Windows 10",
     kondisiHariIni: "Touchpad masih bermasalah, battery drop.",
     masihLolos: "Tidak Lolos",
     catatan: "Tahan, jangan katalog."
