@@ -87,7 +87,10 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
           </div>
         </div>
 
-        <label>Catatan QC Awal<textarea name="catatan" placeholder="Catatan body, repaint, karet bawah, kamera, USB, speaker, mic, dan lainnya." /></label>
+        <div className="infoBox compactInfo">
+          Unit Intel Gen 8 ke atas wajib pakai Windows 11. Tulis <strong>Windows 11</strong> di catatan QC awal setelah OS siap, supaya unit bisa masuk siap jual.
+        </div>
+        <label>Catatan QC Awal<textarea name="catatan" placeholder="Contoh: Windows 11 siap, body mulus, kamera OK, USB OK." /></label>
         <button className="primaryButton" type="submit">Simpan Unit dan QC Awal</button>
       </form>
     </section>

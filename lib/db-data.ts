@@ -9,6 +9,28 @@ const paymentStatusLabel: Record<string, BatchPSI["statusPembayaran"]> = {
   LUNAS: "Lunas"
 };
 
+function processorGeneration(processor: string) {
+  const normalized = processor.toLowerCase();
+  const genMatch = normalized.match(/gen\s*(\d+)/);
+  if (genMatch) return Number(genMatch[1]);
+  const intelCodeMatch = normalized.match(/\b[ui][3579][- ]?(\d{4,5})/);
+  if (intelCodeMatch) {
+    const code = intelCodeMatch[1];
+    return code.length === 5 ? Number(code.slice(0, 2)) : Number(code.slice(0, 1));
+  }
+  return 0;
+}
+
+function requiresWindows11(processor: string) {
+  return processorGeneration(processor) >= 8;
+}
+
+function hasWindows11Note(qcAwal: { catatan: string | null; reminder: string[] } | null) {
+  if (!qcAwal) return false;
+  const source = `${qcAwal.catatan ?? ""} ${qcAwal.reminder.join(" ")}`.toLowerCase();
+  return source.includes("windows 11") || source.includes("win 11");
+}
+
 export async function getBatchesForPage() {
   try {
     const dbBatches = await prisma.batchPSI.findMany({
@@ -381,6 +403,7 @@ export async function getDashboardData() {
       }),
       prisma.unit.findMany({
         include: {
+          qcAwal: { select: { catatan: true, reminder: true } },
           qcHarian: {
             orderBy: { tanggal: "desc" },
             take: 1,
@@ -403,13 +426,14 @@ export async function getDashboardData() {
       const latestDaily = unit.qcHarian[0];
       return Boolean(latestDaily && latestDaily.masihLolos !== "LOLOS");
     };
-    const isReadyForCatalog = (unit: { statusObservasi: string; soldAt: Date | null; qcHarian: { masihLolos: string }[] }) =>
+    const isReadyForCatalog = (unit: { statusObservasi: string; soldAt: Date | null; processor: string; qcAwal: { catatan: string | null; reminder: string[] } | null; qcHarian: { masihLolos: string }[] }) =>
       !unit.soldAt &&
       (unit.statusObservasi === "VERIFIED" || unit.statusObservasi === "VERIFIED_WITH_NOTES") &&
-      !isDailyProblem(unit);
+      !isDailyProblem(unit) &&
+      (!requiresWindows11(unit.processor) || hasWindows11Note(unit.qcAwal));
 
     const problemUnits = units
-      .filter((unit) => unit.statusObservasi === "RECHECK" || unit.statusObservasi === "CANDIDATE_RETUR" || isDailyProblem(unit))
+      .filter((unit) => unit.statusObservasi === "RECHECK" || unit.statusObservasi === "CANDIDATE_RETUR" || isDailyProblem(unit) || (requiresWindows11(unit.processor) && !hasWindows11Note(unit.qcAwal)))
       .slice(0, 6)
       .map((unit) => ({
         id: unit.id,
@@ -418,7 +442,7 @@ export async function getDashboardData() {
         processor: unit.processor,
         ram: unit.ram,
         ssd: unit.ssd,
-        statusObservasi: unit.statusObservasi.replaceAll("_", " ")
+        statusObservasi: requiresWindows11(unit.processor) && !hasWindows11Note(unit.qcAwal) ? "BUTUH WINDOWS 11" : unit.statusObservasi.replaceAll("_", " ")
       }));
 
     const catalogReadyUnits = units
@@ -535,6 +559,7 @@ export async function getSalesPageData() {
         statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }
       },
       include: {
+        qcAwal: { select: { catatan: true, reminder: true } },
         qcHarian: {
           orderBy: { tanggal: "desc" },
           take: 1,
@@ -547,7 +572,9 @@ export async function getSalesPageData() {
 
     const readyUnits = readyCandidates.filter((unit) => {
       const latestDaily = unit.qcHarian[0];
-      return !latestDaily || latestDaily.masihLolos === "LOLOS";
+      const dailyReady = !latestDaily || latestDaily.masihLolos === "LOLOS";
+      const osReady = !requiresWindows11(unit.processor) || hasWindows11Note(unit.qcAwal);
+      return dailyReady && osReady;
     });
 
     let sales: Array<Prisma.SaleGetPayload<{ include: { unit: true; items: true } }>> = [];
@@ -669,5 +696,52 @@ export async function getSaleReceipt(id: string) {
     };
   } catch {
     return null;
+  }
+}
+
+export async function getFinancePageData() {
+  try {
+    const sales = await prisma.sale.findMany({
+      where: { voidedAt: null },
+      include: { unit: true, items: true },
+      orderBy: { soldAt: "desc" },
+      take: 120
+    });
+
+    const totalOmzet = sales.reduce((sum, sale) => sum + sale.soldPrice, 0);
+    const totalModal = sales.reduce((sum, sale) => sum + sale.costPrice, 0);
+    const totalProfit = sales.reduce((sum, sale) => sum + sale.grossProfit, 0);
+
+    return {
+      stats: {
+        totalOmzet,
+        totalModal,
+        totalProfit,
+        totalTransaksi: sales.length
+      },
+      sales: sales.map((sale) => ({
+        id: sale.id,
+        invoiceNumber: sale.invoiceNumber,
+        soldAt: sale.soldAt.toISOString().slice(0, 10),
+        location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
+        unitNomor: sale.unit.nomorUnit,
+        model: sale.unit.model,
+        soldPrice: sale.soldPrice,
+        costPrice: sale.costPrice,
+        grossProfit: sale.grossProfit,
+        itemCount: sale.items.reduce((sum, item) => sum + item.qty, 0),
+        paymentMethod: sale.paymentMethod
+      }))
+    };
+  } catch {
+    return {
+      stats: {
+        totalOmzet: 0,
+        totalModal: 0,
+        totalProfit: 0,
+        totalTransaksi: 0
+      },
+      sales: []
+    };
   }
 }

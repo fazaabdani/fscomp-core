@@ -1,4 +1,4 @@
-import { Banknote, Gift, MapPin, Receipt, ShoppingCart } from "lucide-react";
+import { Gift, MapPin, Receipt, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
 import { getSalesPageData } from "@/lib/db-data";
@@ -17,8 +17,8 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
       <div className="sectionTitle">
         <div>
           <p className="eyebrow">Penjualan dan Kasir</p>
-          <h1>Unit siap jual, lokasi toko, omzet, dan keuntungan</h1>
-          <p className="bodyText">Unit yang muncul di kasir hanya unit VERIFIED atau VERIFIED WITH NOTES dan belum tercatat terjual.</p>
+          <h1>Kasir unit siap jual dan cetak nota</h1>
+          <p className="bodyText">Unit yang muncul di kasir hanya unit siap jual, belum terjual, QC harian lolos, dan Gen 8 ke atas sudah tercatat Windows 11.</p>
         </div>
         <ShoppingCart size={34} />
       </div>
@@ -26,8 +26,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
       <div className="statsGrid salesStatsGrid">
         <div className="metric metric-blue"><Receipt size={21} /><span>Unit siap jual</span><strong>{stats.readyCount}</strong></div>
         <div className="metric metric-green"><ShoppingCart size={21} /><span>Transaksi</span><strong>{stats.soldCount}</strong></div>
-        <div className="metric metric-cyan"><Banknote size={21} /><span>Omzet</span><strong>{formatRupiah(stats.totalOmzet)}</strong></div>
-        <div className="metric metric-green"><Banknote size={21} /><span>Profit kotor</span><strong>{formatRupiah(stats.totalProfit)}</strong></div>
+        <Link className="metric metric-cyan" href="/finance"><Receipt size={21} /><span>Laporan</span><strong>Keuangan</strong></Link>
       </div>
 
       {!salesReady ? (
@@ -38,7 +37,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
 
       {blockedByDailyQc > 0 ? (
         <div className="infoBox">
-          {blockedByDailyQc} unit tidak dimunculkan di stok siap jual karena QC harian terakhir masih ada catatan/problem. Kalau speaker, keyboard, SSD, WiFi, Bluetooth, booting, atau battery bermasalah, unit ditahan dulu.
+          {blockedByDailyQc} unit tidak dimunculkan di stok siap jual karena QC harian terakhir masih ada catatan/problem atau unit Gen 8 ke atas belum tercatat memakai Windows 11.
         </div>
       ) : null}
 

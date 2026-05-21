@@ -30,6 +30,24 @@ function mapLocation(value: string): SaleLocation {
   return value === "KAJEN" ? "KAJEN" : "WIRADESA";
 }
 
+function processorGeneration(processor: string) {
+  const normalized = processor.toLowerCase();
+  const genMatch = normalized.match(/gen\s*(\d+)/);
+  if (genMatch) return Number(genMatch[1]);
+  const intelCodeMatch = normalized.match(/\b[ui][3579][- ]?(\d{4,5})/);
+  if (intelCodeMatch) {
+    const code = intelCodeMatch[1];
+    return code.length === 5 ? Number(code.slice(0, 2)) : Number(code.slice(0, 1));
+  }
+  return 0;
+}
+
+function hasWindows11Note(qcAwal: { catatan: string | null; reminder: string[] } | null) {
+  if (!qcAwal) return false;
+  const source = `${qcAwal.catatan ?? ""} ${qcAwal.reminder.join(" ")}`.toLowerCase();
+  return source.includes("windows 11") || source.includes("win 11");
+}
+
 function invoiceNumber() {
   const now = new Date();
   const date = now.toISOString().slice(0, 10).replaceAll("-", "");
@@ -65,7 +83,8 @@ export async function createSaleAction(formData: FormData) {
         orderBy: { tanggal: "desc" },
         take: 1,
         select: { masihLolos: true }
-      }
+      },
+      qcAwal: { select: { catatan: true, reminder: true } }
     }
   });
   if (!unit) {
@@ -75,6 +94,10 @@ export async function createSaleAction(formData: FormData) {
   const latestDailyQc = unit.qcHarian[0];
   if (latestDailyQc && latestDailyQc.masihLolos !== "LOLOS") {
     redirect("/sales?error=qc-harian-belum-lolos");
+  }
+
+  if (processorGeneration(unit.processor) >= 8 && !hasWindows11Note(unit.qcAwal)) {
+    redirect("/sales?error=windows-11-wajib-gen-8-keatas");
   }
 
   const items = [

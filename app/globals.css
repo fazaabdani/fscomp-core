@@ -987,6 +987,10 @@ textarea {
   grid-template-columns: 136px minmax(0, 1fr) auto auto auto;
 }
 
+.financeRow {
+  grid-template-columns: 136px minmax(0, 1fr) auto auto auto;
+}
+
 .voidedSaleRow {
   opacity: 0.68;
 }
@@ -1290,8 +1294,8 @@ textarea {
   }
 
   .receiptPaper {
-    width: 215mm;
-    min-height: 165mm;
+    width: 200mm;
+    min-height: 155mm;
     border: 0;
     border-radius: 0;
     background: white;
@@ -1342,8 +1346,8 @@ textarea {
 }
 
 @page receipt {
-  size: 215mm 165mm landscape;
-  margin: 6mm;
+  size: 210mm 165mm landscape;
+  margin: 5mm;
 }
 
 .emptyState {
@@ -1522,6 +1526,7 @@ textarea {
   }
 
   .cashierItemRow,
+  .financeRow,
   .receiptTop,
   .receiptInfoGrid,
   .receiptFooter,
