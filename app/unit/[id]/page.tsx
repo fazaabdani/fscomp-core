@@ -115,6 +115,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
               <div className="miniMetrics">
                 <span>SSD {qc.ssdHealth}%</span>
                 <span>Battery {qc.batteryHealth}%</span>
+                <span>{qc.windowsVersion}</span>
               </div>
               <small>{qc.catatan} / {qc.checker}</small>
             </div>

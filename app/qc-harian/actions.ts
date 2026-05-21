@@ -61,6 +61,7 @@ export async function createDailyQcAction(formData: FormData) {
   const checker = await ensureChecker(checkerName || currentUser.name, "magang");
   const ssdHealth = numberValue(formData, "ssdHealth");
   const batteryHealth = numberValue(formData, "batteryHealth");
+  const windowsVersion = text(formData, "windowsVersion") || "Windows 10";
   const catatan = text(formData, "catatan");
   const dailyChecks = [
     checked(formData, "nyalaNormal"),
@@ -80,6 +81,7 @@ export async function createDailyQcAction(formData: FormData) {
     checked(formData, "keyboard") ? "keyboard OK" : "keyboard perlu cek",
     checked(formData, "ssd") ? "SSD terbaca" : "SSD perlu cek",
     checked(formData, "speaker") ? "speaker OK" : "speaker perlu cek",
+    `OS ${windowsVersion}`,
     `SSD health ${ssdHealth}%`,
     `battery health ${batteryHealth}%`,
     checked(formData, "wifi") ? "WiFi OK" : "WiFi perlu cek",
@@ -94,6 +96,7 @@ export async function createDailyQcAction(formData: FormData) {
         tanggal: new Date(),
         ssdHealth,
         batteryHealth,
+        windowsVersion,
         nyalaNormal: checked(formData, "nyalaNormal"),
         booting: checked(formData, "booting"),
         layar: true,

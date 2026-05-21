@@ -70,8 +70,17 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
               <input name="batteryHealth" type="number" min="0" max="100" defaultValue={firstUnit?.batteryHealth ?? 80} />
             </label>
           </div>
+          <label>
+            Seri Windows hari ini
+            <select name="windowsVersion" defaultValue="Windows 11">
+              <option>Windows 11</option>
+              <option>Windows 10</option>
+              <option>Belum install OS</option>
+              <option>OS bermasalah</option>
+            </select>
+          </label>
           <div className="infoBox compactInfo">
-            Status otomatis: battery di bawah 70% atau SSD health di bawah 80% akan masuk <strong>Tidak Lolos</strong> dan perlu konfirmasi teknisi/admin.
+            Status otomatis: battery di bawah 70% atau SSD health di bawah 80% akan masuk <strong>Tidak Lolos</strong>. Unit Gen 8 ke atas baru siap jual kalau QC harian terakhir sudah Windows 11.
           </div>
           <label>
             Catatan harian
@@ -99,6 +108,7 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
                   <div className="miniMetrics">
                     <span>SSD {qc.ssdHealth}%</span>
                     <span>Battery {qc.batteryHealth}%</span>
+                    <span>{qc.windowsVersion}</span>
                   </div>
                   <small>{qc.tanggal} oleh {qc.checker}</small>
                 </Link>

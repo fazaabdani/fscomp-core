@@ -42,10 +42,9 @@ function processorGeneration(processor: string) {
   return 0;
 }
 
-function hasWindows11Note(qcAwal: { catatan: string | null; reminder: string[] } | null) {
-  if (!qcAwal) return false;
-  const source = `${qcAwal.catatan ?? ""} ${qcAwal.reminder.join(" ")}`.toLowerCase();
-  return source.includes("windows 11") || source.includes("win 11");
+function hasWindows11Daily(qcHarian: { windowsVersion?: string | null }[]) {
+  const latestDaily = qcHarian[0];
+  return Boolean(latestDaily?.windowsVersion?.toLowerCase().includes("windows 11"));
 }
 
 function invoiceNumber() {
@@ -82,9 +81,8 @@ export async function createSaleAction(formData: FormData) {
       qcHarian: {
         orderBy: { tanggal: "desc" },
         take: 1,
-        select: { masihLolos: true }
-      },
-      qcAwal: { select: { catatan: true, reminder: true } }
+        select: { masihLolos: true, windowsVersion: true }
+      }
     }
   });
   if (!unit) {
@@ -96,7 +94,7 @@ export async function createSaleAction(formData: FormData) {
     redirect("/sales?error=qc-harian-belum-lolos");
   }
 
-  if (processorGeneration(unit.processor) >= 8 && !hasWindows11Note(unit.qcAwal)) {
+  if (processorGeneration(unit.processor) >= 8 && !hasWindows11Daily(unit.qcHarian)) {
     redirect("/sales?error=windows-11-wajib-gen-8-keatas");
   }
 

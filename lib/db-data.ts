@@ -25,10 +25,9 @@ function requiresWindows11(processor: string) {
   return processorGeneration(processor) >= 8;
 }
 
-function hasWindows11Note(qcAwal: { catatan: string | null; reminder: string[] } | null) {
-  if (!qcAwal) return false;
-  const source = `${qcAwal.catatan ?? ""} ${qcAwal.reminder.join(" ")}`.toLowerCase();
-  return source.includes("windows 11") || source.includes("win 11");
+function hasWindows11Daily(qcHarian: { windowsVersion?: string | null }[]) {
+  const latestDaily = qcHarian[0];
+  return Boolean(latestDaily?.windowsVersion?.toLowerCase().includes("windows 11"));
 }
 
 export async function getBatchesForPage() {
@@ -146,6 +145,7 @@ export async function getUnitForDetail(id: string) {
             tanggal: true,
             ssdHealth: true,
             batteryHealth: true,
+            windowsVersion: true,
             kondisiHariIni: true,
             masihLolos: true,
             catatan: true,
@@ -223,6 +223,7 @@ export async function getUnitForDetail(id: string) {
         checker: qc.checker.name,
         ssdHealth: qc.ssdHealth,
         batteryHealth: qc.batteryHealth,
+        windowsVersion: qc.windowsVersion,
         kondisiHariIni: qc.kondisiHariIni,
         masihLolos: qc.masihLolos.replaceAll("_", " "),
         catatan: qc.catatan ?? "-"
@@ -320,6 +321,7 @@ export async function getQcHarianPageData() {
         checker: { select: { name: true } },
         ssdHealth: true,
         batteryHealth: true,
+        windowsVersion: true,
         kondisiHariIni: true,
         masihLolos: true,
         catatan: true,
@@ -357,6 +359,7 @@ export async function getQcHarianPageData() {
         checker: qc.checker.name,
         ssdHealth: qc.ssdHealth,
         batteryHealth: qc.batteryHealth,
+        windowsVersion: qc.windowsVersion,
         kondisiHariIni: qc.kondisiHariIni,
         masihLolos: qc.masihLolos.replaceAll("_", " "),
         catatan: qc.catatan ?? "",
@@ -403,11 +406,10 @@ export async function getDashboardData() {
       }),
       prisma.unit.findMany({
         include: {
-          qcAwal: { select: { catatan: true, reminder: true } },
           qcHarian: {
             orderBy: { tanggal: "desc" },
             take: 1,
-            select: { masihLolos: true }
+            select: { masihLolos: true, windowsVersion: true }
           }
         },
         orderBy: { createdAt: "desc" },
@@ -426,14 +428,14 @@ export async function getDashboardData() {
       const latestDaily = unit.qcHarian[0];
       return Boolean(latestDaily && latestDaily.masihLolos !== "LOLOS");
     };
-    const isReadyForCatalog = (unit: { statusObservasi: string; soldAt: Date | null; processor: string; qcAwal: { catatan: string | null; reminder: string[] } | null; qcHarian: { masihLolos: string }[] }) =>
+    const isReadyForCatalog = (unit: { statusObservasi: string; soldAt: Date | null; processor: string; qcHarian: { masihLolos: string; windowsVersion?: string | null }[] }) =>
       !unit.soldAt &&
       (unit.statusObservasi === "VERIFIED" || unit.statusObservasi === "VERIFIED_WITH_NOTES") &&
       !isDailyProblem(unit) &&
-      (!requiresWindows11(unit.processor) || hasWindows11Note(unit.qcAwal));
+      (!requiresWindows11(unit.processor) || hasWindows11Daily(unit.qcHarian));
 
     const problemUnits = units
-      .filter((unit) => unit.statusObservasi === "RECHECK" || unit.statusObservasi === "CANDIDATE_RETUR" || isDailyProblem(unit) || (requiresWindows11(unit.processor) && !hasWindows11Note(unit.qcAwal)))
+      .filter((unit) => unit.statusObservasi === "RECHECK" || unit.statusObservasi === "CANDIDATE_RETUR" || isDailyProblem(unit) || (requiresWindows11(unit.processor) && !hasWindows11Daily(unit.qcHarian)))
       .slice(0, 6)
       .map((unit) => ({
         id: unit.id,
@@ -442,7 +444,7 @@ export async function getDashboardData() {
         processor: unit.processor,
         ram: unit.ram,
         ssd: unit.ssd,
-        statusObservasi: requiresWindows11(unit.processor) && !hasWindows11Note(unit.qcAwal) ? "BUTUH WINDOWS 11" : unit.statusObservasi.replaceAll("_", " ")
+        statusObservasi: requiresWindows11(unit.processor) && !hasWindows11Daily(unit.qcHarian) ? "BUTUH WINDOWS 11" : unit.statusObservasi.replaceAll("_", " ")
       }));
 
     const catalogReadyUnits = units
@@ -559,11 +561,10 @@ export async function getSalesPageData() {
         statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }
       },
       include: {
-        qcAwal: { select: { catatan: true, reminder: true } },
         qcHarian: {
           orderBy: { tanggal: "desc" },
           take: 1,
-          select: { masihLolos: true }
+          select: { masihLolos: true, windowsVersion: true }
         }
       },
       orderBy: { createdAt: "desc" },
@@ -573,7 +574,7 @@ export async function getSalesPageData() {
     const readyUnits = readyCandidates.filter((unit) => {
       const latestDaily = unit.qcHarian[0];
       const dailyReady = !latestDaily || latestDaily.masihLolos === "LOLOS";
-      const osReady = !requiresWindows11(unit.processor) || hasWindows11Note(unit.qcAwal);
+      const osReady = !requiresWindows11(unit.processor) || hasWindows11Daily(unit.qcHarian);
       return dailyReady && osReady;
     });
 

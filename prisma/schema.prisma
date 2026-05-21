@@ -166,6 +166,7 @@ model QcHarian {
   tanggal         DateTime
   ssdHealth       Int
   batteryHealth   Int
+  windowsVersion  String      @default("Windows 10")
   nyalaNormal     Boolean
   booting         Boolean
   layar           Boolean

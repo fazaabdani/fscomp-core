@@ -88,9 +88,9 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
         </div>
 
         <div className="infoBox compactInfo">
-          Unit Intel Gen 8 ke atas wajib pakai Windows 11. Tulis <strong>Windows 11</strong> di catatan QC awal setelah OS siap, supaya unit bisa masuk siap jual.
+          Unit Intel Gen 8 ke atas wajib pakai Windows 11. Kalau saat masuk batch masih Windows 10 tidak apa-apa, nanti status siap jual mengikuti input <strong>Seri Windows</strong> di QC harian terbaru.
         </div>
-        <label>Catatan QC Awal<textarea name="catatan" placeholder="Contoh: Windows 11 siap, body mulus, kamera OK, USB OK." /></label>
+        <label>Catatan QC Awal<textarea name="catatan" placeholder="Catatan body, repaint, karet bawah, kamera, USB, speaker, mic, dan lainnya." /></label>
         <button className="primaryButton" type="submit">Simpan Unit dan QC Awal</button>
       </form>
     </section>
