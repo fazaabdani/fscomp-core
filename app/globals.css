@@ -895,8 +895,14 @@ textarea {
 
 .salesLayout {
   display: grid;
-  grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1.14fr);
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 1.32fr);
   gap: 18px;
+  align-items: start;
+}
+
+.salesLayout > .panel,
+.salesLayout > form {
+  min-width: 0;
 }
 
 .salesUnitRow {
@@ -911,14 +917,36 @@ textarea {
   margin: 0;
 }
 
+.cashierItems {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.cashierItemHeader,
 .cashierItemRow {
   display: grid;
-  grid-template-columns: minmax(130px, 1.3fr) minmax(84px, 0.8fr) 64px minmax(112px, 1fr) minmax(112px, 1fr);
+  grid-template-columns: minmax(128px, 1fr) 82px 50px 88px 88px;
   gap: 8px;
+  min-width: 476px;
+}
+
+.cashierItemHeader {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .cashierItemRow input {
   min-height: 38px;
+  padding: 0 9px;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.formHint {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .receiptWarranty {
@@ -930,6 +958,12 @@ textarea {
   border-radius: 8px;
   background: rgba(40, 232, 154, 0.1);
   color: #c7ffe7;
+  min-width: 0;
+}
+
+.receiptWarranty span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .profitText {
@@ -1357,6 +1391,21 @@ textarea {
   .unitRow .statusPill {
     grid-column: 2;
     justify-self: start;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 1120px) {
+  main {
+    max-width: 100%;
+  }
+
+  .salesLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cashierItemHeader,
+  .cashierItemRow {
+    min-width: 0;
   }
 }
 

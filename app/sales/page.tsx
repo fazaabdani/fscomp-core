@@ -80,6 +80,13 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               <p className="eyebrow">Item tambahan</p>
               <h3>Bonus, software, dan aksesoris</h3>
             </div>
+            <div className="cashierItemHeader">
+              <span>Item</span>
+              <span>Kategori</span>
+              <span>Qty</span>
+              <span>Jual/pcs</span>
+              <span>Modal/pcs</span>
+            </div>
             {[
               { name: "Tas laptop", category: "BONUS", qty: 1, price: 0, cost: 0 },
               { name: "Mouse wireless", category: "BONUS", qty: 1, price: 0, cost: 0 },
@@ -94,7 +101,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
                 <input aria-label={`${item.name} modal`} name="itemCost" type="number" min="0" defaultValue={item.cost} />
               </div>
             ))}
-            <small className="bodyText">Urutan kolom: item, kategori, qty, harga jual/pcs, modal/pcs. Set qty 0 kalau item tidak ikut.</small>
+            <small className="formHint">Qty 0 = item tidak ikut.</small>
           </div>
           <div className="numberGrid">
             <label>
