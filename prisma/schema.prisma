@@ -51,6 +51,11 @@ enum CatalogSyncStatus {
   FAILED
 }
 
+enum SaleLocation {
+  WIRADESA
+  KAJEN
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -108,6 +113,7 @@ model Unit {
   qcHarian    QcHarian[]
   aiLogs      AiLog[]
   catalogSync CatalogSync[]
+  sale        Sale?
 }
 
 model QcAwal {
@@ -167,6 +173,7 @@ model QcHarian {
   ssd             Boolean
   battery         Boolean
   port            Boolean
+  speaker         Boolean     @default(true)
   wifi            Boolean
   bluetooth       Boolean
   kondisiHariIni  String
@@ -177,6 +184,23 @@ model QcHarian {
 
   unit            Unit        @relation(fields: [unitId], references: [id])
   checker         User        @relation(fields: [checkerId], references: [id])
+}
+
+model Sale {
+  id            String       @id @default(cuid())
+  unitId        String       @unique
+  location      SaleLocation
+  soldPrice     Int
+  costPrice     Int
+  grossProfit   Int
+  paymentMethod String
+  buyerName     String?
+  soldAt        DateTime     @default(now())
+  notes         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  unit          Unit         @relation(fields: [unitId], references: [id])
 }
 
 model AiLog {

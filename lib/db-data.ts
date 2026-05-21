@@ -494,3 +494,71 @@ export async function getBatchPaymentSummary(batchId: string) {
     return null;
   }
 }
+
+export async function getSalesPageData() {
+  try {
+    const [readyUnits, sales] = await Promise.all([
+      prisma.unit.findMany({
+        where: {
+          soldAt: null,
+          statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }
+        },
+        orderBy: { createdAt: "desc" },
+        take: 80
+      }),
+      prisma.sale.findMany({
+        include: { unit: true },
+        orderBy: { soldAt: "desc" },
+        take: 40
+      })
+    ]);
+
+    const totalOmzet = sales.reduce((sum, sale) => sum + sale.soldPrice, 0);
+    const totalProfit = sales.reduce((sum, sale) => sum + sale.grossProfit, 0);
+
+    return {
+      readyUnits: readyUnits.map((unit) => ({
+        id: unit.id,
+        nomorUnit: unit.nomorUnit,
+        model: unit.model,
+        processor: unit.processor,
+        ram: unit.ram,
+        ssd: unit.ssd,
+        hargaModal: unit.hargaModal,
+        hargaJualRekomendasi: unit.hargaJualRekomendasi,
+        statusObservasi: unit.statusObservasi.replaceAll("_", " ")
+      })),
+      sales: sales.map((sale) => ({
+        id: sale.id,
+        unitId: sale.unitId,
+        nomorUnit: sale.unit.nomorUnit,
+        model: sale.unit.model,
+        location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
+        soldPrice: sale.soldPrice,
+        costPrice: sale.costPrice,
+        grossProfit: sale.grossProfit,
+        paymentMethod: sale.paymentMethod,
+        buyerName: sale.buyerName ?? "-",
+        soldAt: sale.soldAt.toISOString().slice(0, 10),
+        notes: sale.notes ?? ""
+      })),
+      stats: {
+        totalOmzet,
+        totalProfit,
+        readyCount: readyUnits.length,
+        soldCount: sales.length
+      }
+    };
+  } catch {
+    return {
+      readyUnits: [],
+      sales: [],
+      stats: {
+        totalOmzet: 0,
+        totalProfit: 0,
+        readyCount: 0,
+        soldCount: 0
+      }
+    };
+  }
+}

@@ -3,9 +3,11 @@ import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
 import { statusTone } from "@/lib/constants";
 import { getDashboardData } from "@/lib/db-data";
+import { getCurrentUser } from "@/lib/session";
 
 export default async function DashboardPage() {
   const dashboard = await getDashboardData();
+  const currentUser = getCurrentUser();
   const stats = [
     { label: "Unit aktif", value: dashboard.stats.unitAktif, icon: Boxes, tone: "blue" },
     { label: "Siap katalog", value: dashboard.stats.siapKatalog, icon: ClipboardCheck, tone: "green" },
@@ -25,6 +27,7 @@ export default async function DashboardPage() {
         </div>
         <div className="heroActions">
           <Link className="primaryButton" href="/qc-harian">Input QC Harian</Link>
+          {currentUser?.role === "admin" ? <Link className="secondaryButton" href="/sales">Kasir Penjualan</Link> : null}
           <Link className="secondaryButton" href="/label">Cetak Label QR</Link>
         </div>
       </div>

@@ -12,6 +12,36 @@ const screenColors = [
   { label: "Kuning", value: "#ffff00" }
 ];
 
+const keyboardRows = [
+  ["Esc", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "PrintScreen", "ScrollLock", "Pause"],
+  ["`", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "Backspace"],
+  ["Tab", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\"],
+  ["CapsLock", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "Enter"],
+  ["Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "Shift"],
+  ["Control", "Meta", "Alt", "Space", "Alt", "Control", "ArrowLeft", "ArrowDown", "ArrowRight"]
+];
+
+const keyLabels: Record<string, string> = {
+  " ": "Space",
+  Control: "Ctrl",
+  Meta: "Win",
+  ArrowLeft: "Left",
+  ArrowDown: "Down",
+  ArrowRight: "Right",
+  PrintScreen: "Prt Sc",
+  ScrollLock: "Scr Lk",
+  CapsLock: "Caps",
+  Backspace: "Backspace"
+};
+
+function keyName(key: string) {
+  return key === " " ? "Space" : key;
+}
+
+function keyLabel(key: string) {
+  return keyLabels[key] ?? key.toUpperCase();
+}
+
 export function QcToolsClient() {
   const [screenColor, setScreenColor] = useState(screenColors[0].value);
   const [isScreenOpen, setIsScreenOpen] = useState(false);
@@ -25,7 +55,7 @@ export function QcToolsClient() {
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      const key = event.key === " " ? "Space" : event.key;
+      const key = keyName(event.key);
       setPressedKeys((current) => [key, ...current.filter((item) => item !== key)].slice(0, 24));
     }
 
@@ -126,6 +156,21 @@ export function QcToolsClient() {
             <h2>Key tester</h2>
           </div>
           <Keyboard size={22} />
+        </div>
+        <div className="visualKeyboard">
+          {keyboardRows.map((row, rowIndex) => (
+            <div className="keyboardRow" key={`row-${rowIndex}`}>
+              {row.map((key, index) => {
+                const active = pressedKeys.includes(key) || pressedKeys.includes(key.toLowerCase()) || pressedKeys.includes(key.toUpperCase());
+                const wideClass = key === "Space" ? "keySpace" : ["Backspace", "CapsLock", "Enter", "Shift"].includes(key) ? "keyWide" : "";
+                return (
+                  <span className={`keyboardKey ${active ? "activeKey" : ""} ${wideClass}`} key={`${key}-${index}`}>
+                    {keyLabel(key)}
+                  </span>
+                );
+              })}
+            </div>
+          ))}
         </div>
         <div className="keyGrid">
           {pressedKeys.length === 0 ? <span className="emptyKey">Tekan tombol apa saja</span> : pressedKeys.map((key) => <span key={key}>{key}</span>)}

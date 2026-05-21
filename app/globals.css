@@ -574,9 +574,55 @@ input:not([type]) {
   font-weight: 800;
 }
 
+.visualKeyboard {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(8, 18, 32, 0.96), rgba(4, 11, 20, 0.96));
+}
+
+.keyboardRow {
+  display: flex;
+  gap: 6px;
+  min-width: max-content;
+}
+
+.keyboardKey {
+  display: grid;
+  place-items: center;
+  min-width: 42px;
+  height: 38px;
+  padding: 0 8px;
+  border: 1px solid rgba(210, 226, 245, 0.7);
+  border-radius: 7px;
+  color: #e8f2ff;
+  background: rgba(18, 32, 48, 0.88);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.keyboardKey.activeKey {
+  border-color: #28e89a;
+  background: rgba(40, 232, 154, 0.18);
+  color: #9cffd2;
+  box-shadow: 0 0 0 1px rgba(40, 232, 154, 0.18), 0 0 18px rgba(40, 232, 154, 0.18);
+}
+
+.keyWide {
+  min-width: 76px;
+}
+
+.keySpace {
+  min-width: 220px;
+}
+
 .keyGrid {
   display: flex;
-  min-height: 118px;
+  min-height: 72px;
   align-content: flex-start;
   align-items: flex-start;
   flex-wrap: wrap;
@@ -646,6 +692,17 @@ input:not([type]) {
 .downloadCard span {
   color: #7cc7ff;
   font-weight: 800;
+}
+
+.noTopMargin {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+.compactInfo {
+  margin-top: 0;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .narrowPage {
@@ -836,6 +893,30 @@ textarea {
   background: rgba(8, 18, 32, 0.78);
 }
 
+.salesLayout {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1.14fr);
+  gap: 18px;
+}
+
+.salesUnitRow {
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+}
+
+.saleRow {
+  grid-template-columns: 92px minmax(0, 1fr) auto auto;
+}
+
+.profitText {
+  color: var(--green) !important;
+  font-weight: 800;
+}
+
+.lossText {
+  color: var(--red) !important;
+  font-weight: 800;
+}
+
 .problemPaymentRow {
   grid-template-columns: 90px minmax(0, 1fr) auto auto;
 }
@@ -917,6 +998,10 @@ textarea {
   background: rgba(9, 20, 35, 0.76);
 }
 
+.labelSheet:has(.qcCompleteLabel) {
+  min-height: 480px;
+}
+
 .unitLabel {
   width: 7cm;
   height: 5cm;
@@ -934,6 +1019,8 @@ textarea {
   width: 10cm;
   height: 7cm;
   grid-template-rows: auto 1fr auto;
+  gap: 0.12cm;
+  padding: 0.28cm;
 }
 
 .labelTop,
@@ -978,23 +1065,30 @@ textarea {
 .qcMiniGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 3px;
+  gap: 2px;
   margin-top: 4px;
 }
 
 .qcMiniGrid span {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   justify-content: space-between;
   gap: 4px;
-  padding: 2px 3px;
+  min-height: 0.32cm;
+  padding: 1px 3px;
   border: 1px solid #d8e1ee;
   border-radius: 3px;
   font-size: 7px;
+  overflow: hidden;
 }
 
 .qcMiniGrid em {
   font-style: normal;
   color: #42526b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .qcMiniGrid strong {
@@ -1015,6 +1109,7 @@ textarea {
   .batchGrid,
   .catalogGrid,
   .qcLayout,
+  .salesLayout,
   .labelLayout,
   .qcColumns,
   .reminderGrid {
@@ -1079,6 +1174,11 @@ textarea {
     border-radius: 0;
     min-height: auto;
     background: white;
+  }
+
+  .labelSheet:has(.qcCompleteLabel) {
+    width: 10cm;
+    height: 7cm;
   }
 
   .unitLabel {

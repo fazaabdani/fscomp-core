@@ -19,9 +19,17 @@ function checked(formData: FormData, key: string) {
   return formData.get(key) === "on";
 }
 
-function mapDailyStatus(value: string): DailyStatus {
-  if (value === "Lolos dengan catatan") return "LOLOS_DENGAN_CATATAN";
-  if (value === "Tidak Lolos") return "TIDAK_LOLOS";
+function computeDailyStatus({
+  ssdHealth,
+  batteryHealth,
+  checks
+}: {
+  ssdHealth: number;
+  batteryHealth: number;
+  checks: boolean[];
+}): DailyStatus {
+  if (batteryHealth < 70 || ssdHealth < 80) return "TIDAK_LOLOS";
+  if (checks.some((item) => !item)) return "LOLOS_DENGAN_CATATAN";
   return "LOLOS";
 }
 
@@ -53,21 +61,33 @@ export async function createDailyQcAction(formData: FormData) {
   const checker = await ensureChecker(checkerName || currentUser.name, "magang");
   const ssdHealth = numberValue(formData, "ssdHealth");
   const batteryHealth = numberValue(formData, "batteryHealth");
-  const status = mapDailyStatus(text(formData, "masihLolos"));
   const catatan = text(formData, "catatan");
+  const dailyChecks = [
+    checked(formData, "nyalaNormal"),
+    checked(formData, "booting"),
+    checked(formData, "keyboard"),
+    checked(formData, "ssd"),
+    checked(formData, "speaker"),
+    checked(formData, "wifi"),
+    checked(formData, "bluetooth")
+  ];
+  const status = computeDailyStatus({ ssdHealth, batteryHealth, checks: dailyChecks });
+  const perluKonfirmasi = status === "TIDAK_LOLOS";
 
   const conditionParts = [
     checked(formData, "nyalaNormal") ? "nyala normal" : "nyala perlu cek",
     checked(formData, "booting") ? "booting normal" : "booting bermasalah",
     checked(formData, "keyboard") ? "keyboard OK" : "keyboard perlu cek",
     checked(formData, "ssd") ? "SSD terbaca" : "SSD perlu cek",
+    checked(formData, "speaker") ? "speaker OK" : "speaker perlu cek",
+    `SSD health ${ssdHealth}%`,
     `battery health ${batteryHealth}%`,
     checked(formData, "wifi") ? "WiFi OK" : "WiFi perlu cek",
     checked(formData, "bluetooth") ? "Bluetooth OK" : "Bluetooth perlu cek"
   ];
 
-  await prisma.$transaction([
-    prisma.qcHarian.create({
+  await prisma.$transaction(async (tx) => {
+    await tx.qcHarian.create({
       data: {
         unitId,
         checkerId: checker.id,
@@ -79,24 +99,36 @@ export async function createDailyQcAction(formData: FormData) {
         layar: true,
         keyboard: checked(formData, "keyboard"),
         ssd: checked(formData, "ssd"),
-        battery: batteryHealth >= 50,
+        battery: batteryHealth >= 70,
         port: true,
+        speaker: checked(formData, "speaker"),
         wifi: checked(formData, "wifi"),
         bluetooth: checked(formData, "bluetooth"),
-        kondisiHariIni: catatan || conditionParts.join(", "),
+        kondisiHariIni: catatan || `${conditionParts.join(", ")}. Status otomatis: ${status.replaceAll("_", " ")}`,
         masihLolos: status,
         catatan
       }
-    }),
-    prisma.unit.update({
+    });
+
+    await tx.unit.update({
       where: { id: unitId },
       data: {
         ssdHealth,
         batteryHealth,
         statusObservasi: status === "TIDAK_LOLOS" ? "RECHECK" : unit.statusObservasi
       }
-    })
-  ]);
+    });
+
+    if (perluKonfirmasi) {
+      await tx.aiLog.create({
+        data: {
+          unitId,
+          source: "qc-harian-auto",
+          rekomendasi: `Perlu konfirmasi QC harian: SSD ${ssdHealth}%, battery ${batteryHealth}%. Unit otomatis tidak lolos sebelum dicek teknisi/admin.`
+        }
+      });
+    }
+  });
 
   revalidatePath("/qc-harian");
   revalidatePath(`/unit/${unitId}`);

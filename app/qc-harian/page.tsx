@@ -1,4 +1,4 @@
-import { Bluetooth, CheckCircle2, HardDrive, Keyboard, Monitor, Wifi } from "lucide-react";
+import { Bluetooth, CheckCircle2, HardDrive, Keyboard, Monitor, Volume2, Wifi } from "lucide-react";
 import Link from "next/link";
 import { getQcHarianPageData } from "@/lib/db-data";
 import { createDailyQcAction } from "./actions";
@@ -8,6 +8,7 @@ const checklist = [
   { label: "Booting", name: "booting", icon: Monitor },
   { label: "Keyboard", name: "keyboard", icon: Keyboard },
   { label: "SSD", name: "ssd", icon: HardDrive },
+  { label: "Speaker", name: "speaker", icon: Volume2 },
   { label: "WiFi", name: "wifi", icon: Wifi },
   { label: "Bluetooth", name: "bluetooth", icon: Bluetooth }
 ];
@@ -69,14 +70,9 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
               <input name="batteryHealth" type="number" min="0" max="100" defaultValue={firstUnit?.batteryHealth ?? 80} />
             </label>
           </div>
-          <label>
-            Status
-            <select name="masihLolos" defaultValue="Lolos">
-              <option>Lolos</option>
-              <option>Lolos dengan catatan</option>
-              <option>Tidak Lolos</option>
-            </select>
-          </label>
+          <div className="infoBox compactInfo">
+            Status otomatis: battery di bawah 70% atau SSD health di bawah 80% akan masuk <strong>Tidak Lolos</strong> dan perlu konfirmasi teknisi/admin.
+          </div>
           <label>
             Catatan harian
             <textarea name="catatan" placeholder="Contoh: booting normal, battery turun 6 persen dalam 20 menit." />

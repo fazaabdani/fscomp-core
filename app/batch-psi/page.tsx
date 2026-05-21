@@ -70,6 +70,7 @@ export default async function BatchPsiPage() {
                   <Link className="secondaryButton" href={`/unit/new?batch=${batch.id}`}>Tambah Unit</Link>
                   <Link className="secondaryButton" href={`/batch-psi/${batch.id}/history`}>Histori QC</Link>
                   <Link className="secondaryButton" href={`/batch-psi/${batch.id}/payment`}>Rekap Pembayaran</Link>
+                  <a className="secondaryButton" href={`/api/batch-psi/${batch.id}/export`}>Export Spek CSV</a>
                 </div>
               ) : (
                 <div className="infoBox">Login sebagai admin atau teknisi untuk edit batch dan tambah unit.</div>
