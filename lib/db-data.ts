@@ -553,6 +553,89 @@ export async function getBatchPaymentSummary(batchId: string) {
   }
 }
 
+export async function getBatchHistoryData(batchId: string) {
+  try {
+    const batch = await prisma.batchPSI.findUnique({
+      where: { id: batchId },
+      include: {
+        units: {
+          orderBy: { nomorUnit: "asc" },
+          include: {
+            qcHarian: {
+              orderBy: { tanggal: "desc" },
+              select: {
+                id: true,
+                tanggal: true,
+                checker: { select: { name: true } },
+                ssdHealth: true,
+                batteryHealth: true,
+                windowsVersion: true,
+                kondisiHariIni: true,
+                masihLolos: true,
+                catatan: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!batch) return null;
+
+    return {
+      id: batch.id,
+      nomorBatch: batch.nomorBatch,
+      supplier: batch.supplier,
+      histories: batch.units.flatMap((unit) =>
+        unit.qcHarian.map((qc) => ({
+          id: qc.id,
+          unitId: unit.id,
+          nomorUnit: unit.nomorUnit,
+          model: unit.model,
+          tanggal: qc.tanggal.toISOString().slice(0, 10),
+          checker: qc.checker.name,
+          ssdHealth: qc.ssdHealth,
+          batteryHealth: qc.batteryHealth,
+          windowsVersion: qc.windowsVersion,
+          kondisiHariIni: qc.kondisiHariIni,
+          masihLolos: qc.masihLolos.replaceAll("_", " "),
+          catatan: qc.catatan ?? ""
+        }))
+      )
+    };
+  } catch {
+    const batch = demoBatches.find((item) => item.id === batchId);
+    if (!batch) return null;
+
+    const batchUnits = demoUnits.filter((unit) => unit.batchId === batch.id);
+    const unitIds = new Set(batchUnits.map((unit) => unit.id));
+    return {
+      id: batch.id,
+      nomorBatch: batch.nomorBatch,
+      supplier: batch.supplier,
+      histories: demoDailyQcs
+        .filter((qc) => unitIds.has(qc.unitId))
+        .map((qc) => {
+          const unit = batchUnits.find((item) => item.id === qc.unitId);
+          return {
+            id: qc.id,
+            unitId: qc.unitId,
+            nomorUnit: unit?.nomorUnit ?? "-",
+            model: unit?.model ?? "-",
+            tanggal: qc.tanggal,
+            checker: qc.checker,
+            ssdHealth: qc.ssdHealth,
+            batteryHealth: qc.batteryHealth,
+            windowsVersion: qc.windowsVersion,
+            kondisiHariIni: qc.kondisiHariIni,
+            masihLolos: qc.masihLolos,
+            catatan: qc.catatan
+          };
+        })
+    };
+  }
+}
+
 export async function getSalesPageData() {
   try {
     const readyCandidates = await prisma.unit.findMany({

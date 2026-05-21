@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Receipt } from "lucide-react";
+import { ArrowLeft, MapPin, MessageCircle, Receipt } from "lucide-react";
 import { formatRupiah } from "@/lib/api";
 import { getSaleReceipt } from "@/lib/db-data";
 import { requireRole } from "@/lib/session";
@@ -13,6 +13,19 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
   requireRole(["admin"]);
   const sale = await getSaleReceipt(params.id);
   if (!sale) notFound();
+  const buyerWa = sale.buyerPhone.replace(/\D/g, "").replace(/^0/, "62");
+  const waText = [
+    `Nota FS Comp ${sale.invoiceNumber}`,
+    `Unit ${sale.unit.nomorUnit} - ${sale.unit.model}`,
+    `${sale.unit.processor} / ${sale.unit.ram} / ${sale.unit.ssd}`,
+    `Total: ${formatRupiah(sale.subtotal)}`,
+    `Garansi software ${sale.warrantySoftware}, hardware ${sale.warrantyHardware}`,
+    "Rekening: BCA 251-029-8724 / Mandiri 139-00-1590821-7 / BRI 0325-01-017004-53-8 a.n. Faza Abdani Auni Robbi",
+    "FS Comp Wiradesa - WA 0816692428"
+  ].join("\n");
+  const waHref = buyerWa.length >= 10
+    ? `https://wa.me/${buyerWa}?text=${encodeURIComponent(waText)}`
+    : `https://wa.me/?text=${encodeURIComponent(waText)}`;
 
   return (
     <section className="pageStack receiptPage">
@@ -22,7 +35,10 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
           <p className="eyebrow">Nota Penjualan</p>
           <h1>{sale.invoiceNumber}</h1>
         </div>
-        <PrintReceiptButton />
+        <div className="buttonCluster">
+          <a className="secondaryButton" href={waHref} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Share WA</a>
+          <PrintReceiptButton />
+        </div>
         {!sale.voidedAt ? (
           <form action={voidSaleAction.bind(null, sale.id)} className="printHidden">
             <input type="hidden" name="voidReason" value="Transaksi batal dari nota" />

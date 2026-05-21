@@ -65,7 +65,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
           </label>
           <label>
             Harga jual final
-            <input name="soldPrice" type="number" min="0" defaultValue={firstUnit?.hargaJualRekomendasi ?? 0} required />
+            <input name="soldPrice" type="number" inputMode="numeric" min="0" step="1000" defaultValue={firstUnit?.hargaJualRekomendasi ?? 0} required />
           </label>
           <label>
             Lokasi penjualan
@@ -111,11 +111,11 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
                 <input name="itemName" defaultValue={item.name} placeholder="Item tambahan" />
                 <input name="itemCategory" defaultValue={item.category} />
                 <input aria-label={`${item.name} qty`} name="itemQty" type="number" min="0" defaultValue={item.qty} />
-                <input aria-label={`${item.name} harga jual`} name="itemPrice" type="number" min="0" defaultValue={item.price} />
-                <input aria-label={`${item.name} modal`} name="itemCost" type="number" min="0" defaultValue={item.cost} />
+                <input aria-label={`${item.name} harga jual`} name="itemPrice" type="number" inputMode="numeric" min="0" step="1000" defaultValue={item.price} />
+                <input aria-label={`${item.name} modal`} name="itemCost" type="number" inputMode="numeric" min="0" step="1000" defaultValue={item.cost} />
               </div>
             ))}
-            <small className="formHint">Qty 0 = item tidak ikut.</small>
+            <small className="formHint">Qty 0 = item tidak ikut. Nominal ditulis angka rupiah tanpa titik, contoh 4100000.</small>
           </div>
           <div className="cashierSide">
             <div className="receiptWarranty">

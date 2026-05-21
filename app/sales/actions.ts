@@ -55,6 +55,46 @@ function invoiceNumber() {
   return `FS-${date}-${time}-${suffix}`;
 }
 
+async function notifySaleToN8n(payload: {
+  saleId: string;
+  invoiceNumber: string;
+  unit: string;
+  location: SaleLocation;
+  subtotal: number;
+  grossProfit: number;
+  paymentMethod: string;
+  buyerName: string;
+  buyerPhone: string;
+}) {
+  const webhookUrl = process.env.N8N_SALES_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  try {
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...payload,
+        notifyTo: "0816692428",
+        receiptUrl: `${process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id"}/sales/${payload.saleId}/receipt`,
+        message: [
+          "*FS Comp Core - Penjualan Baru*",
+          `Invoice: ${payload.invoiceNumber}`,
+          `Unit: ${payload.unit}`,
+          `Lokasi: ${payload.location === "WIRADESA" ? "Wiradesa" : "Kajen"}`,
+          `Total: Rp ${payload.subtotal.toLocaleString("id-ID")}`,
+          `Profit kotor: Rp ${payload.grossProfit.toLocaleString("id-ID")}`,
+          `Pembayaran: ${payload.paymentMethod}`,
+          `Pembeli: ${payload.buyerName || "-"}`,
+          `WA pembeli: ${payload.buyerPhone || "-"}`
+        ].join("\n")
+      })
+    });
+  } catch {
+    // Notifikasi n8n tidak boleh menggagalkan transaksi kasir.
+  }
+}
+
 export async function createSaleAction(formData: FormData) {
   requireRole(["admin"]);
 
@@ -119,13 +159,14 @@ export async function createSaleAction(formData: FormData) {
   const totalCost = items.reduce((sum, item) => sum + item.qty * item.unitCost, 0);
   const grossProfit = subtotal - totalCost;
   let saleId = "";
+  const invoice = invoiceNumber();
 
   try {
     await prisma.$transaction(async (tx) => {
       const sale = await tx.sale.create({
         data: {
           unitId,
-          invoiceNumber: invoiceNumber(),
+          invoiceNumber: invoice,
           location,
           soldPrice: subtotal,
           costPrice: totalCost,
@@ -162,6 +203,18 @@ export async function createSaleAction(formData: FormData) {
   } catch {
     redirect("/sales?error=tabel-penjualan-belum-migrasi");
   }
+
+  await notifySaleToN8n({
+    saleId,
+    invoiceNumber: invoice,
+    unit: `Unit ${unit.nomorUnit} - ${unit.model}`,
+    location,
+    subtotal,
+    grossProfit,
+    paymentMethod,
+    buyerName,
+    buyerPhone
+  });
 
   revalidatePath("/sales");
   revalidatePath("/");
