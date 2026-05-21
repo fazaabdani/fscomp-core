@@ -147,3 +147,34 @@ export async function createSaleAction(formData: FormData) {
   revalidatePath(`/unit/${unitId}`);
   redirect(`/sales/${saleId}/receipt`);
 }
+
+export async function voidSaleAction(saleId: string, formData: FormData) {
+  requireRole(["admin"]);
+  const reason = text(formData, "voidReason") || "Transaksi dibatalkan";
+
+  const sale = await prisma.sale.findUnique({ where: { id: saleId } });
+  if (!sale) {
+    redirect("/sales?error=transaksi-tidak-ditemukan");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.sale.update({
+      where: { id: saleId },
+      data: {
+        voidedAt: new Date(),
+        voidReason: reason
+      }
+    });
+
+    await tx.unit.update({
+      where: { id: sale.unitId },
+      data: { soldAt: null }
+    });
+  });
+
+  revalidatePath("/sales");
+  revalidatePath("/");
+  revalidatePath(`/unit/${sale.unitId}`);
+  revalidatePath(`/sales/${saleId}/receipt`);
+  redirect("/sales?voided=1");
+}

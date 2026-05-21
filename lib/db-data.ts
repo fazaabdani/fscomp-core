@@ -564,8 +564,9 @@ export async function getSalesPageData() {
     }
 
     const blockedByDailyQc = readyCandidates.length - readyUnits.length;
-    const totalOmzet = sales.reduce((sum, sale) => sum + sale.soldPrice, 0);
-    const totalProfit = sales.reduce((sum, sale) => sum + sale.grossProfit, 0);
+    const activeSales = sales.filter((sale) => !sale.voidedAt);
+    const totalOmzet = activeSales.reduce((sum, sale) => sum + sale.soldPrice, 0);
+    const totalProfit = activeSales.reduce((sum, sale) => sum + sale.grossProfit, 0);
 
     return {
       readyUnits: readyUnits.map((unit) => ({
@@ -593,13 +594,15 @@ export async function getSalesPageData() {
         buyerName: sale.buyerName ?? "-",
         itemCount: sale.items.reduce((sum, item) => sum + item.qty, 0),
         soldAt: sale.soldAt.toISOString().slice(0, 10),
+        voidedAt: sale.voidedAt?.toISOString().slice(0, 10) ?? "",
+        voidReason: sale.voidReason ?? "",
         notes: sale.notes ?? ""
       })),
       stats: {
         totalOmzet,
         totalProfit,
         readyCount: readyUnits.length,
-        soldCount: sales.length
+        soldCount: activeSales.length
       },
       salesReady,
       blockedByDailyQc
@@ -645,6 +648,8 @@ export async function getSaleReceipt(id: string) {
       subtotal: sale.subtotal,
       costPrice: sale.costPrice,
       grossProfit: sale.grossProfit,
+      voidedAt: sale.voidedAt?.toISOString().slice(0, 10) ?? "",
+      voidReason: sale.voidReason ?? "",
       notes: sale.notes ?? "-",
       unit: {
         nomorUnit: sale.unit.nomorUnit,

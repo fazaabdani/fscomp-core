@@ -37,6 +37,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
         <main>{children}</main>
+        <footer className="siteFooter">
+          <span>Dibuat oleh</span>
+          <strong>Faza Abdani Auni Robbi S.T</strong>
+        </footer>
       </body>
     </html>
   );

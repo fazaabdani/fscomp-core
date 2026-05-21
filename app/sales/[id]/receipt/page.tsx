@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, Receipt } from "lucide-react";
 import { formatRupiah } from "@/lib/api";
 import { getSaleReceipt } from "@/lib/db-data";
 import { requireRole } from "@/lib/session";
+import { voidSaleAction } from "../../actions";
 import { PrintReceiptButton } from "./PrintReceiptButton";
 
 export const dynamic = "force-dynamic";
@@ -22,14 +23,24 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
           <h1>{sale.invoiceNumber}</h1>
         </div>
         <PrintReceiptButton />
+        {!sale.voidedAt ? (
+          <form action={voidSaleAction.bind(null, sale.id)} className="printHidden">
+            <input type="hidden" name="voidReason" value="Transaksi batal dari nota" />
+            <button className="secondaryButton" type="submit">Batalkan Penjualan</button>
+          </form>
+        ) : null}
       </div>
 
       <article className="receiptPaper">
+        {sale.voidedAt ? <div className="receiptVoidStamp">TRANSAKSI DIBATALKAN</div> : null}
         <header className="receiptTop">
           <div>
             <span className="receiptLogo">FS</span>
             <h2>FS Comp</h2>
             <p>Laptop second berkualitas, QC jelas, garansi tertulis.</p>
+            <small>FS Comp / FS Media Comp Wiradesa</small>
+            <small>Jl. Wiradesa No.1 RT 22 RW 05, Desa Wiradesa, Kecamatan Wiradesa, Kabupaten Pekalongan, Jawa Tengah 51152</small>
+            <small>HP/WA toko: 0816692428</small>
           </div>
           <div className="receiptMeta">
             <strong>{sale.invoiceNumber}</strong>
@@ -94,6 +105,12 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
             <strong>{formatRupiah(sale.subtotal)}</strong>
           </div>
         </footer>
+
+        <div className="receiptBankNote">
+          <strong>Rekening Transaksi FS Comp</strong>
+          <span>BCA 251-029-8724 / Mandiri 139-00-1590821-7 / BRI 0325-01-017004-53-8 a.n. Faza Abdani Auni Robbi</span>
+          <span>Dana / OVO / GoPay: 0816692428</span>
+        </div>
       </article>
     </section>
   );

@@ -48,6 +48,20 @@ main {
   padding: 28px 20px 60px;
 }
 
+.siteFooter {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 22px 20px 30px;
+  border-top: 1px solid rgba(80, 139, 215, 0.16);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.siteFooter strong {
+  color: #d9e9ff;
+}
+
 .topbar {
   position: sticky;
   top: 0;
@@ -225,6 +239,30 @@ main {
 
 .statsGrid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.salesStatsGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.salesStatsGrid .metric {
+  min-height: 92px;
+  padding: 12px 14px;
+  gap: 5px;
+}
+
+.salesStatsGrid .metric strong {
+  font-size: 22px;
+}
+
+.salesStatsGrid .metric span {
+  font-size: 12px;
+}
+
+.salesStatsGrid .metric svg {
+  width: 16px;
+  height: 16px;
 }
 
 .metric,
@@ -541,6 +579,10 @@ input:not([type]) {
   align-content: start;
 }
 
+.keyboardToolPanel {
+  grid-column: 1 / -1;
+}
+
 .swatchGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -594,8 +636,8 @@ input:not([type]) {
 .keyboardKey {
   display: grid;
   place-items: center;
-  min-width: 42px;
-  height: 38px;
+  min-width: 54px;
+  height: 46px;
   padding: 0 8px;
   border: 1px solid rgba(210, 226, 245, 0.7);
   border-radius: 7px;
@@ -613,11 +655,11 @@ input:not([type]) {
 }
 
 .keyWide {
-  min-width: 76px;
+  min-width: 98px;
 }
 
 .keySpace {
-  min-width: 220px;
+  min-width: 320px;
 }
 
 .keyGrid {
@@ -905,12 +947,52 @@ textarea {
   min-width: 0;
 }
 
+.cashierPanel {
+  min-width: 0;
+}
+
+.cashierMainGrid,
+.cashierBottomGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.cashierMainGrid {
+  grid-template-columns: minmax(240px, 1.5fr) repeat(2, minmax(170px, 1fr));
+}
+
+.cashierBottomGrid {
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+  align-items: start;
+}
+
+.cashierSide {
+  display: grid;
+  gap: 12px;
+}
+
+.cashierSide textarea {
+  min-height: 132px;
+}
+
 .salesUnitRow {
   grid-template-columns: 52px minmax(0, 1fr) auto;
 }
 
+.stockGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .saleRow {
-  grid-template-columns: 136px minmax(0, 1fr) auto auto;
+  grid-template-columns: 136px minmax(0, 1fr) auto auto auto;
+}
+
+.voidedSaleRow {
+  opacity: 0.68;
+}
+
+.voidSaleForm {
+  margin: 0;
 }
 
 .cashierItems h3 {
@@ -995,12 +1077,27 @@ textarea {
 }
 
 .receiptPaper {
+  position: relative;
   padding: 28px;
   border: 1px solid rgba(87, 156, 255, 0.32);
   border-radius: 8px;
   background:
     linear-gradient(180deg, rgba(11, 24, 42, 0.96), rgba(8, 15, 26, 0.96));
   box-shadow: var(--shadow);
+}
+
+.receiptVoidStamp {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  padding: 8px 18px;
+  border: 2px solid #ff6f61;
+  border-radius: 8px;
+  color: #ffb6af;
+  font-weight: 900;
+  letter-spacing: 0;
+  background: rgba(255, 111, 97, 0.12);
 }
 
 .receiptTop,
@@ -1040,6 +1137,12 @@ textarea {
 .receiptTop p,
 .receiptTerms p {
   margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.receiptTop small {
+  display: block;
+  margin-top: 4px;
   color: var(--muted);
 }
 
@@ -1140,13 +1243,30 @@ textarea {
   font-size: 26px;
 }
 
+.receiptBankNote {
+  display: grid;
+  gap: 3px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.receiptBankNote strong {
+  color: #cfe7ff;
+  font-size: 11px;
+}
+
 @media print {
   .paymentPage {
     color: #111827;
   }
 
   .printHidden,
-  .topbar {
+  .topbar,
+  .siteFooter {
     display: none !important;
   }
 
@@ -1166,9 +1286,12 @@ textarea {
 
   .receiptPage {
     max-width: none;
+    page: receipt;
   }
 
   .receiptPaper {
+    width: 215mm;
+    min-height: 165mm;
     border: 0;
     border-radius: 0;
     background: white;
@@ -1187,6 +1310,7 @@ textarea {
   }
 
   .receiptTop p,
+  .receiptTop small,
   .receiptTerms p,
   .receiptInfoGrid span,
   .receiptInfoGrid small,
@@ -1206,6 +1330,20 @@ textarea {
   .receiptMeta strong {
     color: #0f2f6b;
   }
+
+  .receiptBankNote {
+    color: #64748b;
+    border-color: #cbd5e1;
+  }
+
+  .receiptBankNote strong {
+    color: #0f2f6b;
+  }
+}
+
+@page receipt {
+  size: 215mm 165mm landscape;
+  margin: 6mm;
 }
 
 .emptyState {
@@ -1358,11 +1496,15 @@ textarea {
   }
 
   .statsGrid,
+  .salesStatsGrid,
   .contentGrid,
   .batchGrid,
   .catalogGrid,
   .qcLayout,
   .salesLayout,
+  .cashierMainGrid,
+  .cashierBottomGrid,
+  .stockGrid,
   .labelLayout,
   .qcColumns,
   .reminderGrid {
@@ -1400,6 +1542,12 @@ textarea {
   }
 
   .salesLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cashierMainGrid,
+  .cashierBottomGrid,
+  .stockGrid {
     grid-template-columns: minmax(0, 1fr);
   }
 

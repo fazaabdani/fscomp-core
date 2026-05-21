@@ -125,7 +125,7 @@ export function QcToolsClient() {
 
   return (
     <div className="qcToolsGrid">
-      <section className="panel qcToolPanel">
+      <section className="panel qcToolPanel keyboardToolPanel">
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Display</p>

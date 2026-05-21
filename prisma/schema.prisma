@@ -113,7 +113,7 @@ model Unit {
   qcHarian    QcHarian[]
   aiLogs      AiLog[]
   catalogSync CatalogSync[]
-  sale        Sale?
+  sales       Sale[]
 }
 
 model QcAwal {
@@ -188,7 +188,7 @@ model QcHarian {
 
 model Sale {
   id            String       @id @default(cuid())
-  unitId        String       @unique
+  unitId        String
   invoiceNumber String       @unique
   location      SaleLocation
   soldPrice     Int
@@ -201,6 +201,8 @@ model Sale {
   warrantySoftware String    @default("3 bulan")
   warrantyHardware String    @default("3 minggu")
   soldAt        DateTime     @default(now())
+  voidedAt      DateTime?
+  voidReason    String?
   notes         String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
