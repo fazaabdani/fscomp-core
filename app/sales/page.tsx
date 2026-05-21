@@ -1,4 +1,4 @@
-import { Banknote, MapPin, Receipt, ShoppingCart } from "lucide-react";
+import { Banknote, Gift, MapPin, Receipt, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
 import { getSalesPageData } from "@/lib/db-data";
@@ -75,6 +75,27 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               </select>
             </label>
           </div>
+          <div className="panelSubsection cashierItems">
+            <div>
+              <p className="eyebrow">Item tambahan</p>
+              <h3>Bonus, software, dan aksesoris</h3>
+            </div>
+            {[
+              { name: "Tas laptop", category: "BONUS", qty: 1, price: 0, cost: 0 },
+              { name: "Mouse wireless", category: "BONUS", qty: 1, price: 0, cost: 0 },
+              { name: "Microsoft Office", category: "SOFTWARE", qty: 1, price: 0, cost: 0 },
+              { name: "", category: "LAINNYA", qty: 0, price: 0, cost: 0 }
+            ].map((item) => (
+              <div className="cashierItemRow" key={item.name || "custom-item"}>
+                <input name="itemName" defaultValue={item.name} placeholder="Item tambahan" />
+                <input name="itemCategory" defaultValue={item.category} />
+                <input aria-label={`${item.name} qty`} name="itemQty" type="number" min="0" defaultValue={item.qty} />
+                <input aria-label={`${item.name} harga jual`} name="itemPrice" type="number" min="0" defaultValue={item.price} />
+                <input aria-label={`${item.name} modal`} name="itemCost" type="number" min="0" defaultValue={item.cost} />
+              </div>
+            ))}
+            <small className="bodyText">Urutan kolom: item, kategori, qty, harga jual/pcs, modal/pcs. Set qty 0 kalau item tidak ikut.</small>
+          </div>
           <div className="numberGrid">
             <label>
               Metode bayar
@@ -84,6 +105,14 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               Nama pembeli
               <input name="buyerName" placeholder="Opsional" />
             </label>
+          </div>
+          <label>
+            No. WhatsApp pembeli
+            <input name="buyerPhone" placeholder="Opsional" />
+          </label>
+          <div className="receiptWarranty">
+            <Gift size={18} />
+            <span>Garansi otomatis di nota: software 3 bulan, hardware 3 minggu.</span>
           </div>
           <label>
             Catatan
@@ -126,10 +155,10 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
         <div className="paymentRows">
           {sales.length === 0 ? <div className="emptyState">Belum ada transaksi.</div> : sales.map((sale) => (
             <div className="paymentRow saleRow" key={sale.id}>
-              <span>Unit {sale.nomorUnit}</span>
+              <span>{sale.invoiceNumber}</span>
               <div>
-                <strong>{sale.model}</strong>
-                <small>{sale.soldAt} / {sale.location} / {sale.paymentMethod} / {sale.buyerName}</small>
+                <Link href={`/sales/${sale.id}/receipt`}><strong>Unit {sale.nomorUnit} - {sale.model}</strong></Link>
+                <small>{sale.soldAt} / {sale.location} / {sale.paymentMethod} / {sale.buyerName} / {sale.itemCount} item</small>
               </div>
               <b>{formatRupiah(sale.soldPrice)}</b>
               <span className={sale.grossProfit >= 0 ? "profitText" : "lossText"}>{formatRupiah(sale.grossProfit)}</span>

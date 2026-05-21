@@ -904,7 +904,32 @@ textarea {
 }
 
 .saleRow {
-  grid-template-columns: 92px minmax(0, 1fr) auto auto;
+  grid-template-columns: 136px minmax(0, 1fr) auto auto;
+}
+
+.cashierItems h3 {
+  margin: 0;
+}
+
+.cashierItemRow {
+  display: grid;
+  grid-template-columns: minmax(130px, 1.3fr) minmax(84px, 0.8fr) 64px minmax(112px, 1fr) minmax(112px, 1fr);
+  gap: 8px;
+}
+
+.cashierItemRow input {
+  min-height: 38px;
+}
+
+.receiptWarranty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(40, 232, 154, 0.28);
+  border-radius: 8px;
+  background: rgba(40, 232, 154, 0.1);
+  color: #c7ffe7;
 }
 
 .profitText {
@@ -930,6 +955,157 @@ textarea {
   color: #9bd4ff;
 }
 
+.receiptPage {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.receiptPaper {
+  padding: 28px;
+  border: 1px solid rgba(87, 156, 255, 0.32);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(11, 24, 42, 0.96), rgba(8, 15, 26, 0.96));
+  box-shadow: var(--shadow);
+}
+
+.receiptTop,
+.receiptFooter,
+.receiptInfoGrid,
+.receiptUnit,
+.receiptTableHead,
+.receiptLine {
+  display: grid;
+  gap: 14px;
+}
+
+.receiptTop {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.receiptLogo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1268e8, #22d3ee);
+  color: white;
+  font-weight: 900;
+}
+
+.receiptTop h2 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.receiptTop p,
+.receiptTerms p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.receiptMeta {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.receiptMeta strong {
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.receiptMeta span:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.receiptInfoGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 18px 0;
+}
+
+.receiptInfoGrid div,
+.receiptUnit,
+.receiptTerms,
+.receiptTotals {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(7, 17, 30, 0.72);
+}
+
+.receiptInfoGrid span,
+.receiptInfoGrid small,
+.receiptLine small,
+.receiptUnit span {
+  color: var(--muted);
+}
+
+.receiptInfoGrid strong,
+.receiptInfoGrid small,
+.receiptLine small,
+.receiptUnit span {
+  display: block;
+  margin-top: 4px;
+}
+
+.receiptUnit {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.receiptTable {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.receiptTableHead,
+.receiptLine {
+  grid-template-columns: minmax(0, 1fr) 64px 130px 130px;
+  align-items: center;
+  padding: 12px 14px;
+}
+
+.receiptTableHead {
+  background: rgba(55, 163, 255, 0.14);
+  color: #bfe5ff;
+  font-weight: 800;
+}
+
+.receiptLine {
+  border-top: 1px solid var(--line);
+}
+
+.receiptFooter {
+  grid-template-columns: minmax(0, 1fr) 220px;
+  align-items: stretch;
+  margin-top: 18px;
+}
+
+.receiptTotals {
+  display: grid;
+  place-items: center end;
+}
+
+.receiptTotals span {
+  color: var(--muted);
+}
+
+.receiptTotals strong {
+  color: #7cc7ff;
+  font-size: 26px;
+}
+
 @media print {
   .paymentPage {
     color: #111827;
@@ -952,6 +1128,49 @@ textarea {
   .paymentRow b,
   .paymentSummary strong {
     color: #111827;
+  }
+
+  .receiptPage {
+    max-width: none;
+  }
+
+  .receiptPaper {
+    border: 0;
+    border-radius: 0;
+    background: white;
+    color: #111827;
+    padding: 0;
+  }
+
+  .receiptTop,
+  .receiptInfoGrid div,
+  .receiptUnit,
+  .receiptTerms,
+  .receiptTotals,
+  .receiptTable {
+    border-color: #cbd5e1;
+    background: white;
+  }
+
+  .receiptTop p,
+  .receiptTerms p,
+  .receiptInfoGrid span,
+  .receiptInfoGrid small,
+  .receiptLine small,
+  .receiptUnit span,
+  .receiptMeta,
+  .receiptTotals span {
+    color: #475569;
+  }
+
+  .receiptTableHead {
+    background: #eaf4ff;
+    color: #0f2f6b;
+  }
+
+  .receiptTotals strong,
+  .receiptMeta strong {
+    color: #0f2f6b;
   }
 }
 
@@ -1124,6 +1343,15 @@ textarea {
 
   .unitRow {
     grid-template-columns: 46px minmax(0, 1fr);
+  }
+
+  .cashierItemRow,
+  .receiptTop,
+  .receiptInfoGrid,
+  .receiptFooter,
+  .receiptTableHead,
+  .receiptLine {
+    grid-template-columns: 1fr;
   }
 
   .unitRow .statusPill {

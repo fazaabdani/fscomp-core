@@ -550,12 +550,12 @@ export async function getSalesPageData() {
       return !latestDaily || latestDaily.masihLolos === "LOLOS";
     });
 
-    let sales: Array<Prisma.SaleGetPayload<{ include: { unit: true } }>> = [];
+    let sales: Array<Prisma.SaleGetPayload<{ include: { unit: true; items: true } }>> = [];
     let salesReady = true;
 
     try {
       sales = await prisma.sale.findMany({
-        include: { unit: true },
+        include: { unit: true, items: true },
         orderBy: { soldAt: "desc" },
         take: 40
       });
@@ -584,12 +584,14 @@ export async function getSalesPageData() {
         unitId: sale.unitId,
         nomorUnit: sale.unit.nomorUnit,
         model: sale.unit.model,
+        invoiceNumber: sale.invoiceNumber,
         location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
         soldPrice: sale.soldPrice,
         costPrice: sale.costPrice,
         grossProfit: sale.grossProfit,
         paymentMethod: sale.paymentMethod,
         buyerName: sale.buyerName ?? "-",
+        itemCount: sale.items.reduce((sum, item) => sum + item.qty, 0),
         soldAt: sale.soldAt.toISOString().slice(0, 10),
         notes: sale.notes ?? ""
       })),
@@ -615,5 +617,52 @@ export async function getSalesPageData() {
       salesReady: false,
       blockedByDailyQc: 0
     };
+  }
+}
+
+export async function getSaleReceipt(id: string) {
+  try {
+    const sale = await prisma.sale.findUnique({
+      where: { id },
+      include: {
+        unit: true,
+        items: { orderBy: { createdAt: "asc" } }
+      }
+    });
+
+    if (!sale) return null;
+
+    return {
+      id: sale.id,
+      invoiceNumber: sale.invoiceNumber,
+      soldAt: sale.soldAt.toISOString().slice(0, 10),
+      location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
+      paymentMethod: sale.paymentMethod,
+      buyerName: sale.buyerName ?? "-",
+      buyerPhone: sale.buyerPhone ?? "-",
+      warrantySoftware: sale.warrantySoftware,
+      warrantyHardware: sale.warrantyHardware,
+      subtotal: sale.subtotal,
+      costPrice: sale.costPrice,
+      grossProfit: sale.grossProfit,
+      notes: sale.notes ?? "-",
+      unit: {
+        nomorUnit: sale.unit.nomorUnit,
+        model: sale.unit.model,
+        processor: sale.unit.processor,
+        ram: sale.unit.ram,
+        ssd: sale.unit.ssd
+      },
+      items: sale.items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        qty: item.qty,
+        unitPrice: item.unitPrice,
+        lineTotal: item.lineTotal
+      }))
+    };
+  } catch {
+    return null;
   }
 }

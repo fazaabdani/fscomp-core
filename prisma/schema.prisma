@@ -189,18 +189,39 @@ model QcHarian {
 model Sale {
   id            String       @id @default(cuid())
   unitId        String       @unique
+  invoiceNumber String       @unique
   location      SaleLocation
   soldPrice     Int
   costPrice     Int
+  subtotal      Int          @default(0)
   grossProfit   Int
   paymentMethod String
   buyerName     String?
+  buyerPhone    String?
+  warrantySoftware String    @default("3 bulan")
+  warrantyHardware String    @default("3 minggu")
   soldAt        DateTime     @default(now())
   notes         String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
   unit          Unit         @relation(fields: [unitId], references: [id])
+  items         SaleItem[]
+}
+
+model SaleItem {
+  id          String   @id @default(cuid())
+  saleId      String
+  name        String
+  category    String
+  qty         Int      @default(1)
+  unitPrice   Int
+  unitCost    Int      @default(0)
+  lineTotal   Int
+  lineCost    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
 }
 
 model AiLog {
