@@ -115,7 +115,7 @@ export async function createDailyQcAction(formData: FormData) {
       data: {
         ssdHealth,
         batteryHealth,
-        statusObservasi: status === "TIDAK_LOLOS" ? "RECHECK" : unit.statusObservasi
+        statusObservasi: status === "LOLOS" ? unit.statusObservasi : "RECHECK"
       }
     });
 

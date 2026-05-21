@@ -6,6 +6,8 @@ import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 import { getCurrentUser } from "@/lib/session";
 
+export const dynamic = "force-dynamic";
+
 export default async function UnitDetailPage({ params }: { params: { id: string } }) {
   const unit = await getUnitForDetail(params.id);
   if (!unit) notFound();

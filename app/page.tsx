@@ -5,6 +5,8 @@ import { statusTone } from "@/lib/constants";
 import { getDashboardData } from "@/lib/db-data";
 import { getCurrentUser } from "@/lib/session";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const dashboard = await getDashboardData();
   const currentUser = getCurrentUser();

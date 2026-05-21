@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { batches as demoBatches, dailyQcs as demoDailyQcs, units as demoUnits, type BatchPSI } from "./api";
 import { prisma } from "./prisma";
 
@@ -116,7 +117,19 @@ export async function getUnitForDetail(id: string) {
       include: {
         batch: true,
         qcAwal: { include: { checker: true } },
-        qcHarian: { include: { checker: true }, orderBy: { tanggal: "desc" } }
+        qcHarian: {
+          orderBy: { tanggal: "desc" },
+          select: {
+            id: true,
+            tanggal: true,
+            ssdHealth: true,
+            batteryHealth: true,
+            kondisiHariIni: true,
+            masihLolos: true,
+            catatan: true,
+            checker: { select: { name: true } }
+          }
+        }
       }
     });
 
@@ -278,7 +291,18 @@ export async function getQcHarianPageData() {
     });
 
     const dbDailyQcs = await prisma.qcHarian.findMany({
-      include: { unit: true, checker: true },
+      select: {
+        id: true,
+        unitId: true,
+        tanggal: true,
+        checker: { select: { name: true } },
+        ssdHealth: true,
+        batteryHealth: true,
+        kondisiHariIni: true,
+        masihLolos: true,
+        catatan: true,
+        unit: { select: { id: true, nomorUnit: true, model: true } }
+      },
       orderBy: { tanggal: "desc" },
       take: 20
     });
@@ -347,8 +371,6 @@ export async function getDashboardData() {
       batches,
       units,
       totalUnitCount,
-      catalogReadyCount,
-      problemUnitCount,
       dailyQcCount,
       aiLogs
     ] = await Promise.all([
@@ -358,16 +380,17 @@ export async function getDashboardData() {
         take: 6
       }),
       prisma.unit.findMany({
+        include: {
+          qcHarian: {
+            orderBy: { tanggal: "desc" },
+            take: 1,
+            select: { masihLolos: true }
+          }
+        },
         orderBy: { createdAt: "desc" },
         take: 30
       }),
       prisma.unit.count(),
-      prisma.unit.count({
-        where: { statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] } }
-      }),
-      prisma.unit.count({
-        where: { statusObservasi: { in: ["RECHECK", "CANDIDATE_RETUR"] } }
-      }),
       prisma.qcHarian.count(),
       prisma.aiLog.findMany({
         include: { unit: true },
@@ -376,8 +399,17 @@ export async function getDashboardData() {
       })
     ]);
 
+    const isDailyProblem = (unit: { qcHarian: { masihLolos: string }[] }) => {
+      const latestDaily = unit.qcHarian[0];
+      return Boolean(latestDaily && latestDaily.masihLolos !== "LOLOS");
+    };
+    const isReadyForCatalog = (unit: { statusObservasi: string; soldAt: Date | null; qcHarian: { masihLolos: string }[] }) =>
+      !unit.soldAt &&
+      (unit.statusObservasi === "VERIFIED" || unit.statusObservasi === "VERIFIED_WITH_NOTES") &&
+      !isDailyProblem(unit);
+
     const problemUnits = units
-      .filter((unit) => unit.statusObservasi === "RECHECK" || unit.statusObservasi === "CANDIDATE_RETUR")
+      .filter((unit) => unit.statusObservasi === "RECHECK" || unit.statusObservasi === "CANDIDATE_RETUR" || isDailyProblem(unit))
       .slice(0, 6)
       .map((unit) => ({
         id: unit.id,
@@ -390,7 +422,7 @@ export async function getDashboardData() {
       }));
 
     const catalogReadyUnits = units
-      .filter((unit) => unit.statusObservasi === "VERIFIED" || unit.statusObservasi === "VERIFIED_WITH_NOTES")
+      .filter(isReadyForCatalog)
       .slice(0, 8)
       .map((unit) => ({
         id: unit.id,
@@ -406,8 +438,8 @@ export async function getDashboardData() {
       connected: true,
       stats: {
         unitAktif: totalUnitCount,
-        siapKatalog: catalogReadyCount,
-        perluPerhatian: problemUnitCount,
+        siapKatalog: catalogReadyUnits.length,
+        perluPerhatian: problemUnits.length,
         qcHarian: dailyQcCount
       },
       problemUnits,
@@ -497,22 +529,41 @@ export async function getBatchPaymentSummary(batchId: string) {
 
 export async function getSalesPageData() {
   try {
-    const [readyUnits, sales] = await Promise.all([
-      prisma.unit.findMany({
-        where: {
-          soldAt: null,
-          statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }
-        },
-        orderBy: { createdAt: "desc" },
-        take: 80
-      }),
-      prisma.sale.findMany({
+    const readyCandidates = await prisma.unit.findMany({
+      where: {
+        soldAt: null,
+        statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }
+      },
+      include: {
+        qcHarian: {
+          orderBy: { tanggal: "desc" },
+          take: 1,
+          select: { masihLolos: true }
+        }
+      },
+      orderBy: { createdAt: "desc" },
+      take: 80
+    });
+
+    const readyUnits = readyCandidates.filter((unit) => {
+      const latestDaily = unit.qcHarian[0];
+      return !latestDaily || latestDaily.masihLolos === "LOLOS";
+    });
+
+    let sales: Array<Prisma.SaleGetPayload<{ include: { unit: true } }>> = [];
+    let salesReady = true;
+
+    try {
+      sales = await prisma.sale.findMany({
         include: { unit: true },
         orderBy: { soldAt: "desc" },
         take: 40
-      })
-    ]);
+      });
+    } catch {
+      salesReady = false;
+    }
 
+    const blockedByDailyQc = readyCandidates.length - readyUnits.length;
     const totalOmzet = sales.reduce((sum, sale) => sum + sale.soldPrice, 0);
     const totalProfit = sales.reduce((sum, sale) => sum + sale.grossProfit, 0);
 
@@ -547,7 +598,9 @@ export async function getSalesPageData() {
         totalProfit,
         readyCount: readyUnits.length,
         soldCount: sales.length
-      }
+      },
+      salesReady,
+      blockedByDailyQc
     };
   } catch {
     return {
@@ -558,7 +611,9 @@ export async function getSalesPageData() {
         totalProfit: 0,
         readyCount: 0,
         soldCount: 0
-      }
+      },
+      salesReady: false,
+      blockedByDailyQc: 0
     };
   }
 }

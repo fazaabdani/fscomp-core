@@ -33,30 +33,48 @@ export async function createSaleAction(formData: FormData) {
     redirect("/sales?error=data-kurang");
   }
 
-  const unit = await prisma.unit.findUnique({ where: { id: unitId } });
+  const unit = await prisma.unit.findUnique({
+    where: { id: unitId },
+    include: {
+      qcHarian: {
+        orderBy: { tanggal: "desc" },
+        take: 1,
+        select: { masihLolos: true }
+      }
+    }
+  });
   if (!unit) {
     redirect("/sales?error=unit-tidak-ditemukan");
   }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.sale.create({
-      data: {
-        unitId,
-        location,
-        soldPrice,
-        costPrice: unit.hargaModal,
-        grossProfit: soldPrice - unit.hargaModal,
-        paymentMethod,
-        buyerName: buyerName || null,
-        notes: notes || null
-      }
-    });
+  const latestDailyQc = unit.qcHarian[0];
+  if (latestDailyQc && latestDailyQc.masihLolos !== "LOLOS") {
+    redirect("/sales?error=qc-harian-belum-lolos");
+  }
 
-    await tx.unit.update({
-      where: { id: unitId },
-      data: { soldAt: new Date() }
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.sale.create({
+        data: {
+          unitId,
+          location,
+          soldPrice,
+          costPrice: unit.hargaModal,
+          grossProfit: soldPrice - unit.hargaModal,
+          paymentMethod,
+          buyerName: buyerName || null,
+          notes: notes || null
+        }
+      });
+
+      await tx.unit.update({
+        where: { id: unitId },
+        data: { soldAt: new Date() }
+      });
     });
-  });
+  } catch {
+    redirect("/sales?error=tabel-penjualan-belum-migrasi");
+  }
 
   revalidatePath("/sales");
   revalidatePath("/");

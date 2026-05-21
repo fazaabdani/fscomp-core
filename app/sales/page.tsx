@@ -5,9 +5,11 @@ import { getSalesPageData } from "@/lib/db-data";
 import { requireRole } from "@/lib/session";
 import { createSaleAction } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string } }) {
   requireRole(["admin"]);
-  const { readyUnits, sales, stats } = await getSalesPageData();
+  const { readyUnits, sales, stats, salesReady, blockedByDailyQc } = await getSalesPageData();
   const firstUnit = readyUnits[0];
 
   return (
@@ -27,6 +29,18 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
         <div className="metric metric-cyan"><Banknote size={21} /><span>Omzet</span><strong>{formatRupiah(stats.totalOmzet)}</strong></div>
         <div className="metric metric-green"><Banknote size={21} /><span>Profit kotor</span><strong>{formatRupiah(stats.totalProfit)}</strong></div>
       </div>
+
+      {!salesReady ? (
+        <div className="infoBox dangerInfo">
+          Tabel penjualan belum aktif di database. Jalankan <strong>npm run db:migrate</strong> di terminal app Coolify, lalu restart/redeploy.
+        </div>
+      ) : null}
+
+      {blockedByDailyQc > 0 ? (
+        <div className="infoBox">
+          {blockedByDailyQc} unit tidak dimunculkan di stok siap jual karena QC harian terakhir masih ada catatan/problem. Kalau speaker, keyboard, SSD, WiFi, Bluetooth, booting, atau battery bermasalah, unit ditahan dulu.
+        </div>
+      ) : null}
 
       <div className="salesLayout">
         <form className="panel formGrid" action={createSaleAction}>
