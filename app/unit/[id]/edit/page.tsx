@@ -64,6 +64,12 @@ export default async function EditUnitPage({ params }: { params: { id: string } 
             <option>Ya</option>
           </select>
         </label>
+        <label>Lokasi stok
+          <select name="stockLocation" defaultValue={unit.stockLocation ?? "WIRADESA"}>
+            <option value="WIRADESA">Wiradesa utama</option>
+            <option value="KAJEN">Kajen secondary</option>
+          </select>
+        </label>
         <button className="primaryButton" type="submit">Simpan Perubahan Unit</button>
       </form>
     </section>

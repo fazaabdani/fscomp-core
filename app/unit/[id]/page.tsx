@@ -79,6 +79,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
           </div>
           {isInternalUser ? <div className="kv"><span>Batch</span><strong>{unit.batch.nomorBatch}</strong></div> : null}
           {isInternalUser ? <div className="kv"><span>Supplier</span><strong>{unit.supplier}</strong></div> : null}
+          {isInternalUser ? <div className="kv"><span>Lokasi stok</span><strong>{unit.stockLocation}</strong></div> : null}
           {isInternalUser ? <div className="kv"><span>Seri SSD</span><strong>{unit.ssdSerial}</strong></div> : null}
           <div className="kv"><span>LCD</span><strong>{unit.lcdSize}</strong></div>
           <div className="kv"><span>Resolusi</span><strong>{unit.lcdResolution}</strong></div>

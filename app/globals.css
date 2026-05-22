@@ -837,6 +837,90 @@ textarea {
   border-color: rgba(55, 163, 255, 0.72);
 }
 
+.catalogHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: end;
+  padding: 28px;
+  border: 1px solid rgba(55, 163, 255, 0.42);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(11, 31, 57, 0.95), rgba(4, 18, 24, 0.94)),
+    linear-gradient(90deg, rgba(55, 163, 255, 0.16), transparent);
+}
+
+.catalogHero h1 {
+  margin: 6px 0 10px;
+  font-size: clamp(32px, 5vw, 64px);
+}
+
+.catalogHeroBadge {
+  display: grid;
+  min-width: 130px;
+  justify-items: center;
+  gap: 4px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(7, 17, 30, 0.72);
+  color: var(--cyan);
+}
+
+.catalogHeroBadge strong {
+  color: var(--ink);
+  font-size: 34px;
+}
+
+.catalogHeroBadge small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.catalogPublicGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.catalogPublicCard {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(8, 20, 36, 0.86);
+}
+
+.catalogCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.catalogPublicCard h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.catalogPublicCard p,
+.catalogSpecList {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.catalogSpecList {
+  display: grid;
+  gap: 4px;
+}
+
+.catalogPrice {
+  color: var(--cyan);
+  font-size: 20px;
+}
+
 .backLink {
   display: inline-flex;
   align-items: center;
@@ -1528,6 +1612,8 @@ textarea {
   .contentGrid,
   .batchGrid,
   .catalogGrid,
+  .catalogPublicGrid,
+  .catalogHero,
   .qcLayout,
   .salesLayout,
   .cashierMainGrid,

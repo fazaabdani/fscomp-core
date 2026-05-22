@@ -1,6 +1,6 @@
 "use server";
 
-import { QcResult, Role, UnitStatus } from "@prisma/client";
+import { QcResult, Role, SaleLocation, UnitStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { batches as demoBatches } from "@/lib/api";
@@ -104,6 +104,7 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
       isTouchscreen: text(formData, "isTouchscreen") === "Ya" || displayLower.includes("touch") || featureLower.includes("touch"),
       hargaModal: numberValue(formData, "hargaModal"),
       hargaJualRekomendasi: numberValue(formData, "hargaJualRekomendasi"),
+      stockLocation: (text(formData, "stockLocation") || "WIRADESA") as SaleLocation,
       batteryHealth,
       ssdHealth,
       statusObservasi: status || "RECHECK",

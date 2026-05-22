@@ -1,6 +1,6 @@
 "use server";
 
-import { UnitStatus } from "@prisma/client";
+import { SaleLocation, UnitStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -32,6 +32,7 @@ export async function updateUnitAction(unitId: string, formData: FormData) {
       isTouchscreen: text(formData, "isTouchscreen") === "Ya",
       hargaModal: numberValue(formData, "hargaModal"),
       hargaJualRekomendasi: numberValue(formData, "hargaJualRekomendasi"),
+      stockLocation: (text(formData, "stockLocation") || "WIRADESA") as SaleLocation,
       ssdHealth: numberValue(formData, "ssdHealth"),
       batteryHealth: numberValue(formData, "batteryHealth"),
       statusObservasi: text(formData, "statusObservasi") as UnitStatus

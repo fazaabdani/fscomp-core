@@ -80,6 +80,12 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
           <label>Harga Modal<input name="hargaModal" type="number" inputMode="numeric" step="1000" placeholder="2850000" /></label>
           <label>Harga Jual<input name="hargaJualRekomendasi" type="number" inputMode="numeric" step="1000" placeholder="3650000" required /></label>
         </div>
+        <label>Lokasi stok awal
+          <select name="stockLocation" defaultValue="WIRADESA">
+            <option value="WIRADESA">Wiradesa utama</option>
+            <option value="KAJEN">Kajen secondary</option>
+          </select>
+        </label>
 
         <div className="numberGrid">
           <label>SSD Health (%)<input name="ssdHealth" type="number" min="0" max="100" defaultValue={90} required /></label>

@@ -61,6 +61,7 @@ export async function getBatchesForPage() {
         ssd: unit.ssd,
         hargaModal: unit.hargaModal,
         hargaJualRekomendasi: unit.hargaJualRekomendasi,
+        stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
         ssdSerial: unit.ssdSerial ?? "",
         lcdSize: unit.lcdSize ?? "",
         lcdResolution: unit.lcdResolution ?? "",
@@ -98,6 +99,7 @@ export async function getUnitForEdit(id: string) {
       isTouchscreen: unit.isTouchscreen,
       hargaModal: unit.hargaModal,
       hargaJualRekomendasi: unit.hargaJualRekomendasi,
+      stockLocation: unit.stockLocation,
       batteryHealth: unit.batteryHealth ?? 0,
       ssdHealth: unit.ssdHealth ?? 0,
       statusObservasi: unit.statusObservasi
@@ -107,6 +109,7 @@ export async function getUnitForEdit(id: string) {
     if (!unit) return null;
     return {
       ...unit,
+      stockLocation: "WIRADESA",
       batchName: demoBatches.find((batch) => batch.id === unit.batchId)?.nomorBatch ?? "-"
     };
   }
@@ -191,6 +194,7 @@ export async function getUnitForDetail(id: string) {
       isTouchscreen: unit.isTouchscreen,
       hargaModal: unit.hargaModal,
       hargaJualRekomendasi: unit.hargaJualRekomendasi,
+      stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
       batteryHealth: unit.batteryHealth ?? 0,
       ssdHealth: unit.ssdHealth ?? 0,
       statusObservasi: unit.statusObservasi.replaceAll("_", " "),
@@ -775,6 +779,7 @@ export async function getSalesPageData() {
         ssd: unit.ssd,
         hargaModal: unit.hargaModal,
         hargaJualRekomendasi: unit.hargaJualRekomendasi,
+        stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
         statusObservasi: unit.statusObservasi.replaceAll("_", " ")
       })),
       sales: sales.map((sale) => ({
@@ -816,6 +821,79 @@ export async function getSalesPageData() {
       },
       salesReady: false,
       blockedByDailyQc: 0
+    };
+  }
+}
+
+export async function getCatalogPageData() {
+  try {
+    const candidates = await prisma.unit.findMany({
+      where: {
+        soldAt: null,
+        statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }
+      },
+      include: {
+        qcHarian: {
+          orderBy: { tanggal: "desc" },
+          take: 1,
+          select: {
+            masihLolos: true,
+            windowsVersion: true,
+            ssdHealth: true,
+            batteryHealth: true,
+            screenCondition: true,
+            officeStatus: true
+          }
+        }
+      },
+      orderBy: [
+        { stockLocation: "desc" },
+        { createdAt: "desc" }
+      ],
+      take: 120
+    });
+
+    const units = candidates
+      .filter((unit) => {
+        const latestDaily = unit.qcHarian[0];
+        return Boolean(
+          latestDaily &&
+          latestDaily.masihLolos === "LOLOS" &&
+          (!requiresWindows11(unit.processor) || hasWindows11Daily(unit.qcHarian))
+        );
+      })
+      .map((unit) => {
+        const latestDaily = unit.qcHarian[0];
+        return {
+          id: unit.id,
+          nomorUnit: unit.nomorUnit,
+          model: unit.model,
+          processor: unit.processor,
+          ram: unit.ram,
+          ssd: unit.ssd,
+          lcdSize: unit.lcdSize ?? "-",
+          lcdResolution: unit.lcdResolution ?? "-",
+          isTouchscreen: unit.isTouchscreen,
+          hargaJualRekomendasi: unit.hargaJualRekomendasi,
+          stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
+          ssdHealth: latestDaily?.ssdHealth ?? unit.ssdHealth ?? 0,
+          batteryHealth: latestDaily?.batteryHealth ?? unit.batteryHealth ?? 0,
+          windowsVersion: latestDaily?.windowsVersion ?? "-",
+          screenCondition: latestDaily?.screenCondition ?? "-",
+          officeStatus: latestDaily?.officeStatus ?? "-"
+        };
+      });
+
+    return {
+      connected: true,
+      wiradesaUnits: units.filter((unit) => unit.stockLocation === "Wiradesa"),
+      kajenUnits: units.filter((unit) => unit.stockLocation === "Kajen")
+    };
+  } catch {
+    return {
+      connected: false,
+      wiradesaUnits: [],
+      kajenUnits: []
     };
   }
 }

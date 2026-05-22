@@ -29,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/batch-psi">Batch PSI</Link>
                 <Link href="/qc-harian">QC Harian</Link>
                 <Link href="/qc-tools">QC Tools</Link>
+                <Link href="/katalog">Katalog</Link>
                 <Link href="/label">Label QR</Link>
                 {currentUser.role === "admin" ? <Link href="/sales">Penjualan</Link> : null}
                 {currentUser.role === "admin" ? <Link href="/finance">Keuangan</Link> : null}

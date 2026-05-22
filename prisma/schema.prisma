@@ -98,6 +98,7 @@ model Unit {
   isTouchscreen        Boolean    @default(false)
   hargaModal           Int
   hargaJualRekomendasi Int
+  stockLocation        SaleLocation @default(WIRADESA)
   batteryHealth        Int?
   ssdHealth            Int?
   statusObservasi      UnitStatus @default(RECHECK)

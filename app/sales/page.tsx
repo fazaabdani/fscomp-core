@@ -186,7 +186,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               <span className="unitNumber">{unit.nomorUnit}</span>
               <span>
                 <strong>{unit.model}</strong>
-                <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
+                <small>{unit.processor} / {unit.ram} / {unit.ssd} / {unit.stockLocation}</small>
               </span>
               <b>{formatRupiah(unit.hargaJualRekomendasi)}</b>
             </Link>
