@@ -128,30 +128,6 @@ export function QcToolsClient() {
       <section className="panel qcToolPanel keyboardToolPanel">
         <div className="panelHeader">
           <div>
-            <p className="eyebrow">Display</p>
-            <h2>Test layar dan dead pixel</h2>
-          </div>
-          <Monitor size={22} />
-        </div>
-        <div className="swatchGrid">
-          {screenColors.map((color) => (
-            <button
-              className="swatchButton"
-              type="button"
-              key={color.value}
-              style={{ background: color.value, color: color.value === "#000000" ? "#ffffff" : "#111827" }}
-              onClick={() => setScreenColor(color.value)}
-            >
-              {color.label}
-            </button>
-          ))}
-        </div>
-        <button className="primaryButton" type="button" onClick={() => setIsScreenOpen(true)}>Buka Fullscreen Test</button>
-      </section>
-
-      <section className="panel qcToolPanel">
-        <div className="panelHeader">
-          <div>
             <p className="eyebrow">Keyboard</p>
             <h2>Key tester</h2>
           </div>
@@ -176,6 +152,30 @@ export function QcToolsClient() {
           {pressedKeys.length === 0 ? <span className="emptyKey">Tekan tombol apa saja</span> : pressedKeys.map((key) => <span key={key}>{key}</span>)}
         </div>
         <button className="secondaryButton" type="button" onClick={() => setPressedKeys([])}>Reset tombol</button>
+      </section>
+
+      <section className="panel qcToolPanel displayToolPanel">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Display</p>
+            <h2>Test layar dan dead pixel</h2>
+          </div>
+          <Monitor size={22} />
+        </div>
+        <div className="swatchGrid">
+          {screenColors.map((color) => (
+            <button
+              className="swatchButton"
+              type="button"
+              key={color.value}
+              style={{ background: color.value, color: color.value === "#000000" ? "#ffffff" : "#111827" }}
+              onClick={() => setScreenColor(color.value)}
+            >
+              {color.label}
+            </button>
+          ))}
+        </div>
+        <button className="primaryButton" type="button" onClick={() => setIsScreenOpen(true)}>Buka Fullscreen Test</button>
       </section>
 
       <section className="panel qcToolPanel">

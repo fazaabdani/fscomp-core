@@ -583,6 +583,10 @@ input:not([type]) {
   grid-column: 1 / -1;
 }
 
+.displayToolPanel {
+  grid-column: 1 / -1;
+}
+
 .swatchGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

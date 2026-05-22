@@ -115,8 +115,30 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
               <div className="miniMetrics">
                 <span>SSD {qc.ssdHealth}%</span>
                 <span>Battery {qc.batteryHealth}%</span>
-                <span>{qc.windowsVersion}</span>
+                <span>{qc.screenCondition}</span>
               </div>
+              <div className="miniMetrics">
+                <span>{qc.windowsVersion}</span>
+                <span>Office {qc.officeStatus}</span>
+                <span>{qc.partitionCount} partisi</span>
+              </div>
+              <div className="qcColumns">
+                <div>
+                  <div className="kv"><span>Seri SSD</span><strong>{qc.ssdSerial}</strong></div>
+                  <div className="kv"><span>Keyboard</span><strong>{qc.keyboard ? "OK" : "Perlu cek"}</strong></div>
+                  <div className="kv"><span>WiFi</span><strong>{qc.wifi ? "OK" : "Perlu cek"}</strong></div>
+                  <div className="kv"><span>USB</span><strong>{qc.usb ? "OK" : "Perlu cek"}</strong></div>
+                  <div className="kv"><span>Camera</span><strong>{qc.camera ? "OK" : "Perlu cek"}</strong></div>
+                </div>
+                <div>
+                  <div className="kv"><span>Touchpad</span><strong>{qc.touchpad ? "OK" : "Perlu cek"}</strong></div>
+                  <div className="kv"><span>Trackpoint</span><strong>{qc.trackpoint ? "OK" : "Perlu cek"}</strong></div>
+                  <div className="kv"><span>Bluetooth</span><strong>{qc.bluetooth ? "OK" : "Perlu cek"}</strong></div>
+                  <div className="kv"><span>Speaker/Mic</span><strong>{qc.speaker && qc.mic ? "OK" : "Perlu cek"}</strong></div>
+                  <div className="kv"><span>Body/Karet</span><strong>{!qc.bodyBroken && qc.karetBawah ? "OK" : "Perlu cek"}</strong></div>
+                </div>
+              </div>
+              {isInternalUser ? <div className="kv"><span>Kondisi cat internal</span><strong>{qc.paintCondition}</strong></div> : null}
               <small>{qc.catatan} / {qc.checker}</small>
             </div>
           ))}

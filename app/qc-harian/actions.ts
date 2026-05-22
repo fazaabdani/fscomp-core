@@ -22,14 +22,17 @@ function checked(formData: FormData, key: string) {
 function computeDailyStatus({
   ssdHealth,
   batteryHealth,
-  checks
+  checks,
+  noteChecks
 }: {
   ssdHealth: number;
   batteryHealth: number;
   checks: boolean[];
+  noteChecks: boolean[];
 }): DailyStatus {
   if (batteryHealth < 70 || ssdHealth < 80) return "TIDAK_LOLOS";
   if (checks.some((item) => !item)) return "LOLOS_DENGAN_CATATAN";
+  if (noteChecks.some((item) => !item)) return "LOLOS_DENGAN_CATATAN";
   return "LOLOS";
 }
 
@@ -61,31 +64,66 @@ export async function createDailyQcAction(formData: FormData) {
   const checker = await ensureChecker(checkerName || currentUser.name, "magang");
   const ssdHealth = numberValue(formData, "ssdHealth");
   const batteryHealth = numberValue(formData, "batteryHealth");
+  const ssdSerial = text(formData, "ssdSerial");
+  const screenCondition = text(formData, "screenCondition") || "Normal";
   const windowsVersion = text(formData, "windowsVersion") || "Windows 10";
+  const driverStatus = text(formData, "driverStatus") || "OK";
+  const clockStatus = text(formData, "clockStatus") || "Sesuai";
+  const appStatus = text(formData, "appStatus") || "Lengkap";
+  const officeStatus = text(formData, "officeStatus") || "Tidak dicek";
+  const partitionCount = numberValue(formData, "partitionCount", 1);
+  const bodyBroken = text(formData, "bodyBroken") === "Ya";
+  const paintCondition = text(formData, "paintCondition") || "Normal";
   const catatan = text(formData, "catatan");
+  const screenCritical = screenCondition === "Garis" || screenCondition === "Pecah";
   const dailyChecks = [
-    checked(formData, "nyalaNormal"),
-    checked(formData, "booting"),
     checked(formData, "keyboard"),
-    checked(formData, "ssd"),
-    checked(formData, "speaker"),
     checked(formData, "wifi"),
-    checked(formData, "bluetooth")
+    checked(formData, "usb"),
+    checked(formData, "camera"),
+    checked(formData, "touchpad"),
+    checked(formData, "speaker"),
+    checked(formData, "mic"),
+    !screenCritical,
+    !bodyBroken
   ];
-  const status = computeDailyStatus({ ssdHealth, batteryHealth, checks: dailyChecks });
+  const noteChecks = [
+    checked(formData, "trackpoint"),
+    checked(formData, "bluetooth"),
+    checked(formData, "karetBawah"),
+    screenCondition === "Normal",
+    driverStatus === "OK",
+    clockStatus === "Sesuai",
+    appStatus === "Lengkap",
+    officeStatus !== "Bajakan",
+    partitionCount === 2,
+    paintCondition === "Normal"
+  ];
+  const status = computeDailyStatus({ ssdHealth, batteryHealth, checks: dailyChecks, noteChecks });
   const perluKonfirmasi = status === "TIDAK_LOLOS";
 
   const conditionParts = [
-    checked(formData, "nyalaNormal") ? "nyala normal" : "nyala perlu cek",
-    checked(formData, "booting") ? "booting normal" : "booting bermasalah",
+    `layar ${screenCondition}`,
     checked(formData, "keyboard") ? "keyboard OK" : "keyboard perlu cek",
-    checked(formData, "ssd") ? "SSD terbaca" : "SSD perlu cek",
-    checked(formData, "speaker") ? "speaker OK" : "speaker perlu cek",
-    `OS ${windowsVersion}`,
-    `SSD health ${ssdHealth}%`,
-    `battery health ${batteryHealth}%`,
     checked(formData, "wifi") ? "WiFi OK" : "WiFi perlu cek",
-    checked(formData, "bluetooth") ? "Bluetooth OK" : "Bluetooth perlu cek"
+    checked(formData, "usb") ? "USB OK" : "USB perlu cek",
+    checked(formData, "camera") ? "camera OK" : "camera perlu cek",
+    checked(formData, "touchpad") ? "touchpad OK" : "touchpad perlu cek",
+    checked(formData, "trackpoint") ? "trackpoint OK" : "trackpoint perlu cek",
+    checked(formData, "bluetooth") ? "Bluetooth OK" : "Bluetooth perlu cek",
+    checked(formData, "speaker") ? "speaker OK" : "speaker perlu cek",
+    checked(formData, "mic") ? "mic OK" : "mic perlu cek",
+    bodyBroken ? "body broken" : "body tidak broken",
+    checked(formData, "karetBawah") ? "karet bawah OK" : "karet bawah tidak lengkap",
+    `OS ${windowsVersion}`,
+    `driver ${driverStatus}`,
+    `jam ${clockStatus}`,
+    `aplikasi ${appStatus}`,
+    `Office ${officeStatus}`,
+    `${partitionCount} partisi`,
+    ssdSerial ? `seri SSD ${ssdSerial}` : "seri SSD belum diisi",
+    `SSD health ${ssdHealth}%`,
+    `battery health ${batteryHealth}%`
   ];
 
   await prisma.$transaction(async (tx) => {
@@ -96,15 +134,30 @@ export async function createDailyQcAction(formData: FormData) {
         tanggal: new Date(),
         ssdHealth,
         batteryHealth,
+        ssdSerial: ssdSerial || null,
+        screenCondition,
         windowsVersion,
-        nyalaNormal: checked(formData, "nyalaNormal"),
-        booting: checked(formData, "booting"),
-        layar: true,
+        driverStatus,
+        clockStatus,
+        appStatus,
+        officeStatus,
+        partitionCount,
+        nyalaNormal: true,
+        booting: true,
+        layar: !screenCritical,
         keyboard: checked(formData, "keyboard"),
-        ssd: checked(formData, "ssd"),
+        ssd: ssdHealth >= 80,
         battery: batteryHealth >= 70,
-        port: true,
+        port: checked(formData, "usb"),
+        usb: checked(formData, "usb"),
+        camera: checked(formData, "camera"),
+        touchpad: checked(formData, "touchpad"),
+        trackpoint: checked(formData, "trackpoint"),
+        bodyBroken,
+        karetBawah: checked(formData, "karetBawah"),
+        paintCondition,
         speaker: checked(formData, "speaker"),
+        mic: checked(formData, "mic"),
         wifi: checked(formData, "wifi"),
         bluetooth: checked(formData, "bluetooth"),
         kondisiHariIni: catatan || `${conditionParts.join(", ")}. Status otomatis: ${status.replaceAll("_", " ")}`,
@@ -118,7 +171,8 @@ export async function createDailyQcAction(formData: FormData) {
       data: {
         ssdHealth,
         batteryHealth,
-        statusObservasi: status === "LOLOS" ? unit.statusObservasi : "RECHECK"
+        ssdSerial: ssdSerial || unit.ssdSerial,
+        statusObservasi: status === "LOLOS" ? "VERIFIED_WITH_NOTES" : "RECHECK"
       }
     });
 

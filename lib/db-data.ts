@@ -145,7 +145,26 @@ export async function getUnitForDetail(id: string) {
             tanggal: true,
             ssdHealth: true,
             batteryHealth: true,
+            ssdSerial: true,
+            screenCondition: true,
             windowsVersion: true,
+            driverStatus: true,
+            clockStatus: true,
+            appStatus: true,
+            officeStatus: true,
+            partitionCount: true,
+            keyboard: true,
+            wifi: true,
+            usb: true,
+            camera: true,
+            touchpad: true,
+            trackpoint: true,
+            bluetooth: true,
+            speaker: true,
+            mic: true,
+            bodyBroken: true,
+            karetBawah: true,
+            paintCondition: true,
             kondisiHariIni: true,
             masihLolos: true,
             catatan: true,
@@ -224,7 +243,26 @@ export async function getUnitForDetail(id: string) {
         checker: qc.checker.name,
         ssdHealth: qc.ssdHealth,
         batteryHealth: qc.batteryHealth,
+        ssdSerial: qc.ssdSerial ?? "-",
+        screenCondition: qc.screenCondition,
         windowsVersion: qc.windowsVersion,
+        driverStatus: qc.driverStatus,
+        clockStatus: qc.clockStatus,
+        appStatus: qc.appStatus,
+        officeStatus: qc.officeStatus,
+        partitionCount: qc.partitionCount,
+        keyboard: qc.keyboard,
+        wifi: qc.wifi,
+        usb: qc.usb,
+        camera: qc.camera,
+        touchpad: qc.touchpad,
+        trackpoint: qc.trackpoint,
+        bluetooth: qc.bluetooth,
+        speaker: qc.speaker,
+        mic: qc.mic,
+        bodyBroken: qc.bodyBroken,
+        karetBawah: qc.karetBawah,
+        paintCondition: qc.paintCondition ?? "-",
         kondisiHariIni: qc.kondisiHariIni,
         masihLolos: qc.masihLolos.replaceAll("_", " "),
         catatan: qc.catatan ?? "-"
@@ -310,6 +348,7 @@ export async function getQcHarianPageData() {
         processor: true,
         ram: true,
         ssd: true,
+        ssdSerial: true,
         ssdHealth: true,
         batteryHealth: true
       }
@@ -323,7 +362,14 @@ export async function getQcHarianPageData() {
         checker: { select: { name: true } },
         ssdHealth: true,
         batteryHealth: true,
+        ssdSerial: true,
+        screenCondition: true,
         windowsVersion: true,
+        driverStatus: true,
+        clockStatus: true,
+        appStatus: true,
+        officeStatus: true,
+        partitionCount: true,
         kondisiHariIni: true,
         masihLolos: true,
         catatan: true,
@@ -342,6 +388,7 @@ export async function getQcHarianPageData() {
           processor: unit.processor,
           ram: unit.ram,
           ssd: unit.ssd,
+          ssdSerial: unit.ssdSerial ?? "",
           ssdHealth: unit.ssdHealth,
           batteryHealth: unit.batteryHealth
         })),
@@ -361,7 +408,14 @@ export async function getQcHarianPageData() {
         checker: qc.checker.name,
         ssdHealth: qc.ssdHealth,
         batteryHealth: qc.batteryHealth,
+        ssdSerial: qc.ssdSerial ?? "",
+        screenCondition: qc.screenCondition,
         windowsVersion: qc.windowsVersion,
+        driverStatus: qc.driverStatus,
+        clockStatus: qc.clockStatus,
+        appStatus: qc.appStatus,
+        officeStatus: qc.officeStatus,
+        partitionCount: qc.partitionCount,
         kondisiHariIni: qc.kondisiHariIni,
         masihLolos: qc.masihLolos.replaceAll("_", " "),
         catatan: qc.catatan ?? "",
@@ -381,6 +435,7 @@ export async function getQcHarianPageData() {
         processor: unit.processor,
         ram: unit.ram,
         ssd: unit.ssd,
+        ssdSerial: unit.ssdSerial,
         ssdHealth: unit.ssdHealth,
         batteryHealth: unit.batteryHealth
       })),
@@ -430,9 +485,11 @@ export async function getDashboardData() {
       const latestDaily = unit.qcHarian[0];
       return Boolean(latestDaily && latestDaily.masihLolos !== "LOLOS");
     };
+    const hasPassingDaily = (unit: { qcHarian: { masihLolos: string }[] }) => Boolean(unit.qcHarian[0] && unit.qcHarian[0].masihLolos === "LOLOS");
     const isReadyForCatalog = (unit: { statusObservasi: string; soldAt: Date | null; processor: string; qcHarian: { masihLolos: string; windowsVersion?: string | null }[] }) =>
       !unit.soldAt &&
       (unit.statusObservasi === "VERIFIED" || unit.statusObservasi === "VERIFIED_WITH_NOTES") &&
+      hasPassingDaily(unit) &&
       !isDailyProblem(unit) &&
       (!requiresWindows11(unit.processor) || hasWindows11Daily(unit.qcHarian));
 
@@ -571,7 +628,12 @@ export async function getBatchHistoryData(batchId: string) {
                 checker: { select: { name: true } },
                 ssdHealth: true,
                 batteryHealth: true,
+                ssdSerial: true,
+                screenCondition: true,
                 windowsVersion: true,
+                driverStatus: true,
+                officeStatus: true,
+                partitionCount: true,
                 kondisiHariIni: true,
                 masihLolos: true,
                 catatan: true
@@ -598,7 +660,12 @@ export async function getBatchHistoryData(batchId: string) {
           checker: qc.checker.name,
           ssdHealth: qc.ssdHealth,
           batteryHealth: qc.batteryHealth,
+          ssdSerial: qc.ssdSerial ?? "",
+          screenCondition: qc.screenCondition,
           windowsVersion: qc.windowsVersion,
+          driverStatus: qc.driverStatus,
+          officeStatus: qc.officeStatus,
+          partitionCount: qc.partitionCount,
           kondisiHariIni: qc.kondisiHariIni,
           masihLolos: qc.masihLolos.replaceAll("_", " "),
           catatan: qc.catatan ?? ""
@@ -628,7 +695,12 @@ export async function getBatchHistoryData(batchId: string) {
             checker: qc.checker,
             ssdHealth: qc.ssdHealth,
             batteryHealth: qc.batteryHealth,
+            ssdSerial: qc.ssdSerial,
+            screenCondition: qc.screenCondition,
             windowsVersion: qc.windowsVersion,
+            driverStatus: qc.driverStatus,
+            officeStatus: qc.officeStatus,
+            partitionCount: qc.partitionCount,
             kondisiHariIni: qc.kondisiHariIni,
             masihLolos: qc.masihLolos,
             catatan: qc.catatan
@@ -658,7 +730,7 @@ export async function getSalesPageData() {
 
     const readyUnits = readyCandidates.filter((unit) => {
       const latestDaily = unit.qcHarian[0];
-      const dailyReady = !latestDaily || latestDaily.masihLolos === "LOLOS";
+      const dailyReady = Boolean(latestDaily && latestDaily.masihLolos === "LOLOS");
       const osReady = !requiresWindows11(unit.processor) || hasWindows11Daily(unit.qcHarian);
       return dailyReady && osReady;
     });

@@ -27,7 +27,14 @@ export type DailyQC = {
   checker: string;
   ssdHealth: number;
   batteryHealth: number;
+  ssdSerial: string;
+  screenCondition: string;
   windowsVersion: string;
+  driverStatus: string;
+  clockStatus: string;
+  appStatus: string;
+  officeStatus: string;
+  partitionCount: number;
   kondisiHariIni: string;
   masihLolos: DailyStatus;
   catatan: string;
@@ -328,7 +335,14 @@ export const dailyQcs: DailyQC[] = [
     checker: "Anak Magang",
     ssdHealth: 98,
     batteryHealth: 84,
+    ssdSerial: "SN-T480-256-8F2A",
+    screenCondition: "Normal",
     windowsVersion: "Windows 11",
+    driverStatus: "OK",
+    clockStatus: "Sesuai",
+    appStatus: "Lengkap",
+    officeStatus: "Original / resmi",
+    partitionCount: 2,
     kondisiHariIni: "Nyala normal, booting cepat, WiFi aktif.",
     masihLolos: "Lolos",
     catatan: "Tetap siap katalog."
@@ -340,7 +354,14 @@ export const dailyQcs: DailyQC[] = [
     checker: "Anak Magang",
     ssdHealth: 94,
     batteryHealth: 71,
+    ssdSerial: "HP840G5-SATA-731Q",
+    screenCondition: "Normal",
     windowsVersion: "Windows 11",
+    driverStatus: "OK",
+    clockStatus: "Sesuai",
+    appStatus: "Lengkap",
+    officeStatus: "Original / resmi",
+    partitionCount: 2,
     kondisiHariIni: "Booting normal, battery turun 8 persen dalam 20 menit.",
     masihLolos: "Lolos dengan catatan",
     catatan: "Perlu catatan battery di listing."
@@ -352,7 +373,14 @@ export const dailyQcs: DailyQC[] = [
     checker: "Anak Magang",
     ssdHealth: 88,
     batteryHealth: 62,
+    ssdSerial: "DL5490-NVME-52CZ",
+    screenCondition: "White spot",
     windowsVersion: "Windows 10",
+    driverStatus: "Perlu update",
+    clockStatus: "Sesuai",
+    appStatus: "Belum lengkap",
+    officeStatus: "Tidak dicek",
+    partitionCount: 1,
     kondisiHariIni: "WiFi sempat disconnect saat sleep resume.",
     masihLolos: "Lolos dengan catatan",
     catatan: "Recheck driver WiFi."
@@ -364,7 +392,14 @@ export const dailyQcs: DailyQC[] = [
     checker: "Anak Magang",
     ssdHealth: 76,
     batteryHealth: 39,
+    ssdSerial: "ACERP249-128-19ZX",
+    screenCondition: "Normal",
     windowsVersion: "Windows 10",
+    driverStatus: "Bermasalah",
+    clockStatus: "Perlu setting",
+    appStatus: "Belum lengkap",
+    officeStatus: "Tidak dicek",
+    partitionCount: 1,
     kondisiHariIni: "Touchpad masih bermasalah, battery drop.",
     masihLolos: "Tidak Lolos",
     catatan: "Tahan, jangan katalog."

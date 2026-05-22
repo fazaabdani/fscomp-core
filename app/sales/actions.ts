@@ -164,6 +164,10 @@ export async function createSaleAction(formData: FormData) {
   }
 
   const latestDailyQc = unit.qcHarian[0];
+  if (!latestDailyQc) {
+    redirect("/sales?error=qc-harian-belum-diisi");
+  }
+
   if (latestDailyQc && latestDailyQc.masihLolos !== "LOLOS") {
     redirect("/sales?error=qc-harian-belum-lolos");
   }

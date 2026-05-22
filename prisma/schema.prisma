@@ -167,7 +167,14 @@ model QcHarian {
   tanggal         DateTime
   ssdHealth       Int
   batteryHealth   Int
+  ssdSerial       String?
+  screenCondition String      @default("Normal")
   windowsVersion  String      @default("Windows 10")
+  driverStatus    String      @default("OK")
+  clockStatus     String      @default("OK")
+  appStatus       String      @default("OK")
+  officeStatus    String      @default("Tidak dicek")
+  partitionCount  Int         @default(1)
   nyalaNormal     Boolean
   booting         Boolean
   layar           Boolean
@@ -175,7 +182,15 @@ model QcHarian {
   ssd             Boolean
   battery         Boolean
   port            Boolean
+  usb             Boolean     @default(true)
+  camera          Boolean     @default(true)
+  touchpad        Boolean     @default(true)
+  trackpoint      Boolean     @default(true)
+  bodyBroken      Boolean     @default(false)
+  karetBawah      Boolean     @default(true)
+  paintCondition  String?
   speaker         Boolean     @default(true)
+  mic             Boolean     @default(true)
   wifi            Boolean
   bluetooth       Boolean
   kondisiHariIni  String

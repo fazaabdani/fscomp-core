@@ -27,14 +27,24 @@ async function ensureChecker(name: string, role: "admin" | "teknisi" | "magang")
   });
 }
 
+function qcStatusFromFlow(value: string): UnitStatus {
+  if (value === "CANDIDATE_RETUR") return "CANDIDATE_RETUR";
+  return "RECHECK";
+}
+
 export async function createUnitWithInitialQcAction(formData: FormData) {
   const currentUser = requireRole(["admin", "teknisi"]);
   const batchId = text(formData, "batchId");
   const nomorUnit = text(formData, "nomorUnit");
-  const model = text(formData, "model");
+  const merk = text(formData, "merk");
+  const seri = text(formData, "seri");
+  const model = text(formData, "model") || [merk, seri].filter(Boolean).join(" ");
   const processor = text(formData, "processor");
   const ram = text(formData, "ram");
-  const ssd = text(formData, "ssd");
+  const ssd = text(formData, "storage") || text(formData, "ssd");
+  const display = text(formData, "display");
+  const fiturTambahan = text(formData, "fiturTambahan");
+  const minus = text(formData, "minus") || text(formData, "catatan");
 
   if (!batchId || !nomorUnit || !model || !processor || !ram || !ssd) {
     redirect(`/unit/new?batch=${batchId}&error=required`);
@@ -65,8 +75,19 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
   const checker = await ensureChecker(currentUser.name, currentUser.role);
   const ssdHealth = numberValue(formData, "ssdHealth");
   const batteryHealth = numberValue(formData, "batteryHealth");
-  const status = text(formData, "statusObservasi") as UnitStatus;
+  const status = (text(formData, "statusObservasi") as UnitStatus) || qcStatusFromFlow(text(formData, "qcFlowStatus"));
   const qcOk: QcResult = "OK";
+  const minusLower = minus.toLowerCase();
+  const featureLower = fiturTambahan.toLowerCase();
+  const displayLower = display.toLowerCase();
+  const hasMinus = minus.trim().length > 0;
+  const catatan = [
+    merk ? `Merk: ${merk}` : "",
+    seri ? `Seri: ${seri}` : "",
+    fiturTambahan ? `Fitur tambahan: ${fiturTambahan}` : "",
+    minus ? `Minus: ${minus}` : "",
+    text(formData, "qcFlowStatus") ? `Status alur: ${text(formData, "qcFlowStatus").replaceAll("_", " ")}` : ""
+  ].filter(Boolean).join("\n");
 
   const unit = await prisma.unit.create({
     data: {
@@ -78,9 +99,9 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
       ram,
       ssd,
       ssdSerial: text(formData, "ssdSerial"),
-      lcdSize: text(formData, "lcdSize"),
-      lcdResolution: text(formData, "lcdResolution"),
-      isTouchscreen: text(formData, "isTouchscreen") === "Ya",
+      lcdSize: display || text(formData, "lcdSize"),
+      lcdResolution: display || text(formData, "lcdResolution"),
+      isTouchscreen: text(formData, "isTouchscreen") === "Ya" || displayLower.includes("touch") || featureLower.includes("touch"),
       hargaModal: numberValue(formData, "hargaModal"),
       hargaJualRekomendasi: numberValue(formData, "hargaJualRekomendasi"),
       batteryHealth,
@@ -94,21 +115,21 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
           tanggal: new Date(),
           status: status || "RECHECK",
           body: qcOk,
-          bodyBroken: text(formData, "bodyBroken") === "FAIL" ? "FAIL" : qcOk,
-          karetBawah: text(formData, "karetBawah") === "FAIL" ? "FAIL" : qcOk,
-          repaint: text(formData, "repaint") === "NOTES" ? "NOTES" : qcOk,
-          layar: qcOk,
+          bodyBroken: minusLower.includes("body") || minusLower.includes("casing") || minusLower.includes("retak") ? "NOTES" : qcOk,
+          karetBawah: minusLower.includes("karet") ? "NOTES" : qcOk,
+          repaint: minusLower.includes("repaint") ? "NOTES" : qcOk,
+          layar: minusLower.includes("layar") || minusLower.includes("lcd") ? "NOTES" : qcOk,
           ukuranLcd: qcOk,
           resolusiLayar: qcOk,
-          touchscreen: qcOk,
-          keyboard: qcOk,
-          touchpad: text(formData, "touchpad") === "FAIL" ? "FAIL" : qcOk,
-          trackpoint: text(formData, "trackpoint") === "FAIL" ? "FAIL" : qcOk,
-          usb: text(formData, "usb") === "FAIL" ? "FAIL" : qcOk,
-          kamera: text(formData, "kamera") === "FAIL" ? "FAIL" : qcOk,
+          touchscreen: displayLower.includes("touch") || featureLower.includes("touch") ? "OK" : qcOk,
+          keyboard: minusLower.includes("keyboard") ? "NOTES" : qcOk,
+          touchpad: minusLower.includes("touchpad") ? "NOTES" : qcOk,
+          trackpoint: minusLower.includes("trackpoint") ? "NOTES" : qcOk,
+          usb: minusLower.includes("usb") ? "NOTES" : qcOk,
+          kamera: minusLower.includes("kamera") || minusLower.includes("camera") ? "NOTES" : qcOk,
           port: qcOk,
-          speaker: text(formData, "speaker") === "FAIL" ? "FAIL" : qcOk,
-          mic: text(formData, "mic") === "FAIL" ? "FAIL" : qcOk,
+          speaker: minusLower.includes("speaker") ? "NOTES" : qcOk,
+          mic: minusLower.includes("mic") ? "NOTES" : qcOk,
           charger: qcOk,
           battery: batteryHealth < 50 ? "FAIL" : batteryHealth < 70 ? "NOTES" : "OK",
           ssd: ssdHealth < 80 ? "NOTES" : "OK",
@@ -119,8 +140,8 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
           driver: qcOk,
           securityPatch: "NOTES",
           aplikasiDefault: qcOk,
-          reminder: ["Cek update OS dan aplikasi sebelum katalog"],
-          catatan: text(formData, "catatan")
+          reminder: hasMinus ? ["Selesaikan minus sebelum siap jual", "Cek update OS dan aplikasi sebelum katalog"] : ["Cek update OS dan aplikasi sebelum katalog"],
+          catatan
         }
       }
     }
