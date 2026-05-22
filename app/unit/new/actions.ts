@@ -105,6 +105,7 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
       hargaModal: numberValue(formData, "hargaModal"),
       hargaJualRekomendasi: numberValue(formData, "hargaJualRekomendasi"),
       stockLocation: (text(formData, "stockLocation") || "WIRADESA") as SaleLocation,
+      catalogImageUrl: text(formData, "catalogImageUrl") || null,
       batteryHealth,
       ssdHealth,
       statusObservasi: status || "RECHECK",
@@ -150,6 +151,7 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
 
   revalidatePath("/batch-psi");
   revalidatePath("/qc-harian");
+  revalidatePath("/katalog");
   revalidatePath("/");
   redirect(`/unit/${unit.id}`);
 }

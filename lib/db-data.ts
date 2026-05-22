@@ -100,6 +100,7 @@ export async function getUnitForEdit(id: string) {
       hargaModal: unit.hargaModal,
       hargaJualRekomendasi: unit.hargaJualRekomendasi,
       stockLocation: unit.stockLocation,
+      catalogImageUrl: unit.catalogImageUrl ?? "",
       batteryHealth: unit.batteryHealth ?? 0,
       ssdHealth: unit.ssdHealth ?? 0,
       statusObservasi: unit.statusObservasi
@@ -110,6 +111,7 @@ export async function getUnitForEdit(id: string) {
     return {
       ...unit,
       stockLocation: "WIRADESA",
+      catalogImageUrl: "",
       batchName: demoBatches.find((batch) => batch.id === unit.batchId)?.nomorBatch ?? "-"
     };
   }
@@ -195,6 +197,7 @@ export async function getUnitForDetail(id: string) {
       hargaModal: unit.hargaModal,
       hargaJualRekomendasi: unit.hargaJualRekomendasi,
       stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
+      catalogImageUrl: unit.catalogImageUrl ?? "",
       batteryHealth: unit.batteryHealth ?? 0,
       ssdHealth: unit.ssdHealth ?? 0,
       statusObservasi: unit.statusObservasi.replaceAll("_", " "),
@@ -278,6 +281,7 @@ export async function getUnitForDetail(id: string) {
 
     return {
       ...demoUnit,
+      catalogImageUrl: "",
       batch: { nomorBatch: demoBatches.find((batch) => batch.id === demoUnit.batchId)?.nomorBatch ?? "-" },
       dailyHistory: []
     };
@@ -875,6 +879,7 @@ export async function getCatalogPageData() {
           lcdResolution: unit.lcdResolution ?? "-",
           isTouchscreen: unit.isTouchscreen,
           hargaJualRekomendasi: unit.hargaJualRekomendasi,
+          catalogImageUrl: unit.catalogImageUrl ?? "",
           stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
           ssdHealth: latestDaily?.ssdHealth ?? unit.ssdHealth ?? 0,
           batteryHealth: latestDaily?.batteryHealth ?? unit.batteryHealth ?? 0,

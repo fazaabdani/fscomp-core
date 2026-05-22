@@ -70,6 +70,10 @@ export default async function EditUnitPage({ params }: { params: { id: string } 
             <option value="KAJEN">Kajen secondary</option>
           </select>
         </label>
+        <label>Link foto katalog
+          <input name="catalogImageUrl" defaultValue={unit.catalogImageUrl} placeholder="Link Google Drive / link foto langsung" />
+          <small>Opsional. Bisa diisi setelah unit difoto dan siap dipajang di katalog.</small>
+        </label>
         <button className="primaryButton" type="submit">Simpan Perubahan Unit</button>
       </form>
     </section>

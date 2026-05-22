@@ -15,6 +15,15 @@ function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: 
   return `https://wa.me/62816692428?text=${encodeURIComponent(text)}`;
 }
 
+function displayImageUrl(url?: string) {
+  if (!url) return "";
+  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if (fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
+  const openMatch = url.match(/[?&]id=([^&]+)/);
+  if (url.includes("drive.google.com") && openMatch) return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
+  return url;
+}
+
 function CatalogSection({
   title,
   subtitle,
@@ -33,12 +42,9 @@ function CatalogSection({
     lcdResolution: string;
     isTouchscreen: boolean;
     hargaJualRekomendasi: number;
+    catalogImageUrl: string;
     stockLocation: string;
-    ssdHealth: number;
-    batteryHealth: number;
     windowsVersion: string;
-    screenCondition: string;
-    officeStatus: string;
   }>;
 }) {
   return (
@@ -53,6 +59,14 @@ function CatalogSection({
       <div className="catalogPublicGrid">
         {units.length === 0 ? <div className="emptyState">Belum ada unit siap jual di lokasi ini.</div> : units.map((unit) => (
           <article className="catalogPublicCard" key={unit.id}>
+            {unit.catalogImageUrl ? (
+              <img className="catalogImage" src={displayImageUrl(unit.catalogImageUrl)} alt={`Foto ${unit.model}`} />
+            ) : (
+              <div className="catalogImagePlaceholder">
+                <strong>FS</strong>
+                <span>Foto menyusul</span>
+              </div>
+            )}
             <div className="catalogCardTop">
               <span className="unitNumber">{unit.nomorUnit}</span>
               <span className="statusPill green">{unit.stockLocation}</span>
@@ -60,19 +74,16 @@ function CatalogSection({
             <h3>{unit.model}</h3>
             <p>{unit.processor} / {unit.ram} / {unit.ssd}</p>
             <div className="miniMetrics">
-              <span>SSD {unit.ssdHealth}%</span>
-              <span>Battery {unit.batteryHealth}%</span>
               <span>{unit.windowsVersion}</span>
+              <span>{unit.isTouchscreen ? "Touchscreen" : "Non-touchscreen"}</span>
             </div>
             <div className="catalogSpecList">
               <span>LCD {unit.lcdSize} {unit.lcdResolution}</span>
-              <span>Layar {unit.screenCondition}</span>
-              <span>{unit.isTouchscreen ? "Touchscreen" : "Non-touchscreen"}</span>
-              <span>Office {unit.officeStatus}</span>
+              <span>Lokasi stok {unit.stockLocation}</span>
             </div>
             <strong className="catalogPrice">{formatRupiah(unit.hargaJualRekomendasi)}</strong>
             <div className="buttonRow">
-              <Link className="secondaryButton" href={`/unit/${unit.id}`}>Detail QC</Link>
+              <Link className="secondaryButton" href={`/unit/${unit.id}`}>Lihat unit</Link>
               <a className="primaryButton" href={waLink(unit)} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Unit</a>
             </div>
           </article>

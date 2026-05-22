@@ -105,6 +105,7 @@ model Unit {
   tanggalMasuk         DateTime
   tempo                DateTime?
   catalogLiveUrl       String?
+  catalogImageUrl      String?
   soldAt               DateTime?
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt

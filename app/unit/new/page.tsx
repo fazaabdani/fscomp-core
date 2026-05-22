@@ -86,6 +86,9 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
             <option value="KAJEN">Kajen secondary</option>
           </select>
         </label>
+        <label>Link foto katalog
+          <input name="catalogImageUrl" placeholder="Opsional, bisa diisi nanti setelah unit difoto" />
+        </label>
 
         <div className="numberGrid">
           <label>SSD Health (%)<input name="ssdHealth" type="number" min="0" max="100" defaultValue={90} required /></label>

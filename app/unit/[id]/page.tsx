@@ -1,12 +1,31 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CalendarClock, Cpu, HardDrive, QrCode, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CalendarClock, Cpu, HardDrive, MessageCircle, QrCode, ShieldCheck } from "lucide-react";
 import { formatRupiah } from "@/lib/api";
 import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
+
+function displayImageUrl(url?: string) {
+  if (!url) return "";
+  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if (fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
+  const openMatch = url.match(/[?&]id=([^&]+)/);
+  if (url.includes("drive.google.com") && openMatch) return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
+  return url;
+}
+
+function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: number }) {
+  const text = [
+    "Assalamu'alaikum FS Comp.",
+    `Saya tertarik dengan Unit ${unit.nomorUnit} - ${unit.model}.`,
+    `Harga di katalog: ${formatRupiah(unit.hargaJualRekomendasi)}.`,
+    "Apakah unitnya masih ready?"
+  ].join("\n");
+  return `https://wa.me/62816692428?text=${encodeURIComponent(text)}`;
+}
 
 export default async function UnitDetailPage({ params }: { params: { id: string } }) {
   const unit = await getUnitForDetail(params.id);
@@ -19,6 +38,69 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
   const visibleHardware = qcAwal
     ? Object.entries(qcAwal.hardware).filter(([key]) => isInternalUser || key !== "Seri SSD")
     : [];
+  const latestDaily = dailyHistory[0];
+  const publicWindows = latestDaily?.windowsVersion ?? qcAwal?.software.Windows ?? "-";
+
+  if (!isInternalUser) {
+    return (
+      <section className="pageStack">
+        <div className="unitHero">
+          <div>
+            <p className="eyebrow">Katalog FS Comp</p>
+            <h1>{unit.model}</h1>
+            <p className="heroCopy">{unit.processor} / {unit.ram} / {unit.ssd}</p>
+          </div>
+          <div className="unitHeroActions">
+            <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
+            <a className="primaryButton" href={waLink(unit)} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Unit</a>
+          </div>
+        </div>
+
+        <div className="contentGrid">
+          <section className="panel wide">
+            {unit.catalogImageUrl ? (
+              <img className="publicUnitPhoto" src={displayImageUrl(unit.catalogImageUrl)} alt={`Foto ${unit.model}`} />
+            ) : (
+              <div className="publicUnitPhoto placeholderPhoto">
+                <strong>FS</strong>
+                <span>Foto unit menyusul</span>
+              </div>
+            )}
+          </section>
+
+          <aside className="panel">
+            <div className="panelHeader">
+              <div>
+                <p className="eyebrow">Spek umum</p>
+                <h2>Unit siap jual</h2>
+              </div>
+            </div>
+            <div className="detailList">
+              <div><Cpu size={16} /> {unit.processor}</div>
+              <div><HardDrive size={16} /> {unit.ram} / {unit.ssd}</div>
+              <div><CalendarClock size={16} /> {publicWindows}</div>
+            </div>
+            <div className="kv"><span>LCD</span><strong>{unit.lcdSize}</strong></div>
+            <div className="kv"><span>Resolusi</span><strong>{unit.lcdResolution}</strong></div>
+            <div className="kv"><span>Touchscreen</span><strong>{unit.isTouchscreen ? "Ya" : "Tidak"}</strong></div>
+            <div className="kv"><span>Lokasi stok</span><strong>{unit.stockLocation}</strong></div>
+            <div className="kv"><span>Harga jual</span><strong>{formatRupiah(unit.hargaJualRekomendasi)}</strong></div>
+          </aside>
+        </div>
+
+        <section className="panel">
+          <div className="panelHeader">
+            <div>
+              <p className="eyebrow">Catatan pembeli</p>
+              <h2>QC internal sudah dicek FS Comp</h2>
+            </div>
+            <ShieldCheck size={22} />
+          </div>
+          <p className="bodyText">Detail teknis seperti health SSD, health baterai, seri SSD, dan catatan internal disimpan di sistem FS Comp. Untuk kondisi spesifik unit, silakan tanyakan langsung ke admin sebelum transaksi.</p>
+        </section>
+      </section>
+    );
+  }
 
   return (
     <section className="pageStack">

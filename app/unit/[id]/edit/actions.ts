@@ -33,6 +33,7 @@ export async function updateUnitAction(unitId: string, formData: FormData) {
       hargaModal: numberValue(formData, "hargaModal"),
       hargaJualRekomendasi: numberValue(formData, "hargaJualRekomendasi"),
       stockLocation: (text(formData, "stockLocation") || "WIRADESA") as SaleLocation,
+      catalogImageUrl: text(formData, "catalogImageUrl") || null,
       ssdHealth: numberValue(formData, "ssdHealth"),
       batteryHealth: numberValue(formData, "batteryHealth"),
       statusObservasi: text(formData, "statusObservasi") as UnitStatus
@@ -41,6 +42,7 @@ export async function updateUnitAction(unitId: string, formData: FormData) {
 
   revalidatePath("/batch-psi");
   revalidatePath(`/unit/${unitId}`);
+  revalidatePath("/katalog");
   revalidatePath("/");
   redirect(`/unit/${unitId}`);
 }
