@@ -18,7 +18,7 @@ const keyboardRows = [
   ["Tab", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\"],
   ["CapsLock", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "Enter"],
   ["Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "Shift"],
-  ["Control", "Meta", "Alt", "Space", "Alt", "Control", "ArrowLeft", "ArrowDown", "ArrowRight"]
+  ["Control", "Meta", "Alt", "Space", "Alt", "Control", "ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"]
 ];
 
 const keyLabels: Record<string, string> = {
@@ -26,6 +26,7 @@ const keyLabels: Record<string, string> = {
   Control: "Ctrl",
   Meta: "Win",
   ArrowLeft: "Left",
+  ArrowUp: "Up",
   ArrowDown: "Down",
   ArrowRight: "Right",
   PrintScreen: "Prt Sc",
@@ -53,10 +54,14 @@ export function QcToolsClient() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const animationRef = useRef<number | null>(null);
 
+  function markKey(key: string) {
+    setPressedKeys((current) => [key, ...current.filter((item) => item !== key)].slice(0, 80));
+  }
+
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       const key = keyName(event.key);
-      setPressedKeys((current) => [key, ...current.filter((item) => item !== key)].slice(0, 24));
+      markKey(key);
     }
 
     window.addEventListener("keydown", onKeyDown);
@@ -140,9 +145,14 @@ export function QcToolsClient() {
                 const active = pressedKeys.includes(key) || pressedKeys.includes(key.toLowerCase()) || pressedKeys.includes(key.toUpperCase());
                 const wideClass = key === "Space" ? "keySpace" : ["Backspace", "CapsLock", "Enter", "Shift"].includes(key) ? "keyWide" : "";
                 return (
-                  <span className={`keyboardKey ${active ? "activeKey" : ""} ${wideClass}`} key={`${key}-${index}`}>
+                  <button
+                    className={`keyboardKey ${active ? "activeKey" : ""} ${wideClass}`}
+                    key={`${key}-${index}`}
+                    type="button"
+                    onClick={() => markKey(key)}
+                  >
                     {keyLabel(key)}
-                  </span>
+                  </button>
                 );
               })}
             </div>

@@ -649,6 +649,7 @@ input:not([type]) {
   background: rgba(18, 32, 48, 0.88);
   font-size: 12px;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .keyboardKey.activeKey {

@@ -75,8 +75,12 @@ export default async function BatchPaymentPage({ params }: { params: { id: strin
           {summary.problemUnits.map((unit) => (
             <div className="paymentRow problemPaymentRow" key={unit.id}>
               <span>Unit {unit.nomorUnit}</span>
-              <strong>{unit.model}</strong>
-              <small>{unit.statusObservasi}</small>
+              <div>
+                <strong>{unit.model}</strong>
+                <small>Status: {unit.statusObservasi}</small>
+                <small>Problem: {unit.problem}</small>
+                <small>Catatan unit: {unit.catatan}</small>
+              </div>
               <b>{formatRupiah(unit.hargaModal)}</b>
             </div>
           ))}

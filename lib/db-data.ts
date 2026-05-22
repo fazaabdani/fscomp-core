@@ -567,7 +567,14 @@ export async function getBatchPaymentSummary(batchId: string) {
       where: { id: batchId },
       include: {
         units: {
-          orderBy: { nomorUnit: "asc" }
+          orderBy: { nomorUnit: "asc" },
+          include: {
+            qcAwal: true,
+            qcHarian: {
+              orderBy: { tanggal: "desc" },
+              take: 1
+            }
+          }
         }
       }
     });
@@ -604,7 +611,12 @@ export async function getBatchPaymentSummary(batchId: string) {
         nomorUnit: unit.nomorUnit,
         model: unit.model,
         hargaModal: unit.hargaModal,
-        statusObservasi: unit.statusObservasi.replaceAll("_", " ")
+        statusObservasi: unit.statusObservasi.replaceAll("_", " "),
+        problem: [
+          unit.qcAwal?.catatan ? `QC awal: ${unit.qcAwal.catatan}` : "",
+          unit.qcHarian[0]?.kondisiHariIni ? `QC harian: ${unit.qcHarian[0].kondisiHariIni}` : ""
+        ].filter(Boolean).join(" | ") || "Belum ada keterangan problem.",
+        catatan: unit.qcHarian[0]?.catatan || unit.qcAwal?.catatan || "-"
       }))
     };
   } catch {
@@ -742,7 +754,7 @@ export async function getSalesPageData() {
       sales = await prisma.sale.findMany({
         include: { unit: true, items: true },
         orderBy: { soldAt: "desc" },
-        take: 40
+        take: 200
       });
     } catch {
       salesReady = false;

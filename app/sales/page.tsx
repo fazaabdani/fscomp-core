@@ -160,6 +160,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               ) : (
                 <span className={sale.grossProfit >= 0 ? "profitText" : "lossText"}>{formatRupiah(sale.grossProfit)}</span>
               )}
+              <Link className="secondaryButton compactButton" href={`/sales/${sale.id}/receipt`}>Nota / Cetak ulang</Link>
               {!sale.voidedAt ? (
                 <form action={voidSaleAction.bind(null, sale.id)} className="voidSaleForm">
                   <input type="hidden" name="voidReason" value="Transaksi batal dari kasir" />
