@@ -832,41 +832,76 @@ textarea {
 }
 
 .qcForm {
-  gap: 8px;
+  gap: 6px;
+  padding: 14px;
 }
 
 .qcForm label {
-  gap: 5px;
-  font-size: 12px;
+  gap: 3px;
+  font-size: 11px;
+  line-height: 1.15;
 }
 
 .qcForm select,
 .qcForm input[type="number"],
 .qcForm input[type="text"],
+.qcForm input[type="email"],
+.qcForm input[type="password"],
+.qcForm input[type="date"],
 .qcForm input:not([type]) {
-  min-height: 32px;
-  padding: 0 9px;
-  border-radius: 7px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 
 .qcForm textarea {
-  min-height: 54px;
-  padding: 8px 9px;
+  height: 46px;
+  min-height: 46px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 
 .qcForm .checkGrid,
 .qcForm .numberGrid {
-  gap: 7px;
+  gap: 6px;
 }
 
 .qcForm .checkTile {
-  min-height: 32px;
-  padding: 6px 8px;
+  min-height: 28px;
+  padding: 4px 7px;
+  gap: 6px;
+  border-radius: 6px;
 }
 
 .qcForm .checkTile svg {
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
+}
+
+.qcForm .panelHeader {
+  margin-bottom: 8px;
+}
+
+.qcForm .panelHeader h2 {
+  font-size: 18px;
+}
+
+.qcForm .eyebrow {
+  margin-bottom: 4px;
+  font-size: 10px;
+}
+
+.qcForm .infoBox {
+  padding: 8px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.qcForm .primaryButton {
+  min-height: 34px;
 }
 
 .linkNote:hover,
