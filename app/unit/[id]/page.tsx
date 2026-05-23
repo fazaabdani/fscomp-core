@@ -2,20 +2,12 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, CalendarClock, Cpu, HardDrive, MessageCircle, QrCode, ShieldCheck } from "lucide-react";
 import { formatRupiah } from "@/lib/api";
+import { displayCatalogImageUrl } from "@/lib/catalog-image";
 import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
-
-function displayImageUrl(url?: string) {
-  if (!url) return "";
-  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-  if (fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
-  const openMatch = url.match(/[?&]id=([^&]+)/);
-  if (url.includes("drive.google.com") && openMatch) return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
-  return url;
-}
 
 function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: number }) {
   const text = [
@@ -59,7 +51,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
         <div className="contentGrid">
           <section className="panel wide">
             {unit.catalogImageUrl ? (
-              <img className="publicUnitPhoto" src={displayImageUrl(unit.catalogImageUrl)} alt={`Foto ${unit.model}`} />
+              <img className="publicUnitPhoto" src={displayCatalogImageUrl(unit.catalogImageUrl)} alt={`Foto ${unit.model}`} />
             ) : (
               <div className="publicUnitPhoto placeholderPhoto">
                 <strong>FS</strong>

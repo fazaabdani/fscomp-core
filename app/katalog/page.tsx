@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MapPin, MessageCircle, ShieldCheck } from "lucide-react";
 import { formatRupiah } from "@/lib/api";
+import { displayCatalogImageUrl } from "@/lib/catalog-image";
 import { getCatalogPageData } from "@/lib/db-data";
 
 export const dynamic = "force-dynamic";
@@ -13,15 +14,6 @@ function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: 
     "Apakah unitnya masih ready?"
   ].join("\n");
   return `https://wa.me/62816692428?text=${encodeURIComponent(text)}`;
-}
-
-function displayImageUrl(url?: string) {
-  if (!url) return "";
-  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-  if (fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
-  const openMatch = url.match(/[?&]id=([^&]+)/);
-  if (url.includes("drive.google.com") && openMatch) return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
-  return url;
 }
 
 function CatalogSection({
@@ -60,7 +52,7 @@ function CatalogSection({
         {units.length === 0 ? <div className="emptyState">Belum ada unit siap jual di lokasi ini.</div> : units.map((unit) => (
           <article className="catalogPublicCard" key={unit.id}>
             {unit.catalogImageUrl ? (
-              <img className="catalogImage" src={displayImageUrl(unit.catalogImageUrl)} alt={`Foto ${unit.model}`} />
+              <img className="catalogImage" src={displayCatalogImageUrl(unit.catalogImageUrl)} alt={`Foto ${unit.model}`} />
             ) : (
               <div className="catalogImagePlaceholder">
                 <strong>FS</strong>
