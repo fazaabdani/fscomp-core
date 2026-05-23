@@ -831,6 +831,44 @@ textarea {
   background: rgba(7, 17, 30, 0.78);
 }
 
+.qcForm {
+  gap: 8px;
+}
+
+.qcForm label {
+  gap: 5px;
+  font-size: 12px;
+}
+
+.qcForm select,
+.qcForm input[type="number"],
+.qcForm input[type="text"],
+.qcForm input:not([type]) {
+  min-height: 32px;
+  padding: 0 9px;
+  border-radius: 7px;
+}
+
+.qcForm textarea {
+  min-height: 54px;
+  padding: 8px 9px;
+}
+
+.qcForm .checkGrid,
+.qcForm .numberGrid {
+  gap: 7px;
+}
+
+.qcForm .checkTile {
+  min-height: 32px;
+  padding: 6px 8px;
+}
+
+.qcForm .checkTile svg {
+  width: 15px;
+  height: 15px;
+}
+
 .linkNote:hover,
 .catalogItem:hover,
 .unitRow:hover {

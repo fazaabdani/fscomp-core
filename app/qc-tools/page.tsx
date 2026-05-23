@@ -34,7 +34,7 @@ export default function QcToolsPage() {
         <div>
           <p className="eyebrow">QC Tools</p>
           <h1>Alat bantu pengecekan laptop</h1>
-          <p className="bodyText">Pakai tools browser untuk test cepat, lalu catat hasil teknis ke QC awal atau QC harian.</p>
+          <p className="bodyText">Pakai tools browser untuk test cepat, lalu catat hasil teknis ke QC harian lengkap.</p>
         </div>
         <MonitorCheck size={34} />
       </div>

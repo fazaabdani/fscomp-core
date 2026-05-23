@@ -1,6 +1,6 @@
 "use server";
 
-import { DailyStatus, Role } from "@prisma/client";
+import { DailyStatus, Role, SaleLocation } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -72,6 +72,7 @@ export async function createDailyQcAction(formData: FormData) {
   const appStatus = text(formData, "appStatus") || "Lengkap";
   const officeStatus = text(formData, "officeStatus") || "Tidak dicek";
   const partitionCount = numberValue(formData, "partitionCount", 1);
+  const stockLocation = (text(formData, "stockLocation") || "WIRADESA") as SaleLocation;
   const bodyBroken = text(formData, "bodyBroken") === "Ya";
   const paintCondition = text(formData, "paintCondition") || "Normal";
   const catatan = text(formData, "catatan");
@@ -172,6 +173,7 @@ export async function createDailyQcAction(formData: FormData) {
         ssdHealth,
         batteryHealth,
         ssdSerial: ssdSerial || unit.ssdSerial,
+        stockLocation,
         statusObservasi: status === "LOLOS" ? "VERIFIED_WITH_NOTES" : "RECHECK"
       }
     });

@@ -15,6 +15,14 @@ function numberValue(formData: FormData, key: string, fallback = 0) {
   return Number.isFinite(value) ? value : fallback;
 }
 
+function rupiahValue(formData: FormData, key: string, fallback = 0) {
+  const raw = text(formData, key);
+  const digits = raw.replace(/[^\d]/g, "");
+  if (!digits) return fallback;
+  const value = Number(digits);
+  return Number.isFinite(value) ? value : fallback;
+}
+
 export async function updateUnitAction(unitId: string, formData: FormData) {
   requireRole(["admin"]);
 
@@ -30,8 +38,8 @@ export async function updateUnitAction(unitId: string, formData: FormData) {
       lcdSize: text(formData, "lcdSize"),
       lcdResolution: text(formData, "lcdResolution"),
       isTouchscreen: text(formData, "isTouchscreen") === "Ya",
-      hargaModal: numberValue(formData, "hargaModal"),
-      hargaJualRekomendasi: numberValue(formData, "hargaJualRekomendasi"),
+      hargaModal: rupiahValue(formData, "hargaModal"),
+      hargaJualRekomendasi: rupiahValue(formData, "hargaJualRekomendasi"),
       stockLocation: (text(formData, "stockLocation") || "WIRADESA") as SaleLocation,
       catalogImageUrl: text(formData, "catalogImageUrl") || null,
       ssdHealth: numberValue(formData, "ssdHealth"),

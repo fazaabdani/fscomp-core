@@ -97,6 +97,7 @@ export async function getUnitForEdit(id: string) {
       lcdSize: unit.lcdSize ?? "",
       lcdResolution: unit.lcdResolution ?? "",
       isTouchscreen: unit.isTouchscreen,
+      entryNotes: unit.entryNotes ?? "-",
       hargaModal: unit.hargaModal,
       hargaJualRekomendasi: unit.hargaJualRekomendasi,
       stockLocation: unit.stockLocation,
@@ -281,6 +282,7 @@ export async function getUnitForDetail(id: string) {
 
     return {
       ...demoUnit,
+      entryNotes: "-",
       catalogImageUrl: "",
       batch: { nomorBatch: demoBatches.find((batch) => batch.id === demoUnit.batchId)?.nomorBatch ?? "-" },
       dailyHistory: []
@@ -358,7 +360,8 @@ export async function getQcHarianPageData() {
         ssd: true,
         ssdSerial: true,
         ssdHealth: true,
-        batteryHealth: true
+        batteryHealth: true,
+        stockLocation: true
       }
     });
 
@@ -398,7 +401,8 @@ export async function getQcHarianPageData() {
           ssd: unit.ssd,
           ssdSerial: unit.ssdSerial ?? "",
           ssdHealth: unit.ssdHealth,
-          batteryHealth: unit.batteryHealth
+          batteryHealth: unit.batteryHealth,
+          stockLocation: "WIRADESA"
         })),
         dailyQcs: demoDailyQcs.map((qc) => ({
           ...qc,
@@ -445,7 +449,8 @@ export async function getQcHarianPageData() {
         ssd: unit.ssd,
         ssdSerial: unit.ssdSerial,
         ssdHealth: unit.ssdHealth,
-        batteryHealth: unit.batteryHealth
+        batteryHealth: unit.batteryHealth,
+        stockLocation: "WIRADESA"
       })),
       dailyQcs: demoDailyQcs.map((qc) => ({
         ...qc,
@@ -621,10 +626,10 @@ export async function getBatchPaymentSummary(batchId: string) {
         hargaModal: unit.hargaModal,
         statusObservasi: unit.statusObservasi.replaceAll("_", " "),
         problem: [
-          unit.qcAwal?.catatan ? `QC awal: ${unit.qcAwal.catatan}` : "",
+          unit.entryNotes ? `Input batch: ${unit.entryNotes}` : "",
           unit.qcHarian[0]?.kondisiHariIni ? `QC harian: ${unit.qcHarian[0].kondisiHariIni}` : ""
         ].filter(Boolean).join(" | ") || "Belum ada keterangan problem.",
-        catatan: unit.qcHarian[0]?.catatan || unit.qcAwal?.catatan || "-"
+        catatan: unit.qcHarian[0]?.catatan || unit.entryNotes || "-"
       }))
     };
   } catch {

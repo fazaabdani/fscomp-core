@@ -14,8 +14,8 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
       <div className="sectionTitle">
         <div>
           <p className="eyebrow">Tambah Unit</p>
-          <h1>Input QC awal singkat</h1>
-          <p className="bodyText">Format QC awal dibuat ringkas sesuai alur kerja PSI: data identitas, fitur, minus, lalu keputusan lanjut QC harian atau tidak.</p>
+          <h1>Input unit ke batch</h1>
+          <p className="bodyText">Tahap ini hanya untuk data spek inti dari Ludfy/Zume. Keputusan siap jual nanti mengikuti QC harian lengkap.</p>
         </div>
       </div>
 
@@ -59,14 +59,14 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
         </label>
 
         <div className="numberGrid">
-          <label>Status
+          <label>Alur setelah disimpan
             <select name="qcFlowStatus" defaultValue="LANJUT_QC_HARIAN">
-              <option value="LANJUT_QC_HARIAN">Lanjut QC harian</option>
+              <option value="LANJUT_QC_HARIAN">Langsung lanjut QC harian</option>
               <option value="TAHAN_DULU">Tahan dulu / perlu keputusan</option>
               <option value="CANDIDATE_RETUR">Candidate retur</option>
             </select>
           </label>
-          <label>Windows saat QC awal
+          <label>Windows saat masuk
             <select name="windowsVersion" defaultValue="Windows 11">
               <option>Windows 11</option>
               <option>Windows 10</option>
@@ -77,29 +77,18 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
         </div>
 
         <div className="numberGrid">
-          <label>Harga Modal<input name="hargaModal" type="number" inputMode="numeric" step="1000" placeholder="2850000" /></label>
-          <label>Harga Jual<input name="hargaJualRekomendasi" type="number" inputMode="numeric" step="1000" placeholder="3650000" required /></label>
+          <label>Harga Modal<input name="hargaModal" inputMode="numeric" placeholder="Rp 2.850.000" /></label>
+          <label>Harga Jual<input name="hargaJualRekomendasi" inputMode="numeric" placeholder="Rp 3.650.000" required /></label>
         </div>
-        <label>Lokasi stok awal
-          <select name="stockLocation" defaultValue="WIRADESA">
-            <option value="WIRADESA">Wiradesa utama</option>
-            <option value="KAJEN">Kajen secondary</option>
-          </select>
-        </label>
         <label>Link foto katalog
           <input name="catalogImageUrl" placeholder="Opsional, bisa diisi nanti setelah unit difoto" />
         </label>
 
-        <div className="numberGrid">
-          <label>SSD Health (%)<input name="ssdHealth" type="number" min="0" max="100" defaultValue={90} required /></label>
-          <label>Battery Health (%)<input name="batteryHealth" type="number" min="0" max="100" defaultValue={80} required /></label>
-        </div>
-
         <div className="infoBox compactInfo">
-          Unit Intel Gen 8 ke atas wajib pakai Windows 11. Kalau saat masuk batch masih Windows 10 tidak apa-apa, nanti status siap jual mengikuti input <strong>Seri Windows</strong> di QC harian terbaru.
+          Lokasi stok, SSD health, battery health, dan keputusan siap jual diisi di QC harian. Unit Intel Gen 8 ke atas wajib Windows 11 sebelum masuk katalog.
         </div>
 
-        <button className="primaryButton" type="submit">Simpan Unit dan QC Awal</button>
+        <button className="primaryButton" type="submit">Simpan Unit ke Batch</button>
       </form>
     </section>
   );

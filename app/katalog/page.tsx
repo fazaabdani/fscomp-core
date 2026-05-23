@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MapPin, MessageCircle, ShieldCheck } from "lucide-react";
+import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
-import { displayCatalogImageUrl } from "@/lib/catalog-image";
 import { getCatalogPageData } from "@/lib/db-data";
 
 export const dynamic = "force-dynamic";
@@ -51,14 +51,7 @@ function CatalogSection({
       <div className="catalogPublicGrid">
         {units.length === 0 ? <div className="emptyState">Belum ada unit siap jual di lokasi ini.</div> : units.map((unit) => (
           <article className="catalogPublicCard" key={unit.id}>
-            {unit.catalogImageUrl ? (
-              <img className="catalogImage" src={displayCatalogImageUrl(unit.catalogImageUrl)} alt={`Foto ${unit.model}`} />
-            ) : (
-              <div className="catalogImagePlaceholder">
-                <strong>FS</strong>
-                <span>Foto menyusul</span>
-              </div>
-            )}
+            <CatalogPhoto url={unit.catalogImageUrl} className="catalogImage" alt={`Foto ${unit.model}`} />
             <div className="catalogCardTop">
               <span className="unitNumber">{unit.nomorUnit}</span>
               <span className="statusPill green">{unit.stockLocation}</span>

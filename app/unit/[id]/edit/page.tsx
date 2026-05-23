@@ -47,8 +47,8 @@ export default async function EditUnitPage({ params }: { params: { id: string } 
           </label>
         </div>
         <div className="numberGrid">
-          <label>Harga Modal<input name="hargaModal" type="number" defaultValue={unit.hargaModal} /></label>
-          <label>Harga Jual<input name="hargaJualRekomendasi" type="number" defaultValue={unit.hargaJualRekomendasi} required /></label>
+          <label>Harga Modal<input name="hargaModal" inputMode="numeric" defaultValue={`Rp ${unit.hargaModal.toLocaleString("id-ID")}`} /></label>
+          <label>Harga Jual<input name="hargaJualRekomendasi" inputMode="numeric" defaultValue={`Rp ${unit.hargaJualRekomendasi.toLocaleString("id-ID")}`} required /></label>
         </div>
         <div className="numberGrid">
           <label>Ukuran LCD<input name="lcdSize" defaultValue={unit.lcdSize} /></label>

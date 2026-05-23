@@ -24,7 +24,7 @@ export default async function DashboardPage() {
           <p className="eyebrow">Operasional hari ini</p>
           <h1>Kontrol unit FS Comp dari PSI sampai siap jual.</h1>
           <p className="heroCopy">
-            Pantau QC awal, QC harian, status batch, reminder OS/aplikasi, dan rekomendasi AI sebelum unit masuk katalog.
+            Pantau input batch, QC harian lengkap, status batch, reminder OS/aplikasi, dan rekomendasi AI sebelum unit masuk katalog.
           </p>
         </div>
         <div className="heroActions">

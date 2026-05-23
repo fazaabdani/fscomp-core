@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, CalendarClock, Cpu, HardDrive, MessageCircle, QrCode, ShieldCheck } from "lucide-react";
+import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
-import { displayCatalogImageUrl } from "@/lib/catalog-image";
 import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 import { getCurrentUser } from "@/lib/session";
@@ -50,14 +50,12 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
 
         <div className="contentGrid">
           <section className="panel wide">
-            {unit.catalogImageUrl ? (
-              <img className="publicUnitPhoto" src={displayCatalogImageUrl(unit.catalogImageUrl)} alt={`Foto ${unit.model}`} />
-            ) : (
-              <div className="publicUnitPhoto placeholderPhoto">
-                <strong>FS</strong>
-                <span>Foto unit menyusul</span>
-              </div>
-            )}
+            <CatalogPhoto
+              url={unit.catalogImageUrl}
+              className="publicUnitPhoto"
+              placeholderClassName="publicUnitPhoto placeholderPhoto"
+              alt={`Foto ${unit.model}`}
+            />
           </section>
 
           <aside className="panel">
@@ -114,28 +112,28 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
         <section className="panel wide">
           <div className="panelHeader">
             <div>
-              <p className="eyebrow">QC Awal</p>
-              <h2>Hardware dan software</h2>
+              <p className="eyebrow">Data masuk batch</p>
+              <h2>Spek inti dari input awal</h2>
             </div>
             <ShieldCheck size={22} />
           </div>
           <div className="qcColumns">
             <div>
-              <h3>Hardware</h3>
+              <h3>Spek dan minus</h3>
               {qcAwal ? visibleHardware.map(([key, value]) => (
                 <div className="kv" key={key}><span>{key}</span><strong>{value}</strong></div>
-              )) : <p className="bodyText">QC awal belum diisi.</p>}
+              )) : <p className="bodyText">{unit.entryNotes}</p>}
             </div>
             <div>
-              <h3>Software</h3>
+              <h3>Catatan Windows awal</h3>
               {qcAwal ? Object.entries(qcAwal.software).map(([key, value]) => (
                 <div className="kv" key={key}><span>{key}</span><strong>{value}</strong></div>
-              )) : <p className="bodyText">QC software belum diisi.</p>}
+              )) : <p className="bodyText">Keputusan siap jual mengikuti QC harian lengkap terbaru.</p>}
             </div>
           </div>
           <div className="infoBox">
-            <strong>Catatan QC</strong>
-            <p>{qcAwal?.catatan ?? "-"}</p>
+            <strong>Catatan input batch</strong>
+            <p>{qcAwal?.catatan ?? unit.entryNotes}</p>
           </div>
         </section>
 
@@ -163,7 +161,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
         </aside>
       </div>
 
-      {isInternalUser ? <section className="panel">
+      {isInternalUser && qcAwal ? <section className="panel">
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Reminder OS & aplikasi</p>

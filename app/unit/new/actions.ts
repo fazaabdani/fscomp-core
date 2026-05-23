@@ -1,6 +1,6 @@
 "use server";
 
-import { QcResult, Role, SaleLocation, UnitStatus } from "@prisma/client";
+import { SaleLocation, UnitStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { batches as demoBatches } from "@/lib/api";
@@ -11,20 +11,12 @@ function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
-function numberValue(formData: FormData, key: string, fallback = 0) {
-  const value = Number(formData.get(key));
+function rupiahValue(formData: FormData, key: string, fallback = 0) {
+  const raw = text(formData, key);
+  const digits = raw.replace(/[^\d]/g, "");
+  if (!digits) return fallback;
+  const value = Number(digits);
   return Number.isFinite(value) ? value : fallback;
-}
-
-async function ensureChecker(name: string, role: "admin" | "teknisi" | "magang") {
-  const email = `${name.toLowerCase().replaceAll(" ", ".")}@fscomp.local`;
-  const dbRole: Role = role === "admin" ? "ADMIN" : role === "teknisi" ? "TEKNISI" : "MAGANG";
-
-  return prisma.user.upsert({
-    where: { email },
-    update: { name, role: dbRole, active: true },
-    create: { name, email, role: dbRole }
-  });
 }
 
 function qcStatusFromFlow(value: string): UnitStatus {
@@ -33,7 +25,7 @@ function qcStatusFromFlow(value: string): UnitStatus {
 }
 
 export async function createUnitWithInitialQcAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "teknisi"]);
+  requireRole(["admin", "teknisi"]);
   const batchId = text(formData, "batchId");
   const nomorUnit = text(formData, "nomorUnit");
   const merk = text(formData, "merk");
@@ -72,20 +64,15 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
     redirect("/batch-psi?error=batch-not-found");
   }
 
-  const checker = await ensureChecker(currentUser.name, currentUser.role);
-  const ssdHealth = numberValue(formData, "ssdHealth");
-  const batteryHealth = numberValue(formData, "batteryHealth");
   const status = (text(formData, "statusObservasi") as UnitStatus) || qcStatusFromFlow(text(formData, "qcFlowStatus"));
-  const qcOk: QcResult = "OK";
-  const minusLower = minus.toLowerCase();
   const featureLower = fiturTambahan.toLowerCase();
   const displayLower = display.toLowerCase();
-  const hasMinus = minus.trim().length > 0;
   const catatan = [
     merk ? `Merk: ${merk}` : "",
     seri ? `Seri: ${seri}` : "",
     fiturTambahan ? `Fitur tambahan: ${fiturTambahan}` : "",
     minus ? `Minus: ${minus}` : "",
+    text(formData, "windowsVersion") ? `Windows masuk: ${text(formData, "windowsVersion")}` : "",
     text(formData, "qcFlowStatus") ? `Status alur: ${text(formData, "qcFlowStatus").replaceAll("_", " ")}` : ""
   ].filter(Boolean).join("\n");
 
@@ -102,50 +89,16 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
       lcdSize: display || text(formData, "lcdSize"),
       lcdResolution: display || text(formData, "lcdResolution"),
       isTouchscreen: text(formData, "isTouchscreen") === "Ya" || displayLower.includes("touch") || featureLower.includes("touch"),
-      hargaModal: numberValue(formData, "hargaModal"),
-      hargaJualRekomendasi: numberValue(formData, "hargaJualRekomendasi"),
-      stockLocation: (text(formData, "stockLocation") || "WIRADESA") as SaleLocation,
+      entryNotes: catatan || null,
+      hargaModal: rupiahValue(formData, "hargaModal"),
+      hargaJualRekomendasi: rupiahValue(formData, "hargaJualRekomendasi"),
+      stockLocation: "WIRADESA" as SaleLocation,
       catalogImageUrl: text(formData, "catalogImageUrl") || null,
-      batteryHealth,
-      ssdHealth,
+      batteryHealth: null,
+      ssdHealth: null,
       statusObservasi: status || "RECHECK",
       tanggalMasuk: batch.tanggalMasuk,
-      tempo: batch.tanggalTempo,
-      qcAwal: {
-        create: {
-          checkerId: checker.id,
-          tanggal: new Date(),
-          status: status || "RECHECK",
-          body: qcOk,
-          bodyBroken: minusLower.includes("body") || minusLower.includes("casing") || minusLower.includes("retak") ? "NOTES" : qcOk,
-          karetBawah: minusLower.includes("karet") ? "NOTES" : qcOk,
-          repaint: minusLower.includes("repaint") ? "NOTES" : qcOk,
-          layar: minusLower.includes("layar") || minusLower.includes("lcd") ? "NOTES" : qcOk,
-          ukuranLcd: qcOk,
-          resolusiLayar: qcOk,
-          touchscreen: displayLower.includes("touch") || featureLower.includes("touch") ? "OK" : qcOk,
-          keyboard: minusLower.includes("keyboard") ? "NOTES" : qcOk,
-          touchpad: minusLower.includes("touchpad") ? "NOTES" : qcOk,
-          trackpoint: minusLower.includes("trackpoint") ? "NOTES" : qcOk,
-          usb: minusLower.includes("usb") ? "NOTES" : qcOk,
-          kamera: minusLower.includes("kamera") || minusLower.includes("camera") ? "NOTES" : qcOk,
-          port: qcOk,
-          speaker: minusLower.includes("speaker") ? "NOTES" : qcOk,
-          mic: minusLower.includes("mic") ? "NOTES" : qcOk,
-          charger: qcOk,
-          battery: batteryHealth < 50 ? "FAIL" : batteryHealth < 70 ? "NOTES" : "OK",
-          ssd: ssdHealth < 80 ? "NOTES" : "OK",
-          seriSsd: qcOk,
-          osInstalled: qcOk,
-          windowsVersion: text(formData, "windowsVersion") || "Windows 11",
-          updateOs: "NOTES",
-          driver: qcOk,
-          securityPatch: "NOTES",
-          aplikasiDefault: qcOk,
-          reminder: hasMinus ? ["Selesaikan minus sebelum siap jual", "Cek update OS dan aplikasi sebelum katalog"] : ["Cek update OS dan aplikasi sebelum katalog"],
-          catatan
-        }
-      }
+      tempo: batch.tanggalTempo
     }
   });
 
@@ -153,5 +106,8 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
   revalidatePath("/qc-harian");
   revalidatePath("/katalog");
   revalidatePath("/");
+  if (text(formData, "qcFlowStatus") === "LANJUT_QC_HARIAN") {
+    redirect(`/qc-harian?unit=${unit.id}`);
+  }
   redirect(`/unit/${unit.id}`);
 }

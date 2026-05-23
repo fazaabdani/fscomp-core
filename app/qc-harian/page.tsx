@@ -16,9 +16,9 @@ const checklist = [
   { label: "Karet bawah", name: "karetBawah", icon: CheckCircle2 }
 ];
 
-export default async function QcHarianPage({ searchParams }: { searchParams?: { saved?: string; error?: string } }) {
+export default async function QcHarianPage({ searchParams }: { searchParams?: { saved?: string; error?: string; unit?: string } }) {
   const { units, dailyQcs } = await getQcHarianPageData();
-  const firstUnit = units[0];
+  const selectedUnit = units.find((unit) => unit.id === searchParams?.unit) ?? units[0];
 
   return (
     <section className="pageStack">
@@ -39,7 +39,7 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
           </div>
           <label>
             Unit
-            <select name="unitId" defaultValue={firstUnit?.id} required>
+            <select name="unitId" defaultValue={selectedUnit?.id} required>
               {units.map((unit) => (
                 <option value={unit.id} key={unit.id}>Unit {unit.nomorUnit} - {unit.model}</option>
               ))}
@@ -54,17 +54,17 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
           <div className="numberGrid">
             <label>
               SSD Health (%)
-              <input name="ssdHealth" type="number" min="0" max="100" defaultValue={firstUnit?.ssdHealth ?? 95} />
+              <input name="ssdHealth" type="number" min="0" max="100" defaultValue={selectedUnit?.ssdHealth ?? 95} />
             </label>
             <label>
               Seri SSD
-              <input name="ssdSerial" defaultValue={firstUnit?.ssdSerial ?? ""} placeholder="Contoh: Samsung PM981 / SN..." />
+              <input name="ssdSerial" defaultValue={selectedUnit?.ssdSerial ?? ""} placeholder="Contoh: Samsung PM981 / SN..." />
             </label>
           </div>
           <div className="numberGrid">
             <label>
               Battery Health (%)
-              <input name="batteryHealth" type="number" min="0" max="100" defaultValue={firstUnit?.batteryHealth ?? 80} />
+              <input name="batteryHealth" type="number" min="0" max="100" defaultValue={selectedUnit?.batteryHealth ?? 80} />
             </label>
             <label>
               Kondisi layar
@@ -76,6 +76,13 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
               </select>
             </label>
           </div>
+          <label>
+            Lokasi stok
+            <select name="stockLocation" defaultValue={selectedUnit?.stockLocation ?? "WIRADESA"}>
+              <option value="WIRADESA">Wiradesa utama</option>
+              <option value="KAJEN">Kajen secondary</option>
+            </select>
+          </label>
           <div className="checkGrid">
             {checklist.map((item) => {
               const Icon = item.icon;

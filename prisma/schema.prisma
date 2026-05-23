@@ -96,6 +96,7 @@ model Unit {
   lcdSize              String?
   lcdResolution        String?
   isTouchscreen        Boolean    @default(false)
+  entryNotes           String?
   hargaModal           Int
   hargaJualRekomendasi Int
   stockLocation        SaleLocation @default(WIRADESA)

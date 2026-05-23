@@ -134,7 +134,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               <textarea name="notes" placeholder="Contoh: DP, transfer BCA, garansi, aksesoris tambahan." />
             </label>
             <button className="primaryButton" type="submit" disabled={readyUnits.length === 0}>Simpan Penjualan</button>
-            {readyUnits.length === 0 ? <div className="emptyState">Belum ada unit siap jual. Pastikan QC awal sudah VERIFIED.</div> : null}
+            {readyUnits.length === 0 ? <div className="emptyState">Belum ada unit siap jual. Pastikan QC harian terakhir sudah lolos.</div> : null}
           </div>
         </div>
       </form>
