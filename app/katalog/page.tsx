@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, MessageCircle, ShieldCheck } from "lucide-react";
+import { CheckCircle2, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
 import { getCatalogPageData } from "@/lib/db-data";
@@ -81,26 +81,67 @@ function CatalogSection({
 export default async function KatalogPage() {
   const { wiradesaUnits, kajenUnits, connected } = await getCatalogPageData();
   const total = wiradesaUnits.length + kajenUnits.length;
+  const features = [
+    ["1", "QC ketat", "Unit dicek sebelum dijual"],
+    ["2", "Garansi toko", "Belanja lebih tenang"],
+    ["3", "Servis profesional", "Teknisi berpengalaman"],
+    ["4", "Stok update", "Data dari Core FS Comp"]
+  ];
 
   return (
     <section className="pageStack katalogPage">
-      <div className="catalogHero">
-        <div>
-          <p className="eyebrow">Katalog FS Comp</p>
-          <h1>Laptop second siap jual, QC jelas</h1>
-          <p className="heroCopy">Unit yang tampil di sini sudah lolos QC harian terakhir, belum terjual, dan siap ditanyakan ke FS Comp.</p>
+      <div className="catalogLandingHero">
+        <div className="catalogHeroCopyPanel">
+          <span className="catalogHeroPill"><CheckCircle2 size={16} /> Katalog Laptop Second FS Comp</span>
+          <h1>Laptop Second <span>Berkualitas</span> Siap Dipilih</h1>
+          <p>Cari laptop ready sesuai kebutuhan panjenengan. Data stok mengikuti sistem Core, lengkap dengan spesifikasi, harga, lokasi stok, foto, dan tombol chat admin.</p>
+          <div className="buttonRow">
+            <a className="primaryButton" href="#produk-ready">Lihat Katalog</a>
+            <a className="greenButton" href="https://wa.me/62816692428" target="_blank" rel="noreferrer">Chat Admin</a>
+            <a className="secondaryButton" href="https://fscomp.id" target="_blank" rel="noreferrer">fscomp.id</a>
+          </div>
         </div>
-        <div className="catalogHeroBadge">
-          <ShieldCheck size={24} />
-          <strong>{total}</strong>
-          <span>unit ready</span>
-          <small>Wiradesa utama</small>
+        <div className="catalogHeroStatsPanel">
+          <div className="catalogHeroStatsGrid">
+            <div className="catalogStatBox">
+              <strong>{total}</strong>
+              <span>Total unit tampil</span>
+            </div>
+            <div className="catalogStatBox">
+              <strong>{total}</strong>
+              <span>Ready stock</span>
+            </div>
+            <div className="catalogStatBox">
+              <strong>{wiradesaUnits.length}</strong>
+              <span>Wiradesa</span>
+            </div>
+            <div className="catalogStatBox">
+              <strong>{kajenUnits.length}</strong>
+              <span>Kajen</span>
+            </div>
+          </div>
+          <p>Harga dan stok mengikuti update dari Core FS Comp. Klik detail unit untuk melihat ringkasan, atau chat admin untuk cek ketersediaan.</p>
         </div>
+      </div>
+
+      <div className="catalogFeatureStrip">
+        {features.map(([number, title, desc]) => (
+          <div className="catalogFeatureItem" key={number}>
+            <span>{number}</span>
+            <strong>{title}</strong>
+            <small>{desc}</small>
+          </div>
+        ))}
       </div>
 
       {!connected ? (
         <div className="infoBox dangerInfo">Katalog belum tersambung ke database production.</div>
       ) : null}
+
+      <div className="catalogSectionTitle" id="produk-ready">
+        <p className="eyebrow">Produk Ready</p>
+        <h2>Pilih laptop sesuai kebutuhan panjenengan</h2>
+      </div>
 
       <CatalogSection title="Stok Wiradesa" subtitle="Lokasi utama" units={wiradesaUnits} />
       <CatalogSection title="Stok Kajen" subtitle="Lokasi secondary" units={kajenUnits} />

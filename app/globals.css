@@ -949,12 +949,16 @@ textarea {
   border-color: rgba(55, 163, 255, 0.72);
 }
 
-.catalogHero {
+.catalogLandingHero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 20px;
-  align-items: end;
-  padding: 28px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.catalogHeroCopyPanel,
+.catalogHeroStatsPanel,
+.catalogFeatureStrip {
   border: 1px solid rgba(55, 163, 255, 0.42);
   border-radius: 10px;
   background:
@@ -962,9 +966,116 @@ textarea {
     linear-gradient(90deg, rgba(55, 163, 255, 0.16), transparent);
 }
 
-.catalogHero h1 {
-  margin: 6px 0 10px;
-  font-size: clamp(32px, 5vw, 64px);
+.catalogHeroCopyPanel,
+.catalogHeroStatsPanel {
+  padding: 28px;
+}
+
+.catalogHeroCopyPanel h1 {
+  max-width: 640px;
+  margin: 22px 0 16px;
+  font-size: clamp(42px, 6vw, 76px);
+  line-height: 0.94;
+}
+
+.catalogHeroCopyPanel h1 span {
+  color: #22d3ee;
+}
+
+.catalogHeroCopyPanel p,
+.catalogHeroStatsPanel p {
+  max-width: 650px;
+  color: #b8cbe1;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.catalogHeroPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1px solid rgba(34, 211, 238, 0.48);
+  border-radius: 999px;
+  background: rgba(34, 211, 238, 0.08);
+  color: #d9fbff;
+  font-weight: 800;
+}
+
+.catalogHeroStatsPanel {
+  display: grid;
+  align-content: space-between;
+  gap: 24px;
+}
+
+.catalogHeroStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.catalogStatBox {
+  display: grid;
+  gap: 8px;
+  min-height: 90px;
+  padding: 18px;
+  border: 1px solid rgba(123, 175, 226, 0.32);
+  border-radius: 10px;
+  background: rgba(38, 70, 96, 0.55);
+}
+
+.catalogStatBox strong {
+  color: #fff;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.catalogStatBox span {
+  color: #b8cbe1;
+  font-size: 13px;
+}
+
+.catalogFeatureStrip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  padding: 14px 18px;
+}
+
+.catalogFeatureItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: center;
+}
+
+.catalogFeatureItem span {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  grid-row: span 2;
+  border: 1px solid rgba(34, 211, 238, 0.54);
+  border-radius: 999px;
+  background: rgba(34, 211, 238, 0.12);
+  color: #22d3ee;
+  font-weight: 900;
+}
+
+.catalogFeatureItem strong {
+  color: #eaf6ff;
+  font-size: 14px;
+}
+
+.catalogFeatureItem small {
+  color: #9fb4cc;
+}
+
+.catalogSectionTitle h2 {
+  margin: 0;
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1.05;
 }
 
 .catalogHeroBadge {
@@ -1768,8 +1879,9 @@ textarea {
   .contentGrid,
   .batchGrid,
   .catalogGrid,
+  .catalogLandingHero,
   .catalogPublicGrid,
-  .catalogHero,
+  .catalogFeatureStrip,
   .qcLayout,
   .salesLayout,
   .cashierMainGrid,
