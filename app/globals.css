@@ -904,6 +904,45 @@ textarea {
   min-height: 34px;
 }
 
+.qcCompactForm,
+.qcCompactForm label,
+.qcCompactForm .numberGrid,
+.qcCompactForm .checkGrid {
+  display: grid;
+  align-content: start;
+  align-items: start;
+}
+
+.qcCompactForm {
+  gap: 8px;
+  align-self: start;
+}
+
+.qcCompactForm label {
+  min-height: 0;
+  margin: 0;
+}
+
+.qcCompactForm select,
+.qcCompactForm input,
+.qcCompactForm textarea {
+  margin: 0;
+}
+
+.qcCompactForm .numberGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.qcCompactForm .checkGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.qcCompactForm .panelHeader {
+  align-items: center;
+}
+
 .linkNote:hover,
 .catalogItem:hover,
 .unitRow:hover {

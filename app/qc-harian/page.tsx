@@ -30,7 +30,7 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
       </div>
 
       <div className="qcLayout">
-        <form className="panel qcForm" action={createDailyQcAction}>
+        <form className="panel qcForm qcCompactForm" action={createDailyQcAction}>
           <div className="panelHeader">
             <div>
               <p className="eyebrow">Input cepat</p>
