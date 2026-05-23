@@ -195,6 +195,7 @@ export async function getUnitForDetail(id: string) {
       lcdSize: unit.lcdSize ?? "-",
       lcdResolution: unit.lcdResolution ?? "-",
       isTouchscreen: unit.isTouchscreen,
+      entryNotes: unit.entryNotes ?? "-",
       hargaModal: unit.hargaModal,
       hargaJualRekomendasi: unit.hargaJualRekomendasi,
       stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
