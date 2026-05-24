@@ -13,7 +13,33 @@ function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: 
     `Harga di katalog: ${formatRupiah(unit.hargaJualRekomendasi)}.`,
     "Apakah unitnya masih ready?"
   ].join("\n");
-  return `https://wa.me/62816692428?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/62816660056?text=${encodeURIComponent(text)}`;
+}
+
+type CatalogUnit = {
+  id: string;
+  nomorUnit: string;
+  model: string;
+  processor: string;
+  ram: string;
+  ssd: string;
+  lcdSize: string;
+  lcdResolution: string;
+  isTouchscreen: boolean;
+  hargaJualRekomendasi: number;
+  catalogImageUrl: string;
+  stockLocation: string;
+  windowsVersion: string;
+};
+
+function sortUnits(units: CatalogUnit[], sort: string) {
+  return [...units].sort((a, b) => {
+    if (sort === "harga-termurah") return a.hargaJualRekomendasi - b.hargaJualRekomendasi;
+    if (sort === "harga-tertinggi") return b.hargaJualRekomendasi - a.hargaJualRekomendasi;
+    if (sort === "nama") return a.model.localeCompare(b.model);
+    if (sort === "unit") return a.nomorUnit.localeCompare(b.nomorUnit, "id", { numeric: true });
+    return 0;
+  });
 }
 
 function CatalogSection({
@@ -23,21 +49,7 @@ function CatalogSection({
 }: {
   title: string;
   subtitle: string;
-  units: Array<{
-    id: string;
-    nomorUnit: string;
-    model: string;
-    processor: string;
-    ram: string;
-    ssd: string;
-    lcdSize: string;
-    lcdResolution: string;
-    isTouchscreen: boolean;
-    hargaJualRekomendasi: number;
-    catalogImageUrl: string;
-    stockLocation: string;
-    windowsVersion: string;
-  }>;
+  units: CatalogUnit[];
 }) {
   return (
     <section className="panel catalogPublicSection">
@@ -78,8 +90,18 @@ function CatalogSection({
   );
 }
 
-export default async function KatalogPage() {
+export default async function KatalogPage({ searchParams }: { searchParams?: { sort?: string; lokasi?: string } }) {
   const { wiradesaUnits, kajenUnits, connected } = await getCatalogPageData();
+  const activeSort = searchParams?.sort ?? "unit";
+  const activeLocation = searchParams?.lokasi ?? "semua";
+  const allUnits = sortUnits([...wiradesaUnits, ...kajenUnits], activeSort);
+  const visibleUnits = activeLocation === "wiradesa"
+    ? sortUnits(wiradesaUnits, activeSort)
+    : activeLocation === "kajen"
+      ? sortUnits(kajenUnits, activeSort)
+      : allUnits;
+  const visibleWiradesa = activeLocation === "kajen" ? [] : visibleUnits.filter((unit) => unit.stockLocation === "Wiradesa");
+  const visibleKajen = activeLocation === "wiradesa" ? [] : visibleUnits.filter((unit) => unit.stockLocation === "Kajen");
   const total = wiradesaUnits.length + kajenUnits.length;
   const features = [
     ["1", "QC ketat", "Unit dicek sebelum dijual"],
@@ -97,7 +119,7 @@ export default async function KatalogPage() {
           <p>Cari laptop ready sesuai kebutuhan panjenengan. Data stok mengikuti sistem Core, lengkap dengan spesifikasi, harga, lokasi stok, foto, dan tombol chat admin.</p>
           <div className="buttonRow">
             <a className="primaryButton" href="#produk-ready">Lihat Katalog</a>
-            <a className="greenButton" href="https://wa.me/62816692428" target="_blank" rel="noreferrer">Chat Admin</a>
+            <a className="greenButton" href="https://wa.me/62816660056" target="_blank" rel="noreferrer">Chat Admin</a>
             <a className="secondaryButton" href="https://fscomp.id" target="_blank" rel="noreferrer">fscomp.id</a>
           </div>
         </div>
@@ -143,8 +165,22 @@ export default async function KatalogPage() {
         <h2>Pilih laptop sesuai kebutuhan panjenengan</h2>
       </div>
 
-      <CatalogSection title="Stok Wiradesa" subtitle="Lokasi utama" units={wiradesaUnits} />
-      <CatalogSection title="Stok Kajen" subtitle="Lokasi secondary" units={kajenUnits} />
+      <div className="catalogSortBar">
+        <div>
+          <strong>{visibleUnits.length}</strong>
+          <span>unit ready ditampilkan</span>
+        </div>
+        <Link className={`sortPill ${activeLocation === "semua" ? "active" : ""}`} href={`/katalog?lokasi=semua&sort=${activeSort}`}>Semua ({total})</Link>
+        <Link className={`sortPill ${activeLocation === "wiradesa" ? "active" : ""}`} href={`/katalog?lokasi=wiradesa&sort=${activeSort}`}>Wiradesa ({wiradesaUnits.length})</Link>
+        <Link className={`sortPill ${activeLocation === "kajen" ? "active" : ""}`} href={`/katalog?lokasi=kajen&sort=${activeSort}`}>Kajen ({kajenUnits.length})</Link>
+        <Link className={`sortPill ${activeSort === "unit" ? "active" : ""}`} href={`/katalog?lokasi=${activeLocation}&sort=unit`}>Urut unit</Link>
+        <Link className={`sortPill ${activeSort === "harga-termurah" ? "active" : ""}`} href={`/katalog?lokasi=${activeLocation}&sort=harga-termurah`}>Termurah</Link>
+        <Link className={`sortPill ${activeSort === "harga-tertinggi" ? "active" : ""}`} href={`/katalog?lokasi=${activeLocation}&sort=harga-tertinggi`}>Tertinggi</Link>
+        <Link className={`sortPill ${activeSort === "nama" ? "active" : ""}`} href={`/katalog?lokasi=${activeLocation}&sort=nama`}>Nama</Link>
+      </div>
+
+      <CatalogSection title="Stok Wiradesa" subtitle="Lokasi utama" units={visibleWiradesa} />
+      <CatalogSection title="Stok Kajen" subtitle="Lokasi secondary" units={visibleKajen} />
     </section>
   );
 }

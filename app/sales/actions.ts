@@ -104,7 +104,9 @@ async function notifySaleToN8n(payload: {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...payload,
-        notifyTo: "0816692428",
+        notifyTo: process.env.WA_OWNER_NUMBER ?? "0816660056",
+        notifyGroup: process.env.WA_REPORT_GROUP_ID ?? "",
+        sourceLocation: payload.location === "WIRADESA" ? "Wiradesa utama" : "Kajen secondary",
         receiptUrl: `${publicUrl}/sales/${payload.saleId}/receipt`,
         customerReceiptUrl: `${publicUrl}/nota/${payload.saleId}`,
         message: [

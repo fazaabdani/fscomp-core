@@ -100,6 +100,7 @@ Role yang dipakai:
 - `admin`: Faza dan Zume. Bisa akses semua, termasuk harga modal, user, batch, AI log, dan sync katalog.
 - `teknisi`: Ludfy dan Rosyadi. Bisa tambah/edit unit, QC awal, QC harian, batch PSI.
 - `magang`: hanya QC harian dan lihat detail unit yang diperlukan.
+- `magang / PKL`: hanya bisa akses **QC Harian**, **QC Tools**, **Katalog**, dan **Label QR**.
 
 Login bisa dibuat pakai email/password biasa dulu. Nanti kalau mau lebih kuat, bisa pakai NextAuth/Auth.js.
 
@@ -139,6 +140,80 @@ Isi alert:
 - QC harian yang punya catatan/gagal.
 - Batch PSI yang mendekati tempo.
 - Link detail unit di `core.fscomp.id`.
+
+## n8n Laporan Penjualan Otomatis
+
+Core akan mengirim webhook setiap ada transaksi penjualan baru kalau environment variable ini diisi di Coolify app:
+
+```env
+N8N_SALES_WEBHOOK_URL="https://n8n-domain-kamu/webhook/fscomp-sale"
+WA_OWNER_NUMBER="0816660056"
+WA_REPORT_GROUP_ID="isi_id_grup_whatsapp_jika_ada"
+```
+
+Payload yang dikirim Core ke n8n berisi:
+
+- `message`: teks laporan untuk owner.
+- `notifyTo`: nomor owner.
+- `notifyGroup`: ID grup WhatsApp jika ada.
+- `sourceLocation`: Wiradesa utama atau Kajen secondary.
+- `invoiceNumber`, `unit`, `subtotal`, `grossProfit`, `paymentMethod`.
+- `buyerName`, `buyerPhone`, `buyerAddress`.
+- `receiptUrl`: nota internal.
+- `customerReceiptUrl`: nota untuk pelanggan.
+- `customerMessage`: chat terima kasih + tips perawatan laptop.
+
+Flow n8n yang disarankan:
+
+```text
+Webhook Trigger /fscomp-sale
+  -> WhatsApp Send Message ke {{$json.notifyTo}} pakai {{$json.message}}
+  -> IF {{$json.notifyGroup}} tidak kosong
+       -> WhatsApp Send Message ke grup pakai {{$json.message}}
+  -> IF {{$json.customerPhone}} tidak kosong
+       -> WhatsApp Send Message ke pembeli pakai {{$json.customerMessage}}
+```
+
+Untuk WhatsApp, pilih salah satu provider:
+
+- **Wablas**: paling mudah untuk nomor Indonesia.
+- **Fonnte**: mudah dan murah untuk WA blast/notif.
+- **WAHA / Baileys self-hosted**: lebih fleksibel, tapi perlu maintenance.
+
+Rekomendasi awal FS Comp: pakai **Fonnte atau Wablas** dulu supaya cepat jalan.
+
+## Chief Assistant FS Comp
+
+Chief Assistant sebaiknya dibuat sebagai workflow n8n harian:
+
+```text
+Schedule Trigger setiap jam 09:00 dan 17:00
+  -> HTTP Request GET https://core.fscomp.id/api/integrations/n8n/whatsapp-alert
+  -> OpenAI / AI Agent merapikan ringkasan
+  -> WhatsApp Send Message ke owner dan grup
+```
+
+Tugas Chief Assistant:
+
+- Mengingatkan unit yang belum siap jual.
+- Menandai unit Gen 8 ke atas yang belum Windows 11.
+- Mengingatkan batch PSI mendekati tempo.
+- Mengingatkan unit problem yang perlu keputusan retur/potongan.
+- Membuat ringkasan stok siap katalog.
+- Membuat ringkasan penjualan harian dan profit kotor.
+
+Prompt AI Agent yang bisa dipakai:
+
+```text
+Kamu adalah Chief Assistant FS Comp. Baca data JSON dari Core.
+Buat laporan singkat, tegas, dan mudah ditindaklanjuti.
+Prioritaskan:
+1. Unit yang menghambat siap jual.
+2. Unit problem yang perlu keputusan owner.
+3. Batch yang mendekati tempo pembayaran.
+4. Rekomendasi tindakan hari ini.
+Gunakan Bahasa Indonesia, gaya operasional toko.
+```
 
 ## Sync ke katalog.fscomp.id via Spreadsheet
 

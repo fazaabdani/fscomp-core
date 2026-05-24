@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {currentUser ? (
               <>
                 <Link href="/">Dashboard</Link>
-                <Link href="/batch-psi">Batch PSI</Link>
+                {currentUser.role !== "magang" ? <Link href="/batch-psi">Batch PSI</Link> : null}
                 <Link href="/qc-harian">QC Harian</Link>
                 <Link href="/qc-tools">QC Tools</Link>
                 <Link href="/katalog">Katalog</Link>

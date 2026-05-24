@@ -72,7 +72,7 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
             <p>Laptop second berkualitas, QC jelas, garansi tertulis.</p>
             <small>FS Comp / FS Media Comp Wiradesa</small>
             <small>Jl. Wiradesa No.1 RT 22 RW 05, Desa Wiradesa, Kecamatan Wiradesa, Kabupaten Pekalongan, Jawa Tengah 51152</small>
-            <small>HP/WA toko: 0816692428</small>
+            <small>HP/WA toko: 0816660056</small>
           </div>
           <div className="receiptMeta">
             <strong>{sale.invoiceNumber}</strong>

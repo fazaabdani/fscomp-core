@@ -16,7 +16,7 @@ function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: 
     `Harga di katalog: ${formatRupiah(unit.hargaJualRekomendasi)}.`,
     "Apakah unitnya masih ready?"
   ].join("\n");
-  return `https://wa.me/62816692428?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/62816660056?text=${encodeURIComponent(text)}`;
 }
 
 export default async function UnitDetailPage({ params }: { params: { id: string } }) {

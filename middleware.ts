@@ -9,9 +9,31 @@ function isPublicPath(pathname: string) {
   return false;
 }
 
+function roleFromUsername(username?: string) {
+  if (username === "admin") return "admin";
+  if (username === "teknisi") return "teknisi";
+  if (username === "pkl") return "magang";
+  return null;
+}
+
+function isMagangAllowedPath(pathname: string) {
+  if (pathname === "/login") return true;
+  if (pathname === "/qc-harian") return true;
+  if (pathname === "/qc-tools") return true;
+  if (pathname === "/katalog") return true;
+  if (pathname === "/label") return true;
+  return false;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasSession = Boolean(request.cookies.get("fscomp_user")?.value);
+  const username = request.cookies.get("fscomp_user")?.value;
+  const hasSession = Boolean(username);
+  const role = roleFromUsername(username);
+
+  if (role === "magang" && !isMagangAllowedPath(pathname) && !isPublicPath(pathname)) {
+    return NextResponse.redirect(new URL("/qc-harian", request.url));
+  }
 
   if (hasSession || isPublicPath(pathname)) {
     return NextResponse.next();
