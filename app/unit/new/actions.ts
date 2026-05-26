@@ -64,6 +64,18 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
     redirect("/batch-psi?error=batch-not-found");
   }
 
+  const existingUnit = await prisma.unit.findFirst({
+    where: {
+      batchId,
+      nomorUnit
+    },
+    select: { id: true }
+  });
+
+  if (existingUnit) {
+    redirect(`/unit/new?batch=${batchId}&error=duplicate-unit`);
+  }
+
   const status = (text(formData, "statusObservasi") as UnitStatus) || qcStatusFromFlow(text(formData, "qcFlowStatus"));
   const featureLower = fiturTambahan.toLowerCase();
   const displayLower = display.toLowerCase();

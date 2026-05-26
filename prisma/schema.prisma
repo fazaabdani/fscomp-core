@@ -85,7 +85,7 @@ model BatchPSI {
 
 model Unit {
   id                   String     @id @default(cuid())
-  nomorUnit            String     @unique
+  nomorUnit            String
   batchId              String
   supplier             String
   model                String
@@ -117,6 +117,8 @@ model Unit {
   aiLogs      AiLog[]
   catalogSync CatalogSync[]
   sales       Sale[]
+
+  @@unique([batchId, nomorUnit])
 }
 
 model QcAwal {

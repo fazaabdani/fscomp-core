@@ -4,9 +4,15 @@ import { getBatchesForPage } from "@/lib/db-data";
 import { requireRole } from "@/lib/session";
 import { createUnitWithInitialQcAction } from "./actions";
 
-export default async function NewUnitPage({ searchParams }: { searchParams?: { batch?: string } }) {
+export default async function NewUnitPage({ searchParams }: { searchParams?: { batch?: string; error?: string } }) {
   requireRole(["admin", "teknisi"]);
   const batches = await getBatchesForPage();
+  const errorMessage =
+    searchParams?.error === "duplicate-unit"
+      ? "Nomor unit ini sudah ada di batch yang sama. Pakai nomor lain, misalnya 1a / 1b."
+      : searchParams?.error === "required"
+        ? "Data utama belum lengkap. Nomor unit, batch, model/seri, processor, RAM, dan storage wajib diisi."
+        : "";
 
   return (
     <section className="pageStack">
@@ -20,6 +26,7 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
       </div>
 
       <form className="panel formGrid" action={createUnitWithInitialQcAction}>
+        {errorMessage ? <div className="infoBox dangerInfo">{errorMessage}</div> : null}
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Data utama</p>

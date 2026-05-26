@@ -5,12 +5,16 @@ import { getUnitForEdit } from "@/lib/db-data";
 import { requireRole } from "@/lib/session";
 import { updateUnitAction } from "./actions";
 
-export default async function EditUnitPage({ params }: { params: { id: string } }) {
+export default async function EditUnitPage({ params, searchParams }: { params: { id: string }; searchParams?: { error?: string } }) {
   requireRole(["admin"]);
   const unit = await getUnitForEdit(params.id);
   if (!unit) notFound();
 
   const action = updateUnitAction.bind(null, unit.id);
+  const errorMessage =
+    searchParams?.error === "duplicate-unit"
+      ? "Nomor unit ini sudah dipakai unit lain di batch yang sama."
+      : "";
 
   return (
     <section className="pageStack">
@@ -23,6 +27,7 @@ export default async function EditUnitPage({ params }: { params: { id: string } 
       </div>
 
       <form className="panel formGrid" action={action}>
+        {errorMessage ? <div className="infoBox dangerInfo">{errorMessage}</div> : null}
         <div className="numberGrid">
           <label>Nomor Unit<input name="nomorUnit" defaultValue={unit.nomorUnit} required /></label>
           <label>Batch<input defaultValue={unit.batchName} disabled /></label>

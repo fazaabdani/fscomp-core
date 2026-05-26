@@ -25,11 +25,33 @@ function rupiahValue(formData: FormData, key: string, fallback = 0) {
 
 export async function updateUnitAction(unitId: string, formData: FormData) {
   requireRole(["admin"]);
+  const nomorUnit = text(formData, "nomorUnit");
+  const currentUnit = await prisma.unit.findUnique({
+    where: { id: unitId },
+    select: { batchId: true }
+  });
+
+  if (!currentUnit) {
+    redirect("/batch-psi?error=unit-not-found");
+  }
+
+  const duplicateUnit = await prisma.unit.findFirst({
+    where: {
+      batchId: currentUnit.batchId,
+      nomorUnit,
+      NOT: { id: unitId }
+    },
+    select: { id: true }
+  });
+
+  if (duplicateUnit) {
+    redirect(`/unit/${unitId}/edit?error=duplicate-unit`);
+  }
 
   await prisma.unit.update({
     where: { id: unitId },
     data: {
-      nomorUnit: text(formData, "nomorUnit"),
+      nomorUnit,
       model: text(formData, "model"),
       processor: text(formData, "processor"),
       ram: text(formData, "ram"),
