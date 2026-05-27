@@ -14,28 +14,41 @@ export function roleFromDb(role: Role): User["role"] {
   return "magang";
 }
 
+async function syncLoginUser(user: User) {
+  const email = `${user.username}@fscomp.local`;
+  const existingByUsername = await prisma.user.findUnique({ where: { username: user.username } });
+  const existingByEmail = await prisma.user.findUnique({ where: { email } });
+  const existing = existingByUsername ?? existingByEmail;
+
+  if (existing) {
+    return prisma.user.update({
+      where: { id: existing.id },
+      data: {
+        name: user.name,
+        username: user.username,
+        password: user.password,
+        role: roleToDb(user.role),
+        active: true
+      }
+    });
+  }
+
+  return prisma.user.create({
+    data: {
+      name: user.name,
+      username: user.username,
+      password: user.password,
+      email,
+      role: roleToDb(user.role),
+      active: true
+    }
+  });
+}
+
 export async function ensureDefaultLoginUsers() {
-  await Promise.all(
-    demoUsers.map((user) =>
-      prisma.user.upsert({
-        where: { username: user.username },
-        update: {
-          name: user.name,
-          password: user.password,
-          role: roleToDb(user.role),
-          active: true
-        },
-        create: {
-          name: user.name,
-          username: user.username,
-          password: user.password,
-          email: `${user.username}@fscomp.local`,
-          role: roleToDb(user.role),
-          active: true
-        }
-      })
-    )
-  );
+  for (const user of demoUsers) {
+    await syncLoginUser(user);
+  }
 }
 
 export async function getLoginUser(username: string, password: string) {
@@ -60,20 +73,5 @@ export async function getLoginUser(username: string, password: string) {
 
 export async function getOrCreateDbUserForSession(user: User) {
   await ensureDefaultLoginUsers();
-  return prisma.user.upsert({
-    where: { username: user.username },
-    update: {
-      name: user.name,
-      role: roleToDb(user.role),
-      active: true
-    },
-    create: {
-      name: user.name,
-      username: user.username,
-      password: user.password,
-      email: `${user.username}@fscomp.local`,
-      role: roleToDb(user.role),
-      active: true
-    }
-  });
+  return syncLoginUser(user);
 }
