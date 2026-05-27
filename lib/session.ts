@@ -5,8 +5,19 @@ import { demoUsers, type User } from "./auth";
 const sessionCookieName = "fscomp_user";
 
 export function getCurrentUser(): User | null {
-  const username = cookies().get(sessionCookieName)?.value;
-  return demoUsers.find((user) => user.username === username) ?? null;
+  const rawSession = cookies().get(sessionCookieName)?.value;
+  if (!rawSession) return null;
+
+  try {
+    const parsed = JSON.parse(rawSession) as User;
+    if (parsed?.username && parsed?.role && parsed?.name) {
+      return parsed;
+    }
+  } catch {
+    return demoUsers.find((user) => user.username === rawSession) ?? null;
+  }
+
+  return demoUsers.find((user) => user.username === rawSession) ?? null;
 }
 
 export function requireUser() {

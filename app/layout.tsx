@@ -31,8 +31,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/qc-tools">QC Tools</Link>
                 <Link href="/katalog">Katalog</Link>
                 <Link href="/label">Label QR</Link>
+                <Link href="/attendance">Absensi</Link>
                 {currentUser.role === "admin" ? <Link href="/sales">Penjualan</Link> : null}
                 {currentUser.role === "admin" ? <Link href="/finance">Keuangan</Link> : null}
+                {currentUser.role === "admin" ? <Link href="/users">User</Link> : null}
               </>
             ) : null}
             <Link href="/login">{currentUser ? `${currentUser.name} (${currentUser.role})` : "Login"}</Link>

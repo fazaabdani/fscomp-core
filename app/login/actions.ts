@@ -4,17 +4,29 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { demoUsers } from "@/lib/auth";
 import { getSessionCookieName } from "@/lib/session";
+import { getLoginUser } from "@/lib/user-store";
 
 export async function loginAction(formData: FormData) {
   const username = String(formData.get("username") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const user = demoUsers.find((item) => item.username === username && item.password === password);
+  let user = null;
+
+  try {
+    user = await getLoginUser(username, password);
+  } catch {
+    user = demoUsers.find((item) => item.username === username && item.password === password) ?? null;
+  }
 
   if (!user) {
     redirect("/login?error=login");
   }
 
-  cookies().set(getSessionCookieName(), user.username, {
+  cookies().set(getSessionCookieName(), JSON.stringify({
+    name: user.name,
+    username: user.username,
+    password: "",
+    role: user.role
+  }), {
     httpOnly: true,
     sameSite: "lax",
     path: "/",

@@ -1,0 +1,20 @@
+ALTER TABLE "User" ADD COLUMN "username" TEXT;
+ALTER TABLE "User" ADD COLUMN "password" TEXT;
+
+CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+CREATE TABLE "Attendance" (
+  "id" TEXT NOT NULL,
+  "userId" TEXT NOT NULL,
+  "tanggal" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "checkInAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "checkOutAt" TIMESTAMP(3),
+  "status" TEXT NOT NULL DEFAULT 'HADIR',
+  "note" TEXT,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL,
+
+  CONSTRAINT "Attendance_pkey" PRIMARY KEY ("id")
+);
+
+ALTER TABLE "Attendance" ADD CONSTRAINT "Attendance_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

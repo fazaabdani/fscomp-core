@@ -2,7 +2,7 @@ import { LockKeyhole } from "lucide-react";
 import { getCurrentUser } from "@/lib/session";
 import { loginAction, logoutAction } from "./actions";
 
-export default function LoginPage() {
+export default function LoginPage({ searchParams }: { searchParams?: { error?: string } }) {
   const currentUser = getCurrentUser();
 
   return (
@@ -29,6 +29,7 @@ export default function LoginPage() {
         </form>
       ) : (
       <form className="panel formGrid loginCard" action={loginAction}>
+        {searchParams?.error === "login" ? <div className="infoBox dangerInfo">Username atau password salah, atau user sedang nonaktif.</div> : null}
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Akses internal</p>

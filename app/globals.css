@@ -241,6 +241,30 @@ main {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.statCard {
+  display: grid;
+  gap: 8px;
+  min-height: 104px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(18, 40, 69, 0.9), rgba(10, 20, 35, 0.92));
+  box-shadow: var(--shadow);
+}
+
+.statCard svg {
+  color: var(--blue);
+}
+
+.statCard span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.statCard strong {
+  font-size: 22px;
+}
+
 .salesStatsGrid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
@@ -489,6 +513,73 @@ main {
 
 .noMargin {
   margin-top: 0;
+}
+
+.twoColumn {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.15fr);
+  gap: 18px;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.dataTable th,
+.dataTable td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(91, 141, 206, 0.2);
+  text-align: left;
+  vertical-align: top;
+}
+
+.dataTable th {
+  color: #7cc7ff;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.dataTable small {
+  color: var(--muted);
+}
+
+.listStack {
+  display: grid;
+  gap: 10px;
+}
+
+.unitListItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(5, 12, 22, 0.58);
+}
+
+.unitListItem small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.dangerButton {
+  color: #ffd2cf;
+  border-color: rgba(255, 111, 97, 0.5);
+}
+
+.checkLine {
+  align-content: center;
+  grid-template-columns: auto 1fr;
+  gap: 10px !important;
 }
 
 .spreadsheetPaste {
