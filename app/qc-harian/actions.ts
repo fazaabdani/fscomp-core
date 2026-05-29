@@ -31,7 +31,7 @@ function computeDailyStatus({
   noteChecks: boolean[];
 }): DailyStatus {
   if (batteryHealth < 70 || ssdHealth < 80) return "TIDAK_LOLOS";
-  if (checks.some((item) => !item)) return "LOLOS_DENGAN_CATATAN";
+  if (checks.some((item) => !item)) return "TIDAK_LOLOS";
   if (noteChecks.some((item) => !item)) return "LOLOS_DENGAN_CATATAN";
   return "LOLOS";
 }
@@ -174,7 +174,7 @@ export async function createDailyQcAction(formData: FormData) {
         batteryHealth,
         ssdSerial: ssdSerial || unit.ssdSerial,
         stockLocation,
-        statusObservasi: status === "LOLOS" ? "VERIFIED_WITH_NOTES" : "RECHECK"
+        statusObservasi: status === "TIDAK_LOLOS" ? "RECHECK" : "VERIFIED_WITH_NOTES"
       }
     });
 
