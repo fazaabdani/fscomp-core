@@ -2,21 +2,29 @@ import { CalendarDays, FileClock, Plus, ReceiptText } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
 import { canEditBatch, canEditUnit } from "@/lib/auth";
-import { getBatchesForPage } from "@/lib/db-data";
+import { getBatchesForManagementPage } from "@/lib/batch-page-data";
 import { getCurrentUser } from "@/lib/session";
 import { statusTone } from "@/lib/constants";
+import { deleteUnitFromBatchAction } from "./actions";
 
-export default async function BatchPsiPage() {
+const paymentTone: Record<string, string> = {
+  Lunas: "green",
+  "Belum jatuh tempo": "yellow",
+  "Mendekati tempo": "yellow",
+  "Butuh follow up": "red"
+};
+
+export default async function BatchPsiPage({ searchParams }: { searchParams?: { error?: string; deleted?: string } }) {
   const currentUser = getCurrentUser();
   const canManageBatch = currentUser ? canEditBatch(currentUser) : false;
   const canManageUnit = currentUser ? canEditUnit(currentUser) : false;
-  const batches = await getBatchesForPage();
+  const batches = await getBatchesForManagementPage();
 
   return (
     <section className="pageStack">
       <div className="sectionTitle">
         <div>
-          <p className="eyebrow">Batch PSI</p>
+          <p className="eyebrow">Batch</p>
           <h1>Management batch masuk dan tempo pembayaran</h1>
         </div>
         {canManageBatch ? (
@@ -29,9 +37,13 @@ export default async function BatchPsiPage() {
         )}
       </div>
 
+      {searchParams?.deleted === "unit" ? <div className="successBox">Unit berhasil dihapus dari batch.</div> : null}
+      {searchParams?.error === "unit-sold" ? <div className="infoBox dangerInfo">Unit sudah terjual, jadi tidak bisa dihapus dari batch.</div> : null}
+
       <div className="batchManagement">
         {batches.map((batch) => {
-          const batchUnits = batch.units;
+          const soldUnits = batch.units.filter((unit) => unit.soldAt);
+          const batchUnits = batch.units.filter((unit) => !unit.soldAt);
           const totalModal = batchUnits.reduce((sum, unit) => sum + unit.hargaModal, 0);
           return (
             <article className="panel" key={batch.id}>
@@ -40,13 +52,14 @@ export default async function BatchPsiPage() {
                   <p className="eyebrow">{batch.nomorBatch}</p>
                   <h2>{batch.supplier}</h2>
                 </div>
-                <span className="statusPill yellow">{batch.statusPembayaran}</span>
+                <span className={`statusPill ${paymentTone[batch.statusPembayaran] ?? "yellow"}`}>{batch.statusPembayaran}</span>
               </div>
 
               <div className="batchMeta">
                 <span><CalendarDays size={16} /> Masuk {batch.tanggalMasuk}</span>
                 <span><FileClock size={16} /> Tempo {batch.tanggalTempo}</span>
                 <span><ReceiptText size={16} /> Modal {formatRupiah(totalModal)}</span>
+                {soldUnits.length > 0 ? <span><ReceiptText size={16} /> {soldUnits.length} unit terjual disembunyikan</span> : null}
               </div>
               <p className="bodyText">{batch.catatan}</p>
 
@@ -59,9 +72,17 @@ export default async function BatchPsiPage() {
                       <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
                     </span>
                     <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
-                    {canManageUnit ? <Link className="secondaryButton compactButton" href={`/unit/${unit.id}/edit`}>Edit Unit</Link> : null}
+                    {canManageUnit ? (
+                      <div className="buttonRow noMargin">
+                        <Link className="secondaryButton compactButton" href={`/unit/${unit.id}/edit`}>Edit Unit</Link>
+                        <form action={deleteUnitFromBatchAction.bind(null, unit.id)}>
+                          <button className="secondaryButton compactButton dangerButton" type="submit">Hapus</button>
+                        </form>
+                      </div>
+                    ) : null}
                   </div>
                 ))}
+                {batchUnits.length === 0 ? <div className="emptyState">Tidak ada unit aktif di batch ini.</div> : null}
               </div>
 
               {canManageBatch ? (
