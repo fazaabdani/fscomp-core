@@ -67,3 +67,33 @@ export async function updateBatchAction(batchId: string, formData: FormData) {
   revalidatePath("/batch-psi");
   redirect("/batch-psi");
 }
+
+export async function deleteUnitFromBatchAction(unitId: string) {
+  requireRole(["admin", "teknisi"]);
+
+  const unit = await prisma.unit.findUnique({
+    where: { id: unitId },
+    select: { id: true, batchId: true, soldAt: true }
+  });
+
+  if (!unit) {
+    redirect("/batch-psi?error=unit-not-found");
+  }
+
+  if (unit.soldAt) {
+    redirect("/batch-psi?error=unit-sold");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.catalogSync.deleteMany({ where: { unitId } });
+    await tx.aiLog.deleteMany({ where: { unitId } });
+    await tx.qcHarian.deleteMany({ where: { unitId } });
+    await tx.qcAwal.deleteMany({ where: { unitId } });
+    await tx.unit.delete({ where: { id: unitId } });
+  });
+
+  revalidatePath("/batch-psi");
+  revalidatePath(`/batch-psi/${unit.batchId}/history`);
+  revalidatePath(`/batch-psi/${unit.batchId}/payment`);
+  redirect("/batch-psi?deleted=unit");
+}
