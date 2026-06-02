@@ -27,7 +27,7 @@ export default async function PublicReceiptPage({ params }: { params: { id: stri
             <strong>{sale.invoiceNumber}</strong>
             <span>{sale.soldAt}</span>
             <span><MapPin size={14} /> {sale.location}</span>
-            <QRCodeSVG value={publicReceiptUrl} size={58} />
+            <QRCodeSVG value={publicReceiptUrl} size={42} />
           </div>
         </header>
 
