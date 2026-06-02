@@ -79,7 +79,7 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
             <strong>{sale.invoiceNumber}</strong>
             <span>{sale.soldAt}</span>
             <span><MapPin size={14} /> {sale.location}</span>
-            <QRCodeSVG value={publicReceiptUrl} size={58} />
+            <QRCodeSVG value={publicReceiptUrl} size={42} />
           </div>
         </header>
 
