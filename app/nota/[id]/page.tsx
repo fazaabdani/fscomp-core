@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { MapPin, Receipt } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { formatRupiah } from "@/lib/api";
 import { getSaleReceipt } from "@/lib/db-data";
 
@@ -8,6 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function PublicReceiptPage({ params }: { params: { id: string } }) {
   const sale = await getSaleReceipt(params.id);
   if (!sale || sale.voidedAt) notFound();
+  const publicReceiptUrl = `${process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id"}/nota/${sale.id}`;
 
   return (
     <section className="pageStack receiptPage">
@@ -25,6 +27,7 @@ export default async function PublicReceiptPage({ params }: { params: { id: stri
             <strong>{sale.invoiceNumber}</strong>
             <span>{sale.soldAt}</span>
             <span><MapPin size={14} /> {sale.location}</span>
+            <QRCodeSVG value={publicReceiptUrl} size={58} />
           </div>
         </header>
 
@@ -78,7 +81,7 @@ export default async function PublicReceiptPage({ params }: { params: { id: stri
         <footer className="receiptFooter">
           <div className="receiptTerms">
             <strong>Ketentuan garansi</strong>
-            <p>Garansi software 3 bulan dan hardware 3 minggu berlaku sesuai hasil QC dan pemakaian normal. Simpan nota digital ini sebagai bukti transaksi.</p>
+            <p>Garansi software {sale.warrantySoftware} dan hardware {sale.warrantyHardware} berlaku sesuai hasil QC dan pemakaian normal. Simpan nota digital ini sebagai bukti transaksi.</p>
           </div>
           <div className="receiptTotals">
             <span>Total</span>
