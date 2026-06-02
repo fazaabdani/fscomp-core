@@ -36,7 +36,7 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
         </div>
 
         <div className="numberGrid">
-          <label>Nomor Unit<input name="nomorUnit" placeholder="4 atau 4a" required /></label>
+          <label>Nomor Unit<input name="nomorUnit" placeholder="29" required /></label>
           <label>Batch
             <select name="batchId" defaultValue={searchParams?.batch} required>
               {batches.map((batch) => <option value={batch.id} key={batch.id}>{batch.nomorBatch}</option>)}
@@ -92,7 +92,7 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
         </label>
 
         <div className="infoBox compactInfo">
-          Lokasi stok, SSD health, battery health, dan keputusan siap jual diisi di QC harian. Unit Intel Gen 8 ke atas wajib Windows 11 sebelum masuk katalog.
+          Sistem otomatis menambah kode tanggal batch di belakang nomor unit, contoh 29 menjadi 29-020626. Lokasi stok, SSD health, battery health, dan keputusan siap jual diisi di QC harian.
         </div>
 
         <button className="primaryButton" type="submit">Simpan Unit ke Batch</button>
