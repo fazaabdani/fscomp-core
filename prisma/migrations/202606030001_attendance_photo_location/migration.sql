@@ -1,0 +1,4 @@
+ALTER TABLE "Attendance" ADD COLUMN "photoDataUrl" TEXT;
+ALTER TABLE "Attendance" ADD COLUMN "latitude" DOUBLE PRECISION;
+ALTER TABLE "Attendance" ADD COLUMN "longitude" DOUBLE PRECISION;
+ALTER TABLE "Attendance" ADD COLUMN "accuracy" DOUBLE PRECISION;
