@@ -1,27 +1,31 @@
-import { Download, MonitorCheck } from "lucide-react";
+import { FolderOpen, MonitorCheck } from "lucide-react";
 import { requireRole } from "@/lib/session";
 import { QcToolsClient } from "./QcToolsClient";
 
-const downloadTools = [
+const localShares = [
   {
-    name: "CrystalDiskInfo",
-    purpose: "Cek SSD health, power-on hours, dan indikasi storage problem.",
-    url: "/tools/CrystalDiskInfo.zip"
+    name: "FS APPS",
+    purpose: "Installer aplikasi umum untuk persiapan unit.",
+    unc: "\\\\192.168.18.15\\FS-APPS",
+    url: "file://///192.168.18.15/FS-APPS"
   },
   {
-    name: "HWiNFO",
-    purpose: "Cek spek umum, sensor, battery, suhu, dan perangkat terdeteksi.",
-    url: "/tools/HWiNFO.zip"
+    name: "FS DRIVER",
+    purpose: "Driver laptop dan perangkat pendukung.",
+    unc: "\\\\192.168.18.15\\FS-DRIVER",
+    url: "file://///192.168.18.15/FS-DRIVER"
   },
   {
-    name: "CPU-Z",
-    purpose: "Validasi processor, RAM, mainboard, dan detail sistem.",
-    url: "/tools/CPU-Z.zip"
+    name: "FS TOOLS",
+    purpose: "Tools QC lokal seperti cek SSD, baterai, sensor, dan spek.",
+    unc: "\\\\192.168.18.15\\FS-TOOLS",
+    url: "file://///192.168.18.15/FS-TOOLS"
   },
   {
-    name: "BatteryInfoView",
-    purpose: "Cek battery wear, designed capacity, full charge capacity.",
-    url: "/tools/BatteryInfoView.zip"
+    name: "FS ISO",
+    purpose: "File ISO Windows dan kebutuhan instalasi OS.",
+    unc: "\\\\192.168.18.15\\FS-ISO",
+    url: "file://///192.168.18.15/FS-ISO"
   }
 ];
 
@@ -44,20 +48,21 @@ export default function QcToolsPage() {
       <section className="panel">
         <div className="panelHeader">
           <div>
-            <p className="eyebrow">Windows portable tools</p>
-            <h2>Tools lokal dari sistem Core</h2>
+            <p className="eyebrow">Folder lokal toko</p>
+            <h2>Shortcut tools di server 192.168.18.15</h2>
           </div>
-          <Download size={22} />
+          <FolderOpen size={22} />
         </div>
         <div className="infoBox noTopMargin">
-          Upload file portable ke folder <strong>public/tools</strong> dengan nama sesuai kartu di bawah. Setelah deploy, teknisi tinggal download dari Core tanpa cari ulang ke website resmi.
+          Tools portable tidak disimpan di core.fscomp.id. Jika browser memblokir link folder, salin alamat UNC di kartu lalu buka lewat File Explorer.
         </div>
         <div className="downloadGrid">
-          {downloadTools.map((tool) => (
-            <a className="downloadCard" href={tool.url} download key={tool.name}>
+          {localShares.map((tool) => (
+            <a className="downloadCard" href={tool.url} target="_blank" rel="noreferrer" key={tool.name}>
               <strong>{tool.name}</strong>
               <p>{tool.purpose}</p>
-              <span>Download dari Core</span>
+              <code>{tool.unc}</code>
+              <span>Buka folder lokal</span>
             </a>
           ))}
         </div>
