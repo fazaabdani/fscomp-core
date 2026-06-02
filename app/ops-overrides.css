@@ -1,0 +1,150 @@
+.topbar nav a.activeNav {
+  border: 1px solid rgba(55, 163, 255, 0.5);
+  background: rgba(55, 163, 255, 0.2);
+  color: #ffffff;
+  box-shadow: inset 0 -2px 0 #37a3ff;
+}
+
+.salesControlBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.salesControlBar > div {
+  display: grid;
+  margin-right: auto;
+}
+
+.salesControlBar strong {
+  font-size: 22px;
+}
+
+.salesControlBar span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.transactionScroll {
+  max-height: 760px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.unitRow form,
+.paymentRow form {
+  margin: 0;
+}
+
+.attendanceCapture {
+  display: grid;
+  gap: 10px;
+}
+
+.attendancePhotoPreview,
+.attendanceThumb {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.attendancePhotoPreview {
+  width: 150px;
+  height: 110px;
+}
+
+.attendanceThumb {
+  display: block;
+  width: 72px;
+  height: 52px;
+  margin-bottom: 6px;
+}
+
+@page receipt {
+  size: A5 landscape;
+  margin: 5mm;
+}
+
+@media print {
+  .receiptPage {
+    max-width: none;
+    page: receipt;
+  }
+
+  .receiptPaper {
+    width: 200mm;
+    min-height: 136mm;
+    font-size: 9pt;
+  }
+
+  .receiptTop {
+    padding-bottom: 4mm;
+  }
+
+  .receiptLogo {
+    width: 8mm;
+    height: 8mm;
+    margin-bottom: 1.5mm;
+    font-size: 8pt;
+  }
+
+  .receiptTop h2 {
+    font-size: 18pt;
+  }
+
+  .receiptTop p,
+  .receiptTop small,
+  .receiptTerms p {
+    margin-top: 1mm;
+    line-height: 1.18;
+  }
+
+  .receiptMeta {
+    gap: 1.5mm;
+  }
+
+  .receiptMeta strong {
+    font-size: 10pt;
+  }
+
+  .receiptInfoGrid {
+    gap: 2mm;
+    margin: 4mm 0;
+  }
+
+  .receiptInfoGrid div,
+  .receiptUnit,
+  .receiptTerms,
+  .receiptTotals {
+    padding: 2.4mm;
+    border-radius: 1.6mm;
+  }
+
+  .receiptUnit {
+    margin-bottom: 4mm;
+  }
+
+  .receiptTableHead,
+  .receiptLine {
+    grid-template-columns: minmax(0, 1fr) 18mm 28mm 30mm;
+    padding: 2mm 2.6mm;
+    gap: 2mm;
+  }
+
+  .receiptFooter {
+    grid-template-columns: minmax(0, 1fr) 44mm;
+    margin-top: 4mm;
+  }
+
+  .receiptTotals strong {
+    font-size: 17pt;
+  }
+
+  .receiptBankNote {
+    margin-top: 3mm;
+    padding-top: 2mm;
+    font-size: 7pt;
+  }
+}
