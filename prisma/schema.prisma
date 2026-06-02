@@ -80,6 +80,10 @@ model Attendance {
   checkOutAt  DateTime?
   status      String   @default("HADIR")
   note        String?
+  photoDataUrl String?
+  latitude    Float?
+  longitude   Float?
+  accuracy    Float?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
