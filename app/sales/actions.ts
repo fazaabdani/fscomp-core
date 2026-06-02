@@ -26,6 +26,13 @@ function textArray(formData: FormData, key: string) {
   return formData.getAll(key).map((value) => String(value ?? "").trim());
 }
 
+function warrantyText(formData: FormData, key: string, fallbackAmount: number, fallbackUnit: "minggu" | "bulan") {
+  const amount = Math.max(1, numberValue(formData, `${key}Amount`) || fallbackAmount);
+  const unitInput = text(formData, `${key}Unit`).toLowerCase();
+  const unit = unitInput === "minggu" || unitInput === "bulan" ? unitInput : fallbackUnit;
+  return `${amount} ${unit}`;
+}
+
 function mapLocation(value: string): SaleLocation {
   return value === "KAJEN" ? "KAJEN" : "WIRADESA";
 }
@@ -141,6 +148,8 @@ export async function createSaleAction(formData: FormData) {
   const buyerAddress = text(formData, "buyerAddress");
   const notes = text(formData, "notes");
   const location = mapLocation(text(formData, "location"));
+  const warrantySoftware = warrantyText(formData, "warrantySoftware", 3, "bulan");
+  const warrantyHardware = warrantyText(formData, "warrantyHardware", 3, "minggu");
   const itemNames = textArray(formData, "itemName");
   const itemCategories = textArray(formData, "itemCategory");
   const itemQty = numberArray(formData, "itemQty");
@@ -216,8 +225,8 @@ export async function createSaleAction(formData: FormData) {
           buyerName: buyerName || null,
           buyerPhone: buyerPhone || null,
           buyerAddress: buyerAddress || null,
-          warrantySoftware: "3 bulan",
-          warrantyHardware: "3 minggu",
+          warrantySoftware,
+          warrantyHardware,
           notes: notes || null
         }
       });
