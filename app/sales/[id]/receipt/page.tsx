@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, MapPin, MessageCircle, Receipt } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { formatRupiah } from "@/lib/api";
 import { getSaleReceipt } from "@/lib/db-data";
 import { requireRole } from "@/lib/session";
@@ -78,6 +79,7 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
             <strong>{sale.invoiceNumber}</strong>
             <span>{sale.soldAt}</span>
             <span><MapPin size={14} /> {sale.location}</span>
+            <QRCodeSVG value={publicReceiptUrl} size={58} />
           </div>
         </header>
 
@@ -131,7 +133,7 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
         <footer className="receiptFooter">
           <div className="receiptTerms">
             <strong>Ketentuan garansi</strong>
-            <p>Garansi software 3 bulan dan hardware 3 minggu berlaku sesuai hasil QC dan pemakaian normal. Data pribadi pembeli disarankan dibackup mandiri.</p>
+            <p>Garansi software {sale.warrantySoftware} dan hardware {sale.warrantyHardware} berlaku sesuai hasil QC dan pemakaian normal. Data pribadi pembeli disarankan dibackup mandiri.</p>
           </div>
           <div className="receiptTotals">
             <span>Total</span>
