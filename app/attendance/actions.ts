@@ -22,6 +22,16 @@ function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
+function numberOrNull(formData: FormData, key: string) {
+  const value = Number(formData.get(key));
+  return Number.isFinite(value) ? value : null;
+}
+
+function photoValue(formData: FormData) {
+  const value = text(formData, "photoDataUrl");
+  return value.startsWith("data:image/jpeg;base64,") && value.length < 300000 ? value : null;
+}
+
 export async function checkInAction(formData: FormData) {
   const currentUser = requireRole(["admin", "teknisi", "magang"]);
   const dbUser = await getOrCreateDbUserForSession(currentUser);
@@ -41,7 +51,11 @@ export async function checkInAction(formData: FormData) {
     data: {
       userId: dbUser.id,
       status: "HADIR",
-      note: text(formData, "note") || null
+      note: text(formData, "note") || null,
+      photoDataUrl: photoValue(formData),
+      latitude: numberOrNull(formData, "latitude"),
+      longitude: numberOrNull(formData, "longitude"),
+      accuracy: numberOrNull(formData, "accuracy")
     }
   });
 
