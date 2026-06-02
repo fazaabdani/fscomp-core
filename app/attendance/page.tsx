@@ -2,6 +2,7 @@ import { Clock3, LogIn, LogOut, UsersRound } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { getOrCreateDbUserForSession } from "@/lib/user-store";
+import { AttendanceCapture } from "./AttendanceCapture";
 import { checkInAction, checkOutAction } from "./actions";
 
 function formatTime(date?: Date | null) {
@@ -70,7 +71,7 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
         <div>
           <p className="eyebrow">Absensi</p>
           <h1>Catat kehadiran tim FS Comp</h1>
-          <p className="bodyText">User cukup klik masuk dan pulang. Admin bisa melihat rekap semua user.</p>
+          <p className="bodyText">User klik masuk dan pulang. Saat masuk, sistem bisa menyimpan foto dan koordinat lokasi.</p>
         </div>
         <Clock3 size={28} />
       </div>
@@ -109,6 +110,7 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
             </div>
             {isOpen ? <LogOut size={22} /> : <LogIn size={22} />}
           </div>
+          {!isOpen ? <AttendanceCapture /> : null}
           <label>Catatan opsional
             <textarea name="note" placeholder="Contoh: masuk shift sore, izin keluar beli sparepart, dll." />
           </label>
@@ -129,6 +131,7 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
                 <div>
                   <strong>{record.user.name}</strong>
                   <small>{formatTime(record.checkInAt)} - {formatTime(record.checkOutAt)}</small>
+                  {record.latitude && record.longitude ? <small>{record.latitude.toFixed(5)}, {record.longitude.toFixed(5)} / akurasi {Math.round(record.accuracy ?? 0)} m</small> : null}
                 </div>
                 <span className={`statusPill ${record.checkOutAt ? "green" : "yellow"}`}>{record.checkOutAt ? "Selesai" : "Aktif"}</span>
               </div>
@@ -153,6 +156,7 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
                 <th>Nama</th>
                 <th>Masuk</th>
                 <th>Pulang</th>
+                <th>Foto/Lokasi</th>
                 <th>Catatan</th>
               </tr>
             </thead>
@@ -163,6 +167,10 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
                   <td>{record.user.name}</td>
                   <td>{formatTime(record.checkInAt)}</td>
                   <td>{formatTime(record.checkOutAt)}</td>
+                  <td>
+                    {record.photoDataUrl ? <img className="attendanceThumb" src={record.photoDataUrl} alt={`Absensi ${record.user.name}`} /> : null}
+                    {record.latitude && record.longitude ? <small>{record.latitude.toFixed(5)}, {record.longitude.toFixed(5)}</small> : "-"}
+                  </td>
                   <td>{record.note || "-"}</td>
                 </tr>
               ))}
