@@ -33,6 +33,13 @@ function warrantyText(formData: FormData, key: string, fallbackAmount: number, f
   return `${amount} ${unit}`;
 }
 
+function hasBundledBagAndMouse(items: { name: string; qty: number }[]) {
+  const normalizedItems = items.map((item) => ({ name: item.name.toLowerCase(), qty: item.qty }));
+  const hasBag = normalizedItems.some((item) => item.qty > 0 && item.name.includes("tas"));
+  const hasMouse = normalizedItems.some((item) => item.qty > 0 && item.name.includes("mouse"));
+  return hasBag && hasMouse;
+}
+
 function mapLocation(value: string): SaleLocation {
   return value === "KAJEN" ? "KAJEN" : "WIRADESA";
 }
@@ -206,7 +213,8 @@ export async function createSaleAction(formData: FormData) {
 
   const subtotal = items.reduce((sum, item) => sum + item.qty * item.unitPrice, 0);
   const totalCost = items.reduce((sum, item) => sum + item.qty * item.unitCost, 0);
-  const grossProfit = subtotal - totalCost;
+  const bundleHandlingCost = hasBundledBagAndMouse(items) ? 50000 : 0;
+  const grossProfit = subtotal - totalCost - bundleHandlingCost;
   let saleId = "";
   const invoice = invoiceNumber();
 
