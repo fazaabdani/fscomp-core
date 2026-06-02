@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
+import { NavLinks } from "./NavLinks";
 import "./globals.css";
+import "./ops-overrides.css";
 
 export const metadata: Metadata = {
   title: "FS Comp Core",
-  description: "Manajemen unit, batch PSI, QC, label QR, dan AI reporting FS Comp."
+  description: "Manajemen unit, batch, QC, label QR, dan AI reporting FS Comp."
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -19,25 +21,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <span className="brandMark">FS</span>
             <span>
               <strong>FS Comp Core</strong>
-              <small>Unit, QC, PSI, Label QR</small>
+              <small>Unit, QC, Batch, Label QR</small>
             </span>
           </Link>
           <nav>
-            {currentUser ? (
-              <>
-                <Link href="/">Dashboard</Link>
-                {currentUser.role !== "magang" ? <Link href="/batch-psi">Batch PSI</Link> : null}
-                <Link href="/qc-harian">QC Harian</Link>
-                <Link href="/qc-tools">QC Tools</Link>
-                <Link href="/katalog">Katalog</Link>
-                <Link href="/label">Label QR</Link>
-                <Link href="/attendance">Absensi</Link>
-                {currentUser.role === "admin" ? <Link href="/sales">Penjualan</Link> : null}
-                {currentUser.role === "admin" ? <Link href="/finance">Keuangan</Link> : null}
-                {currentUser.role === "admin" ? <Link href="/users">User</Link> : null}
-              </>
-            ) : null}
-            <Link href="/login">{currentUser ? `${currentUser.name} (${currentUser.role})` : "Login"}</Link>
+            <NavLinks currentUser={currentUser} />
           </nav>
         </header>
         <main>{children}</main>
