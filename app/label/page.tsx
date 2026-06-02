@@ -4,16 +4,28 @@ import { statusTone } from "@/lib/constants";
 import { getUnitsForLabel } from "@/lib/db-data";
 import { PrintButton } from "./PrintButton";
 
+function healthValue(value: unknown) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) && numberValue > 0 ? `${numberValue}%` : "-";
+}
+
 export default async function LabelPage({ searchParams }: { searchParams?: { unit?: string; mode?: string } }) {
   const units = await getUnitsForLabel();
   const selectedId = searchParams?.unit ?? units[0].id;
   const mode = searchParams?.mode === "qc" ? "qc" : "simple";
   const selected = units.find((unit) => unit.id === selectedId) ?? units[0];
   const detailUrl = `https://core.fscomp.id/unit/${selected.id}`;
-  const qcItems = [
-    ...Object.entries(selected.qcAwal.hardware ?? {}),
-    ...Object.entries(selected.qcAwal.software ?? {})
-  ];
+  const selectedWithHealth = selected as typeof selected & { ssdHealth?: number; batteryHealth?: number };
+  const qcItemMap = new Map<string, string | number>(
+    [
+      ...Object.entries(selected.qcAwal.hardware ?? {}),
+      ...Object.entries(selected.qcAwal.software ?? {})
+    ].filter(([key]) => key !== "Office")
+  );
+  qcItemMap.set("SSD", healthValue(selectedWithHealth.ssdHealth ?? qcItemMap.get("SSD")));
+  qcItemMap.set("Battery", healthValue(selectedWithHealth.batteryHealth ?? qcItemMap.get("Battery")));
+  qcItemMap.delete("Office");
+  const qcItems = Array.from(qcItemMap.entries());
 
   return (
     <section className="pageStack">
