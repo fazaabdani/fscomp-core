@@ -127,7 +127,33 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
           <div className="cashierSide">
             <div className="receiptWarranty">
               <Gift size={18} />
-              <span>Garansi otomatis di nota: software 3 bulan, hardware 3 minggu.</span>
+              <span>Garansi nota diisi manual. Pilih minggu atau bulan sesuai transaksi.</span>
+            </div>
+            <div className="numberGrid">
+              <label>
+                Garansi software
+                <input name="warrantySoftwareAmount" type="number" min="1" defaultValue={3} />
+              </label>
+              <label>
+                Periode software
+                <select name="warrantySoftwareUnit" defaultValue="bulan">
+                  <option value="minggu">Minggu</option>
+                  <option value="bulan">Bulan</option>
+                </select>
+              </label>
+            </div>
+            <div className="numberGrid">
+              <label>
+                Garansi hardware
+                <input name="warrantyHardwareAmount" type="number" min="1" defaultValue={3} />
+              </label>
+              <label>
+                Periode hardware
+                <select name="warrantyHardwareUnit" defaultValue="minggu">
+                  <option value="minggu">Minggu</option>
+                  <option value="bulan">Bulan</option>
+                </select>
+              </label>
             </div>
             <label>
               Catatan
