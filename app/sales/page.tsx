@@ -7,10 +7,17 @@ import { createSaleAction, voidSaleAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string } }) {
+export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string; sort?: string } }) {
   requireRole(["admin"]);
   const { readyUnits, sales, stats, salesReady, blockedByDailyQc } = await getSalesPageData();
   const firstUnit = readyUnits[0];
+  const sort = searchParams?.sort ?? "terbaru";
+  const sortedSales = [...sales].sort((a, b) => {
+    if (sort === "lama") return a.soldAt.localeCompare(b.soldAt);
+    if (sort === "terbesar") return b.soldPrice - a.soldPrice;
+    if (sort === "batal") return Number(Boolean(b.voidedAt)) - Number(Boolean(a.voidedAt));
+    return b.soldAt.localeCompare(a.soldAt);
+  });
 
   return (
     <section className="pageStack">
@@ -26,7 +33,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
       <div className="statsGrid salesStatsGrid">
         <div className="metric metric-blue"><Receipt size={21} /><span>Unit siap jual</span><strong>{stats.readyCount}</strong></div>
         <div className="metric metric-green"><ShoppingCart size={21} /><span>Transaksi</span><strong>{stats.soldCount}</strong></div>
-        <Link className="metric metric-cyan" href="/finance"><Receipt size={21} /><span>Laporan</span><strong>Keuangan</strong></Link>
+        <Link className="metric metric-cyan" href="/finance"><Receipt size={21} /><span>Rekap</span><strong>Admin</strong></Link>
       </div>
 
       {!salesReady ? (
@@ -122,7 +129,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
                 <input aria-label={`${item.name} modal`} name="itemCost" type="number" inputMode="numeric" min="0" step="1000" defaultValue={item.cost} />
               </div>
             ))}
-            <small className="formHint">Qty 0 = item tidak ikut. Nominal ditulis angka rupiah tanpa titik, contoh 4100000.</small>
+            <small className="formHint">Qty 0 = item tidak ikut. Jika transaksi dapat tas dan mouse, profit otomatis dikurangi Rp 50.000.</small>
           </div>
           <div className="cashierSide">
             <div className="receiptWarranty">
@@ -172,8 +179,18 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
             <h2>Penjualan terbaru</h2>
           </div>
         </div>
-        <div className="paymentRows">
-          {sales.length === 0 ? <div className="emptyState">Belum ada transaksi.</div> : sales.map((sale) => (
+        <div className="salesControlBar">
+          <div>
+            <strong>{sales.length}</strong>
+            <span>transaksi tercatat</span>
+          </div>
+          <Link className={`sortPill ${sort === "terbaru" ? "active" : ""}`} href="/sales?sort=terbaru">Terbaru</Link>
+          <Link className={`sortPill ${sort === "lama" ? "active" : ""}`} href="/sales?sort=lama">Terlama</Link>
+          <Link className={`sortPill ${sort === "terbesar" ? "active" : ""}`} href="/sales?sort=terbesar">Nominal besar</Link>
+          <Link className={`sortPill ${sort === "batal" ? "active" : ""}`} href="/sales?sort=batal">Batal</Link>
+        </div>
+        <div className="paymentRows transactionScroll">
+          {sortedSales.length === 0 ? <div className="emptyState">Belum ada transaksi.</div> : sortedSales.map((sale) => (
             <div className={`paymentRow saleRow ${sale.voidedAt ? "voidedSaleRow" : ""}`} key={sale.id}>
               <span>{sale.invoiceNumber}</span>
               <div>
@@ -184,7 +201,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               {sale.voidedAt ? (
                 <span className="statusPill red">Batal</span>
               ) : (
-                <span className={sale.grossProfit >= 0 ? "profitText" : "lossText"}>{formatRupiah(sale.grossProfit)}</span>
+                <span className="statusPill green">Aktif</span>
               )}
               <Link className="secondaryButton compactButton" href={`/sales/${sale.id}/receipt`}>Nota / Cetak ulang</Link>
               {!sale.voidedAt ? (
