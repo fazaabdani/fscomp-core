@@ -1,7 +1,7 @@
 import { QRCodeSVG } from "qrcode.react";
 import { formatRupiah } from "@/lib/api";
 import { statusTone } from "@/lib/constants";
-import { getUnitsForLabel } from "@/lib/db-data";
+import { getUnitsForLabel } from "@/lib/label-data";
 import { PrintButton } from "./PrintButton";
 
 function healthValue(value: unknown) {
