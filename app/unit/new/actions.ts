@@ -19,6 +19,18 @@ function rupiahValue(formData: FormData, key: string, fallback = 0) {
   return Number.isFinite(value) ? value : fallback;
 }
 
+function unitDateCode(date: Date) {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = String(date.getFullYear()).slice(-2);
+  return `${day}${month}${year}`;
+}
+
+function unitNumberWithBatchDate(rawNomorUnit: string, batchDate: Date) {
+  if (/-\d{6}$/.test(rawNomorUnit)) return rawNomorUnit;
+  return `${rawNomorUnit}-${unitDateCode(batchDate)}`;
+}
+
 function qcStatusFromFlow(value: string): UnitStatus {
   if (value === "CANDIDATE_RETUR") return "CANDIDATE_RETUR";
   return "RECHECK";
@@ -27,7 +39,7 @@ function qcStatusFromFlow(value: string): UnitStatus {
 export async function createUnitWithInitialQcAction(formData: FormData) {
   requireRole(["admin", "teknisi"]);
   const batchId = text(formData, "batchId");
-  const nomorUnit = text(formData, "nomorUnit");
+  const rawNomorUnit = text(formData, "nomorUnit");
   const merk = text(formData, "merk");
   const seri = text(formData, "seri");
   const model = text(formData, "model") || [merk, seri].filter(Boolean).join(" ");
@@ -38,7 +50,7 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
   const fiturTambahan = text(formData, "fiturTambahan");
   const minus = text(formData, "minus") || text(formData, "catatan");
 
-  if (!batchId || !nomorUnit || !model || !processor || !ram || !ssd) {
+  if (!batchId || !rawNomorUnit || !model || !processor || !ram || !ssd) {
     redirect(`/unit/new?batch=${batchId}&error=required`);
   }
 
@@ -63,6 +75,8 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
   if (!batch) {
     redirect("/batch-psi?error=batch-not-found");
   }
+
+  const nomorUnit = unitNumberWithBatchDate(rawNomorUnit, batch.tanggalMasuk);
 
   const existingUnit = await prisma.unit.findFirst({
     where: {
