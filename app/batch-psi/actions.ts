@@ -72,6 +72,10 @@ export async function updateBatchAction(batchId: string, formData: FormData) {
   const tanggalTempo = text(formData, "tanggalTempo");
   const statusPembayaran = text(formData, "statusPembayaran") || "Belum jatuh tempo";
   const catatan = text(formData, "catatan");
+  const hasChargerFields =
+    formData.has("jumlahLaptopDatang") ||
+    formData.has("jumlahChargerDatang") ||
+    chargerTypes.some((chargerType) => formData.has(chargerFieldName(chargerType)));
 
   await prisma.batchPSI.update({
     where: { id: batchId },
@@ -80,9 +84,13 @@ export async function updateBatchAction(batchId: string, formData: FormData) {
       supplier,
       tanggalMasuk: new Date(tanggalMasuk),
       tanggalTempo: new Date(tanggalTempo),
-      jumlahLaptopDatang: numberOrNull(formData, "jumlahLaptopDatang"),
-      jumlahChargerDatang: numberOrNull(formData, "jumlahChargerDatang"),
-      chargerCounts: chargerCountsFromForm(formData),
+      ...(hasChargerFields
+        ? {
+            jumlahLaptopDatang: numberOrNull(formData, "jumlahLaptopDatang"),
+            jumlahChargerDatang: numberOrNull(formData, "jumlahChargerDatang"),
+            chargerCounts: chargerCountsFromForm(formData)
+          }
+        : {}),
       statusPembayaran: paymentStatusMap[statusPembayaran] ?? "BELUM_JATUH_TEMPO",
       catatan
     }
