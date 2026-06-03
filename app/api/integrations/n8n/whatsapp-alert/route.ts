@@ -32,7 +32,7 @@ export async function GET() {
   ]);
 
   const problemUnits = units
-    .filter((unit) => unit.statusObservasi === "RECHECK" || unit.statusObservasi === "CANDIDATE_RETUR")
+    .filter((unit) => unit.statusObservasi === "RECHECK" || unit.statusObservasi === "CANDIDATE_RETUR" || unit.statusObservasi === "RETUR_DISTRIBUTOR")
     .map((unit) => ({
       nomorUnit: unit.nomorUnit,
       model: unit.model,
