@@ -3,6 +3,7 @@
 import { PaymentStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { chargerFieldName, chargerTypes } from "@/lib/charger-options";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 
@@ -13,15 +14,32 @@ const paymentStatusMap: Record<string, PaymentStatus> = {
   Lunas: "LUNAS"
 };
 
+function text(formData: FormData, key: string) {
+  return String(formData.get(key) ?? "").trim();
+}
+
+function numberOrNull(formData: FormData, key: string) {
+  const raw = text(formData, key).replace(/[^\d]/g, "");
+  if (!raw) return null;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : null;
+}
+
+function chargerCountsFromForm(formData: FormData) {
+  return Object.fromEntries(
+    chargerTypes.map((chargerType) => [chargerType, numberOrNull(formData, chargerFieldName(chargerType)) ?? 0])
+  );
+}
+
 export async function createBatchAction(formData: FormData) {
   requireRole(["admin", "teknisi"]);
 
-  const nomorBatch = String(formData.get("nomorBatch") ?? "").trim();
-  const supplier = String(formData.get("supplier") ?? "").trim();
-  const tanggalMasuk = String(formData.get("tanggalMasuk") ?? "");
-  const tanggalTempo = String(formData.get("tanggalTempo") ?? "");
-  const statusPembayaran = String(formData.get("statusPembayaran") ?? "Belum jatuh tempo");
-  const catatan = String(formData.get("catatan") ?? "").trim();
+  const nomorBatch = text(formData, "nomorBatch");
+  const supplier = text(formData, "supplier");
+  const tanggalMasuk = text(formData, "tanggalMasuk");
+  const tanggalTempo = text(formData, "tanggalTempo");
+  const statusPembayaran = text(formData, "statusPembayaran") || "Belum jatuh tempo";
+  const catatan = text(formData, "catatan");
 
   if (!nomorBatch || !supplier || !tanggalMasuk || !tanggalTempo) {
     redirect("/batch-psi/new?error=required");
@@ -33,6 +51,9 @@ export async function createBatchAction(formData: FormData) {
       supplier,
       tanggalMasuk: new Date(tanggalMasuk),
       tanggalTempo: new Date(tanggalTempo),
+      jumlahLaptopDatang: numberOrNull(formData, "jumlahLaptopDatang"),
+      jumlahChargerDatang: numberOrNull(formData, "jumlahChargerDatang"),
+      chargerCounts: chargerCountsFromForm(formData),
       statusPembayaran: paymentStatusMap[statusPembayaran] ?? "BELUM_JATUH_TEMPO",
       catatan
     }
@@ -45,12 +66,12 @@ export async function createBatchAction(formData: FormData) {
 export async function updateBatchAction(batchId: string, formData: FormData) {
   requireRole(["admin", "teknisi"]);
 
-  const nomorBatch = String(formData.get("nomorBatch") ?? "").trim();
-  const supplier = String(formData.get("supplier") ?? "").trim();
-  const tanggalMasuk = String(formData.get("tanggalMasuk") ?? "");
-  const tanggalTempo = String(formData.get("tanggalTempo") ?? "");
-  const statusPembayaran = String(formData.get("statusPembayaran") ?? "Belum jatuh tempo");
-  const catatan = String(formData.get("catatan") ?? "").trim();
+  const nomorBatch = text(formData, "nomorBatch");
+  const supplier = text(formData, "supplier");
+  const tanggalMasuk = text(formData, "tanggalMasuk");
+  const tanggalTempo = text(formData, "tanggalTempo");
+  const statusPembayaran = text(formData, "statusPembayaran") || "Belum jatuh tempo";
+  const catatan = text(formData, "catatan");
 
   await prisma.batchPSI.update({
     where: { id: batchId },
@@ -59,6 +80,9 @@ export async function updateBatchAction(batchId: string, formData: FormData) {
       supplier,
       tanggalMasuk: new Date(tanggalMasuk),
       tanggalTempo: new Date(tanggalTempo),
+      jumlahLaptopDatang: numberOrNull(formData, "jumlahLaptopDatang"),
+      jumlahChargerDatang: numberOrNull(formData, "jumlahChargerDatang"),
+      chargerCounts: chargerCountsFromForm(formData),
       statusPembayaran: paymentStatusMap[statusPembayaran] ?? "BELUM_JATUH_TEMPO",
       catatan
     }
