@@ -39,6 +39,7 @@ export async function getUnitsForLabel() {
         ? {
             Layar: qcResultFromText(latestDaily.screenCondition, "Normal"),
             Keyboard: qcResultFromBoolean(latestDaily.keyboard),
+            ...(latestDaily.keyboardBacklight ? { Backlight: "OK" } : {}),
             USB: qcResultFromBoolean(latestDaily.usb),
             Kamera: qcResultFromBoolean(latestDaily.camera),
             Touchpad: qcResultFromBoolean(latestDaily.touchpad),
