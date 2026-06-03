@@ -8,9 +8,11 @@ export type User = {
 };
 
 export const demoUsers: User[] = [
-  { name: "Ludfy", username: "admin", password: "admin123", role: "admin" },
-  { name: "Rosyadi", username: "teknisi", password: "admin123", role: "teknisi" },
-  { name: "PKL", username: "pkl", password: "pkl", role: "magang" }
+  { name: "Faza", username: "faza", password: "admin123", role: "admin" },
+  { name: "Zume", username: "zume", password: "admin123", role: "admin" },
+  { name: "Ludfy", username: "ludfy", password: "admin123", role: "admin" },
+  { name: "Rosyadi", username: "rosyadi", password: "admin123", role: "teknisi" },
+  { name: "Sales", username: "sales", password: "admin123", role: "sales" }
 ];
 
 export function canViewPrice(user: User) {
