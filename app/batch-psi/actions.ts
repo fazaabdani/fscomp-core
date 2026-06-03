@@ -97,3 +97,35 @@ export async function deleteUnitFromBatchAction(unitId: string) {
   revalidatePath(`/batch-psi/${unit.batchId}/payment`);
   redirect("/batch-psi?deleted=unit");
 }
+
+export async function markUnitReturnedAction(unitId: string) {
+  requireRole(["admin", "teknisi"]);
+
+  const unit = await prisma.unit.findUnique({
+    where: { id: unitId },
+    select: { id: true, batchId: true, soldAt: true, entryNotes: true }
+  });
+
+  if (!unit) {
+    redirect("/batch-psi?error=unit-not-found");
+  }
+
+  if (unit.soldAt) {
+    redirect("/batch-psi?error=unit-sold-retur");
+  }
+
+  const returNote = `Retur distributor ${new Date().toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta" })}`;
+
+  await prisma.unit.update({
+    where: { id: unitId },
+    data: {
+      statusObservasi: "RETUR_DISTRIBUTOR",
+      entryNotes: [unit.entryNotes, returNote].filter(Boolean).join("\n")
+    }
+  });
+
+  revalidatePath("/batch-psi");
+  revalidatePath(`/batch-psi/${unit.batchId}/history`);
+  revalidatePath(`/batch-psi/${unit.batchId}/payment`);
+  redirect("/batch-psi?returned=unit");
+}
