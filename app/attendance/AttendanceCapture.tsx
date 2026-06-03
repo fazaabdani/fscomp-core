@@ -14,7 +14,7 @@ export function AttendanceCapture() {
   const streamRef = useRef<MediaStream | null>(null);
   const [photoDataUrl, setPhotoDataUrl] = useState("");
   const [location, setLocation] = useState<LocationState>({ latitude: "", longitude: "", accuracy: "" });
-  const [status, setStatus] = useState("Aktifkan kamera dan lokasi sebelum absen.");
+  const [status, setStatus] = useState("Foto dan lokasi wajib sebelum absen masuk.");
 
   useEffect(() => {
     return () => {
