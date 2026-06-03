@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { batches as demoBatches } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { unitNumberWithBatchDate } from "@/lib/unit-number";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -17,18 +18,6 @@ function rupiahValue(formData: FormData, key: string, fallback = 0) {
   if (!digits) return fallback;
   const value = Number(digits);
   return Number.isFinite(value) ? value : fallback;
-}
-
-function unitDateCode(date: Date) {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = String(date.getFullYear()).slice(-2);
-  return `${day}${month}${year}`;
-}
-
-function unitNumberWithBatchDate(rawNomorUnit: string, batchDate: Date) {
-  if (/-\d{6}$/.test(rawNomorUnit)) return rawNomorUnit;
-  return `${rawNomorUnit}-${unitDateCode(batchDate)}`;
 }
 
 function qcStatusFromFlow(value: string): UnitStatus {
