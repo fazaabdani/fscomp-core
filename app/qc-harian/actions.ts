@@ -76,6 +76,7 @@ export async function createDailyQcAction(formData: FormData) {
   const bodyBroken = text(formData, "bodyBroken") === "Ya";
   const paintCondition = text(formData, "paintCondition") || "Normal";
   const catatan = text(formData, "catatan");
+  const keyboardBacklight = checked(formData, "keyboardBacklight");
   const screenCritical = screenCondition === "Garis" || screenCondition === "Pecah";
   const dailyChecks = [
     checked(formData, "keyboard"),
@@ -106,6 +107,7 @@ export async function createDailyQcAction(formData: FormData) {
   const conditionParts = [
     `layar ${screenCondition}`,
     checked(formData, "keyboard") ? "keyboard OK" : "keyboard perlu cek",
+    keyboardBacklight ? "keyboard backlight ada" : "",
     checked(formData, "wifi") ? "WiFi OK" : "WiFi perlu cek",
     checked(formData, "usb") ? "USB OK" : "USB perlu cek",
     checked(formData, "camera") ? "camera OK" : "camera perlu cek",
@@ -147,6 +149,7 @@ export async function createDailyQcAction(formData: FormData) {
         booting: true,
         layar: !screenCritical,
         keyboard: checked(formData, "keyboard"),
+        keyboardBacklight,
         ssd: ssdHealth >= 80,
         battery: batteryHealth >= 70,
         port: checked(formData, "usb"),
@@ -161,7 +164,7 @@ export async function createDailyQcAction(formData: FormData) {
         mic: checked(formData, "mic"),
         wifi: checked(formData, "wifi"),
         bluetooth: checked(formData, "bluetooth"),
-        kondisiHariIni: catatan || `${conditionParts.join(", ")}. Status otomatis: ${status.replaceAll("_", " ")}`,
+        kondisiHariIni: catatan || `${conditionParts.filter(Boolean).join(", ")}. Status otomatis: ${status.replaceAll("_", " ")}`,
         masihLolos: status,
         catatan
       }
