@@ -48,6 +48,7 @@ export default async function EditUnitPage({ params, searchParams }: { params: {
               <option value="VERIFIED_WITH_NOTES">VERIFIED WITH NOTES</option>
               <option value="RECHECK">RECHECK</option>
               <option value="CANDIDATE_RETUR">CANDIDATE RETUR</option>
+              <option value="RETUR_DISTRIBUTOR">RETUR DISTRIBUTOR</option>
             </select>
           </label>
         </div>
