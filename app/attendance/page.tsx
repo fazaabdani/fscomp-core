@@ -7,23 +7,28 @@ import { checkInAction, checkOutAction } from "./actions";
 
 function formatTime(date?: Date | null) {
   if (!date) return "-";
-  return date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" });
 }
 
 function formatDate(date: Date) {
-  return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+  return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Jakarta" });
+}
+
+function todayJakartaDateString() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date());
 }
 
 function startOfToday() {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  return date;
+  return new Date(`${todayJakartaDateString()}T00:00:00+07:00`);
 }
 
 function endOfToday() {
-  const date = new Date();
-  date.setHours(23, 59, 59, 999);
-  return date;
+  return new Date(`${todayJakartaDateString()}T23:59:59.999+07:00`);
 }
 
 export default async function AttendancePage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
@@ -59,11 +64,13 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
       ? "Absensi masuk hari ini masih aktif. Pulang dulu kalau shift sudah selesai."
       : searchParams?.error === "no-open-attendance"
         ? "Belum ada absensi masuk aktif untuk hari ini."
-        : searchParams?.success === "check-in"
-          ? "Absensi masuk berhasil dicatat."
-          : searchParams?.success === "check-out"
-            ? "Absensi pulang berhasil dicatat."
-            : "";
+        : searchParams?.error === "photo-location-required"
+          ? "Foto dan koordinat wajib diambil sebelum absen masuk."
+          : searchParams?.success === "check-in"
+            ? "Absensi masuk berhasil dicatat."
+            : searchParams?.success === "check-out"
+              ? "Absensi pulang berhasil dicatat."
+              : "";
 
   return (
     <section className="pageStack">
@@ -71,7 +78,7 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
         <div>
           <p className="eyebrow">Absensi</p>
           <h1>Catat kehadiran tim FS Comp</h1>
-          <p className="bodyText">User klik masuk dan pulang. Saat masuk, sistem bisa menyimpan foto dan koordinat lokasi.</p>
+          <p className="bodyText">User cukup klik masuk dan pulang. Admin bisa melihat rekap semua user.</p>
         </div>
         <Clock3 size={28} />
       </div>
@@ -111,6 +118,7 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
             {isOpen ? <LogOut size={22} /> : <LogIn size={22} />}
           </div>
           {!isOpen ? <AttendanceCapture /> : null}
+          {!isOpen ? <small className="formHint">Wajib ambil foto dan lokasi sebelum klik Masuk Sekarang.</small> : null}
           <label>Catatan opsional
             <textarea name="note" placeholder="Contoh: masuk shift sore, izin keluar beli sparepart, dll." />
           </label>
