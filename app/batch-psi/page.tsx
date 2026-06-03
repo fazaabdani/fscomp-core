@@ -3,6 +3,7 @@ import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
 import { canEditBatch, canEditUnit } from "@/lib/auth";
 import { getBatchesForManagementPage } from "@/lib/batch-page-data";
+import { chargerTypes } from "@/lib/charger-options";
 import { getCurrentUser } from "@/lib/session";
 import { statusTone } from "@/lib/constants";
 import { deleteUnitFromBatchAction, markUnitReturnedAction } from "./actions";
@@ -47,6 +48,9 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
           const soldUnits = batch.units.filter((unit) => unit.soldAt);
           const batchUnits = batch.units.filter((unit) => !unit.soldAt);
           const totalModal = batchUnits.reduce((sum, unit) => sum + unit.hargaModal, 0);
+          const chargerSummary = chargerTypes
+            .map((chargerType) => ({ type: chargerType, count: batch.chargerCounts?.[chargerType] ?? 0 }))
+            .filter((item) => item.count > 0);
           return (
             <article className="panel" key={batch.id}>
               <div className="panelHeader">
@@ -60,35 +64,50 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
               <div className="batchMeta">
                 <span><CalendarDays size={16} /> Masuk {batch.tanggalMasuk}</span>
                 <span><FileClock size={16} /> Tempo {batch.tanggalTempo}</span>
+                <span><ReceiptText size={16} /> Laptop datang {batch.jumlahLaptopDatang ?? batch.units.length}</span>
+                <span><ReceiptText size={16} /> Charger datang {batch.jumlahChargerDatang ?? 0}</span>
                 <span><ReceiptText size={16} /> Modal {formatRupiah(totalModal)}</span>
                 {soldUnits.length > 0 ? <span><ReceiptText size={16} /> {soldUnits.length} unit terjual disembunyikan</span> : null}
               </div>
+              {chargerSummary.length > 0 ? (
+                <div className="chargerSummary">
+                  {chargerSummary.map((item) => <span key={item.type}>{item.type}: {item.count}</span>)}
+                </div>
+              ) : null}
               <p className="bodyText">{batch.catatan}</p>
 
               <div className="tableLike compact">
-                {batchUnits.map((unit) => (
-                  <div className="unitRow" key={unit.id}>
-                    <span className="unitNumber">{unit.nomorUnit}</span>
-                    <span>
-                      <Link href={`/unit/${unit.id}`}><strong>{unit.model}</strong></Link>
-                      <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
-                    </span>
-                    <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
-                    {canManageUnit ? (
-                      <div className="buttonRow noMargin">
-                        <Link className="secondaryButton compactButton" href={`/unit/${unit.id}/edit`}>Edit Unit</Link>
-                        {unit.statusObservasi !== "RETUR DISTRIBUTOR" ? (
-                          <form action={markUnitReturnedAction.bind(null, unit.id)}>
-                            <button className="secondaryButton compactButton" type="submit">Retur</button>
-                          </form>
-                        ) : null}
-                        <form action={deleteUnitFromBatchAction.bind(null, unit.id)}>
-                          <button className="secondaryButton compactButton dangerButton" type="submit">Hapus</button>
-                        </form>
+                {batchUnits.map((unit) => {
+                  const isReady = unit.statusObservasi === "VERIFIED" || unit.statusObservasi === "VERIFIED WITH NOTES";
+                  const hasPhoto = Boolean(unit.catalogImageUrl);
+                  return (
+                    <div className={`unitRow ${isReady ? "readyUnitRow" : ""} ${hasPhoto ? "photoUnitRow" : ""}`} key={unit.id}>
+                      <span className="unitNumber">{unit.nomorUnit}</span>
+                      <span>
+                        <Link href={`/unit/${unit.id}`}><strong>{unit.model}</strong></Link>
+                        <small>{unit.processor} / {unit.ram} / {unit.ssd}{unit.chargerType ? ` / ${unit.chargerType}` : ""}</small>
+                      </span>
+                      <div className="unitBadgeStack">
+                        <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
+                        {isReady ? <span className="statusPill green">Ready jual</span> : null}
+                        {hasPhoto ? <span className="statusPill photoPill">Ada foto</span> : null}
                       </div>
-                    ) : null}
-                  </div>
-                ))}
+                      {canManageUnit ? (
+                        <div className="buttonRow noMargin">
+                          <Link className="secondaryButton compactButton" href={`/unit/${unit.id}/edit`}>Edit Unit</Link>
+                          {unit.statusObservasi !== "RETUR DISTRIBUTOR" ? (
+                            <form action={markUnitReturnedAction.bind(null, unit.id)}>
+                              <button className="secondaryButton compactButton" type="submit">Retur</button>
+                            </form>
+                          ) : null}
+                          <form action={deleteUnitFromBatchAction.bind(null, unit.id)}>
+                            <button className="secondaryButton compactButton dangerButton" type="submit">Hapus</button>
+                          </form>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
                 {batchUnits.length === 0 ? <div className="emptyState">Tidak ada unit aktif di batch ini.</div> : null}
               </div>
 
