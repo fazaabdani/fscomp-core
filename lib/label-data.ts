@@ -1,18 +1,22 @@
 import { units as demoUnits } from "./api";
 import { prisma } from "./prisma";
+import { displayUnitNumber } from "./unit-number";
 
 function qcResultFromBoolean(ok: boolean) {
   return ok ? "OK" : "FAIL";
 }
 
 function qcResultFromNote(ok: boolean) {
-  return ok ? "OK" : "NOTES";
+  return ok ? "OK" : "Tidak ada";
 }
 
 function qcResultFromText(value: string, okValue: string) {
   if (value === okValue) return "OK";
-  if (value === "Garis" || value === "Pecah" || value === "Bajakan" || value === "Bermasalah") return "FAIL";
-  return "NOTES";
+  return value || "-";
+}
+
+function problemFromBoolean(ok: boolean, problem: string) {
+  return ok ? "OK" : problem;
 }
 
 export async function getUnitsForLabel() {
@@ -40,15 +44,15 @@ export async function getUnitsForLabel() {
             Layar: qcResultFromText(latestDaily.screenCondition, "Normal"),
             Keyboard: qcResultFromBoolean(latestDaily.keyboard),
             ...(latestDaily.keyboardBacklight ? { Backlight: "OK" } : {}),
-            USB: qcResultFromBoolean(latestDaily.usb),
-            Kamera: qcResultFromBoolean(latestDaily.camera),
-            Touchpad: qcResultFromBoolean(latestDaily.touchpad),
+            USB: problemFromBoolean(latestDaily.usb, "Problem"),
+            Kamera: problemFromBoolean(latestDaily.camera, "Problem"),
+            Touchpad: problemFromBoolean(latestDaily.touchpad, "Problem"),
             Trackpoint: qcResultFromNote(latestDaily.trackpoint),
             Bluetooth: qcResultFromNote(latestDaily.bluetooth),
-            Speaker: qcResultFromBoolean(latestDaily.speaker),
-            Mic: qcResultFromBoolean(latestDaily.mic),
-            "Body Broken": latestDaily.bodyBroken ? "FAIL" : "OK",
-            "Karet Bawah": qcResultFromNote(latestDaily.karetBawah),
+            Speaker: problemFromBoolean(latestDaily.speaker, "Problem"),
+            Mic: problemFromBoolean(latestDaily.mic, "Problem"),
+            "Body Broken": latestDaily.bodyBroken ? "Ya" : "OK",
+            "Karet Bawah": latestDaily.karetBawah ? "OK" : "Tidak lengkap",
             Battery: `${batteryHealth}%`,
             SSD: `${ssdHealth}%`
           }
@@ -59,13 +63,13 @@ export async function getUnitsForLabel() {
             Driver: qcResultFromText(latestDaily.driverStatus, "OK"),
             Jam: qcResultFromText(latestDaily.clockStatus, "Sesuai"),
             Aplikasi: qcResultFromText(latestDaily.appStatus, "Lengkap"),
-            Partisi: latestDaily.partitionCount === 2 ? "OK" : "NOTES"
+            Partisi: latestDaily.partitionCount === 2 ? "OK" : `${latestDaily.partitionCount} partisi`
           }
         : {};
 
       return {
         id: unit.id,
-        nomorUnit: unit.nomorUnit,
+        nomorUnit: displayUnitNumber(unit.nomorUnit),
         model: unit.model,
         processor: unit.processor,
         ram: unit.ram,
