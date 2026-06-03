@@ -5,7 +5,7 @@ import { canEditBatch, canEditUnit } from "@/lib/auth";
 import { getBatchesForManagementPage } from "@/lib/batch-page-data";
 import { getCurrentUser } from "@/lib/session";
 import { statusTone } from "@/lib/constants";
-import { deleteUnitFromBatchAction } from "./actions";
+import { deleteUnitFromBatchAction, markUnitReturnedAction } from "./actions";
 
 const paymentTone: Record<string, string> = {
   Lunas: "green",
@@ -14,7 +14,7 @@ const paymentTone: Record<string, string> = {
   "Butuh follow up": "red"
 };
 
-export default async function BatchPsiPage({ searchParams }: { searchParams?: { error?: string; deleted?: string } }) {
+export default async function BatchPsiPage({ searchParams }: { searchParams?: { error?: string; deleted?: string; returned?: string } }) {
   const currentUser = getCurrentUser();
   const canManageBatch = currentUser ? canEditBatch(currentUser) : false;
   const canManageUnit = currentUser ? canEditUnit(currentUser) : false;
@@ -38,7 +38,9 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
       </div>
 
       {searchParams?.deleted === "unit" ? <div className="successBox">Unit berhasil dihapus dari batch.</div> : null}
+      {searchParams?.returned === "unit" ? <div className="successBox">Unit ditandai retur distributor dan tidak dihitung sebagai unit dibayar.</div> : null}
       {searchParams?.error === "unit-sold" ? <div className="infoBox dangerInfo">Unit sudah terjual, jadi tidak bisa dihapus dari batch.</div> : null}
+      {searchParams?.error === "unit-sold-retur" ? <div className="infoBox dangerInfo">Unit sudah terjual, jadi tidak bisa ditandai retur distributor.</div> : null}
 
       <div className="batchManagement">
         {batches.map((batch) => {
@@ -75,6 +77,11 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                     {canManageUnit ? (
                       <div className="buttonRow noMargin">
                         <Link className="secondaryButton compactButton" href={`/unit/${unit.id}/edit`}>Edit Unit</Link>
+                        {unit.statusObservasi !== "RETUR DISTRIBUTOR" ? (
+                          <form action={markUnitReturnedAction.bind(null, unit.id)}>
+                            <button className="secondaryButton compactButton" type="submit">Retur</button>
+                          </form>
+                        ) : null}
                         <form action={deleteUnitFromBatchAction.bind(null, unit.id)}>
                           <button className="secondaryButton compactButton dangerButton" type="submit">Hapus</button>
                         </form>
