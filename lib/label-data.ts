@@ -39,6 +39,10 @@ export async function getUnitsForLabel() {
       const latestDaily = unit.qcHarian[0];
       const ssdHealth = latestDaily?.ssdHealth ?? unit.ssdHealth ?? 0;
       const batteryHealth = latestDaily?.batteryHealth ?? unit.batteryHealth ?? 0;
+      const statusObservasi = unit.statusObservasi.replaceAll("_", " ");
+      const candidateReturNote = statusObservasi === "CANDIDATE RETUR"
+        ? latestDaily?.catatan || latestDaily?.kondisiHariIni || unit.entryNotes || ""
+        : "";
       const dailyHardware = latestDaily
         ? {
             Layar: qcResultFromText(latestDaily.screenCondition, "Normal"),
@@ -77,43 +81,36 @@ export async function getUnitsForLabel() {
         ssdHealth,
         batteryHealth,
         hargaJualRekomendasi: unit.hargaJualRekomendasi,
-        statusObservasi: unit.statusObservasi.replaceAll("_", " "),
+        statusObservasi,
+        candidateReturNote,
         qcAwal: {
           tanggal: latestDaily?.tanggal.toISOString().slice(0, 10) ?? unit.qcAwal?.tanggal.toISOString().slice(0, 10) ?? "-",
           checker: latestDaily?.checker.name ?? unit.qcAwal?.checker.name ?? "-",
-          hardware: latestDaily
-            ? dailyHardware
-            : unit.qcAwal
-            ? {
-                Body: unit.qcAwal.body,
-                "Body Broken": unit.qcAwal.bodyBroken,
-                "Karet Bawah": unit.qcAwal.karetBawah,
-                Repaint: unit.qcAwal.repaint,
-                Layar: unit.qcAwal.layar,
-                Touchscreen: unit.qcAwal.touchscreen,
-                Keyboard: unit.qcAwal.keyboard,
-                Touchpad: unit.qcAwal.touchpad,
-                Trackpoint: unit.qcAwal.trackpoint,
-                USB: unit.qcAwal.usb,
-                Kamera: unit.qcAwal.kamera,
-                Speaker: unit.qcAwal.speaker,
-                Mic: unit.qcAwal.mic,
-                Battery: batteryHealth > 0 ? `${batteryHealth}%` : unit.qcAwal.battery,
-                SSD: ssdHealth > 0 ? `${ssdHealth}%` : unit.qcAwal.ssd
-              }
-            : {},
-          software: latestDaily
-            ? dailySoftware
-            : unit.qcAwal
-            ? {
-                OS: unit.qcAwal.osInstalled,
-                Windows: unit.qcAwal.windowsVersion,
-                "Update OS": unit.qcAwal.updateOs,
-                Driver: unit.qcAwal.driver,
-                "Security Patch": unit.qcAwal.securityPatch,
-                Aplikasi: unit.qcAwal.aplikasiDefault
-              }
-            : {}
+          hardware: latestDaily ? dailyHardware : unit.qcAwal ? {
+            Body: unit.qcAwal.body,
+            "Body Broken": unit.qcAwal.bodyBroken,
+            "Karet Bawah": unit.qcAwal.karetBawah,
+            Repaint: unit.qcAwal.repaint,
+            Layar: unit.qcAwal.layar,
+            Touchscreen: unit.qcAwal.touchscreen,
+            Keyboard: unit.qcAwal.keyboard,
+            Touchpad: unit.qcAwal.touchpad,
+            Trackpoint: unit.qcAwal.trackpoint,
+            USB: unit.qcAwal.usb,
+            Kamera: unit.qcAwal.kamera,
+            Speaker: unit.qcAwal.speaker,
+            Mic: unit.qcAwal.mic,
+            Battery: batteryHealth > 0 ? `${batteryHealth}%` : unit.qcAwal.battery,
+            SSD: ssdHealth > 0 ? `${ssdHealth}%` : unit.qcAwal.ssd
+          } : {},
+          software: latestDaily ? dailySoftware : unit.qcAwal ? {
+            OS: unit.qcAwal.osInstalled,
+            Windows: unit.qcAwal.windowsVersion,
+            "Update OS": unit.qcAwal.updateOs,
+            Driver: unit.qcAwal.driver,
+            "Security Patch": unit.qcAwal.securityPatch,
+            Aplikasi: unit.qcAwal.aplikasiDefault
+          } : {}
         }
       };
     });
