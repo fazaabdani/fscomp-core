@@ -8,7 +8,7 @@ import { createSaleAction, voidSaleAction } from "./actions";
 export const dynamic = "force-dynamic";
 
 export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string; sort?: string } }) {
-  requireRole(["admin"]);
+  const currentUser = requireRole(["admin", "teknisi", "sales"]);
   const { readyUnits, sales, stats, salesReady, blockedByDailyQc } = await getSalesPageData();
   const firstUnit = readyUnits[0];
   const sort = searchParams?.sort ?? "terbaru";
@@ -33,7 +33,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
       <div className="statsGrid salesStatsGrid">
         <div className="metric metric-blue"><Receipt size={21} /><span>Unit siap jual</span><strong>{stats.readyCount}</strong></div>
         <div className="metric metric-green"><ShoppingCart size={21} /><span>Transaksi</span><strong>{stats.soldCount}</strong></div>
-        <Link className="metric metric-cyan" href="/finance"><Receipt size={21} /><span>Rekap</span><strong>Admin</strong></Link>
+        {currentUser.role === "admin" ? <Link className="metric metric-cyan" href="/finance"><Receipt size={21} /><span>Rekap</span><strong>Admin</strong></Link> : null}
       </div>
 
       {!salesReady ? (
@@ -109,7 +109,11 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               <h3>Bonus, software, dan aksesoris</h3>
             </div>
             <div className="cashierItemHeader">
-              <span>Item</span><span>Kategori</span><span>Qty</span><span>Jual/pcs</span><span>Modal/pcs</span>
+              <span>Item</span>
+              <span>Kategori</span>
+              <span>Qty</span>
+              <span>Jual/pcs</span>
+              <span>Modal/pcs</span>
             </div>
             {[
               { name: "Tas laptop", category: "BONUS", qty: 1, price: 0, cost: 0 },
@@ -128,16 +132,40 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
             <small className="formHint">Qty 0 = item tidak ikut. Nominal ditulis angka rupiah tanpa titik, contoh 4100000.</small>
           </div>
           <div className="cashierSide">
-            <div className="receiptWarranty"><Gift size={18} /><span>Garansi nota diisi manual. Pilih minggu atau bulan sesuai transaksi.</span></div>
-            <div className="numberGrid">
-              <label>Garansi software<input name="warrantySoftwareAmount" type="number" min="1" defaultValue={3} /></label>
-              <label>Periode software<select name="warrantySoftwareUnit" defaultValue="bulan"><option value="minggu">Minggu</option><option value="bulan">Bulan</option></select></label>
+            <div className="receiptWarranty">
+              <Gift size={18} />
+              <span>Garansi nota diisi manual. Pilih minggu atau bulan sesuai transaksi.</span>
             </div>
             <div className="numberGrid">
-              <label>Garansi hardware<input name="warrantyHardwareAmount" type="number" min="1" defaultValue={3} /></label>
-              <label>Periode hardware<select name="warrantyHardwareUnit" defaultValue="minggu"><option value="minggu">Minggu</option><option value="bulan">Bulan</option></select></label>
+              <label>
+                Garansi software
+                <input name="warrantySoftwareAmount" type="number" min="1" defaultValue={3} />
+              </label>
+              <label>
+                Periode software
+                <select name="warrantySoftwareUnit" defaultValue="bulan">
+                  <option value="minggu">Minggu</option>
+                  <option value="bulan">Bulan</option>
+                </select>
+              </label>
             </div>
-            <label>Catatan<textarea name="notes" placeholder="Contoh: DP, transfer BCA, garansi, aksesoris tambahan." /></label>
+            <div className="numberGrid">
+              <label>
+                Garansi hardware
+                <input name="warrantyHardwareAmount" type="number" min="1" defaultValue={3} />
+              </label>
+              <label>
+                Periode hardware
+                <select name="warrantyHardwareUnit" defaultValue="minggu">
+                  <option value="minggu">Minggu</option>
+                  <option value="bulan">Bulan</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              Catatan
+              <textarea name="notes" placeholder="Contoh: DP, transfer BCA, garansi, aksesoris tambahan." />
+            </label>
             <button className="primaryButton" type="submit" disabled={readyUnits.length === 0}>Simpan Penjualan</button>
             {readyUnits.length === 0 ? <div className="emptyState">Belum ada unit siap jual. Pastikan QC harian terakhir sudah lolos.</div> : null}
           </div>
@@ -145,9 +173,17 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
       </form>
 
       <section className="panel">
-        <div className="panelHeader"><div><p className="eyebrow">Riwayat transaksi</p><h2>Penjualan terbaru</h2></div></div>
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Riwayat transaksi</p>
+            <h2>Penjualan terbaru</h2>
+          </div>
+        </div>
         <div className="salesControlBar">
-          <div><strong>{sales.length}</strong><span>transaksi tercatat</span></div>
+          <div>
+            <strong>{sales.length}</strong>
+            <span>transaksi tercatat</span>
+          </div>
           <Link className={`sortPill ${sort === "terbaru" ? "active" : ""}`} href="/sales?sort=terbaru">Terbaru</Link>
           <Link className={`sortPill ${sort === "lama" ? "active" : ""}`} href="/sales?sort=lama">Terlama</Link>
           <Link className={`sortPill ${sort === "terbesar" ? "active" : ""}`} href="/sales?sort=terbesar">Nominal besar</Link>
@@ -157,23 +193,44 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
           {sortedSales.length === 0 ? <div className="emptyState">Belum ada transaksi.</div> : sortedSales.map((sale) => (
             <div className={`paymentRow saleRow ${sale.voidedAt ? "voidedSaleRow" : ""}`} key={sale.id}>
               <span>{sale.invoiceNumber}</span>
-              <div><Link href={`/sales/${sale.id}/receipt`}><strong>Unit {sale.nomorUnit} - {sale.model}</strong></Link><small>{sale.soldAt} / {sale.location} / {sale.paymentMethod} / {sale.buyerName} / {sale.itemCount} item {sale.voidedAt ? `/ BATAL: ${sale.voidReason}` : ""}</small></div>
+              <div>
+                <Link href={`/sales/${sale.id}/receipt`}><strong>Unit {sale.nomorUnit} - {sale.model}</strong></Link>
+                <small>{sale.soldAt} / {sale.location} / {sale.paymentMethod} / {sale.buyerName} / {sale.itemCount} item {sale.voidedAt ? `/ BATAL: ${sale.voidReason}` : ""}</small>
+              </div>
               <b>{formatRupiah(sale.soldPrice)}</b>
-              {sale.voidedAt ? <span className="statusPill red">Batal</span> : <span className="statusPill green">Aktif</span>}
+              {sale.voidedAt ? (
+                <span className="statusPill red">Batal</span>
+              ) : (
+                <span className="statusPill green">Aktif</span>
+              )}
               <Link className="secondaryButton compactButton" href={`/sales/${sale.id}/receipt`}>Nota / Cetak ulang</Link>
-              {!sale.voidedAt ? <form action={voidSaleAction.bind(null, sale.id)} className="voidSaleForm"><input type="hidden" name="voidReason" value="Transaksi batal dari kasir" /><button className="secondaryButton compactButton" type="submit">Batalkan</button></form> : null}
+              {currentUser.role === "admin" && !sale.voidedAt ? (
+                <form action={voidSaleAction.bind(null, sale.id)} className="voidSaleForm">
+                  <input type="hidden" name="voidReason" value="Transaksi batal dari kasir" />
+                  <button className="secondaryButton compactButton" type="submit">Batalkan</button>
+                </form>
+              ) : null}
             </div>
           ))}
         </div>
       </section>
 
       <section className="panel">
-        <div className="panelHeader"><div><p className="eyebrow">Stok siap jual</p><h2>Belum terjual</h2></div><MapPin size={22} /></div>
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Stok siap jual</p>
+            <h2>Belum terjual</h2>
+          </div>
+          <MapPin size={22} />
+        </div>
         <div className="tableLike compact stockGrid">
           {readyUnits.length === 0 ? <div className="emptyState">Belum ada stok siap jual.</div> : readyUnits.slice(0, 14).map((unit) => (
             <Link className="unitRow salesUnitRow" href={`/unit/${unit.id}`} key={unit.id}>
               <span className="unitNumber">{unit.nomorUnit}</span>
-              <span><strong>{unit.model}</strong><small>{unit.processor} / {unit.ram} / {unit.ssd} / {unit.stockLocation}</small></span>
+              <span>
+                <strong>{unit.model}</strong>
+                <small>{unit.processor} / {unit.ram} / {unit.ssd} / {unit.stockLocation}</small>
+              </span>
               <b>{formatRupiah(unit.hargaJualRekomendasi)}</b>
             </Link>
           ))}
