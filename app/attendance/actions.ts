@@ -1,51 +1,51 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { getOrCreateDbUserForSession } from "@/lib/user-store";
 
-function startOfToday() {
-  const now = new Date();
-  const jakartaDate = new Intl.DateTimeFormat("en-CA", {
+function requiredString(formData: FormData, name: string) {
+  return String(formData.get(name) ?? "").trim();
+}
+
+function parseOptionalFloat(value: FormDataEntryValue | null) {
+  if (!value) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function todayJakartaDateString() {
+  return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Jakarta",
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
-  }).format(now);
-  return new Date(`${jakartaDate}T00:00:00+07:00`);
+  }).format(new Date());
+}
+
+function startOfToday() {
+  return new Date(`${todayJakartaDateString()}T00:00:00+07:00`);
 }
 
 function endOfToday() {
-  const now = new Date();
-  const jakartaDate = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Jakarta",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).format(now);
-  return new Date(`${jakartaDate}T23:59:59.999+07:00`);
-}
-
-function text(formData: FormData, key: string) {
-  return String(formData.get(key) ?? "").trim();
-}
-
-function numberOrNull(formData: FormData, key: string) {
-  const value = Number(formData.get(key));
-  return Number.isFinite(value) ? value : null;
-}
-
-function photoValue(formData: FormData) {
-  const value = text(formData, "photoDataUrl");
-  return value.startsWith("data:image/jpeg;base64,") && value.length < 300000 ? value : null;
+  return new Date(`${todayJakartaDateString()}T23:59:59.999+07:00`);
 }
 
 export async function checkInAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "teknisi", "magang"]);
+  const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
   const dbUser = await getOrCreateDbUserForSession(currentUser);
-  const existing = await prisma.attendance.findFirst({
+  const now = new Date();
+  const photoDataUrl = requiredString(formData, "photoDataUrl");
+  const latitude = parseOptionalFloat(formData.get("latitude"));
+  const longitude = parseOptionalFloat(formData.get("longitude"));
+  const accuracy = parseOptionalFloat(formData.get("accuracy"));
+
+  if (!photoDataUrl || latitude === null || longitude === null) {
+    redirect("/attendance?error=photo-location-required");
+  }
+
+  const existingOpen = await prisma.attendance.findFirst({
     where: {
       userId: dbUser.id,
       checkInAt: { gte: startOfToday(), lte: endOfToday() },
@@ -53,24 +53,17 @@ export async function checkInAction(formData: FormData) {
     }
   });
 
-  if (existing) {
+  if (existingOpen) {
     redirect("/attendance?error=already-in");
-  }
-
-  const photoDataUrl = photoValue(formData);
-  const latitude = numberOrNull(formData, "latitude");
-  const longitude = numberOrNull(formData, "longitude");
-  const accuracy = numberOrNull(formData, "accuracy");
-
-  if (!photoDataUrl || latitude === null || longitude === null) {
-    redirect("/attendance?error=photo-location-required");
   }
 
   await prisma.attendance.create({
     data: {
       userId: dbUser.id,
+      tanggal: now,
+      checkInAt: now,
       status: "HADIR",
-      note: text(formData, "note") || null,
+      note: requiredString(formData, "note") || null,
       photoDataUrl,
       latitude,
       longitude,
@@ -78,14 +71,14 @@ export async function checkInAction(formData: FormData) {
     }
   });
 
-  revalidatePath("/attendance");
   redirect("/attendance?success=check-in");
 }
 
 export async function checkOutAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "teknisi", "magang"]);
+  const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
   const dbUser = await getOrCreateDbUserForSession(currentUser);
-  const attendance = await prisma.attendance.findFirst({
+
+  const open = await prisma.attendance.findFirst({
     where: {
       userId: dbUser.id,
       checkInAt: { gte: startOfToday(), lte: endOfToday() },
@@ -94,19 +87,17 @@ export async function checkOutAction(formData: FormData) {
     orderBy: { checkInAt: "desc" }
   });
 
-  if (!attendance) {
+  if (!open) {
     redirect("/attendance?error=no-open-attendance");
   }
 
-  const extraNote = text(formData, "note");
   await prisma.attendance.update({
-    where: { id: attendance.id },
+    where: { id: open.id },
     data: {
       checkOutAt: new Date(),
-      note: [attendance.note, extraNote].filter(Boolean).join("\n")
+      note: requiredString(formData, "note") || open.note
     }
   });
 
-  revalidatePath("/attendance");
   redirect("/attendance?success=check-out");
 }
