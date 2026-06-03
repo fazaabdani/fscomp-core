@@ -210,6 +210,7 @@ model QcHarian {
   booting         Boolean
   layar           Boolean
   keyboard        Boolean
+  keyboardBacklight Boolean @default(false)
   ssd             Boolean
   battery         Boolean
   port            Boolean
