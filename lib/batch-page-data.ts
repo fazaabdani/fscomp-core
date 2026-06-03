@@ -1,4 +1,5 @@
 import { batches as demoBatches, units as demoUnits, type BatchPSI } from "./api";
+import { chargerTypes } from "./charger-options";
 import { prisma } from "./prisma";
 
 const paymentStatusLabel: Record<string, BatchPSI["statusPembayaran"]> = {
@@ -7,6 +8,11 @@ const paymentStatusLabel: Record<string, BatchPSI["statusPembayaran"]> = {
   BUTUH_FOLLOW_UP: "Butuh follow up",
   LUNAS: "Lunas"
 };
+
+function chargerCounts(value: unknown) {
+  const raw = value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+  return Object.fromEntries(chargerTypes.map((type) => [type, Number(raw[type] ?? 0) || 0]));
+}
 
 export async function getBatchesForManagementPage() {
   try {
@@ -18,7 +24,10 @@ export async function getBatchesForManagementPage() {
     if (dbBatches.length === 0) {
       return demoBatches.map((batch) => ({
         ...batch,
-        units: demoUnits.filter((unit) => unit.batchId === batch.id).map((unit) => ({ ...unit, soldAt: "" }))
+        jumlahLaptopDatang: demoUnits.filter((unit) => unit.batchId === batch.id).length,
+        jumlahChargerDatang: 0,
+        chargerCounts: chargerCounts(null),
+        units: demoUnits.filter((unit) => unit.batchId === batch.id).map((unit) => ({ ...unit, chargerType: "", catalogImageUrl: "", soldAt: "" }))
       }));
     }
 
@@ -28,6 +37,9 @@ export async function getBatchesForManagementPage() {
       supplier: batch.supplier,
       tanggalMasuk: batch.tanggalMasuk.toISOString().slice(0, 10),
       tanggalTempo: batch.tanggalTempo.toISOString().slice(0, 10),
+      jumlahLaptopDatang: batch.jumlahLaptopDatang ?? batch.units.length,
+      jumlahChargerDatang: batch.jumlahChargerDatang ?? 0,
+      chargerCounts: chargerCounts(batch.chargerCounts),
       statusPembayaran: paymentStatusLabel[batch.statusPembayaran],
       catatan: batch.catatan ?? "",
       units: batch.units.map((unit) => ({
@@ -37,15 +49,20 @@ export async function getBatchesForManagementPage() {
         processor: unit.processor,
         ram: unit.ram,
         ssd: unit.ssd,
+        chargerType: unit.chargerType ?? "",
         hargaModal: unit.hargaModal,
         statusObservasi: unit.statusObservasi.replaceAll("_", " "),
+        catalogImageUrl: unit.catalogImageUrl ?? "",
         soldAt: unit.soldAt?.toISOString().slice(0, 10) ?? ""
       }))
     }));
   } catch {
     return demoBatches.map((batch) => ({
       ...batch,
-      units: demoUnits.filter((unit) => unit.batchId === batch.id).map((unit) => ({ ...unit, soldAt: "" }))
+      jumlahLaptopDatang: demoUnits.filter((unit) => unit.batchId === batch.id).length,
+      jumlahChargerDatang: 0,
+      chargerCounts: chargerCounts(null),
+      units: demoUnits.filter((unit) => unit.batchId === batch.id).map((unit) => ({ ...unit, chargerType: "", catalogImageUrl: "", soldAt: "" }))
     }));
   }
 }
