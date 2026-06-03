@@ -18,6 +18,7 @@ enum UnitStatus {
   VERIFIED_WITH_NOTES
   RECHECK
   CANDIDATE_RETUR
+  RETUR_DISTRIBUTOR
 }
 
 enum QcResult {
