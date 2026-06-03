@@ -47,6 +47,7 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
   const ram = text(formData, "ram");
   const ssd = text(formData, "storage") || text(formData, "ssd");
   const display = text(formData, "display");
+  const chargerType = text(formData, "chargerType");
   const fiturTambahan = text(formData, "fiturTambahan");
   const minus = text(formData, "minus") || text(formData, "catatan");
 
@@ -96,6 +97,7 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
   const catatan = [
     merk ? `Merk: ${merk}` : "",
     seri ? `Seri: ${seri}` : "",
+    chargerType ? `Charger: ${chargerType}` : "",
     fiturTambahan ? `Fitur tambahan: ${fiturTambahan}` : "",
     minus ? `Minus: ${minus}` : "",
     text(formData, "windowsVersion") ? `Windows masuk: ${text(formData, "windowsVersion")}` : "",
@@ -112,6 +114,7 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
       ram,
       ssd,
       ssdSerial: text(formData, "ssdSerial"),
+      chargerType: chargerType || null,
       lcdSize: display || text(formData, "lcdSize"),
       lcdResolution: display || text(formData, "lcdResolution"),
       isTouchscreen: text(formData, "isTouchscreen") === "Ya" || displayLower.includes("touch") || featureLower.includes("touch"),
