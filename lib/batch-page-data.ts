@@ -1,6 +1,7 @@
 import { batches as demoBatches, units as demoUnits, type BatchPSI } from "./api";
 import { chargerTypes } from "./charger-options";
 import { prisma } from "./prisma";
+import { displayUnitNumber } from "./unit-number";
 
 const paymentStatusLabel: Record<string, BatchPSI["statusPembayaran"]> = {
   BELUM_JATUH_TEMPO: "Belum jatuh tempo",
@@ -44,7 +45,7 @@ export async function getBatchesForManagementPage() {
       catatan: batch.catatan ?? "",
       units: batch.units.map((unit) => ({
         id: unit.id,
-        nomorUnit: unit.nomorUnit,
+        nomorUnit: displayUnitNumber(unit.nomorUnit),
         model: unit.model,
         processor: unit.processor,
         ram: unit.ram,
