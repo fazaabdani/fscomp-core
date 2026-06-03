@@ -29,63 +29,29 @@ export default async function LabelPage({ searchParams }: { searchParams?: { uni
 
   return (
     <section className="pageStack">
-      <div className="sectionTitle">
-        <div>
-          <p className="eyebrow">Label QR</p>
-          <h1>Cetak label unit 7x5cm</h1>
-        </div>
-      </div>
-
+      <div className="sectionTitle"><div><p className="eyebrow">Label QR</p><h1>Cetak label unit 7x5cm</h1></div></div>
       <div className="labelLayout">
         <form className="panel">
-          <div className="panelHeader">
-            <div>
-              <p className="eyebrow">Pilih unit</p>
-              <h2>Preview label</h2>
-            </div>
-          </div>
+          <div className="panelHeader"><div><p className="eyebrow">Pilih unit</p><h2>Preview label</h2></div></div>
           <select name="unit" defaultValue={selected.id}>
-            {units.map((unit) => (
-              <option value={unit.id} key={unit.id}>Unit {unit.nomorUnit} - {unit.model}</option>
-            ))}
+            {units.map((unit) => <option value={unit.id} key={unit.id}>Unit {unit.nomorUnit} - {unit.model}</option>)}
           </select>
-          <label>
-            Jenis label
-            <select name="mode" defaultValue={mode}>
-              <option value="simple">Label tempel ringkas</option>
-              <option value="qc">Label hasil QC lengkap</option>
-            </select>
-          </label>
-          <div className="buttonRow">
-            <button className="secondaryButton" type="submit">Preview</button>
-            <PrintButton />
-          </div>
+          <label>Jenis label<select name="mode" defaultValue={mode}><option value="simple">Label tempel ringkas</option><option value="qc">Label hasil QC lengkap</option></select></label>
+          <div className="buttonRow"><button className="secondaryButton" type="submit">Preview</button><PrintButton /></div>
         </form>
-
         <div className="labelSheet">
           <article className={mode === "qc" ? "unitLabel qcCompleteLabel" : "unitLabel"}>
             <div className="labelTop">
-              <div>
-                <span className="labelBrand">FS Comp</span>
-                <h2>{mode === "qc" ? "QC Unit" : `Unit ${selected.nomorUnit}`}</h2>
-              </div>
+              <div><span className="labelBrand">FS Comp</span><h2>{mode === "qc" ? "QC Unit" : `Unit ${selected.nomorUnit}`}</h2></div>
               <QRCodeSVG value={detailUrl} size={mode === "qc" ? 68 : 86} fgColor="#0f2f6b" />
             </div>
             <div className="labelBody">
-              <strong>{selected.model}</strong>
-              <span>{selected.processor}</span>
-              <span>{selected.ram} / {selected.ssd}</span>
-              <b>{formatRupiah(selected.hargaJualRekomendasi)}</b>
-              {mode === "qc" ? (
-                <div className="qcMiniGrid">
-                  {qcItems.slice(0, 18).map(([key, value]) => (
-                    <span key={key}><em>{key}</em><strong>{value}</strong></span>
-                  ))}
-                </div>
-              ) : null}
+              <strong>{selected.model}</strong><span>{selected.processor}</span><span>{selected.ram} / {selected.ssd}</span><b>{formatRupiah(selected.hargaJualRekomendasi)}</b>
+              {mode === "qc" ? <div className="qcMiniGrid">{qcItems.slice(0, 18).map(([key, value]) => <span key={key}><em>{key}</em><strong>{value}</strong></span>)}</div> : null}
             </div>
             <div className="labelFooter">
               <span className={`statusPill ${statusTone[selected.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{selected.statusObservasi}</span>
+              {selected.statusObservasi === "RETUR DISTRIBUTOR" ? <span className="statusPill red">JANGAN DIJUAL</span> : null}
               <span>QC {selected.qcAwal.tanggal} / {selected.qcAwal.checker}</span>
             </div>
           </article>
