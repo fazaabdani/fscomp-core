@@ -94,6 +94,11 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
                 </label>
               );
             })}
+            <label className="checkTile">
+              <input name="keyboardBacklight" type="checkbox" />
+              <Keyboard size={18} />
+              <span>Keyboard backlight</span>
+            </label>
           </div>
           <div className="numberGrid">
             <label>
