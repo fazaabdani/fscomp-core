@@ -19,6 +19,10 @@ function checked(formData: FormData, key: string) {
   return formData.get(key) === "on";
 }
 
+function screenPasses(screenCondition: string) {
+  return screenCondition === "Normal" || screenCondition === "White spot";
+}
+
 function computeDailyStatus({
   ssdHealth,
   batteryHealth,
@@ -52,14 +56,10 @@ export async function createDailyQcAction(formData: FormData) {
   const unitId = text(formData, "unitId");
   const checkerName = text(formData, "checkerName");
 
-  if (!unitId) {
-    redirect("/qc-harian?error=unit-required");
-  }
+  if (!unitId) redirect("/qc-harian?error=unit-required");
 
   const unit = await prisma.unit.findUnique({ where: { id: unitId } });
-  if (!unit) {
-    redirect("/qc-harian?error=unit-not-found");
-  }
+  if (!unit) redirect("/qc-harian?error=unit-not-found");
 
   const checker = await ensureChecker(checkerName || currentUser.name, "magang");
   const ssdHealth = numberValue(formData, "ssdHealth");
@@ -77,7 +77,7 @@ export async function createDailyQcAction(formData: FormData) {
   const paintCondition = text(formData, "paintCondition") || "Normal";
   const catatan = text(formData, "catatan");
   const keyboardBacklight = checked(formData, "keyboardBacklight");
-  const screenCritical = screenCondition === "Garis" || screenCondition === "Pecah";
+  const screenCritical = !screenPasses(screenCondition);
   const dailyChecks = [
     checked(formData, "keyboard"),
     checked(formData, "wifi"),
@@ -93,7 +93,7 @@ export async function createDailyQcAction(formData: FormData) {
     checked(formData, "trackpoint"),
     checked(formData, "bluetooth"),
     checked(formData, "karetBawah"),
-    screenCondition === "Normal",
+    screenPasses(screenCondition),
     driverStatus === "OK",
     clockStatus === "Sesuai",
     appStatus === "Lengkap",
@@ -103,6 +103,7 @@ export async function createDailyQcAction(formData: FormData) {
   ];
   const status = computeDailyStatus({ ssdHealth, batteryHealth, checks: dailyChecks, noteChecks });
   const perluKonfirmasi = status === "TIDAK_LOLOS";
+  const nextUnitStatus = status === "TIDAK_LOLOS" ? (screenCritical ? "CANDIDATE_RETUR" : "RECHECK") : "VERIFIED_WITH_NOTES";
 
   const conditionParts = [
     `layar ${screenCondition}`,
@@ -177,7 +178,7 @@ export async function createDailyQcAction(formData: FormData) {
         batteryHealth,
         ssdSerial: ssdSerial || unit.ssdSerial,
         stockLocation,
-        statusObservasi: status === "TIDAK_LOLOS" ? "RECHECK" : "VERIFIED_WITH_NOTES"
+        statusObservasi: nextUnitStatus
       }
     });
 
@@ -186,7 +187,9 @@ export async function createDailyQcAction(formData: FormData) {
         data: {
           unitId,
           source: "qc-harian-auto",
-          rekomendasi: `Perlu konfirmasi QC harian: SSD ${ssdHealth}%, battery ${batteryHealth}%. Unit otomatis tidak lolos sebelum dicek teknisi/admin.`
+          rekomendasi: screenCritical
+            ? `Candidate retur dari QC harian: layar ${screenCondition}. Catatan: ${catatan || "belum ada catatan tambahan"}.`
+            : `Perlu konfirmasi QC harian: SSD ${ssdHealth}%, battery ${batteryHealth}%. Unit otomatis tidak lolos sebelum dicek teknisi/admin.`
         }
       });
     }
