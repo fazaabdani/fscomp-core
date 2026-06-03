@@ -7,15 +7,25 @@ import { requireRole } from "@/lib/session";
 import { getOrCreateDbUserForSession } from "@/lib/user-store";
 
 function startOfToday() {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  return date;
+  const now = new Date();
+  const jakartaDate = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(now);
+  return new Date(`${jakartaDate}T00:00:00+07:00`);
 }
 
 function endOfToday() {
-  const date = new Date();
-  date.setHours(23, 59, 59, 999);
-  return date;
+  const now = new Date();
+  const jakartaDate = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(now);
+  return new Date(`${jakartaDate}T23:59:59.999+07:00`);
 }
 
 function text(formData: FormData, key: string) {
@@ -47,15 +57,24 @@ export async function checkInAction(formData: FormData) {
     redirect("/attendance?error=already-in");
   }
 
+  const photoDataUrl = photoValue(formData);
+  const latitude = numberOrNull(formData, "latitude");
+  const longitude = numberOrNull(formData, "longitude");
+  const accuracy = numberOrNull(formData, "accuracy");
+
+  if (!photoDataUrl || latitude === null || longitude === null) {
+    redirect("/attendance?error=photo-location-required");
+  }
+
   await prisma.attendance.create({
     data: {
       userId: dbUser.id,
       status: "HADIR",
       note: text(formData, "note") || null,
-      photoDataUrl: photoValue(formData),
-      latitude: numberOrNull(formData, "latitude"),
-      longitude: numberOrNull(formData, "longitude"),
-      accuracy: numberOrNull(formData, "accuracy")
+      photoDataUrl,
+      latitude,
+      longitude,
+      accuracy
     }
   });
 
