@@ -15,13 +15,11 @@ export default async function LabelPage({ searchParams }: { searchParams?: { uni
   const mode = searchParams?.mode === "qc" ? "qc" : "simple";
   const selected = units.find((unit) => unit.id === selectedId) ?? units[0];
   const detailUrl = `https://core.fscomp.id/unit/${selected.id}`;
-  const selectedWithHealth = selected as typeof selected & { ssdHealth?: number; batteryHealth?: number };
-  const qcItemMap = new Map<string, string | number>(
-    [
-      ...Object.entries(selected.qcAwal.hardware ?? {}),
-      ...Object.entries(selected.qcAwal.software ?? {})
-    ].filter(([key]) => key !== "Office")
-  );
+  const selectedWithHealth = selected as typeof selected & { ssdHealth?: number; batteryHealth?: number; candidateReturNote?: string };
+  const qcItemMap = new Map<string, string | number>([
+    ...Object.entries(selected.qcAwal.hardware ?? {}),
+    ...Object.entries(selected.qcAwal.software ?? {})
+  ].filter(([key]) => key !== "Office"));
   qcItemMap.set("SSD", healthValue(selectedWithHealth.ssdHealth ?? qcItemMap.get("SSD")));
   qcItemMap.set("Battery", healthValue(selectedWithHealth.batteryHealth ?? qcItemMap.get("Battery")));
   qcItemMap.delete("Office");
@@ -33,27 +31,19 @@ export default async function LabelPage({ searchParams }: { searchParams?: { uni
       <div className="labelLayout">
         <form className="panel">
           <div className="panelHeader"><div><p className="eyebrow">Pilih unit</p><h2>Preview label</h2></div></div>
-          <select name="unit" defaultValue={selected.id}>
-            {units.map((unit) => <option value={unit.id} key={unit.id}>Unit {unit.nomorUnit} - {unit.model}</option>)}
-          </select>
+          <select name="unit" defaultValue={selected.id}>{units.map((unit) => <option value={unit.id} key={unit.id}>Unit {unit.nomorUnit} - {unit.model}</option>)}</select>
           <label>Jenis label<select name="mode" defaultValue={mode}><option value="simple">Label tempel ringkas</option><option value="qc">Label hasil QC lengkap</option></select></label>
           <div className="buttonRow"><button className="secondaryButton" type="submit">Preview</button><PrintButton /></div>
         </form>
         <div className="labelSheet">
           <article className={mode === "qc" ? "unitLabel qcCompleteLabel" : "unitLabel"}>
-            <div className="labelTop">
-              <div><span className="labelBrand">FS Comp</span><h2>{mode === "qc" ? "QC Unit" : `Unit ${selected.nomorUnit}`}</h2></div>
-              <QRCodeSVG value={detailUrl} size={mode === "qc" ? 68 : 86} fgColor="#0f2f6b" />
-            </div>
+            <div className="labelTop"><div><span className="labelBrand">FS Comp</span><h2>{mode === "qc" ? "QC Unit" : `Unit ${selected.nomorUnit}`}</h2></div><QRCodeSVG value={detailUrl} size={mode === "qc" ? 68 : 86} fgColor="#0f2f6b" /></div>
             <div className="labelBody">
               <strong>{selected.model}</strong><span>{selected.processor}</span><span>{selected.ram} / {selected.ssd}</span><b>{formatRupiah(selected.hargaJualRekomendasi)}</b>
+              {selectedWithHealth.candidateReturNote ? <small className="labelProblemNote">{selectedWithHealth.candidateReturNote}</small> : null}
               {mode === "qc" ? <div className="qcMiniGrid">{qcItems.slice(0, 18).map(([key, value]) => <span key={key}><em>{key}</em><strong>{value}</strong></span>)}</div> : null}
             </div>
-            <div className="labelFooter">
-              <span className={`statusPill ${statusTone[selected.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{selected.statusObservasi}</span>
-              {selected.statusObservasi === "RETUR DISTRIBUTOR" ? <span className="statusPill red">JANGAN DIJUAL</span> : null}
-              <span>QC {selected.qcAwal.tanggal} / {selected.qcAwal.checker}</span>
-            </div>
+            <div className="labelFooter"><span className={`statusPill ${statusTone[selected.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{selected.statusObservasi}</span>{selected.statusObservasi === "RETUR DISTRIBUTOR" ? <span className="statusPill red">JANGAN DIJUAL</span> : null}<span>QC {selected.qcAwal.tanggal} / {selected.qcAwal.checker}</span></div>
           </article>
         </div>
       </div>
