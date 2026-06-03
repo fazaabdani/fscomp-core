@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Laptop } from "lucide-react";
+import { chargerTypes } from "@/lib/charger-options";
 import { getBatchesForPage } from "@/lib/db-data";
 import { requireRole } from "@/lib/session";
 import { createUnitWithInitialQcAction } from "./actions";
@@ -56,6 +57,12 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
           <label>Storage<input name="storage" placeholder="SSD 256GB" required /></label>
           <label>Display<input name="display" placeholder="14 INCH FHD / Touchscreen" required /></label>
         </div>
+        <label>Jenis charger
+          <select name="chargerType" defaultValue="">
+            <option value="">Belum dicatat</option>
+            {chargerTypes.map((chargerType) => <option value={chargerType} key={chargerType}>{chargerType}</option>)}
+          </select>
+        </label>
 
         <label>Fitur tambahan
           <input name="fiturTambahan" placeholder="Keyboard backlit, fingerprint, touchscreen, dll" />
