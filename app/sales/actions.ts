@@ -145,7 +145,7 @@ async function notifySaleToN8n(payload: {
 }
 
 export async function createSaleAction(formData: FormData) {
-  requireRole(["admin"]);
+  requireRole(["admin", "teknisi", "sales"]);
 
   const unitId = text(formData, "unitId");
   const soldPrice = numberValue(formData, "soldPrice");
@@ -186,12 +186,8 @@ export async function createSaleAction(formData: FormData) {
     redirect("/sales?error=qc-harian-belum-diisi");
   }
 
-  if (latestDailyQc && latestDailyQc.masihLolos !== "LOLOS") {
+  if (latestDailyQc && latestDailyQc.masihLolos === "TIDAK_LOLOS") {
     redirect("/sales?error=qc-harian-belum-lolos");
-  }
-
-  if (processorGeneration(unit.processor) >= 8 && !hasWindows11Daily(unit.qcHarian)) {
-    redirect("/sales?error=windows-11-wajib-gen-8-keatas");
   }
 
   const items = [
