@@ -32,10 +32,11 @@ function endOfToday() {
 }
 
 export default async function AttendancePage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
-  const currentUser = requireRole(["admin", "teknisi", "magang"]);
+  const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
   const dbUser = await getOrCreateDbUserForSession(currentUser);
   const todayStart = startOfToday();
   const todayEnd = endOfToday();
+  const canSeeAttendanceDetail = currentUser.role === "admin";
 
   const [myToday, latestRecords, todayAll] = await Promise.all([
     prisma.attendance.findFirst({
@@ -46,16 +47,22 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
       orderBy: { checkInAt: "desc" }
     }),
     prisma.attendance.findMany({
-      where: currentUser.role === "admin" ? {} : { userId: dbUser.id },
+      where: canSeeAttendanceDetail ? {} : { userId: dbUser.id },
       include: { user: true },
       orderBy: { checkInAt: "desc" },
       take: 30
     }),
-    prisma.attendance.findMany({
-      where: { checkInAt: { gte: todayStart, lte: todayEnd } },
-      include: { user: true },
-      orderBy: { checkInAt: "asc" }
-    })
+    canSeeAttendanceDetail
+      ? prisma.attendance.findMany({
+          where: { checkInAt: { gte: todayStart, lte: todayEnd } },
+          include: { user: true },
+          orderBy: { checkInAt: "asc" }
+        })
+      : prisma.attendance.findMany({
+          where: { userId: dbUser.id, checkInAt: { gte: todayStart, lte: todayEnd } },
+          include: { user: true },
+          orderBy: { checkInAt: "asc" }
+        })
   ]);
 
   const isOpen = Boolean(myToday && !myToday.checkOutAt);
@@ -103,8 +110,8 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
         </article>
         <article className="statCard">
           <UsersRound size={17} />
-          <span>Hadir hari ini</span>
-          <strong>{todayAll.length}</strong>
+          <span>{canSeeAttendanceDetail ? "Hadir hari ini" : "Absensi saya"}</span>
+          <strong>{canSeeAttendanceDetail ? todayAll.length : myToday ? "Tercatat" : "Belum"}</strong>
         </article>
       </section>
 
@@ -125,7 +132,7 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
           <button className="primaryButton" type="submit">{isOpen ? "Pulang Sekarang" : "Masuk Sekarang"}</button>
         </form>
 
-        <section className="panel">
+        {canSeeAttendanceDetail ? <section className="panel">
           <div className="panelHeader">
             <div>
               <p className="eyebrow">Hari ini</p>
@@ -145,14 +152,25 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
               </div>
             ))}
           </div>
-        </section>
+        </section> : (
+          <section className="panel">
+            <div className="panelHeader">
+              <div>
+                <p className="eyebrow">Hari ini</p>
+                <h2>Absensi saya</h2>
+              </div>
+              <UsersRound size={22} />
+            </div>
+            <div className="emptyState">Detail daftar absensi tim hanya bisa dilihat admin.</div>
+          </section>
+        )}
       </div>
 
       <section className="panel">
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Riwayat</p>
-            <h2>{currentUser.role === "admin" ? "Absensi terbaru semua user" : "Absensi terbaru saya"}</h2>
+              <h2>{canSeeAttendanceDetail ? "Absensi terbaru semua user" : "Absensi terbaru saya"}</h2>
           </div>
           <Clock3 size={22} />
         </div>
