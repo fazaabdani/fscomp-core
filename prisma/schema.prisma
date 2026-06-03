@@ -97,6 +97,9 @@ model BatchPSI {
   supplier         String
   tanggalMasuk     DateTime
   tanggalTempo     DateTime
+  jumlahLaptopDatang Int?
+  jumlahChargerDatang Int?
+  chargerCounts    Json?
   statusPembayaran PaymentStatus @default(BELUM_JATUH_TEMPO)
   catatan          String?
   createdAt        DateTime      @default(now())
@@ -115,6 +118,7 @@ model Unit {
   ram                  String
   ssd                  String
   ssdSerial            String?
+  chargerType          String?
   lcdSize              String?
   lcdResolution        String?
   isTouchscreen        Boolean    @default(false)
