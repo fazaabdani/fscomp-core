@@ -38,6 +38,47 @@
   margin: 0;
 }
 
+.chargerCountGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.panelSubsection {
+  display: grid;
+  gap: 10px;
+}
+
+.chargerSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chargerSummary span,
+.photoPill {
+  border: 1px solid rgba(55, 163, 255, 0.35);
+  background: rgba(55, 163, 255, 0.12);
+  color: #7cc7ff;
+}
+
+.unitBadgeStack {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.readyUnitRow {
+  border-color: rgba(40, 232, 154, 0.48);
+  background: linear-gradient(90deg, rgba(40, 232, 154, 0.1), rgba(10, 22, 38, 0.72));
+}
+
+.photoUnitRow {
+  box-shadow: inset 3px 0 0 rgba(55, 163, 255, 0.75);
+}
+
 .attendanceCapture {
   display: grid;
   gap: 10px;
