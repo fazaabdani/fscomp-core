@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
+import { chargerFieldName, chargerTypes } from "@/lib/charger-options";
 import { requireRole } from "@/lib/session";
 import { createBatchAction } from "../actions";
 
@@ -22,6 +23,18 @@ export default function NewBatchPage() {
         <div className="numberGrid">
           <label>Tanggal Masuk<input name="tanggalMasuk" type="date" required /></label>
           <label>Tanggal Tempo<input name="tanggalTempo" type="date" required /></label>
+        </div>
+        <div className="numberGrid">
+          <label>Jumlah laptop datang<input name="jumlahLaptopDatang" type="number" min="0" placeholder="Contoh: 40" /></label>
+          <label>Jumlah charger datang<input name="jumlahChargerDatang" type="number" min="0" placeholder="Contoh: 38" /></label>
+        </div>
+        <div className="panelSubsection">
+          <p className="eyebrow">Rincian jenis charger</p>
+          <div className="chargerCountGrid">
+            {chargerTypes.map((chargerType) => (
+              <label key={chargerType}>{chargerType}<input name={chargerFieldName(chargerType)} type="number" min="0" placeholder="0" /></label>
+            ))}
+          </div>
         </div>
         <label>Status Pembayaran
           <select name="statusPembayaran" defaultValue="Belum jatuh tempo">
