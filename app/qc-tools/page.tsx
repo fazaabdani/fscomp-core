@@ -31,7 +31,7 @@ const localShares = [
 ];
 
 export default function QcToolsPage() {
-  requireRole(["admin", "teknisi", "magang"]);
+  requireRole(["admin", "teknisi", "sales", "magang"]);
 
   return (
     <section className="pageStack">
