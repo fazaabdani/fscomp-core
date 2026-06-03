@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { formatRupiah } from "@/lib/api";
-import { getBatchPaymentSummary } from "@/lib/db-data";
+import { getBatchPaymentSummary } from "@/lib/batch-payment-data";
 import { requireRole } from "@/lib/session";
 import { PrintPaymentButton } from "./PrintPaymentButton";
 
