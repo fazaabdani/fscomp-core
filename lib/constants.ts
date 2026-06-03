@@ -10,7 +10,8 @@ export const unitStatuses = [
   "VERIFIED",
   "VERIFIED WITH NOTES",
   "RECHECK",
-  "CANDIDATE RETUR"
+  "CANDIDATE RETUR",
+  "RETUR DISTRIBUTOR"
 ] as const;
 
 export type UnitStatus = (typeof unitStatuses)[number];
@@ -31,7 +32,8 @@ export const statusTone: Record<UnitStatus, "green" | "yellow" | "red"> = {
   VERIFIED: "green",
   "VERIFIED WITH NOTES": "yellow",
   RECHECK: "yellow",
-  "CANDIDATE RETUR": "red"
+  "CANDIDATE RETUR": "red",
+  "RETUR DISTRIBUTOR": "red"
 };
 
 export const catalogReadyStatuses: UnitStatus[] = ["VERIFIED", "VERIFIED WITH NOTES"];
