@@ -1,4 +1,5 @@
 import { LockKeyhole } from "lucide-react";
+import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import { loginAction, logoutAction } from "./actions";
 
@@ -33,19 +34,20 @@ export default function LoginPage({ searchParams }: { searchParams?: { error?: s
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Akses internal</p>
-            <h2>Admin, teknisi, atau magang</h2>
+            <h2>Admin, teknisi, sales, atau magang</h2>
           </div>
           <LockKeyhole size={22} />
         </div>
         <label>
           Username
-          <input name="username" placeholder="admin / teknisi / pkl" required />
+          <input name="username" placeholder="faza / zume / ludfy / rosyadi / sales" required />
         </label>
         <label>
           Password
           <input name="password" type="password" placeholder="Masukkan password" required />
         </label>
         <button className="primaryButton" type="submit">Login</button>
+        <Link className="secondaryButton" href="/register">Daftar akun baru</Link>
       </form>
       )}
     </section>
