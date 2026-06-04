@@ -38,7 +38,7 @@ export default async function EditUserPage({ params, searchParams }: { params: {
           <label>Username<input name="username" defaultValue={user.username ?? ""} required /></label>
         </div>
         <div className="numberGrid">
-          <label>Password baru<input name="password" type="password" placeholder="Kosongkan jika tidak diganti" /></label>
+          <label>Password baru<input name="password" type="password" autoComplete="new-password" placeholder="Kosongkan jika tidak diganti" /></label>
           <label>Email internal<input name="email" defaultValue={user.email} /></label>
         </div>
         <div className="numberGrid">
