@@ -73,9 +73,8 @@ export default async function DashboardPage() {
           <div className="listStack">
             {aiLogs.length === 0 ? <div className="emptyState">Belum ada AI log dari database.</div> : aiLogs.map((log) => (
               <div className="aiLog" key={log.id}>
-                <strong>Unit {log.unit.nomorUnit} - {log.unit.model}</strong>
+                <strong>Unit {log.unitNomor}</strong>
                 <p>{log.rekomendasi}</p>
-                <small>{log.status} / {new Date(log.tanggal).toLocaleString("id-ID")}</small>
               </div>
             ))}
           </div>
