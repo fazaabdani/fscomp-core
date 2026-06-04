@@ -49,19 +49,28 @@ async function syncLoginUser(user: User) {
 
 export async function ensureDefaultLoginUsers() {
   for (const user of demoUsers) {
-    await syncLoginUser(user);
+    try {
+      await syncLoginUser(user);
+    } catch {
+      // Sync user default tidak boleh membuat login user lain ikut gagal.
+    }
   }
 }
 
 export async function getLoginUser(username: string, password: string) {
-  await ensureDefaultLoginUsers();
-  const user = await prisma.user.findFirst({
+  const findUser = () => prisma.user.findFirst({
     where: {
       username,
       password,
       active: true
     }
   });
+
+  let user = await findUser();
+  if (!user) {
+    await ensureDefaultLoginUsers();
+    user = await findUser();
+  }
 
   if (!user || !user.username || !user.password) return null;
 
