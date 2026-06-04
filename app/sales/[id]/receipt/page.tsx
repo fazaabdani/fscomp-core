@@ -11,7 +11,7 @@ import { PrintReceiptButton } from "./PrintReceiptButton";
 export const dynamic = "force-dynamic";
 
 export default async function SaleReceiptPage({ params }: { params: { id: string } }) {
-  requireRole(["admin"]);
+  const currentUser = requireRole(["admin", "teknisi", "sales"]);
   const sale = await getSaleReceipt(params.id);
   if (!sale) notFound();
 
@@ -56,7 +56,7 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
           <a className="secondaryButton" href={waHref} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Share WA</a>
           <PrintReceiptButton />
         </div>
-        {!sale.voidedAt ? (
+        {currentUser.role === "admin" && !sale.voidedAt ? (
           <form action={voidSaleAction.bind(null, sale.id)} className="printHidden">
             <input type="hidden" name="voidReason" value="Transaksi batal dari nota" />
             <button className="secondaryButton" type="submit">Batalkan Penjualan</button>
