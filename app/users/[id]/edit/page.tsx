@@ -46,6 +46,7 @@ export default async function EditUserPage({ params, searchParams }: { params: {
             <select name="role" defaultValue={roleFromDb(user.role)}>
               <option value="admin">Admin</option>
               <option value="teknisi">Teknisi</option>
+              <option value="sales">Sales</option>
               <option value="magang">PKL / Magang</option>
             </select>
           </label>
