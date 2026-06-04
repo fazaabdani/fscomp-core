@@ -81,6 +81,15 @@ export async function updateUserAction(userId: string, formData: FormData) {
     redirect(`/users/${userId}/edit?error=required`);
   }
 
+  const existingUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { password: true }
+  });
+
+  if (!existingUser) {
+    redirect("/users?error=required");
+  }
+
   if (!active && (await isLastActiveAdmin(userId))) {
     redirect(`/users/${userId}/edit?error=last-admin`);
   }
@@ -105,7 +114,7 @@ export async function updateUserAction(userId: string, formData: FormData) {
       email,
       role: roleToDb(role),
       active,
-      ...(password ? { password } : {})
+      password: password || existingUser.password || ""
     }
   });
 
