@@ -14,6 +14,7 @@ function text(formData: FormData, key: string) {
 function roleFromForm(formData: FormData): User["role"] {
   const role = text(formData, "role");
   if (role === "teknisi") return "teknisi";
+  if (role === "sales") return "sales";
   if (role === "magang") return "magang";
   return "admin";
 }
@@ -127,4 +128,17 @@ export async function deactivateUserAction(userId: string) {
 
   revalidatePath("/users");
   redirect("/users?success=disabled");
+}
+
+export async function activateUserAction(userId: string) {
+  requireRole(["admin"]);
+  await ensureDefaultLoginUsers();
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { active: true }
+  });
+
+  revalidatePath("/users");
+  redirect("/users?success=activated");
 }
