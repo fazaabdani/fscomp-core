@@ -52,14 +52,18 @@ async function ensureChecker(name: string, role: "admin" | "teknisi" | "magang")
 }
 
 export async function createDailyQcAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "teknisi", "magang"]);
+  const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
   const unitId = text(formData, "unitId");
   const checkerName = text(formData, "checkerName");
 
-  if (!unitId) redirect("/qc-harian?error=unit-required");
+  if (!unitId) {
+    redirect("/qc-harian?error=unit-required");
+  }
 
   const unit = await prisma.unit.findUnique({ where: { id: unitId } });
-  if (!unit) redirect("/qc-harian?error=unit-not-found");
+  if (!unit) {
+    redirect("/qc-harian?error=unit-not-found");
+  }
 
   const checker = await ensureChecker(checkerName || currentUser.name, "magang");
   const ssdHealth = numberValue(formData, "ssdHealth");
