@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Edit3, ShieldCheck, UserPlus, Users } from "lucide-react";
+import { Download, Edit3, ShieldCheck, UserPlus, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { ensureDefaultLoginUsers, roleFromDb } from "@/lib/user-store";
-import { createUserAction, deactivateUserAction } from "./actions";
+import { activateUserAction, createUserAction, deactivateUserAction } from "./actions";
 
 function roleLabel(role: string) {
   if (role === "admin") return "Admin";
@@ -25,7 +25,9 @@ export default async function UsersPage({ searchParams }: { searchParams?: { err
         : searchParams?.error === "last-admin"
           ? "Admin aktif terakhir tidak boleh dinonaktifkan."
           : searchParams?.success
-            ? "Data user berhasil disimpan."
+            ? searchParams.success === "activated"
+              ? "Akun sudah diaktifkan dan bisa login."
+              : "Data user berhasil disimpan."
             : "";
 
   return (
@@ -36,7 +38,10 @@ export default async function UsersPage({ searchParams }: { searchParams?: { err
           <h1>Kelola akses Core FS Comp</h1>
           <p className="bodyText">Admin bisa menambahkan, mengedit, dan menonaktifkan user tanpa menghapus riwayat kerja.</p>
         </div>
-        <ShieldCheck size={28} />
+        <div className="buttonRow noMargin">
+          <a className="secondaryButton" href="/api/users/export"><Download size={16} /> Export User</a>
+          <ShieldCheck size={28} />
+        </div>
       </div>
 
       {message ? <div className={`infoBox ${searchParams?.error ? "dangerInfo" : ""}`}>{message}</div> : null}
@@ -95,7 +100,7 @@ export default async function UsersPage({ searchParams }: { searchParams?: { err
                     <td><strong>{user.name}</strong><br /><small>{user.email}</small></td>
                     <td>{user.username ?? "-"}</td>
                     <td>{roleLabel(role)}</td>
-                    <td><span className={`statusPill ${user.active ? "green" : "red"}`}>{user.active ? "Aktif" : "Nonaktif"}</span></td>
+                    <td><span className={`statusPill ${user.active ? "green" : "red"}`}>{user.active ? "Aktif" : "Menunggu ACC"}</span></td>
                     <td>
                       <div className="buttonRow">
                         <Link className="secondaryButton" href={`/users/${user.id}/edit`}><Edit3 size={15} /> Edit</Link>
@@ -103,7 +108,11 @@ export default async function UsersPage({ searchParams }: { searchParams?: { err
                           <form action={deactivateUserAction.bind(null, user.id)}>
                             <button className="secondaryButton dangerButton" type="submit">Nonaktifkan</button>
                           </form>
-                        ) : null}
+                        ) : (
+                          <form action={activateUserAction.bind(null, user.id)}>
+                            <button className="primaryButton" type="submit">ACC / Aktifkan</button>
+                          </form>
+                        )}
                       </div>
                     </td>
                   </tr>
