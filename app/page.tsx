@@ -1,7 +1,6 @@
 import { ClipboardCheck, MonitorCog, Sparkles, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { formatRupiah } from "@/lib/api";
 import { getDashboardData } from "@/lib/db-data";
 import { getCurrentUser } from "@/lib/session";
 
@@ -11,7 +10,7 @@ export default async function DashboardPage() {
   const currentUser = getCurrentUser();
   if (currentUser?.role === "magang") redirect("/qc-harian");
 
-  const { stats, needsDecision, aiLogs, dbReady } = await getDashboardData();
+  const { stats, problemUnits, aiLogs, connected } = await getDashboardData();
 
   return (
     <section className="pageStack">
@@ -28,17 +27,17 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {!dbReady ? (
+      {!connected ? (
         <div className="infoBox dangerInfo">
           Database belum bisa dibaca. Cek <strong>DATABASE_URL</strong>, status PostgreSQL, dan redeploy app.
         </div>
       ) : null}
 
       <div className="statsGrid">
-        <article className="statCard"><MonitorCog size={19} /><span>Unit aktif</span><strong>{stats.activeUnits}</strong></article>
-        <article className="statCard"><ClipboardCheck size={19} /><span>Siap katalog</span><strong>{stats.ready}</strong></article>
-        <article className="statCard"><TriangleAlert size={19} /><span>Perlu perhatian</span><strong>{stats.needAttention}</strong></article>
-        <article className="statCard"><MonitorCog size={19} /><span>QC harian</span><strong>{stats.dailyQcToday}</strong></article>
+        <article className="statCard"><MonitorCog size={19} /><span>Unit aktif</span><strong>{stats.unitAktif}</strong></article>
+        <article className="statCard"><ClipboardCheck size={19} /><span>Siap katalog</span><strong>{stats.siapKatalog}</strong></article>
+        <article className="statCard"><TriangleAlert size={19} /><span>Perlu perhatian</span><strong>{stats.perluPerhatian}</strong></article>
+        <article className="statCard"><MonitorCog size={19} /><span>QC harian</span><strong>{stats.qcHarian}</strong></article>
       </div>
 
       <div className="twoColumn">
@@ -51,11 +50,11 @@ export default async function DashboardPage() {
             <TriangleAlert size={22} />
           </div>
           <div className="listStack">
-            {needsDecision.length === 0 ? <div className="emptyState">Belum ada unit RECHECK atau CANDIDATE_RETUR dari data Batch PSI.</div> : needsDecision.map((unit) => (
+            {problemUnits.length === 0 ? <div className="emptyState">Belum ada unit RECHECK atau CANDIDATE_RETUR dari data Batch PSI.</div> : problemUnits.map((unit) => (
               <Link href={`/unit/${unit.id}`} className="unitListItem" key={unit.id}>
                 <div>
                   <strong>Unit {unit.nomorUnit} - {unit.model}</strong>
-                  <small>{unit.processor} / {unit.ram} / {unit.ssd} / modal {formatRupiah(unit.hargaModal)}</small>
+                  <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
                 </div>
                 <span className="statusPill yellow">{unit.statusObservasi}</span>
               </Link>
