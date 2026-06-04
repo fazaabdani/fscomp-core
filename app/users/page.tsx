@@ -8,6 +8,7 @@ import { createUserAction, deactivateUserAction } from "./actions";
 function roleLabel(role: string) {
   if (role === "admin") return "Admin";
   if (role === "teknisi") return "Teknisi";
+  if (role === "sales") return "Sales";
   return "PKL / Magang";
 }
 
@@ -60,6 +61,7 @@ export default async function UsersPage({ searchParams }: { searchParams?: { err
           <select name="role" defaultValue="magang">
             <option value="admin">Admin</option>
             <option value="teknisi">Teknisi</option>
+            <option value="sales">Sales</option>
             <option value="magang">PKL / Magang</option>
           </select>
         </label>
