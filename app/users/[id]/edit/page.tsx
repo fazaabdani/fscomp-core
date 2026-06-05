@@ -18,7 +18,9 @@ export default async function EditUserPage({ params, searchParams }: { params: {
         ? "Nama dan username wajib diisi."
         : searchParams?.error === "last-admin"
           ? "Admin aktif terakhir tidak boleh dinonaktifkan."
-          : "";
+          : searchParams?.error === "password-required"
+            ? "Password wajib diisi untuk user aktif. Isi Password baru lalu simpan."
+            : "";
 
   return (
     <section className="pageStack">
