@@ -24,11 +24,13 @@ export default async function UsersPage({ searchParams }: { searchParams?: { err
         ? "Nama, username, dan password wajib diisi."
         : searchParams?.error === "last-admin"
           ? "Admin aktif terakhir tidak boleh dinonaktifkan."
-          : searchParams?.success
-            ? searchParams.success === "activated"
-              ? "Akun sudah diaktifkan dan bisa login."
-              : "Data user berhasil disimpan."
-            : "";
+          : searchParams?.error === "password-required"
+            ? "User aktif wajib punya username dan password. Edit user lalu isi password."
+            : searchParams?.success
+              ? searchParams.success === "activated"
+                ? "Akun sudah diaktifkan dan bisa login."
+                : "Data user berhasil disimpan."
+              : "";
 
   return (
     <section className="pageStack">
