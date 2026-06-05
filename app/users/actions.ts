@@ -90,6 +90,11 @@ export async function updateUserAction(userId: string, formData: FormData) {
     redirect("/users?error=required");
   }
 
+  const finalPassword = password || existingUser.password || "";
+  if (active && !finalPassword) {
+    redirect(`/users/${userId}/edit?error=password-required`);
+  }
+
   if (!active && (await isLastActiveAdmin(userId))) {
     redirect(`/users/${userId}/edit?error=last-admin`);
   }
@@ -114,7 +119,7 @@ export async function updateUserAction(userId: string, formData: FormData) {
       email,
       role: roleToDb(role),
       active,
-      password: password || existingUser.password || ""
+      password: finalPassword
     }
   });
 
@@ -142,6 +147,15 @@ export async function deactivateUserAction(userId: string) {
 export async function activateUserAction(userId: string) {
   requireRole(["admin"]);
   await ensureDefaultLoginUsers();
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { username: true, password: true }
+  });
+
+  if (!user?.username || !user.password) {
+    redirect(`/users/${userId}/edit?error=password-required`);
+  }
 
   await prisma.user.update({
     where: { id: userId },
