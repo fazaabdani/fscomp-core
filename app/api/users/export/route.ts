@@ -26,14 +26,15 @@ export async function GET() {
     }
   });
 
-  const header = ["Nama", "Username", "Password", "Role", "Status", "Email"];
+  const header = ["Nama", "Username", "Password", "Role", "Status", "Email", "Catatan"];
   const rows = users.map((user) => [
     user.name,
     user.username ?? "",
     user.password ?? "",
     roleFromDb(user.role),
     user.active ? "Aktif" : "Nonaktif",
-    user.email
+    user.email,
+    !user.username ? "USERNAME KOSONG" : !user.password ? "PASSWORD KOSONG" : ""
   ]);
   const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
   const today = new Date().toISOString().slice(0, 10);
