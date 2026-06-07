@@ -81,6 +81,16 @@ function normalizeHeader(value: string) {
   return value.replace(/^\uFEFF/, "").trim().toLowerCase();
 }
 
+function isUploadedTextFile(value: FormDataEntryValue | null): value is File {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      "size" in value &&
+      "text" in value &&
+      typeof value.text === "function"
+  );
+}
+
 async function isLastActiveAdmin(userId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { role: true, active: true } });
   if (!user || user.role !== "ADMIN" || !user.active) return false;
@@ -133,7 +143,7 @@ export async function importUsersCsvAction(formData: FormData) {
   await ensureDefaultLoginUsers();
 
   const file = formData.get("csvFile");
-  if (!(file instanceof File) || file.size === 0) {
+  if (!isUploadedTextFile(file) || file.size === 0) {
     redirect("/users?error=csv-required");
   }
 
