@@ -27,7 +27,13 @@ function roleFromCsv(value: string): User["role"] {
   return "magang";
 }
 
+function csvDelimiter(input: string) {
+  const firstLine = input.split(/\r?\n/, 1)[0] ?? "";
+  return firstLine.split(";").length > firstLine.split(",").length ? ";" : ",";
+}
+
 function csvRows(input: string) {
+  const delimiter = csvDelimiter(input);
   const rows: string[][] = [];
   let row: string[] = [];
   let cell = "";
@@ -48,7 +54,7 @@ function csvRows(input: string) {
       continue;
     }
 
-    if (char === "," && !quoted) {
+    if (char === delimiter && !quoted) {
       row.push(cell.trim());
       cell = "";
       continue;
