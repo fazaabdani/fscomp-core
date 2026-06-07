@@ -28,7 +28,7 @@ async function syncLoginUser(user: User) {
       data: {
         name: user.name,
         username: user.username,
-        password: user.password,
+        password: existing.password || user.password,
         role: roleToDb(user.role),
         active: true
       }
