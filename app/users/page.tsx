@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Download, Edit3, ShieldCheck, UserPlus, Users } from "lucide-react";
+import { Download, Edit3, ShieldCheck, Upload, UserPlus, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { ensureDefaultLoginUsers, roleFromDb } from "@/lib/user-store";
-import { activateUserAction, createUserAction, deactivateUserAction } from "./actions";
+import { activateUserAction, createUserAction, deactivateUserAction, importUsersCsvAction } from "./actions";
 
 function roleLabel(role: string) {
   if (role === "admin") return "Admin";
@@ -12,7 +12,7 @@ function roleLabel(role: string) {
   return "PKL / Magang";
 }
 
-export default async function UsersPage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
+export default async function UsersPage({ searchParams }: { searchParams?: { error?: string; success?: string; count?: string } }) {
   requireRole(["admin"]);
   await ensureDefaultLoginUsers();
   const users = await prisma.user.findMany({ orderBy: [{ active: "desc" }, { role: "asc" }, { name: "asc" }] });
@@ -26,11 +26,17 @@ export default async function UsersPage({ searchParams }: { searchParams?: { err
           ? "Admin aktif terakhir tidak boleh dinonaktifkan."
           : searchParams?.error === "password-required"
             ? "User aktif wajib punya username dan password. Edit user lalu isi password."
-            : searchParams?.success
-              ? searchParams.success === "activated"
-                ? "Akun sudah diaktifkan dan bisa login."
-                : "Data user berhasil disimpan."
-              : "";
+            : searchParams?.error === "csv-required"
+              ? "Pilih file CSV user terlebih dahulu."
+              : searchParams?.error === "csv-empty"
+                ? "CSV kosong atau tidak ada data user."
+                : searchParams?.success
+                  ? searchParams.success === "activated"
+                    ? "Akun sudah diaktifkan dan bisa login."
+                    : searchParams.success === "imported"
+                      ? `${searchParams.count ?? "0"} baris user berhasil diproses dari CSV.`
+                      : "Data user berhasil disimpan."
+                  : "";
 
   return (
     <section className="pageStack">
@@ -73,6 +79,23 @@ export default async function UsersPage({ searchParams }: { searchParams?: { err
           </select>
         </label>
         <button className="primaryButton" type="submit">Tambah User</button>
+      </form>
+
+      <form className="panel formGrid" action={importUsersCsvAction}>
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Import CSV</p>
+            <h2>Update username dan password</h2>
+          </div>
+          <Upload size={22} />
+        </div>
+        <div className="infoBox">
+          Upload CSV dari tombol Export User. Password kosong tidak akan menghapus password lama, dan baris user baru tanpa password akan dilewati.
+        </div>
+        <div className="buttonRow">
+          <input name="csvFile" type="file" accept=".csv,text/csv" required />
+          <button className="primaryButton" type="submit"><Upload size={16} /> Import CSV</button>
+        </div>
       </form>
 
       <section className="panel">
