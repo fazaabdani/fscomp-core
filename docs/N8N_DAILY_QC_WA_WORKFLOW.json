@@ -1,0 +1,160 @@
+{
+  "name": "FS Comp - Wajib QC Harian 30 Jam ke WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "6e6fe5c1-9fc2-4a90-8d50-16ea1aa17b91",
+      "name": "Every 2 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.CORE_DAILY_QC_URL || 'https://core.fscomp.id/api/integrations/n8n/daily-qc-list'}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "a126ef59-1896-419b-b2ff-cd48f325b5a8",
+      "name": "Get Daily QC List",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "56cb3380-ac88-408a-afc1-9ce807cdbabb",
+              "leftValue": "={{$json.count}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4d3a9f6c-c84a-4c8c-82b9-1f876af9d45d",
+      "name": "Has Due QC?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.WA_SEND_URL || 'https://api.fonnte.com/send'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{$env.WA_TOKEN}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "target",
+              "value": "={{$env.WA_TARGET}}"
+            },
+            {
+              "name": "message",
+              "value": "={{$json.whatsappText}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "61dc6f26-f258-4209-bb9f-315343d39f22",
+      "name": "Send WhatsApp Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        220
+      ]
+    }
+  ],
+  "connections": {
+    "Every 2 Hours": {
+      "main": [
+        [
+          {
+            "node": "Get Daily QC List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Daily QC List": {
+      "main": [
+        [
+          {
+            "node": "Has Due QC?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Due QC?": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-06-09T00:00:00.000Z",
+  "versionId": "fscomp-daily-qc-wa-v1"
+}
