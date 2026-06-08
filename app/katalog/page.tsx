@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CheckCircle2, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
-import { getCatalogPageData } from "@/lib/db-data";
+import { getCatalogPageData } from "@/lib/catalog-page-data";
 
 export const dynamic = "force-dynamic";
 
