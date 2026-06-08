@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, MapPin, MessageCircle, Receipt } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { formatRupiah } from "@/lib/api";
-import { getSaleReceipt } from "@/lib/db-data";
+import { getSaleReceipt } from "@/lib/sale-receipt-data";
 import { requireRole } from "@/lib/session";
 import { voidSaleAction } from "../../actions";
 import { PrintReceiptButton } from "./PrintReceiptButton";
