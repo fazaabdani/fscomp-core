@@ -244,6 +244,7 @@ model Sale {
   soldPrice     Int
   costPrice     Int
   subtotal      Int          @default(0)
+  dpAmount      Int          @default(0)
   grossProfit   Int
   paymentMethod String
   buyerName     String?
