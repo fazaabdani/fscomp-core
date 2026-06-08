@@ -1,6 +1,5 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
-import { isQcFresh } from "./qc-due";
 import { displayUnitNumber } from "./unit-number";
 
 export async function getSalesPageData() {
@@ -14,7 +13,7 @@ export async function getSalesPageData() {
         qcHarian: {
           orderBy: { tanggal: "desc" },
           take: 1,
-          select: { masihLolos: true, tanggal: true }
+          select: { masihLolos: true }
         }
       },
       orderBy: { createdAt: "desc" },
@@ -23,7 +22,7 @@ export async function getSalesPageData() {
 
     const readyUnits = readyCandidates.filter((unit) => {
       const latestDaily = unit.qcHarian[0];
-      return Boolean(latestDaily && latestDaily.masihLolos !== "TIDAK_LOLOS" && isQcFresh(latestDaily.tanggal));
+      return Boolean(latestDaily && latestDaily.masihLolos !== "TIDAK_LOLOS");
     });
 
     let sales: Array<Prisma.SaleGetPayload<{ include: { unit: true; items: true } }>> = [];
