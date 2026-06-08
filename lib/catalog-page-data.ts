@@ -1,5 +1,4 @@
 import { prisma } from "./prisma";
-import { isQcFresh } from "./qc-due";
 import { displayUnitNumber } from "./unit-number";
 
 export async function getCatalogPageData() {
@@ -36,8 +35,7 @@ export async function getCatalogPageData() {
         const latestDaily = unit.qcHarian[0];
         return Boolean(
           latestDaily &&
-          latestDaily.masihLolos !== "TIDAK_LOLOS" &&
-          isQcFresh(latestDaily.tanggal)
+          latestDaily.masihLolos !== "TIDAK_LOLOS"
         );
       })
       .map((unit) => {
