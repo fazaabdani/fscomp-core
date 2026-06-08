@@ -41,6 +41,8 @@ export default async function PublicReceiptPage({ params }: { params: { id: stri
           <div>
             <span>Pembayaran</span>
             <strong>{sale.paymentMethod}</strong>
+            {sale.dpAmount > 0 ? <small>DP masuk {formatRupiah(sale.dpAmount)}</small> : null}
+            {sale.remainingPayment > 0 ? <small>Sisa {formatRupiah(sale.remainingPayment)}</small> : <small>Lunas</small>}
             <small>{sale.notes}</small>
           </div>
           <div>
@@ -86,6 +88,8 @@ export default async function PublicReceiptPage({ params }: { params: { id: stri
           <div className="receiptTotals">
             <span>Total</span>
             <strong>{formatRupiah(sale.subtotal)}</strong>
+            {sale.dpAmount > 0 ? <small>DP {formatRupiah(sale.dpAmount)}</small> : null}
+            {sale.remainingPayment > 0 ? <small>Sisa {formatRupiah(sale.remainingPayment)}</small> : <small>Lunas</small>}
           </div>
         </footer>
 
