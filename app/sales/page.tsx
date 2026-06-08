@@ -65,7 +65,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
             <select name="unitId" defaultValue={firstUnit?.id} required>
               {readyUnits.map((unit) => (
                 <option value={unit.id} key={unit.id}>
-                  Unit {unit.nomorUnit} - {unit.model} - {formatRupiah(unit.hargaJualRekomendasi)}
+                  Unit {unit.nomorUnit} - {unit.model} - {unit.stockLocation} - {formatRupiah(unit.hargaJualRekomendasi)}
                 </option>
               ))}
             </select>
@@ -73,13 +73,6 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
           <label>
             Harga jual final
             <input name="soldPrice" type="number" inputMode="numeric" min="0" step="1000" defaultValue={firstUnit?.hargaJualRekomendasi ?? 0} required />
-          </label>
-          <label>
-            Lokasi penjualan
-            <select name="location" defaultValue="WIRADESA">
-              <option value="WIRADESA">Wiradesa utama</option>
-              <option value="KAJEN">Kajen secondary</option>
-            </select>
           </label>
           <label>
             Metode bayar
