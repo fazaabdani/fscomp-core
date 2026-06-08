@@ -2,6 +2,7 @@ import { ClipboardCheck, MonitorCog, Sparkles, TriangleAlert } from "lucide-reac
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getDashboardData } from "@/lib/db-data";
+import { getDueDailyQcUnits } from "@/lib/qc-due-data";
 import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +11,10 @@ export default async function DashboardPage() {
   const currentUser = getCurrentUser();
   if (currentUser?.role === "magang") redirect("/qc-harian");
 
-  const { stats, problemUnits, aiLogs, connected } = await getDashboardData();
+  const [{ stats, problemUnits, aiLogs, connected }, dueDailyQc] = await Promise.all([
+    getDashboardData(),
+    getDueDailyQcUnits()
+  ]);
 
   return (
     <section className="pageStack">
@@ -39,6 +43,31 @@ export default async function DashboardPage() {
         <article className="statCard"><TriangleAlert size={19} /><span>Perlu perhatian</span><strong>{stats.perluPerhatian}</strong></article>
         <article className="statCard"><MonitorCog size={19} /><span>QC harian</span><strong>{stats.qcHarian}</strong></article>
       </div>
+
+      <section className="panel dangerPanel">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Wajib QC Harian</p>
+            <h2>{dueDailyQc.count} unit perlu dicek</h2>
+          </div>
+          <Link className="secondaryButton" href="/qc-harian">Input QC</Link>
+        </div>
+        <div className="infoBox">
+          Unit wajib QC harian maksimal {dueDailyQc.dueHours} jam sekali. Unit tetap tampil di kasir dan katalog, bagian ini hanya alarm operasional.
+        </div>
+        <div className="listStack">
+          {dueDailyQc.units.length === 0 ? <div className="emptyState">Semua unit aktif masih dalam jadwal QC harian.</div> : dueDailyQc.units.map((unit) => (
+            <Link href={`/qc-harian?unit=${unit.id}`} className="unitListItem" key={unit.id}>
+              <div>
+                <strong>Unit {unit.nomorUnit} - {unit.model}</strong>
+                <small>{unit.stockLocation} / Last QC: {unit.lastQcAt}{unit.qcAgeHours === null ? "" : ` / ${unit.qcAgeHours} jam lalu`}</small>
+                <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
+              </div>
+              <span className="statusPill yellow">Wajib QC</span>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <div className="twoColumn">
         <section className="panel dangerPanel">
