@@ -1,5 +1,22 @@
 import { prisma } from "./prisma";
 
+const storeByLocation = {
+  WIRADESA: {
+    name: "FS Comp",
+    tagline: "Laptop second berkualitas, QC jelas, garansi tertulis.",
+    branch: "FS Comp / FS Media Comp Wiradesa",
+    address: "Jl. Wiradesa No.1 RT 22 RW 05, Desa Wiradesa, Kecamatan Wiradesa, Kabupaten Pekalongan, Jawa Tengah 51152",
+    phone: "0816660056"
+  },
+  KAJEN: {
+    name: "FS.ID",
+    tagline: "Laptop second berkualitas, QC jelas, garansi tertulis.",
+    branch: "FS.ID Kajen",
+    address: "Jalan Diponegoro No. 204B (Utara Rumah Dinas Wakil Bupati), Kec. Kajen, Kab. Pekalongan Jawa Tengah",
+    phone: "0851-8266-1773"
+  }
+} as const;
+
 export async function getSaleReceipt(id: string) {
   try {
     const sale = await prisma.sale.findUnique({
@@ -17,6 +34,7 @@ export async function getSaleReceipt(id: string) {
       invoiceNumber: sale.invoiceNumber,
       soldAt: sale.soldAt.toISOString().slice(0, 10),
       location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
+      store: storeByLocation[sale.location],
       paymentMethod: sale.paymentMethod,
       buyerName: sale.buyerName ?? "-",
       buyerPhone: sale.buyerPhone ?? "-",
