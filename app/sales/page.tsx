@@ -44,7 +44,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
 
       {blockedByDailyQc > 0 ? (
         <div className="infoBox">
-          {blockedByDailyQc} unit tidak dimunculkan di stok siap jual karena QC harian terakhir tidak lolos hardware.
+          {blockedByDailyQc} unit tidak dimunculkan di stok siap jual karena QC harian belum lolos atau sudah lebih dari 30 jam.
         </div>
       ) : null}
 
@@ -165,7 +165,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               <textarea name="notes" placeholder="Contoh: DP, transfer BCA, garansi, aksesoris tambahan." />
             </label>
             <button className="primaryButton" type="submit" disabled={readyUnits.length === 0}>Simpan Penjualan</button>
-            {readyUnits.length === 0 ? <div className="emptyState">Belum ada unit siap jual. Pastikan QC harian terakhir sudah lolos.</div> : null}
+            {readyUnits.length === 0 ? <div className="emptyState">Belum ada unit siap jual. Pastikan QC harian terakhir lolos dan belum lebih dari 30 jam.</div> : null}
           </div>
         </div>
       </form>
