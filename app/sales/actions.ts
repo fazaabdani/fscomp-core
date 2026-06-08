@@ -4,6 +4,7 @@ import type { SaleLocation } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { isQcFresh } from "@/lib/qc-due";
 import { requireRole } from "@/lib/session";
 
 function text(formData: FormData, key: string) {
@@ -169,7 +170,7 @@ export async function createSaleAction(formData: FormData) {
       qcHarian: {
         orderBy: { tanggal: "desc" },
         take: 1,
-        select: { masihLolos: true, windowsVersion: true }
+        select: { tanggal: true, masihLolos: true, windowsVersion: true }
       }
     }
   });
@@ -185,6 +186,10 @@ export async function createSaleAction(formData: FormData) {
 
   if (latestDailyQc && latestDailyQc.masihLolos === "TIDAK_LOLOS") {
     redirect("/sales?error=qc-harian-belum-lolos");
+  }
+
+  if (!isQcFresh(latestDailyQc.tanggal)) {
+    redirect("/sales?error=qc-harian-lebih-30-jam");
   }
 
   const items = [
