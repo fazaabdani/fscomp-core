@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { MapPin, Receipt } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { formatRupiah } from "@/lib/api";
-import { getSaleReceipt } from "@/lib/db-data";
+import { getSaleReceipt } from "@/lib/sale-receipt-data";
 
 export const dynamic = "force-dynamic";
 
