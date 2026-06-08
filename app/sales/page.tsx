@@ -86,7 +86,12 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
             <select name="paymentMethod" defaultValue="Cash">
               <option>Cash</option>
               <option>Transfer</option>
+              <option>DP</option>
             </select>
+          </label>
+          <label>
+            DP / uang masuk
+            <input name="dpAmount" type="number" inputMode="numeric" min="0" step="1000" placeholder="Isi kalau DP" />
           </label>
           <label>
             Nama pembeli
