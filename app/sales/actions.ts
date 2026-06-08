@@ -40,10 +40,6 @@ function hasBundledBagAndMouse(items: { name: string; qty: number }[]) {
   return hasBag && hasMouse;
 }
 
-function mapLocation(value: string): SaleLocation {
-  return value === "KAJEN" ? "KAJEN" : "WIRADESA";
-}
-
 function processorGeneration(processor: string) {
   const normalized = processor.toLowerCase();
   const genMatch = normalized.match(/gen\s*(\d+)/);
@@ -155,7 +151,6 @@ export async function createSaleAction(formData: FormData) {
   const buyerPhone = text(formData, "buyerPhone");
   const buyerAddress = text(formData, "buyerAddress");
   const notes = text(formData, "notes");
-  const location = mapLocation(text(formData, "location"));
   const warrantySoftware = warrantyText(formData, "warrantySoftware", 3, "bulan");
   const warrantyHardware = warrantyText(formData, "warrantyHardware", 3, "minggu");
   const itemNames = textArray(formData, "itemName");
@@ -181,6 +176,7 @@ export async function createSaleAction(formData: FormData) {
   if (!unit) {
     redirect("/sales?error=unit-tidak-ditemukan");
   }
+  const location = unit.stockLocation;
 
   const latestDailyQc = unit.qcHarian[0];
   if (!latestDailyQc) {
