@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { QC_DUE_HOURS, isQcFresh, qcAgeHours } from "@/lib/qc-due";
 
 export const dynamic = "force-dynamic";
 
@@ -21,22 +22,10 @@ function formatDateTimeWib(date?: Date | null) {
   }).format(date);
 }
 
-function todayJakartaRange() {
-  const today = jakartaDateKey();
-  const start = new Date(`${today}T00:00:00.000+07:00`);
-  const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 1);
-
-  return {
-    today,
-    start,
-    end
-  };
-}
-
 export async function GET() {
   const publicUrl = process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id";
-  const { today, start, end } = todayJakartaRange();
+  const now = new Date();
+  const today = jakartaDateKey(now);
 
   const units = await prisma.unit.findMany({
     where: {
@@ -71,7 +60,7 @@ export async function GET() {
 
   const dueUnits = units.filter((unit) => {
     const latest = unit.qcHarian[0];
-    return !latest || latest.tanggal < start || latest.tanggal >= end;
+    return !isQcFresh(latest?.tanggal, now);
   });
 
   const rows = dueUnits.map((unit) => {
@@ -86,6 +75,7 @@ export async function GET() {
       ssdHealth: latest?.ssdHealth ?? unit.ssdHealth ?? null,
       batteryHealth: latest?.batteryHealth ?? unit.batteryHealth ?? null,
       lastQcAt: latest ? formatDateTimeWib(latest.tanggal) : "Belum pernah QC harian",
+      qcAgeHours: qcAgeHours(latest?.tanggal, now),
       catatanTerakhir: latest?.catatan ?? "",
       detailUrl: `${publicUrl}/unit/${unit.id}`,
       qcUrl: `${publicUrl}/qc-harian?unit=${unit.id}`
@@ -96,12 +86,13 @@ export async function GET() {
   const extraCount = Math.max(rows.length - previewRows.length, 0);
   const whatsappText = [
     `*QC Harian FS Comp - ${today}*`,
-    `Perlu dicek hari ini: ${rows.length} unit`,
+    `Wajib QC harian: ${rows.length} unit`,
+    `Aturan: maksimal ${QC_DUE_HOURS} jam sekali per unit`,
     "",
     ...previewRows.map((unit, index) => [
       `${index + 1}. Unit ${unit.nomorUnit} - ${unit.model}`,
       `   ${unit.lokasi} | ${unit.status}`,
-      `   Last QC: ${unit.lastQcAt}`,
+      `   Last QC: ${unit.lastQcAt}${unit.qcAgeHours === null ? "" : ` (${unit.qcAgeHours} jam lalu)`}`,
       `   SSD ${unit.ssdHealth ?? "-"}% / Battery ${unit.batteryHealth ?? "-"}%`,
       `   ${unit.qcUrl}`
     ].join("\n")),
