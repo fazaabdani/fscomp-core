@@ -149,6 +149,7 @@ export async function createSaleAction(formData: FormData) {
 
   const unitId = text(formData, "unitId");
   const soldPrice = numberValue(formData, "soldPrice");
+  const dpAmountInput = numberValue(formData, "dpAmount");
   const paymentMethod = text(formData, "paymentMethod") || "Cash";
   const buyerName = text(formData, "buyerName");
   const buyerPhone = text(formData, "buyerPhone");
@@ -208,6 +209,7 @@ export async function createSaleAction(formData: FormData) {
   ].filter((item) => item.name && item.qty > 0);
 
   const subtotal = items.reduce((sum, item) => sum + item.qty * item.unitPrice, 0);
+  const dpAmount = Math.min(Math.max(0, dpAmountInput), subtotal);
   const totalCost = items.reduce((sum, item) => sum + item.qty * item.unitCost, 0);
   const bundleHandlingCost = hasBundledBagAndMouse(items) ? 50000 : 0;
   const grossProfit = subtotal - totalCost - bundleHandlingCost;
@@ -224,6 +226,7 @@ export async function createSaleAction(formData: FormData) {
           soldPrice: subtotal,
           costPrice: totalCost,
           subtotal,
+          dpAmount,
           grossProfit,
           paymentMethod,
           buyerName: buyerName || null,
