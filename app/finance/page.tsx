@@ -25,6 +25,8 @@ export default async function FinancePage() {
         <div className="metric metric-cyan"><Banknote size={20} /><span>Omzet</span><strong>{formatRupiah(stats.totalOmzet)}</strong></div>
         <div className="metric metric-blue"><Receipt size={20} /><span>Total modal</span><strong>{formatRupiah(stats.totalModal)}</strong></div>
         <div className="metric metric-green"><TrendingUp size={20} /><span>Profit kotor</span><strong>{formatRupiah(stats.totalProfit)}</strong></div>
+        <div className="metric metric-blue"><Receipt size={20} /><span>Profit Wiradesa</span><strong>{formatRupiah(stats.totalWiradesaShare)}</strong></div>
+        <div className="metric metric-green"><TrendingUp size={20} /><span>Profit Kajen</span><strong>{formatRupiah(stats.totalKajenShare)}</strong></div>
         <div className="metric metric-blue"><Receipt size={20} /><span>Transaksi aktif</span><strong>{stats.totalTransaksi}</strong></div>
       </div>
 
@@ -46,6 +48,7 @@ export default async function FinancePage() {
               <b>{formatRupiah(sale.soldPrice)}</b>
               <span>{formatRupiah(sale.costPrice)}</span>
               <span className={sale.grossProfit >= 0 ? "profitText" : "lossText"}>{formatRupiah(sale.grossProfit)}</span>
+              {sale.location === "Kajen" ? <small>Kajen {formatRupiah(sale.kajenShare)} / Wiradesa {formatRupiah(sale.wiradesaShare)}</small> : null}
             </Link>
           ))}
         </div>
