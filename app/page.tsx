@@ -5,6 +5,7 @@ import { getDashboardData } from "@/lib/db-data";
 import { getUnitsMissingPhotos } from "@/lib/photo-missing-data";
 import { getDueDailyQcUnits } from "@/lib/qc-due-data";
 import { getCurrentUser } from "@/lib/session";
+import { getSoftwareResolutionUnits } from "@/lib/software-resolution-data";
 import { CopyWaButton } from "./CopyWaButton";
 
 export const dynamic = "force-dynamic";
@@ -13,10 +14,11 @@ export default async function DashboardPage() {
   const currentUser = getCurrentUser();
   if (currentUser?.role === "magang") redirect("/qc-harian");
 
-  const [{ stats, problemUnits, aiLogs, connected }, dueDailyQc, missingPhotos] = await Promise.all([
+  const [{ stats, problemUnits, aiLogs, connected }, dueDailyQc, missingPhotos, softwareResolution] = await Promise.all([
     getDashboardData(),
     getDueDailyQcUnits(),
-    getUnitsMissingPhotos()
+    getUnitsMissingPhotos(),
+    getSoftwareResolutionUnits()
   ]);
   const publicUrl = process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id";
   const dueDailyQcWaText = [
@@ -51,6 +53,24 @@ export default async function DashboardPage() {
     "",
     missingPhotos.count > missingPhotos.units.length ? `Masih ada ${missingPhotos.count - missingPhotos.units.length} unit lain belum tampil di pesan ini.` : "",
     "Mohon difoto dan link fotonya diisi."
+  ].filter(Boolean).join("\n");
+  const softwareResolutionWaText = [
+    `*FS Comp Core - Unit Perlu Diselesaikan Software*`,
+    `Total: ${softwareResolution.count} unit`,
+    "",
+    ...softwareResolution.units.map((unit, index) => [
+      `${index + 1}. Unit ${unit.nomorUnit} - ${unit.model}`,
+      `   Lokasi: ${unit.stockLocation}`,
+      `   Status: ${unit.statusObservasi}`,
+      `   Spek: ${unit.processor} / ${unit.ram} / ${unit.ssd}`,
+      `   Last QC: ${unit.lastQcAt}`,
+      `   Perlu diselesaikan: ${unit.items.join(" | ")}`,
+      `   Isi ulang QC: ${publicUrl}/qc-harian?unit=${unit.id}`,
+      `   Detail: ${publicUrl}/unit/${unit.id}`
+    ].join("\n")),
+    "",
+    softwareResolution.count > softwareResolution.units.length ? `Masih ada ${softwareResolution.count - softwareResolution.units.length} unit lain belum tampil di pesan ini.` : "",
+    "Mohon diselesaikan software-nya lalu isi ulang QC harian."
   ].filter(Boolean).join("\n");
 
   return (
@@ -130,6 +150,34 @@ export default async function DashboardPage() {
                 <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
               </div>
               <span className="statusPill yellow"><Camera size={14} /> Perlu foto</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="panel dangerPanel">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Penyelesaian software</p>
+            <h2>{softwareResolution.count} unit perlu dibereskan</h2>
+          </div>
+          <div className="buttonCluster">
+            <CopyWaButton text={softwareResolutionWaText} disabled={softwareResolution.units.length === 0} />
+            <Link className="secondaryButton" href="/qc-harian">Input QC</Link>
+          </div>
+        </div>
+        <div className="infoBox">
+          Ini khusus reminder software seperti OS, driver, jam, aplikasi, partisi, dan Office. Setelah beres, isi ulang QC harian supaya hilang dari daftar.
+        </div>
+        <div className="listStack">
+          {softwareResolution.units.length === 0 ? <div className="emptyState">Belum ada unit aktif yang punya PR software.</div> : softwareResolution.units.slice(0, 8).map((unit) => (
+            <Link href={`/qc-harian?unit=${unit.id}`} className="unitListItem" key={unit.id}>
+              <div>
+                <strong>Unit {unit.nomorUnit} - {unit.model}</strong>
+                <small>{unit.stockLocation} / Last QC: {unit.lastQcAt}</small>
+                <small>{unit.items.slice(0, 3).join(" | ")}</small>
+              </div>
+              <span className="statusPill yellow">Perlu software</span>
             </Link>
           ))}
         </div>
