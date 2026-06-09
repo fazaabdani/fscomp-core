@@ -64,7 +64,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
 
         <div className="cashierMainGrid">
           <label>
-            Unit
+            Unit dan lokasi toko nota
             <select name="unitId" defaultValue={firstUnit?.id} required>
               {readyUnits.map((unit) => (
                 <option value={unit.id} key={unit.id}>
@@ -72,6 +72,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
                 </option>
               ))}
             </select>
+            <small className="formHint">Lokasi nota otomatis mengikuti lokasi unit: Wiradesa memakai kop FS Comp, Kajen memakai kop FS.ID.</small>
           </label>
           <label>
             Harga jual final
