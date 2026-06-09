@@ -24,9 +24,11 @@ export default async function PublicReceiptPage({ params }: { params: { id: stri
             <small>HP/WA toko: {sale.store.phone}</small>
           </div>
           <div className="receiptMeta">
-            <strong>{sale.invoiceNumber}</strong>
-            <span>{sale.soldAt}</span>
-            <span><MapPin size={14} /> {sale.location}</span>
+            <div className="receiptMetaText">
+              <strong>{sale.invoiceNumber}</strong>
+              <span>{sale.soldAt}</span>
+              <span><MapPin size={14} /> {sale.location}</span>
+            </div>
             <QRCodeSVG value={publicReceiptUrl} size={42} />
           </div>
         </header>
