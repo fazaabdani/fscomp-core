@@ -134,6 +134,26 @@
   line-height: 1.15;
 }
 
+.receiptMeta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 12px;
+  text-align: right;
+}
+
+.receiptMetaText {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.receiptMetaText span:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .attendanceCapture {
   display: grid;
   gap: 10px;
@@ -192,6 +212,8 @@
   }
 
   .receiptTop {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
     gap: 3mm;
     padding-bottom: 2mm;
   }
@@ -217,11 +239,25 @@
   }
 
   .receiptMeta {
-    gap: 0.8mm;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 1.6mm;
+    text-align: right;
+  }
+
+  .receiptMetaText {
+    gap: 0.6mm;
   }
 
   .receiptMeta strong {
     font-size: 9pt;
+  }
+
+  .receiptMeta svg {
+    width: 12mm;
+    height: 12mm;
+    flex: 0 0 auto;
   }
 
   .receiptInfoGrid {
