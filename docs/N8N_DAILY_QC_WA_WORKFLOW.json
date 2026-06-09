@@ -7,7 +7,7 @@
           "interval": [
             {
               "field": "days",
-              "triggerAtHour": 22,
+              "triggerAtHour": 9,
               "triggerAtMinute": 0
             }
           ]
@@ -157,5 +157,5 @@
   "tags": [],
   "triggerCount": 1,
   "updatedAt": "2026-06-09T00:00:00.000Z",
-  "versionId": "fscomp-daily-qc-wa-v2"
+  "versionId": "fscomp-daily-qc-wa-v3"
 }
