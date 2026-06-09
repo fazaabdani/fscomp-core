@@ -57,6 +57,7 @@ export async function updateUnitAction(unitId: string, formData: FormData) {
       ram: text(formData, "ram"),
       ssd: text(formData, "ssd"),
       ssdSerial: text(formData, "ssdSerial"),
+      chargerType: text(formData, "chargerType") || null,
       lcdSize: text(formData, "lcdSize"),
       lcdResolution: text(formData, "lcdResolution"),
       isTouchscreen: text(formData, "isTouchscreen") === "Ya",
@@ -64,6 +65,7 @@ export async function updateUnitAction(unitId: string, formData: FormData) {
       hargaJualRekomendasi: rupiahValue(formData, "hargaJualRekomendasi"),
       stockLocation: (text(formData, "stockLocation") || "WIRADESA") as SaleLocation,
       catalogImageUrl: text(formData, "catalogImageUrl") || null,
+      entryNotes: text(formData, "entryNotes") || null,
       ssdHealth: numberValue(formData, "ssdHealth"),
       batteryHealth: numberValue(formData, "batteryHealth"),
       statusObservasi: text(formData, "statusObservasi") as UnitStatus
