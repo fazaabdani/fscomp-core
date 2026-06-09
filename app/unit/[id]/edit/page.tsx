@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { chargerTypes } from "@/lib/charger-options";
 import { getUnitForEdit } from "@/lib/db-data";
 import { requireRole } from "@/lib/session";
 import { updateUnitAction } from "./actions";
@@ -18,7 +19,7 @@ export default async function EditUnitPage({ params, searchParams }: { params: {
 
   return (
     <section className="pageStack">
-      <Link className="backLink" href="/batch-psi"><ArrowLeft size={16} /> Kembali ke Batch PSI</Link>
+      <Link className="backLink" href="/batch-psi"><ArrowLeft size={16} /> Kembali ke Batch</Link>
       <div className="sectionTitle">
         <div>
           <p className="eyebrow">Edit Unit</p>
@@ -42,6 +43,14 @@ export default async function EditUnitPage({ params, searchParams }: { params: {
         </div>
         <div className="numberGrid">
           <label>Seri SSD<input name="ssdSerial" defaultValue={unit.ssdSerial} /></label>
+          <label>Jenis charger
+            <select name="chargerType" defaultValue={unit.chargerType}>
+              <option value="">Belum dicatat</option>
+              {chargerTypes.map((chargerType) => <option value={chargerType} key={chargerType}>{chargerType}</option>)}
+            </select>
+          </label>
+        </div>
+        <div className="numberGrid">
           <label>Status QC
             <select name="statusObservasi" defaultValue={unit.statusObservasi}>
               <option value="VERIFIED">VERIFIED</option>
@@ -79,6 +88,14 @@ export default async function EditUnitPage({ params, searchParams }: { params: {
         <label>Link foto katalog
           <input name="catalogImageUrl" defaultValue={unit.catalogImageUrl} placeholder="Link Google Drive / link foto langsung" />
           <small>Opsional. Bisa diisi setelah unit difoto dan siap dipajang di katalog.</small>
+        </label>
+        <label>Catatan admin unit
+          <textarea
+            name="entryNotes"
+            defaultValue={unit.entryNotes === "-" ? "" : unit.entryNotes}
+            placeholder="Catatan khusus admin: alasan candidate retur, retur distributor, recheck, atau hal yang harus dibereskan."
+          />
+          <small>Catatan ini khusus unit, jadi tidak perlu ditulis ulang di catatan QC harian.</small>
         </label>
         <button className="primaryButton" type="submit">Simpan Perubahan Unit</button>
       </form>
