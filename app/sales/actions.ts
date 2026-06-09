@@ -306,3 +306,50 @@ export async function voidSaleAction(saleId: string, formData: FormData) {
   revalidatePath(`/sales/${saleId}/receipt`);
   redirect("/sales?voided=1");
 }
+
+export async function restoreSaleAction(saleId: string) {
+  requireRole(["admin"]);
+
+  const sale = await prisma.sale.findUnique({ where: { id: saleId } });
+  if (!sale) {
+    redirect("/sales?error=transaksi-tidak-ditemukan");
+  }
+
+  if (!sale.voidedAt) {
+    redirect("/sales?error=transaksi-masih-aktif");
+  }
+
+  const activeSaleForUnit = await prisma.sale.findFirst({
+    where: {
+      unitId: sale.unitId,
+      voidedAt: null,
+      NOT: { id: saleId }
+    },
+    select: { id: true }
+  });
+
+  if (activeSaleForUnit) {
+    redirect("/sales?error=unit-sudah-terjual-lagi");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.sale.update({
+      where: { id: saleId },
+      data: {
+        voidedAt: null,
+        voidReason: null
+      }
+    });
+
+    await tx.unit.update({
+      where: { id: sale.unitId },
+      data: { soldAt: sale.soldAt }
+    });
+  });
+
+  revalidatePath("/sales");
+  revalidatePath("/");
+  revalidatePath(`/unit/${sale.unitId}`);
+  revalidatePath(`/sales/${saleId}/receipt`);
+  redirect("/sales?restored=1");
+}
