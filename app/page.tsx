@@ -29,6 +29,7 @@ export default async function DashboardPage() {
       `   Lokasi: ${unit.stockLocation}`,
       `   Spek: ${unit.processor} / ${unit.ram} / ${unit.ssd}`,
       `   Last QC: ${unit.lastQcAt}${unit.qcAgeHours === null ? "" : ` (${unit.qcAgeHours} jam lalu)`}`,
+      ...(unit.penyelesaian.length > 0 ? [`   Perlu diselesaikan: ${unit.penyelesaian.join(" | ")}`] : []),
       `   Link QC: ${publicUrl}/qc-harian?unit=${unit.id}`,
       `   Detail: ${publicUrl}/unit/${unit.id}`
     ].join("\n")),
@@ -101,6 +102,7 @@ export default async function DashboardPage() {
                 <strong>Unit {unit.nomorUnit} - {unit.model}</strong>
                 <small>{unit.stockLocation} / Last QC: {unit.lastQcAt}{unit.qcAgeHours === null ? "" : ` / ${unit.qcAgeHours} jam lalu`}</small>
                 <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
+                {unit.penyelesaian.length > 0 ? <small>Perlu diselesaikan: {unit.penyelesaian[0]}</small> : null}
               </div>
               <span className="statusPill yellow">Wajib QC</span>
             </Link>
