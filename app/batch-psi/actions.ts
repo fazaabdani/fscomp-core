@@ -1,6 +1,6 @@
 "use server";
 
-import { PaymentStatus } from "@prisma/client";
+import { PaymentStatus, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { chargerFieldName, chargerTypes } from "@/lib/charger-options";
@@ -100,12 +100,67 @@ export async function updateBatchAction(batchId: string, formData: FormData) {
   redirect("/batch-psi");
 }
 
+export async function deleteBatchAction(batchId: string, formData: FormData) {
+  const currentUser = requireRole(["admin"]);
+  const confirmUsername = text(formData, "confirmUsername");
+
+  if (confirmUsername !== currentUser.username) {
+    redirect("/batch-psi?error=batch-confirm");
+  }
+
+  const batch = await prisma.batchPSI.findUnique({
+    where: { id: batchId },
+    select: {
+      id: true,
+      nomorBatch: true,
+      units: {
+        select: {
+          id: true,
+          soldAt: true,
+          _count: { select: { sales: true } }
+        }
+      }
+    }
+  });
+
+  if (!batch) {
+    redirect("/batch-psi?error=batch-not-found");
+  }
+
+  if (batch.units.some((unit) => unit.soldAt || unit._count.sales > 0)) {
+    redirect("/batch-psi?error=batch-has-sales");
+  }
+
+  const unitIds = batch.units.map((unit) => unit.id);
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      if (unitIds.length > 0) {
+        await tx.catalogSync.deleteMany({ where: { unitId: { in: unitIds } } });
+        await tx.aiLog.deleteMany({ where: { unitId: { in: unitIds } } });
+        await tx.qcHarian.deleteMany({ where: { unitId: { in: unitIds } } });
+        await tx.qcAwal.deleteMany({ where: { unitId: { in: unitIds } } });
+        await tx.unit.deleteMany({ where: { id: { in: unitIds } } });
+      }
+      await tx.batchPSI.delete({ where: { id: batchId } });
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
+      redirect("/batch-psi?error=batch-related-data");
+    }
+    throw error;
+  }
+
+  revalidatePath("/batch-psi");
+  redirect("/batch-psi?deleted=batch");
+}
+
 export async function deleteUnitFromBatchAction(unitId: string) {
   requireRole(["admin", "teknisi"]);
 
   const unit = await prisma.unit.findUnique({
     where: { id: unitId },
-    select: { id: true, batchId: true, soldAt: true }
+    select: { id: true, batchId: true, soldAt: true, _count: { select: { sales: true } } }
   });
 
   if (!unit) {
@@ -116,13 +171,24 @@ export async function deleteUnitFromBatchAction(unitId: string) {
     redirect("/batch-psi?error=unit-sold");
   }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.catalogSync.deleteMany({ where: { unitId } });
-    await tx.aiLog.deleteMany({ where: { unitId } });
-    await tx.qcHarian.deleteMany({ where: { unitId } });
-    await tx.qcAwal.deleteMany({ where: { unitId } });
-    await tx.unit.delete({ where: { id: unitId } });
-  });
+  if (unit._count.sales > 0) {
+    redirect("/batch-psi?error=unit-sale-history");
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.catalogSync.deleteMany({ where: { unitId } });
+      await tx.aiLog.deleteMany({ where: { unitId } });
+      await tx.qcHarian.deleteMany({ where: { unitId } });
+      await tx.qcAwal.deleteMany({ where: { unitId } });
+      await tx.unit.delete({ where: { id: unitId } });
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
+      redirect("/batch-psi?error=unit-related-data");
+    }
+    throw error;
+  }
 
   revalidatePath("/batch-psi");
   revalidatePath(`/batch-psi/${unit.batchId}/history`);
