@@ -19,10 +19,11 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
 
   const buyerWa = sale.buyerPhone.replace(/\D/g, "").replace(/^0/, "62");
   const publicReceiptUrl = `${process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id"}/nota/${sale.id}`;
+  const storeShortName = sale.location === "Kajen" ? "FSID" : "FS Comp";
   const waText = [
     "Assalamu'alaikum kak.",
     "",
-    "Terima kasih sudah membeli laptop di FS Comp.",
+    `Terima kasih sudah membeli laptop di ${storeShortName}.`,
     "Semoga laptopnya bermanfaat, awet, dan bisa membantu kebutuhan kerja, sekolah, kuliah, usaha, maupun aktivitas sehari-hari.",
     "",
     `Nota digital: ${publicReceiptUrl}`,
@@ -40,7 +41,7 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
     "10. Segera konsultasi kalau ada gejala aneh seperti panas, keyboard error, layar kedip, baterai boros, atau sering restart.",
     "",
     "Kalau ada kendala atau ingin konsultasi, silakan langsung hubungi kami nggih.",
-    "Terima kasih sudah percaya belanja di FS Comp."
+    `Terima kasih sudah percaya belanja di ${storeShortName}.`
   ].join("\n");
   const waHref = buyerWa.length >= 10
     ? `https://wa.me/${buyerWa}?text=${encodeURIComponent(waText)}`
