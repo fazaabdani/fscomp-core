@@ -5,7 +5,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { formatRupiah } from "@/lib/api";
 import { getSaleReceipt } from "@/lib/sale-receipt-data";
 import { requireRole } from "@/lib/session";
-import { voidSaleAction } from "../../actions";
+import { restoreSaleAction, voidSaleAction } from "../../actions";
+import { RestoreSaleButton } from "../../RestoreSaleButton";
 import { VoidSaleButton } from "../../VoidSaleButton";
 import { PrintReceiptButton } from "./PrintReceiptButton";
 
@@ -61,6 +62,11 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
           <form action={voidSaleAction.bind(null, sale.id)} className="printHidden">
             <input type="hidden" name="voidReason" value="Transaksi batal dari nota" />
             <VoidSaleButton saleLabel={`${sale.invoiceNumber} / Unit ${sale.unit.nomorUnit} - ${sale.unit.model}`} />
+          </form>
+        ) : null}
+        {currentUser.role === "admin" && sale.voidedAt ? (
+          <form action={restoreSaleAction.bind(null, sale.id)} className="printHidden">
+            <RestoreSaleButton saleLabel={`${sale.invoiceNumber} / Unit ${sale.unit.nomorUnit} - ${sale.unit.model}`} />
           </form>
         ) : null}
       </div>
