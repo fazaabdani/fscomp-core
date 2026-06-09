@@ -43,6 +43,12 @@ export async function GET() {
       statusObservasi: true,
       batteryHealth: true,
       ssdHealth: true,
+      aiLogs: {
+        where: { status: "OPEN", source: "qc-harian-reminder" },
+        orderBy: { tanggal: "desc" },
+        take: 2,
+        select: { rekomendasi: true }
+      },
       qcHarian: {
         orderBy: { tanggal: "desc" },
         take: 1,
@@ -77,6 +83,7 @@ export async function GET() {
       lastQcAt: latest ? formatDateTimeWib(latest.tanggal) : "Belum pernah QC harian",
       qcAgeHours: qcAgeHours(latest?.tanggal, now),
       catatanTerakhir: latest?.catatan ?? "",
+      penyelesaian: unit.aiLogs.map((log) => log.rekomendasi),
       detailUrl: `${publicUrl}/unit/${unit.id}`,
       qcUrl: `${publicUrl}/qc-harian?unit=${unit.id}`
     };
@@ -94,6 +101,7 @@ export async function GET() {
       `   ${unit.lokasi} | ${unit.status}`,
       `   Last QC: ${unit.lastQcAt}${unit.qcAgeHours === null ? "" : ` (${unit.qcAgeHours} jam lalu)`}`,
       `   SSD ${unit.ssdHealth ?? "-"}% / Battery ${unit.batteryHealth ?? "-"}%`,
+      ...(unit.penyelesaian.length > 0 ? [`   Perlu diselesaikan: ${unit.penyelesaian.join(" | ")}`] : []),
       `   ${unit.qcUrl}`
     ].join("\n")),
     extraCount > 0 ? `\n+${extraCount} unit lagi. Buka Core untuk list lengkap.` : ""
