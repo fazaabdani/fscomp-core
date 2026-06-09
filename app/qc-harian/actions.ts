@@ -26,18 +26,49 @@ function screenPasses(screenCondition: string) {
 function computeDailyStatus({
   ssdHealth,
   batteryHealth,
-  checks,
-  noteChecks
+  checks
 }: {
   ssdHealth: number;
   batteryHealth: number;
   checks: boolean[];
-  noteChecks: boolean[];
 }): DailyStatus {
   if (batteryHealth < 70 || ssdHealth < 80) return "TIDAK_LOLOS";
   if (checks.some((item) => !item)) return "TIDAK_LOLOS";
-  if (noteChecks.some((item) => !item)) return "LOLOS_DENGAN_CATATAN";
   return "LOLOS";
+}
+
+function buildResolutionItems({
+  windowsVersion,
+  driverStatus,
+  clockStatus,
+  appStatus,
+  partitionCount,
+  officeStatus,
+  trackpoint,
+  karetBawah,
+  paintCondition
+}: {
+  windowsVersion: string;
+  driverStatus: string;
+  clockStatus: string;
+  appStatus: string;
+  partitionCount: number;
+  officeStatus: string;
+  trackpoint: boolean;
+  karetBawah: boolean;
+  paintCondition: string;
+}) {
+  return [
+    windowsVersion !== "Windows 11" ? `OS belum sesuai: ${windowsVersion}` : "",
+    driverStatus !== "OK" ? `Driver ${driverStatus}` : "",
+    clockStatus !== "Sesuai" ? `Jam ${clockStatus}` : "",
+    appStatus !== "Lengkap" ? `Aplikasi ${appStatus}` : "",
+    partitionCount !== 2 ? "Partisi masih 1" : "",
+    officeStatus === "Bajakan" || officeStatus === "Belum install" ? `Office ${officeStatus}` : "",
+    !trackpoint ? "Trackpoint perlu dicek" : "",
+    !karetBawah ? "Karet bawah tidak lengkap" : "",
+    paintCondition === "Repaint parah" || paintCondition === "Kelupas" ? `Kondisi cat ${paintCondition}` : ""
+  ].filter(Boolean);
 }
 
 async function ensureChecker(name: string, role: "admin" | "teknisi" | "magang") {
@@ -82,6 +113,17 @@ export async function createDailyQcAction(formData: FormData) {
   const catatan = text(formData, "catatan");
   const keyboardBacklight = checked(formData, "keyboardBacklight");
   const screenCritical = !screenPasses(screenCondition);
+  const resolutionItems = buildResolutionItems({
+    windowsVersion,
+    driverStatus,
+    clockStatus,
+    appStatus,
+    partitionCount,
+    officeStatus,
+    trackpoint: checked(formData, "trackpoint"),
+    karetBawah: checked(formData, "karetBawah"),
+    paintCondition
+  });
   const dailyChecks = [
     checked(formData, "keyboard"),
     checked(formData, "wifi"),
@@ -93,21 +135,9 @@ export async function createDailyQcAction(formData: FormData) {
     !screenCritical,
     !bodyBroken
   ];
-  const noteChecks = [
-    checked(formData, "trackpoint"),
-    checked(formData, "bluetooth"),
-    checked(formData, "karetBawah"),
-    screenPasses(screenCondition),
-    driverStatus === "OK",
-    clockStatus === "Sesuai",
-    appStatus === "Lengkap",
-    officeStatus !== "Bajakan",
-    partitionCount === 2,
-    paintCondition === "Normal"
-  ];
-  const status = computeDailyStatus({ ssdHealth, batteryHealth, checks: dailyChecks, noteChecks });
+  const status = computeDailyStatus({ ssdHealth, batteryHealth, checks: dailyChecks });
   const perluKonfirmasi = status === "TIDAK_LOLOS";
-  const nextUnitStatus = status === "TIDAK_LOLOS" ? (screenCritical ? "CANDIDATE_RETUR" : "RECHECK") : "VERIFIED_WITH_NOTES";
+  const nextUnitStatus = status === "TIDAK_LOLOS" ? (screenCritical ? "CANDIDATE_RETUR" : "RECHECK") : resolutionItems.length > 0 ? "VERIFIED_WITH_NOTES" : "VERIFIED";
 
   const conditionParts = [
     `layar ${screenCondition}`,
@@ -131,7 +161,8 @@ export async function createDailyQcAction(formData: FormData) {
     `${partitionCount} partisi`,
     ssdSerial ? `seri SSD ${ssdSerial}` : "seri SSD belum diisi",
     `SSD health ${ssdHealth}%`,
-    `battery health ${batteryHealth}%`
+    `battery health ${batteryHealth}%`,
+    resolutionItems.length > 0 ? `perlu diselesaikan: ${resolutionItems.join("; ")}` : ""
   ];
 
   await prisma.$transaction(async (tx) => {
@@ -194,6 +225,16 @@ export async function createDailyQcAction(formData: FormData) {
           rekomendasi: screenCritical
             ? `Candidate retur dari QC harian: layar ${screenCondition}. Catatan: ${catatan || "belum ada catatan tambahan"}.`
             : `Perlu konfirmasi QC harian: SSD ${ssdHealth}%, battery ${batteryHealth}%. Unit otomatis tidak lolos sebelum dicek teknisi/admin.`
+        }
+      });
+    }
+
+    if (resolutionItems.length > 0) {
+      await tx.aiLog.create({
+        data: {
+          unitId,
+          source: "qc-harian-reminder",
+          rekomendasi: `Perlu diselesaikan sebelum finishing: ${resolutionItems.join("; ")}. Unit tetap boleh lanjut jual selama hardware lolos.`
         }
       });
     }
