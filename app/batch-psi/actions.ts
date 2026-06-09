@@ -117,7 +117,7 @@ export async function deleteBatchAction(batchId: string, formData: FormData) {
         select: {
           id: true,
           soldAt: true,
-          _count: { select: { sales: true } }
+          sales: { select: { id: true, voidedAt: true } }
         }
       }
     }
@@ -127,7 +127,7 @@ export async function deleteBatchAction(batchId: string, formData: FormData) {
     redirect("/batch-psi?error=batch-not-found");
   }
 
-  if (batch.units.some((unit) => unit.soldAt || unit._count.sales > 0)) {
+  if (batch.units.some((unit) => unit.soldAt || unit.sales.some((sale) => !sale.voidedAt))) {
     redirect("/batch-psi?error=batch-has-sales");
   }
 
@@ -136,6 +136,7 @@ export async function deleteBatchAction(batchId: string, formData: FormData) {
   try {
     await prisma.$transaction(async (tx) => {
       if (unitIds.length > 0) {
+        await tx.sale.deleteMany({ where: { unitId: { in: unitIds }, voidedAt: { not: null } } });
         await tx.catalogSync.deleteMany({ where: { unitId: { in: unitIds } } });
         await tx.aiLog.deleteMany({ where: { unitId: { in: unitIds } } });
         await tx.qcHarian.deleteMany({ where: { unitId: { in: unitIds } } });
@@ -160,7 +161,12 @@ export async function deleteUnitFromBatchAction(unitId: string) {
 
   const unit = await prisma.unit.findUnique({
     where: { id: unitId },
-    select: { id: true, batchId: true, soldAt: true, _count: { select: { sales: true } } }
+    select: {
+      id: true,
+      batchId: true,
+      soldAt: true,
+      sales: { select: { id: true, voidedAt: true } }
+    }
   });
 
   if (!unit) {
@@ -171,12 +177,13 @@ export async function deleteUnitFromBatchAction(unitId: string) {
     redirect("/batch-psi?error=unit-sold");
   }
 
-  if (unit._count.sales > 0) {
+  if (unit.sales.some((sale) => !sale.voidedAt)) {
     redirect("/batch-psi?error=unit-sale-history");
   }
 
   try {
     await prisma.$transaction(async (tx) => {
+      await tx.sale.deleteMany({ where: { unitId, voidedAt: { not: null } } });
       await tx.catalogSync.deleteMany({ where: { unitId } });
       await tx.aiLog.deleteMany({ where: { unitId } });
       await tx.qcHarian.deleteMany({ where: { unitId } });
