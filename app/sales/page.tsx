@@ -3,12 +3,13 @@ import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
 import { getSalesPageData } from "@/lib/sales-page-data";
 import { requireRole } from "@/lib/session";
-import { createSaleAction, voidSaleAction } from "./actions";
+import { createSaleAction, restoreSaleAction, voidSaleAction } from "./actions";
+import { RestoreSaleButton } from "./RestoreSaleButton";
 import { VoidSaleButton } from "./VoidSaleButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string; sort?: string } }) {
+export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string; restored?: string; sort?: string } }) {
   const currentUser = requireRole(["admin", "teknisi", "sales"]);
   const { readyUnits, sales, stats, salesReady, blockedByDailyQc } = await getSalesPageData();
   const firstUnit = readyUnits[0];
@@ -58,6 +59,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
         </div>
         {searchParams?.saved ? <div className="successBox">Transaksi berhasil disimpan.</div> : null}
         {searchParams?.voided ? <div className="successBox">Transaksi dibatalkan. Unit sudah kembali ke stok siap jual.</div> : null}
+        {searchParams?.restored ? <div className="successBox">Pembatalan transaksi dibatalkan. Transaksi aktif lagi dan unit kembali ditandai terjual.</div> : null}
         {searchParams?.error ? <div className="infoBox dangerInfo">Transaksi gagal: {searchParams.error}</div> : null}
 
         <div className="cashierMainGrid">
@@ -207,6 +209,11 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
                 <form action={voidSaleAction.bind(null, sale.id)} className="voidSaleForm">
                   <input type="hidden" name="voidReason" value="Transaksi batal dari kasir" />
                   <VoidSaleButton saleLabel={`${sale.invoiceNumber} / Unit ${sale.nomorUnit} - ${sale.model}`} compact />
+                </form>
+              ) : null}
+              {currentUser.role === "admin" && sale.voidedAt ? (
+                <form action={restoreSaleAction.bind(null, sale.id)} className="voidSaleForm">
+                  <RestoreSaleButton saleLabel={`${sale.invoiceNumber} / Unit ${sale.nomorUnit} - ${sale.model}`} compact />
                 </form>
               ) : null}
             </div>
