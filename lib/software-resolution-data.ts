@@ -1,5 +1,6 @@
 import { prisma } from "./prisma";
 import { displayUnitNumber } from "./unit-number";
+import { windowsVersionReminder } from "./windows-recommendation";
 
 function formatDateTimeWib(date?: Date | null) {
   if (!date) return "Belum pernah QC harian";
@@ -11,6 +12,7 @@ function formatDateTimeWib(date?: Date | null) {
 }
 
 function softwareResolutionItems(qc?: {
+  processor: string;
   windowsVersion: string;
   driverStatus: string;
   clockStatus: string;
@@ -21,7 +23,7 @@ function softwareResolutionItems(qc?: {
   if (!qc) return ["Belum pernah QC harian"];
 
   return [
-    qc.windowsVersion !== "Windows 11" ? `OS belum sesuai: ${qc.windowsVersion}` : "",
+    windowsVersionReminder(qc.processor, qc.windowsVersion),
     qc.driverStatus !== "OK" ? `Driver ${qc.driverStatus}` : "",
     qc.clockStatus !== "Sesuai" ? `Jam ${qc.clockStatus}` : "",
     qc.appStatus !== "Lengkap" ? `Aplikasi ${qc.appStatus}` : "",
@@ -76,7 +78,7 @@ export async function getSoftwareResolutionUnits() {
           stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
           statusObservasi: unit.statusObservasi.replaceAll("_", " "),
           lastQcAt: formatDateTimeWib(latest?.tanggal),
-          items: softwareResolutionItems(latest)
+          items: softwareResolutionItems(latest ? { ...latest, processor: unit.processor } : null)
         };
       })
       .filter((unit) => unit.items.length > 0);
