@@ -2,6 +2,21 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { displayUnitNumber } from "./unit-number";
 
+function saleProfitSplit(location: string, grossProfit: number) {
+  if (location !== "KAJEN") {
+    return {
+      wiradesaShare: grossProfit,
+      kajenShare: 0
+    };
+  }
+
+  const wiradesaShare = Math.round(grossProfit * 0.6);
+  return {
+    wiradesaShare,
+    kajenShare: grossProfit - wiradesaShare
+  };
+}
+
 export async function getSalesPageData() {
   try {
     const readyCandidates = await prisma.unit.findMany({
@@ -42,6 +57,8 @@ export async function getSalesPageData() {
     const activeSales = sales.filter((sale) => !sale.voidedAt);
     const totalOmzet = activeSales.reduce((sum, sale) => sum + sale.soldPrice, 0);
     const totalProfit = activeSales.reduce((sum, sale) => sum + sale.grossProfit, 0);
+    const totalWiradesaShare = activeSales.reduce((sum, sale) => sum + saleProfitSplit(sale.location, sale.grossProfit).wiradesaShare, 0);
+    const totalKajenShare = activeSales.reduce((sum, sale) => sum + saleProfitSplit(sale.location, sale.grossProfit).kajenShare, 0);
 
     return {
       readyUnits: readyUnits.map((unit) => ({
@@ -77,6 +94,8 @@ export async function getSalesPageData() {
       stats: {
         totalOmzet,
         totalProfit,
+        totalWiradesaShare,
+        totalKajenShare,
         readyCount: readyUnits.length,
         soldCount: activeSales.length
       },
@@ -90,6 +109,8 @@ export async function getSalesPageData() {
       stats: {
         totalOmzet: 0,
         totalProfit: 0,
+        totalWiradesaShare: 0,
+        totalKajenShare: 0,
         readyCount: 0,
         soldCount: 0
       },
