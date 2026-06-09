@@ -10,7 +10,7 @@ docs/N8N_DAILY_QC_WA_WORKFLOW.json
 
 Workflow ini:
 
-1. Jalan otomatis sesuai jadwal.
+1. Jalan otomatis tiap pagi jam 09:00 WIB.
 2. Ambil list unit wajib QC dari Core:
 
 ```text
@@ -20,24 +20,29 @@ GET https://core.fscomp.id/api/integrations/n8n/daily-qc-list
 3. Kalau `count > 0`, kirim isi `whatsappText` ke WhatsApp.
 4. Kalau tidak ada unit wajib QC, tidak kirim pesan.
 
-## Environment Variable di n8n
+## Setting Setelah Import
 
-Isi variable ini di n8n:
+Template ini tidak memakai environment variable karena beberapa instalasi n8n memblokir akses `$env` di node.
 
-```env
-CORE_DAILY_QC_URL=https://core.fscomp.id/api/integrations/n8n/daily-qc-list
-WA_SEND_URL=https://api.fonnte.com/send
-WA_TOKEN=token_whatsapp_gateway
-WA_TARGET=62816660056
-```
+Yang perlu dicek setelah import:
 
-Untuk grup WhatsApp, isi `WA_TARGET` sesuai format provider WA yang dipakai.
+- Node **Get Daily QC List** sudah memakai URL fixed:
+  `https://core.fscomp.id/api/integrations/n8n/daily-qc-list`
+- Node **Send WhatsApp Report** sudah memakai URL fixed:
+  `https://api.fonnte.com/send`
+- Header `Authorization` di node **Send WhatsApp Report** masih berisi placeholder:
+  `ISI_TOKEN_FONNTE_DI_SINI`
+- Ganti placeholder itu dengan token Fonnte asli.
+- Target default sudah:
+  `62816660056`
+
+Jangan commit token Fonnte asli ke GitHub.
 
 ## Provider WA
 
 Template workflow ini memakai format yang cocok untuk Fonnte:
 
-- Header: `Authorization: WA_TOKEN`
+- Header: `Authorization: token_fonnte`
 - Body:
   - `target`
   - `message`
@@ -57,22 +62,21 @@ Isi pesan tetap dari:
 
 ## Jadwal
 
-Default workflow ini jalan setiap 2 jam. Untuk toko, opsi yang masuk akal:
+Default workflow ini jalan setiap pagi jam 09:00 WIB.
 
-- Setiap 2 jam saat jam kerja.
-- Atau jam 08:00, 12:00, 16:00, 20:00.
-
-Kalau ingin tidak terlalu ramai, mulai dari setiap 2 jam dulu.
+Catatan: saat dibuat, timezone n8n terdeteksi `America/New_York`, sehingga node schedule memakai jam `22:00` agar setara dengan `09:00 WIB`. Kalau timezone n8n nanti sudah diganti ke `Asia/Jakarta`, ubah node schedule ke jam `09:00`.
 
 ## Test Manual
 
 Di n8n:
 
 1. Import workflow JSON.
-2. Isi environment variable.
-3. Buka node **Get Daily QC List**.
-4. Klik **Execute step**.
-5. Kalau `count` lebih dari 0, klik node **Send WhatsApp Report** untuk test kirim WA.
+2. Buka node **Send WhatsApp Report**.
+3. Ganti `ISI_TOKEN_FONNTE_DI_SINI` dengan token Fonnte asli.
+4. Buka node **Get Daily QC List**.
+5. Klik **Execute step**.
+6. Kalau `count` lebih dari 0, klik node **Send WhatsApp Report** untuk test kirim WA.
+7. Klik **Publish** kalau test sudah sukses.
 
 ## Payload Core
 
