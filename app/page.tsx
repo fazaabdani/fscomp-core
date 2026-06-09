@@ -1,7 +1,8 @@
-import { ClipboardCheck, MonitorCog, Sparkles, TriangleAlert } from "lucide-react";
+import { Camera, ClipboardCheck, MonitorCog, Sparkles, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getDashboardData } from "@/lib/db-data";
+import { getUnitsMissingPhotos } from "@/lib/photo-missing-data";
 import { getDueDailyQcUnits } from "@/lib/qc-due-data";
 import { getCurrentUser } from "@/lib/session";
 import { CopyWaButton } from "./CopyWaButton";
@@ -12,9 +13,10 @@ export default async function DashboardPage() {
   const currentUser = getCurrentUser();
   if (currentUser?.role === "magang") redirect("/qc-harian");
 
-  const [{ stats, problemUnits, aiLogs, connected }, dueDailyQc] = await Promise.all([
+  const [{ stats, problemUnits, aiLogs, connected }, dueDailyQc, missingPhotos] = await Promise.all([
     getDashboardData(),
-    getDueDailyQcUnits()
+    getDueDailyQcUnits(),
+    getUnitsMissingPhotos()
   ]);
   const publicUrl = process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id";
   const dueDailyQcWaText = [
@@ -33,6 +35,22 @@ export default async function DashboardPage() {
     "",
     "Mohon dicek hari ini."
   ].join("\n");
+  const missingPhotoWaText = [
+    `*FS Comp Core - Unit Belum Ada Foto*`,
+    `Total: ${missingPhotos.count} unit`,
+    "",
+    ...missingPhotos.units.map((unit, index) => [
+      `${index + 1}. Unit ${unit.nomorUnit} - ${unit.model}`,
+      `   Lokasi: ${unit.stockLocation}`,
+      `   Status: ${unit.statusObservasi}`,
+      `   Spek: ${unit.processor} / ${unit.ram} / ${unit.ssd}`,
+      `   Detail: ${publicUrl}/unit/${unit.id}`,
+      `   Isi foto: ${publicUrl}/unit/${unit.id}/edit`
+    ].join("\n")),
+    "",
+    missingPhotos.count > missingPhotos.units.length ? `Masih ada ${missingPhotos.count - missingPhotos.units.length} unit lain belum tampil di pesan ini.` : "",
+    "Mohon difoto dan link fotonya diisi."
+  ].filter(Boolean).join("\n");
 
   return (
     <section className="pageStack">
@@ -85,6 +103,31 @@ export default async function DashboardPage() {
                 <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
               </div>
               <span className="statusPill yellow">Wajib QC</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Foto katalog</p>
+            <h2>{missingPhotos.count} unit belum ada foto</h2>
+          </div>
+          <div className="buttonCluster">
+            <CopyWaButton text={missingPhotoWaText} disabled={missingPhotos.units.length === 0} />
+            <Link className="secondaryButton" href="/batch-psi?sort=foto">Lihat Unit</Link>
+          </div>
+        </div>
+        <div className="listStack">
+          {missingPhotos.units.length === 0 ? <div className="emptyState">Semua unit aktif sudah punya foto katalog.</div> : missingPhotos.units.slice(0, 8).map((unit) => (
+            <Link href={`/unit/${unit.id}/edit`} className="unitListItem" key={unit.id}>
+              <div>
+                <strong>Unit {unit.nomorUnit} - {unit.model}</strong>
+                <small>{unit.stockLocation} / {unit.statusObservasi}</small>
+                <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
+              </div>
+              <span className="statusPill yellow"><Camera size={14} /> Perlu foto</span>
             </Link>
           ))}
         </div>
