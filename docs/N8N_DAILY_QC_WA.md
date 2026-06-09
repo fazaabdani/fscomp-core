@@ -64,7 +64,12 @@ Isi pesan tetap dari:
 
 Default workflow ini jalan setiap pagi jam 09:00 WIB.
 
-Catatan: saat dibuat, timezone n8n terdeteksi `America/New_York`, sehingga node schedule memakai jam `22:00` agar setara dengan `09:00 WIB`. Kalau timezone n8n nanti sudah diganti ke `Asia/Jakarta`, ubah node schedule ke jam `09:00`.
+Pastikan server/container n8n memakai timezone WIB:
+
+```env
+GENERIC_TIMEZONE=Asia/Jakarta
+TZ=Asia/Jakarta
+```
 
 ## Test Manual
 
