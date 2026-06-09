@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { windowsVersionReminder } from "@/lib/windows-recommendation";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -38,6 +39,7 @@ function computeDailyStatus({
 }
 
 function buildResolutionItems({
+  processor,
   windowsVersion,
   driverStatus,
   clockStatus,
@@ -48,6 +50,7 @@ function buildResolutionItems({
   karetBawah,
   paintCondition
 }: {
+  processor: string;
   windowsVersion: string;
   driverStatus: string;
   clockStatus: string;
@@ -59,7 +62,7 @@ function buildResolutionItems({
   paintCondition: string;
 }) {
   return [
-    windowsVersion !== "Windows 11" ? `OS belum sesuai: ${windowsVersion}` : "",
+    windowsVersionReminder(processor, windowsVersion),
     driverStatus !== "OK" ? `Driver ${driverStatus}` : "",
     clockStatus !== "Sesuai" ? `Jam ${clockStatus}` : "",
     appStatus !== "Lengkap" ? `Aplikasi ${appStatus}` : "",
@@ -114,6 +117,7 @@ export async function createDailyQcAction(formData: FormData) {
   const keyboardBacklight = checked(formData, "keyboardBacklight");
   const screenCritical = !screenPasses(screenCondition);
   const resolutionItems = buildResolutionItems({
+    processor: unit.processor,
     windowsVersion,
     driverStatus,
     clockStatus,
