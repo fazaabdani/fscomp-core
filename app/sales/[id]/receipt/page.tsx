@@ -6,6 +6,7 @@ import { formatRupiah } from "@/lib/api";
 import { getSaleReceipt } from "@/lib/sale-receipt-data";
 import { requireRole } from "@/lib/session";
 import { voidSaleAction } from "../../actions";
+import { VoidSaleButton } from "../../VoidSaleButton";
 import { PrintReceiptButton } from "./PrintReceiptButton";
 
 export const dynamic = "force-dynamic";
@@ -59,7 +60,7 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
         {currentUser.role === "admin" && !sale.voidedAt ? (
           <form action={voidSaleAction.bind(null, sale.id)} className="printHidden">
             <input type="hidden" name="voidReason" value="Transaksi batal dari nota" />
-            <button className="secondaryButton" type="submit">Batalkan Penjualan</button>
+            <VoidSaleButton saleLabel={`${sale.invoiceNumber} / Unit ${sale.unit.nomorUnit} - ${sale.unit.model}`} />
           </form>
         ) : null}
       </div>
@@ -76,9 +77,11 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
             <small>HP/WA toko: {sale.store.phone}</small>
           </div>
           <div className="receiptMeta">
-            <strong>{sale.invoiceNumber}</strong>
-            <span>{sale.soldAt}</span>
-            <span><MapPin size={14} /> {sale.location}</span>
+            <div className="receiptMetaText">
+              <strong>{sale.invoiceNumber}</strong>
+              <span>{sale.soldAt}</span>
+              <span><MapPin size={14} /> {sale.location}</span>
+            </div>
             <QRCodeSVG value={publicReceiptUrl} size={42} />
           </div>
         </header>
