@@ -4,6 +4,7 @@ import { formatRupiah } from "@/lib/api";
 import { getSalesPageData } from "@/lib/sales-page-data";
 import { requireRole } from "@/lib/session";
 import { createSaleAction, voidSaleAction } from "./actions";
+import { VoidSaleButton } from "./VoidSaleButton";
 
 export const dynamic = "force-dynamic";
 
@@ -205,7 +206,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               {currentUser.role === "admin" && !sale.voidedAt ? (
                 <form action={voidSaleAction.bind(null, sale.id)} className="voidSaleForm">
                   <input type="hidden" name="voidReason" value="Transaksi batal dari kasir" />
-                  <button className="secondaryButton compactButton" type="submit">Batalkan</button>
+                  <VoidSaleButton saleLabel={`${sale.invoiceNumber} / Unit ${sale.nomorUnit} - ${sale.model}`} compact />
                 </form>
               ) : null}
             </div>
