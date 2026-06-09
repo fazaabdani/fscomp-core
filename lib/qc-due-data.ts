@@ -28,6 +28,12 @@ export async function getDueDailyQcUnits() {
         ssd: true,
         stockLocation: true,
         statusObservasi: true,
+        aiLogs: {
+          where: { status: "OPEN", source: "qc-harian-reminder" },
+          orderBy: { tanggal: "desc" },
+          take: 2,
+          select: { rekomendasi: true }
+        },
         qcHarian: {
           orderBy: { tanggal: "desc" },
           take: 1,
@@ -63,7 +69,8 @@ export async function getDueDailyQcUnits() {
           qcAgeHours: qcAgeHours(latest?.tanggal, now),
           ssdHealth: latest?.ssdHealth ?? null,
           batteryHealth: latest?.batteryHealth ?? null,
-          catatan: latest?.catatan ?? ""
+          catatan: latest?.catatan ?? "",
+          penyelesaian: unit.aiLogs.map((log) => log.rekomendasi)
         };
       })
     };
