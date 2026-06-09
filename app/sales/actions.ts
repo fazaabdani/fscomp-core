@@ -65,11 +65,26 @@ function invoiceNumber() {
   return `FS-${date}-${time}-${suffix}`;
 }
 
-function buildCustomerThanksMessage(receiptUrl: string) {
+function profitSplit(location: SaleLocation, grossProfit: number) {
+  if (location !== "KAJEN") {
+    return {
+      wiradesaShare: grossProfit,
+      kajenShare: 0
+    };
+  }
+
+  return {
+    wiradesaShare: Math.round(grossProfit * 0.6),
+    kajenShare: grossProfit - Math.round(grossProfit * 0.6)
+  };
+}
+
+function buildCustomerThanksMessage(receiptUrl: string, location: SaleLocation) {
+  const storeName = location === "KAJEN" ? "FSID" : "FS Comp";
   return [
     "Assalamu'alaikum kak.",
     "",
-    "Terima kasih sudah membeli laptop di FS Comp.",
+    `Terima kasih sudah membeli laptop di ${storeName}.`,
     "Semoga laptopnya bermanfaat, awet, dan bisa membantu kebutuhan kerja, sekolah, kuliah, usaha, maupun aktivitas sehari-hari.",
     "",
     `Nota digital: ${receiptUrl}`,
@@ -88,7 +103,7 @@ function buildCustomerThanksMessage(receiptUrl: string) {
     "10. Segera konsultasi kalau ada gejala aneh seperti panas, keyboard error, layar kedip, baterai boros, atau sering restart.",
     "",
     "Kalau ada kendala atau ingin konsultasi, silakan langsung hubungi kami nggih.",
-    "Terima kasih sudah percaya belanja di FS Comp."
+    `Terima kasih sudah percaya belanja di ${storeName}.`
   ].join("\n");
 }
 
@@ -107,6 +122,7 @@ async function notifySaleToN8n(payload: {
   const webhookUrl = process.env.N8N_SALES_WEBHOOK_URL;
   const publicUrl = process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id";
   if (!webhookUrl) return;
+  const split = profitSplit(payload.location, payload.grossProfit);
 
   try {
     await fetch(webhookUrl, {
@@ -117,6 +133,8 @@ async function notifySaleToN8n(payload: {
         notifyTo: process.env.WA_OWNER_NUMBER ?? "0816660056",
         notifyGroup: process.env.WA_REPORT_GROUP_ID ?? "",
         sourceLocation: payload.location === "WIRADESA" ? "Wiradesa utama" : "Kajen secondary",
+        wiradesaProfitShare: split.wiradesaShare,
+        kajenProfitShare: split.kajenShare,
         receiptUrl: `${publicUrl}/sales/${payload.saleId}/receipt`,
         customerReceiptUrl: `${publicUrl}/nota/${payload.saleId}`,
         message: [
@@ -126,13 +144,14 @@ async function notifySaleToN8n(payload: {
           `Lokasi: ${payload.location === "WIRADESA" ? "Wiradesa" : "Kajen"}`,
           `Total: Rp ${payload.subtotal.toLocaleString("id-ID")}`,
           `Profit kotor: Rp ${payload.grossProfit.toLocaleString("id-ID")}`,
+          payload.location === "KAJEN" ? `Bagi hasil: Kajen Rp ${split.kajenShare.toLocaleString("id-ID")} / Wiradesa Rp ${split.wiradesaShare.toLocaleString("id-ID")}` : "",
           `Pembayaran: ${payload.paymentMethod}`,
           `Pembeli: ${payload.buyerName || "-"}`,
           `WA pembeli: ${payload.buyerPhone || "-"}`,
           `Alamat: ${payload.buyerAddress || "-"}`
-        ].join("\n"),
+        ].filter(Boolean).join("\n"),
         customerPhone: payload.buyerPhone,
-        customerMessage: buildCustomerThanksMessage(`${publicUrl}/nota/${payload.saleId}`)
+        customerMessage: buildCustomerThanksMessage(`${publicUrl}/nota/${payload.saleId}`, payload.location)
       })
     });
   } catch {
