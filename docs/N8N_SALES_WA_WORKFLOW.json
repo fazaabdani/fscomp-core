@@ -1,0 +1,82 @@
+{
+  "name": "FS Comp - Penjualan Baru ke WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fscomp-sale-report",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "eb28d843-8455-4e0a-9b45-81a56563501e",
+      "name": "Core Sale Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        260,
+        300
+      ],
+      "webhookId": "fscomp-sale-report"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fonnte.com/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "ISI_TOKEN_FONNTE_DI_SINI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "target",
+              "value": "62816660056"
+            },
+            {
+              "name": "message",
+              "value": "={{$json.body.message}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7021f92b-30a1-41f9-bacd-a46f26377f03",
+      "name": "Send Owner Sales Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Core Sale Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send Owner Sales Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-06-09T00:00:00.000Z",
+  "versionId": "fscomp-sale-wa-v1"
+}
