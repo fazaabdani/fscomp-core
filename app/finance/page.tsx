@@ -1,7 +1,7 @@
 import { Banknote, Download, Receipt, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
-import { getFinancePageData } from "@/lib/db-data";
+import { getFinancePageData } from "@/lib/finance-page-data";
 import { requireRole } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
