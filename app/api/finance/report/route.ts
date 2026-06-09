@@ -7,6 +7,21 @@ function csvCell(value: unknown) {
   return `"${text.replaceAll('"', '""')}"`;
 }
 
+function saleProfitSplit(location: string, grossProfit: number) {
+  if (location !== "KAJEN") {
+    return {
+      wiradesaShare: grossProfit,
+      kajenShare: 0
+    };
+  }
+
+  const wiradesaShare = Math.round(grossProfit * 0.6);
+  return {
+    wiradesaShare,
+    kajenShare: grossProfit - wiradesaShare
+  };
+}
+
 export async function GET() {
   requireRole(["admin"]);
   const sales = await prisma.sale.findMany({
@@ -28,24 +43,31 @@ export async function GET() {
     "Jumlah Item",
     "Omzet",
     "Modal",
-    "Profit Kotor"
+    "Profit Kotor",
+    "Bagian Wiradesa",
+    "Bagian Kajen"
   ];
 
-  const rows = sales.map((sale) => [
-    sale.soldAt.toISOString().slice(0, 10),
-    sale.invoiceNumber,
-    sale.location,
-    sale.unit.nomorUnit,
-    sale.unit.model,
-    sale.paymentMethod,
-    sale.buyerName ?? "",
-    sale.buyerPhone ?? "",
-    sale.buyerAddress ?? "",
-    sale.items.reduce((sum, item) => sum + item.qty, 0),
-    sale.soldPrice,
-    sale.costPrice,
-    sale.grossProfit
-  ]);
+  const rows = sales.map((sale) => {
+    const split = saleProfitSplit(sale.location, sale.grossProfit);
+    return [
+      sale.soldAt.toISOString().slice(0, 10),
+      sale.invoiceNumber,
+      sale.location,
+      sale.unit.nomorUnit,
+      sale.unit.model,
+      sale.paymentMethod,
+      sale.buyerName ?? "",
+      sale.buyerPhone ?? "",
+      sale.buyerAddress ?? "",
+      sale.items.reduce((sum, item) => sum + item.qty, 0),
+      sale.soldPrice,
+      sale.costPrice,
+      sale.grossProfit,
+      split.wiradesaShare,
+      split.kajenShare
+    ];
+  });
 
   const csv = [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
 
