@@ -1,79 +1,49 @@
 import type { Prisma } from "@prisma/client";
-import { batches as demoBatches, dailyQcs as demoDailyQcs, units as demoUnits, type BatchPSI } from "./api";
+import { chargerTypes } from "./charger-options";
 import { prisma } from "./prisma";
+import { isQcFresh } from "./qc-due";
+import { displayUnitNumber } from "./unit-number";
+export { getBatchPaymentSummary } from "./batch-payment-data";
+export { getCatalogPageData } from "./catalog-page-data";
+export { getSaleReceipt } from "./sale-receipt-data";
+export { getSalesPageData } from "./sales-page-data";
+export { getUnitsForLabel } from "./label-data";
 
-const paymentStatusLabel: Record<string, BatchPSI["statusPembayaran"]> = {
+const paymentStatusLabel: Record<string, string> = {
   BELUM_JATUH_TEMPO: "Belum jatuh tempo",
   MENDEKATI_TEMPO: "Mendekati tempo",
   BUTUH_FOLLOW_UP: "Butuh follow up",
   LUNAS: "Lunas"
 };
 
-function processorGeneration(processor: string) {
-  const normalized = processor.toLowerCase();
-  const genMatch = normalized.match(/gen\s*(\d+)/);
-  if (genMatch) return Number(genMatch[1]);
-  const intelCodeMatch = normalized.match(/\b[ui][3579][- ]?(\d{4,5})/);
-  if (intelCodeMatch) {
-    const code = intelCodeMatch[1];
-    return code.length === 5 ? Number(code.slice(0, 2)) : Number(code.slice(0, 1));
-  }
-  return 0;
+function chargerCountsFromJson(value: unknown) {
+  const raw = value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+  return Object.fromEntries(chargerTypes.map((type) => [type, Number(raw[type] ?? 0) || 0]));
 }
 
-function requiresWindows11(processor: string) {
-  return processorGeneration(processor) >= 8;
-}
-
-function hasWindows11Daily(qcHarian: { windowsVersion?: string | null }[]) {
+function hasSaleReadyDaily(qcHarian: { masihLolos: string; tanggal?: Date | null }[]) {
   const latestDaily = qcHarian[0];
-  return Boolean(latestDaily?.windowsVersion?.toLowerCase().includes("windows 11"));
-}
-
-function hasSaleReadyDaily(qcHarian: { masihLolos: string; windowsVersion?: string | null }[]) {
-  const latestDaily = qcHarian[0];
-  return Boolean(latestDaily && latestDaily.masihLolos !== "TIDAK_LOLOS");
-}
-
-function qcResultFromBoolean(ok: boolean) {
-  return ok ? "OK" : "FAIL";
-}
-
-function qcResultFromNote(ok: boolean) {
-  return ok ? "OK" : "NOTES";
-}
-
-function qcResultFromText(value: string, okValue: string) {
-  if (value === okValue) return "OK";
-  if (value === "Garis" || value === "Pecah" || value === "Bajakan" || value === "Bermasalah") return "FAIL";
-  return "NOTES";
+  return Boolean(latestDaily && latestDaily.masihLolos !== "TIDAK_LOLOS" && isQcFresh(latestDaily.tanggal));
 }
 
 export async function getBatchesForPage() {
   try {
-    const dbBatches = await prisma.batchPSI.findMany({
+    const batches = await prisma.batchPSI.findMany({
       include: { units: true },
       orderBy: { tanggalMasuk: "desc" }
     });
 
-    if (dbBatches.length === 0) {
-      return demoBatches.map((batch) => ({
-        ...batch,
-        units: demoUnits.filter((unit) => unit.batchId === batch.id)
-      }));
-    }
-
-    return dbBatches.map((batch) => ({
+    return batches.map((batch) => ({
       id: batch.id,
       nomorBatch: batch.nomorBatch,
       supplier: batch.supplier,
       tanggalMasuk: batch.tanggalMasuk.toISOString().slice(0, 10),
       tanggalTempo: batch.tanggalTempo.toISOString().slice(0, 10),
-      statusPembayaran: paymentStatusLabel[batch.statusPembayaran],
+      statusPembayaran: paymentStatusLabel[batch.statusPembayaran] ?? batch.statusPembayaran,
       catatan: batch.catatan ?? "",
       units: batch.units.map((unit) => ({
         id: unit.id,
-        nomorUnit: unit.nomorUnit,
+        nomorUnit: displayUnitNumber(unit.nomorUnit),
         model: unit.model,
         processor: unit.processor,
         ram: unit.ram,
@@ -87,14 +57,12 @@ export async function getBatchesForPage() {
         isTouchscreen: unit.isTouchscreen,
         ssdHealth: unit.ssdHealth ?? 0,
         batteryHealth: unit.batteryHealth ?? 0,
-        statusObservasi: unit.statusObservasi.replaceAll("_", " ")
+        statusObservasi: unit.statusObservasi.replaceAll("_", " "),
+        soldAt: unit.soldAt?.toISOString().slice(0, 10) ?? ""
       }))
     }));
   } catch {
-    return demoBatches.map((batch) => ({
-      ...batch,
-      units: demoUnits.filter((unit) => unit.batchId === batch.id)
-    }));
+    return [];
   }
 }
 
@@ -113,6 +81,7 @@ export async function getUnitForEdit(id: string) {
       ram: unit.ram,
       ssd: unit.ssd,
       ssdSerial: unit.ssdSerial ?? "",
+      chargerType: unit.chargerType ?? "",
       lcdSize: unit.lcdSize ?? "",
       lcdResolution: unit.lcdResolution ?? "",
       isTouchscreen: unit.isTouchscreen,
@@ -126,14 +95,7 @@ export async function getUnitForEdit(id: string) {
       statusObservasi: unit.statusObservasi
     };
   } catch {
-    const unit = demoUnits.find((item) => item.id === id);
-    if (!unit) return null;
-    return {
-      ...unit,
-      stockLocation: "WIRADESA",
-      catalogImageUrl: "",
-      batchName: demoBatches.find((batch) => batch.id === unit.batchId)?.nomorBatch ?? "-"
-    };
+    return null;
   }
 }
 
@@ -148,11 +110,14 @@ export async function getBatchForEdit(id: string) {
       supplier: batch.supplier,
       tanggalMasuk: batch.tanggalMasuk.toISOString().slice(0, 10),
       tanggalTempo: batch.tanggalTempo.toISOString().slice(0, 10),
-      statusPembayaran: paymentStatusLabel[batch.statusPembayaran],
+      jumlahLaptopDatang: batch.jumlahLaptopDatang ?? "",
+      jumlahChargerDatang: batch.jumlahChargerDatang ?? "",
+      chargerCounts: chargerCountsFromJson(batch.chargerCounts),
+      statusPembayaran: paymentStatusLabel[batch.statusPembayaran] ?? batch.statusPembayaran,
       catatan: batch.catatan ?? ""
     };
   } catch {
-    return demoBatches.find((batch) => batch.id === id) ?? null;
+    return null;
   }
 }
 
@@ -165,36 +130,7 @@ export async function getUnitForDetail(id: string) {
         qcAwal: { include: { checker: true } },
         qcHarian: {
           orderBy: { tanggal: "desc" },
-          select: {
-            id: true,
-            tanggal: true,
-            ssdHealth: true,
-            batteryHealth: true,
-            ssdSerial: true,
-            screenCondition: true,
-            windowsVersion: true,
-            driverStatus: true,
-            clockStatus: true,
-            appStatus: true,
-            officeStatus: true,
-            partitionCount: true,
-            keyboard: true,
-            wifi: true,
-            usb: true,
-            camera: true,
-            touchpad: true,
-            trackpoint: true,
-            bluetooth: true,
-            speaker: true,
-            mic: true,
-            bodyBroken: true,
-            karetBawah: true,
-            paintCondition: true,
-            kondisiHariIni: true,
-            masihLolos: true,
-            catatan: true,
-            checker: { select: { name: true } }
-          }
+          include: { checker: true }
         }
       }
     });
@@ -203,7 +139,7 @@ export async function getUnitForDetail(id: string) {
 
     return {
       id: unit.id,
-      nomorUnit: unit.nomorUnit,
+      nomorUnit: displayUnitNumber(unit.nomorUnit),
       batchId: unit.batchId,
       supplier: unit.supplier,
       model: unit.model,
@@ -224,9 +160,7 @@ export async function getUnitForDetail(id: string) {
       statusObservasi: unit.statusObservasi.replaceAll("_", " "),
       tanggalMasuk: unit.tanggalMasuk.toISOString().slice(0, 10),
       tempo: unit.tempo?.toISOString().slice(0, 10) ?? "-",
-      batch: {
-        nomorBatch: unit.batch.nomorBatch
-      },
+      batch: { nomorBatch: unit.batch.nomorBatch },
       qcAwal: unit.qcAwal
         ? {
             checker: unit.qcAwal.checker.name,
@@ -297,121 +231,17 @@ export async function getUnitForDetail(id: string) {
       }))
     };
   } catch {
-    const demoUnit = demoUnits.find((unit) => unit.id === id);
-    if (!demoUnit) return null;
-
-    return {
-      ...demoUnit,
-      entryNotes: "-",
-      catalogImageUrl: "",
-      batch: { nomorBatch: demoBatches.find((batch) => batch.id === demoUnit.batchId)?.nomorBatch ?? "-" },
-      dailyHistory: []
-    };
-  }
-}
-
-export async function getUnitsForLabel() {
-  try {
-    const dbUnits = await prisma.unit.findMany({
-      include: {
-        qcAwal: { include: { checker: true } },
-        qcHarian: {
-          orderBy: { tanggal: "desc" },
-          take: 1,
-          include: { checker: true }
-        }
-      },
-      orderBy: { createdAt: "desc" }
-    });
-
-    if (dbUnits.length === 0) return demoUnits;
-
-    return dbUnits.map((unit) => {
-      const latestDaily = unit.qcHarian[0];
-      const dailyHardware = latestDaily
-        ? {
-            Layar: qcResultFromText(latestDaily.screenCondition, "Normal"),
-            Keyboard: qcResultFromBoolean(latestDaily.keyboard),
-            USB: qcResultFromBoolean(latestDaily.usb),
-            Kamera: qcResultFromBoolean(latestDaily.camera),
-            Touchpad: qcResultFromBoolean(latestDaily.touchpad),
-            Trackpoint: qcResultFromNote(latestDaily.trackpoint),
-            Bluetooth: qcResultFromNote(latestDaily.bluetooth),
-            Speaker: qcResultFromBoolean(latestDaily.speaker),
-            Mic: qcResultFromBoolean(latestDaily.mic),
-            "Body Broken": latestDaily.bodyBroken ? "FAIL" : "OK",
-            "Karet Bawah": qcResultFromNote(latestDaily.karetBawah),
-            Battery: latestDaily.batteryHealth >= 70 ? "OK" : "FAIL",
-            SSD: latestDaily.ssdHealth >= 80 ? "OK" : "FAIL"
-          }
-        : {};
-      const dailySoftware = latestDaily
-        ? {
-            Windows: latestDaily.windowsVersion,
-            Driver: qcResultFromText(latestDaily.driverStatus, "OK"),
-            Jam: qcResultFromText(latestDaily.clockStatus, "Sesuai"),
-            Aplikasi: qcResultFromText(latestDaily.appStatus, "Lengkap"),
-            Office: qcResultFromText(latestDaily.officeStatus, "Original / resmi"),
-            Partisi: latestDaily.partitionCount === 2 ? "OK" : "NOTES"
-          }
-        : {};
-
-      return {
-        id: unit.id,
-        nomorUnit: unit.nomorUnit,
-        model: unit.model,
-        processor: unit.processor,
-        ram: unit.ram,
-        ssd: unit.ssd,
-        hargaJualRekomendasi: unit.hargaJualRekomendasi,
-        statusObservasi: unit.statusObservasi.replaceAll("_", " "),
-        qcAwal: {
-          tanggal: latestDaily?.tanggal.toISOString().slice(0, 10) ?? unit.qcAwal?.tanggal.toISOString().slice(0, 10) ?? "-",
-          checker: latestDaily?.checker.name ?? unit.qcAwal?.checker.name ?? "-",
-          hardware: latestDaily
-            ? dailyHardware
-            : unit.qcAwal
-            ? {
-                Body: unit.qcAwal.body,
-                "Body Broken": unit.qcAwal.bodyBroken,
-                "Karet Bawah": unit.qcAwal.karetBawah,
-                Repaint: unit.qcAwal.repaint,
-                Layar: unit.qcAwal.layar,
-                Touchscreen: unit.qcAwal.touchscreen,
-                Keyboard: unit.qcAwal.keyboard,
-                Touchpad: unit.qcAwal.touchpad,
-                Trackpoint: unit.qcAwal.trackpoint,
-                USB: unit.qcAwal.usb,
-                Kamera: unit.qcAwal.kamera,
-                Speaker: unit.qcAwal.speaker,
-                Mic: unit.qcAwal.mic,
-                Battery: unit.qcAwal.battery,
-                SSD: unit.qcAwal.ssd
-              }
-            : {},
-          software: latestDaily
-            ? dailySoftware
-            : unit.qcAwal
-            ? {
-                OS: unit.qcAwal.osInstalled,
-                Windows: unit.qcAwal.windowsVersion,
-                "Update OS": unit.qcAwal.updateOs,
-                Driver: unit.qcAwal.driver,
-                "Security Patch": unit.qcAwal.securityPatch,
-                Aplikasi: unit.qcAwal.aplikasiDefault
-              }
-            : {}
-        }
-      };
-    });
-  } catch {
-    return demoUnits;
+    return null;
   }
 }
 
 export async function getQcHarianPageData() {
   try {
     const dbUnits = await prisma.unit.findMany({
+      where: {
+        soldAt: null,
+        statusObservasi: { not: "RETUR_DISTRIBUTOR" }
+      },
       orderBy: [{ nomorUnit: "asc" }],
       select: {
         id: true,
@@ -452,27 +282,6 @@ export async function getQcHarianPageData() {
       take: 20
     });
 
-    if (dbUnits.length === 0) {
-      return {
-        units: demoUnits.map((unit) => ({
-          id: unit.id,
-          nomorUnit: unit.nomorUnit,
-          model: unit.model,
-          processor: unit.processor,
-          ram: unit.ram,
-          ssd: unit.ssd,
-          ssdSerial: unit.ssdSerial ?? "",
-          ssdHealth: unit.ssdHealth,
-          batteryHealth: unit.batteryHealth,
-          stockLocation: "WIRADESA"
-        })),
-        dailyQcs: demoDailyQcs.map((qc) => ({
-          ...qc,
-          unit: demoUnits.find((unit) => unit.id === qc.unitId)
-        }))
-      };
-    }
-
     return {
       units: dbUnits,
       dailyQcs: dbDailyQcs.map((qc) => ({
@@ -495,53 +304,26 @@ export async function getQcHarianPageData() {
         catatan: qc.catatan ?? "",
         unit: {
           id: qc.unit.id,
-          nomorUnit: qc.unit.nomorUnit,
+          nomorUnit: displayUnitNumber(qc.unit.nomorUnit),
           model: qc.unit.model
         }
       }))
     };
   } catch {
-    return {
-      units: demoUnits.map((unit) => ({
-        id: unit.id,
-        nomorUnit: unit.nomorUnit,
-        model: unit.model,
-        processor: unit.processor,
-        ram: unit.ram,
-        ssd: unit.ssd,
-        ssdSerial: unit.ssdSerial,
-        ssdHealth: unit.ssdHealth,
-        batteryHealth: unit.batteryHealth,
-        stockLocation: "WIRADESA"
-      })),
-      dailyQcs: demoDailyQcs.map((qc) => ({
-        ...qc,
-        unit: demoUnits.find((unit) => unit.id === qc.unitId)
-      }))
-    };
+    return { units: [], dailyQcs: [] };
   }
 }
 
 export async function getDashboardData() {
   try {
-    const [
-      batches,
-      units,
-      totalUnitCount,
-      dailyQcCount,
-      aiLogs
-    ] = await Promise.all([
-      prisma.batchPSI.findMany({
-        include: { units: true },
-        orderBy: { tanggalMasuk: "desc" },
-        take: 6
-      }),
+    const [batches, units, totalUnitCount, dailyQcCount, aiLogs] = await Promise.all([
+      prisma.batchPSI.findMany({ include: { units: true }, orderBy: { tanggalMasuk: "desc" }, take: 6 }),
       prisma.unit.findMany({
         include: {
           qcHarian: {
             orderBy: { tanggal: "desc" },
             take: 1,
-            select: { masihLolos: true, windowsVersion: true }
+            select: { tanggal: true, masihLolos: true }
           }
         },
         orderBy: { createdAt: "desc" },
@@ -550,48 +332,42 @@ export async function getDashboardData() {
       prisma.unit.count(),
       prisma.qcHarian.count(),
       prisma.aiLog.findMany({
+        where: { status: "OPEN" },
         include: { unit: true },
         orderBy: { tanggal: "desc" },
-        take: 5
+        take: 8
       })
     ]);
 
-    const isDailyProblem = (unit: { qcHarian: { masihLolos: string }[] }) => {
-      const latestDaily = unit.qcHarian[0];
-      return Boolean(latestDaily && latestDaily.masihLolos !== "LOLOS");
-    };
-    const isReadyForCatalog = (unit: { statusObservasi: string; soldAt: Date | null; processor: string; qcHarian: { masihLolos: string; windowsVersion?: string | null }[] }) =>
+    const isDailyProblem = (unit: { qcHarian: { masihLolos: string }[] }) => unit.qcHarian[0]?.masihLolos === "TIDAK_LOLOS";
+    const isReadyForCatalog = (unit: { statusObservasi: string; soldAt: Date | null; qcHarian: { masihLolos: string; tanggal?: Date | null }[] }) =>
       !unit.soldAt &&
       (unit.statusObservasi === "VERIFIED" || unit.statusObservasi === "VERIFIED_WITH_NOTES") &&
       hasSaleReadyDaily(unit.qcHarian) &&
-      !isDailyProblem(unit) &&
-      (!requiresWindows11(unit.processor) || hasWindows11Daily(unit.qcHarian));
+      !isDailyProblem(unit);
 
     const problemUnits = units
-      .filter((unit) => unit.statusObservasi === "RECHECK" || unit.statusObservasi === "CANDIDATE_RETUR" || isDailyProblem(unit) || (requiresWindows11(unit.processor) && !hasWindows11Daily(unit.qcHarian)))
+      .filter((unit) => ["RECHECK", "CANDIDATE_RETUR", "RETUR_DISTRIBUTOR"].includes(unit.statusObservasi) || isDailyProblem(unit))
       .slice(0, 6)
       .map((unit) => ({
         id: unit.id,
-        nomorUnit: unit.nomorUnit,
+        nomorUnit: displayUnitNumber(unit.nomorUnit),
         model: unit.model,
         processor: unit.processor,
         ram: unit.ram,
         ssd: unit.ssd,
-        statusObservasi: requiresWindows11(unit.processor) && !hasWindows11Daily(unit.qcHarian) ? "BUTUH WINDOWS 11" : unit.statusObservasi.replaceAll("_", " ")
+        statusObservasi: unit.statusObservasi.replaceAll("_", " ")
       }));
 
-    const catalogReadyUnits = units
-      .filter(isReadyForCatalog)
-      .slice(0, 8)
-      .map((unit) => ({
-        id: unit.id,
-        nomorUnit: unit.nomorUnit,
-        model: unit.model,
-        processor: unit.processor,
-        ram: unit.ram,
-        ssd: unit.ssd,
-        hargaJualRekomendasi: unit.hargaJualRekomendasi
-      }));
+    const catalogReadyUnits = units.filter(isReadyForCatalog).slice(0, 8).map((unit) => ({
+      id: unit.id,
+      nomorUnit: displayUnitNumber(unit.nomorUnit),
+      model: unit.model,
+      processor: unit.processor,
+      ram: unit.ram,
+      ssd: unit.ssd,
+      hargaJualRekomendasi: unit.hargaJualRekomendasi
+    }));
 
     return {
       connected: true,
@@ -604,7 +380,7 @@ export async function getDashboardData() {
       problemUnits,
       aiLogs: aiLogs.map((log) => ({
         id: log.id,
-        unitNomor: log.unit.nomorUnit,
+        unitNomor: displayUnitNumber(log.unit.nomorUnit),
         rekomendasi: log.rekomendasi
       })),
       batches: batches.map((batch) => ({
@@ -612,7 +388,7 @@ export async function getDashboardData() {
         nomorBatch: batch.nomorBatch,
         supplier: batch.supplier,
         tanggalTempo: batch.tanggalTempo.toISOString().slice(0, 10),
-        statusPembayaran: paymentStatusLabel[batch.statusPembayaran],
+        statusPembayaran: paymentStatusLabel[batch.statusPembayaran] ?? batch.statusPembayaran,
         catatan: batch.catatan ?? "",
         jumlahUnit: batch.units.length
       })),
@@ -621,80 +397,12 @@ export async function getDashboardData() {
   } catch {
     return {
       connected: false,
-      stats: {
-        unitAktif: 0,
-        siapKatalog: 0,
-        perluPerhatian: 0,
-        qcHarian: 0
-      },
+      stats: { unitAktif: 0, siapKatalog: 0, perluPerhatian: 0, qcHarian: 0 },
       problemUnits: [],
       aiLogs: [],
       batches: [],
       catalogReadyUnits: []
     };
-  }
-}
-
-export async function getBatchPaymentSummary(batchId: string) {
-  try {
-    const batch = await prisma.batchPSI.findUnique({
-      where: { id: batchId },
-      include: {
-        units: {
-          orderBy: { nomorUnit: "asc" },
-          include: {
-            qcAwal: true,
-            qcHarian: {
-              orderBy: { tanggal: "desc" },
-              take: 1
-            }
-          }
-        }
-      }
-    });
-
-    if (!batch) return null;
-
-    const normalUnits = batch.units.filter((unit) => unit.statusObservasi === "VERIFIED" || unit.statusObservasi === "VERIFIED_WITH_NOTES");
-    const problemUnits = batch.units.filter((unit) => unit.statusObservasi === "RECHECK" || unit.statusObservasi === "CANDIDATE_RETUR");
-    const totalModal = batch.units.reduce((sum, unit) => sum + unit.hargaModal, 0);
-    const totalNormal = normalUnits.reduce((sum, unit) => sum + unit.hargaModal, 0);
-    const totalProblem = problemUnits.reduce((sum, unit) => sum + unit.hargaModal, 0);
-
-    return {
-      id: batch.id,
-      nomorBatch: batch.nomorBatch,
-      supplier: batch.supplier,
-      tanggalMasuk: batch.tanggalMasuk.toISOString().slice(0, 10),
-      tanggalTempo: batch.tanggalTempo.toISOString().slice(0, 10),
-      statusPembayaran: paymentStatusLabel[batch.statusPembayaran],
-      catatan: batch.catatan ?? "",
-      totalModal,
-      totalNormal,
-      totalProblem,
-      netTransfer: totalNormal,
-      normalUnits: normalUnits.map((unit) => ({
-        id: unit.id,
-        nomorUnit: unit.nomorUnit,
-        model: unit.model,
-        hargaModal: unit.hargaModal,
-        statusObservasi: unit.statusObservasi.replaceAll("_", " ")
-      })),
-      problemUnits: problemUnits.map((unit) => ({
-        id: unit.id,
-        nomorUnit: unit.nomorUnit,
-        model: unit.model,
-        hargaModal: unit.hargaModal,
-        statusObservasi: unit.statusObservasi.replaceAll("_", " "),
-        problem: [
-          unit.entryNotes ? `Input batch: ${unit.entryNotes}` : "",
-          unit.qcHarian[0]?.kondisiHariIni ? `QC harian: ${unit.qcHarian[0].kondisiHariIni}` : ""
-        ].filter(Boolean).join(" | ") || "Belum ada keterangan problem.",
-        catatan: unit.qcHarian[0]?.catatan || unit.entryNotes || "-"
-      }))
-    };
-  } catch {
-    return null;
   }
 }
 
@@ -740,7 +448,7 @@ export async function getBatchHistoryData(batchId: string) {
         unit.qcHarian.map((qc) => ({
           id: qc.id,
           unitId: unit.id,
-          nomorUnit: unit.nomorUnit,
+          nomorUnit: displayUnitNumber(unit.nomorUnit),
           model: unit.model,
           tanggal: qc.tanggal.toISOString().slice(0, 10),
           checker: qc.checker.name,
@@ -757,262 +465,6 @@ export async function getBatchHistoryData(batchId: string) {
           catatan: qc.catatan ?? ""
         }))
       )
-    };
-  } catch {
-    const batch = demoBatches.find((item) => item.id === batchId);
-    if (!batch) return null;
-
-    const batchUnits = demoUnits.filter((unit) => unit.batchId === batch.id);
-    const unitIds = new Set(batchUnits.map((unit) => unit.id));
-    return {
-      id: batch.id,
-      nomorBatch: batch.nomorBatch,
-      supplier: batch.supplier,
-      histories: demoDailyQcs
-        .filter((qc) => unitIds.has(qc.unitId))
-        .map((qc) => {
-          const unit = batchUnits.find((item) => item.id === qc.unitId);
-          return {
-            id: qc.id,
-            unitId: qc.unitId,
-            nomorUnit: unit?.nomorUnit ?? "-",
-            model: unit?.model ?? "-",
-            tanggal: qc.tanggal,
-            checker: qc.checker,
-            ssdHealth: qc.ssdHealth,
-            batteryHealth: qc.batteryHealth,
-            ssdSerial: qc.ssdSerial,
-            screenCondition: qc.screenCondition,
-            windowsVersion: qc.windowsVersion,
-            driverStatus: qc.driverStatus,
-            officeStatus: qc.officeStatus,
-            partitionCount: qc.partitionCount,
-            kondisiHariIni: qc.kondisiHariIni,
-            masihLolos: qc.masihLolos,
-            catatan: qc.catatan
-          };
-        })
-    };
-  }
-}
-
-export async function getSalesPageData() {
-  try {
-    const readyCandidates = await prisma.unit.findMany({
-      where: {
-        soldAt: null,
-        statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }
-      },
-      include: {
-        qcHarian: {
-          orderBy: { tanggal: "desc" },
-          take: 1,
-          select: { masihLolos: true, windowsVersion: true }
-        }
-      },
-      orderBy: { createdAt: "desc" },
-      take: 80
-    });
-
-    const readyUnits = readyCandidates.filter((unit) => {
-      const latestDaily = unit.qcHarian[0];
-      const dailyReady = Boolean(latestDaily && latestDaily.masihLolos !== "TIDAK_LOLOS");
-      const osReady = !requiresWindows11(unit.processor) || hasWindows11Daily(unit.qcHarian);
-      return dailyReady && osReady;
-    });
-
-    let sales: Array<Prisma.SaleGetPayload<{ include: { unit: true; items: true } }>> = [];
-    let salesReady = true;
-
-    try {
-      sales = await prisma.sale.findMany({
-        include: { unit: true, items: true },
-        orderBy: { soldAt: "desc" },
-        take: 200
-      });
-    } catch {
-      salesReady = false;
-    }
-
-    const blockedByDailyQc = readyCandidates.length - readyUnits.length;
-    const activeSales = sales.filter((sale) => !sale.voidedAt);
-    const totalOmzet = activeSales.reduce((sum, sale) => sum + sale.soldPrice, 0);
-    const totalProfit = activeSales.reduce((sum, sale) => sum + sale.grossProfit, 0);
-
-    return {
-      readyUnits: readyUnits.map((unit) => ({
-        id: unit.id,
-        nomorUnit: unit.nomorUnit,
-        model: unit.model,
-        processor: unit.processor,
-        ram: unit.ram,
-        ssd: unit.ssd,
-        hargaModal: unit.hargaModal,
-        hargaJualRekomendasi: unit.hargaJualRekomendasi,
-        stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
-        statusObservasi: unit.statusObservasi.replaceAll("_", " ")
-      })),
-      sales: sales.map((sale) => ({
-        id: sale.id,
-        unitId: sale.unitId,
-        nomorUnit: sale.unit.nomorUnit,
-        model: sale.unit.model,
-        invoiceNumber: sale.invoiceNumber,
-        location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
-        soldPrice: sale.soldPrice,
-        costPrice: sale.costPrice,
-        grossProfit: sale.grossProfit,
-        paymentMethod: sale.paymentMethod,
-        buyerName: sale.buyerName ?? "-",
-        itemCount: sale.items.reduce((sum, item) => sum + item.qty, 0),
-        soldAt: sale.soldAt.toISOString().slice(0, 10),
-        voidedAt: sale.voidedAt?.toISOString().slice(0, 10) ?? "",
-        voidReason: sale.voidReason ?? "",
-        notes: sale.notes ?? ""
-      })),
-      stats: {
-        totalOmzet,
-        totalProfit,
-        readyCount: readyUnits.length,
-        soldCount: activeSales.length
-      },
-      salesReady,
-      blockedByDailyQc
-    };
-  } catch {
-    return {
-      readyUnits: [],
-      sales: [],
-      stats: {
-        totalOmzet: 0,
-        totalProfit: 0,
-        readyCount: 0,
-        soldCount: 0
-      },
-      salesReady: false,
-      blockedByDailyQc: 0
-    };
-  }
-}
-
-export async function getCatalogPageData() {
-  try {
-    const candidates = await prisma.unit.findMany({
-      where: {
-        soldAt: null,
-        statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }
-      },
-      include: {
-        qcHarian: {
-          orderBy: { tanggal: "desc" },
-          take: 1,
-          select: {
-            masihLolos: true,
-            windowsVersion: true,
-            ssdHealth: true,
-            batteryHealth: true,
-            screenCondition: true,
-            officeStatus: true
-          }
-        }
-      },
-      orderBy: [
-        { stockLocation: "desc" },
-        { createdAt: "desc" }
-      ],
-      take: 120
-    });
-
-    const units = candidates
-      .filter((unit) => {
-        const latestDaily = unit.qcHarian[0];
-        return Boolean(
-          latestDaily &&
-          latestDaily.masihLolos !== "TIDAK_LOLOS" &&
-          (!requiresWindows11(unit.processor) || hasWindows11Daily(unit.qcHarian))
-        );
-      })
-      .map((unit) => {
-        const latestDaily = unit.qcHarian[0];
-        return {
-          id: unit.id,
-          nomorUnit: unit.nomorUnit,
-          model: unit.model,
-          processor: unit.processor,
-          ram: unit.ram,
-          ssd: unit.ssd,
-          lcdSize: unit.lcdSize ?? "-",
-          lcdResolution: unit.lcdResolution ?? "-",
-          isTouchscreen: unit.isTouchscreen,
-          hargaJualRekomendasi: unit.hargaJualRekomendasi,
-          catalogImageUrl: unit.catalogImageUrl ?? "",
-          stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
-          ssdHealth: latestDaily?.ssdHealth ?? unit.ssdHealth ?? 0,
-          batteryHealth: latestDaily?.batteryHealth ?? unit.batteryHealth ?? 0,
-          windowsVersion: latestDaily?.windowsVersion ?? "-",
-          screenCondition: latestDaily?.screenCondition ?? "-",
-          officeStatus: latestDaily?.officeStatus ?? "-"
-        };
-      });
-
-    return {
-      connected: true,
-      wiradesaUnits: units.filter((unit) => unit.stockLocation === "Wiradesa"),
-      kajenUnits: units.filter((unit) => unit.stockLocation === "Kajen")
-    };
-  } catch {
-    return {
-      connected: false,
-      wiradesaUnits: [],
-      kajenUnits: []
-    };
-  }
-}
-
-export async function getSaleReceipt(id: string) {
-  try {
-    const sale = await prisma.sale.findUnique({
-      where: { id },
-      include: {
-        unit: true,
-        items: { orderBy: { createdAt: "asc" } }
-      }
-    });
-
-    if (!sale) return null;
-
-    return {
-      id: sale.id,
-      invoiceNumber: sale.invoiceNumber,
-      soldAt: sale.soldAt.toISOString().slice(0, 10),
-      location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
-      paymentMethod: sale.paymentMethod,
-      buyerName: sale.buyerName ?? "-",
-      buyerPhone: sale.buyerPhone ?? "-",
-      buyerAddress: sale.buyerAddress ?? "-",
-      warrantySoftware: sale.warrantySoftware,
-      warrantyHardware: sale.warrantyHardware,
-      subtotal: sale.subtotal,
-      costPrice: sale.costPrice,
-      grossProfit: sale.grossProfit,
-      voidedAt: sale.voidedAt?.toISOString().slice(0, 10) ?? "",
-      voidReason: sale.voidReason ?? "",
-      notes: sale.notes ?? "-",
-      unit: {
-        nomorUnit: sale.unit.nomorUnit,
-        model: sale.unit.model,
-        processor: sale.unit.processor,
-        ram: sale.unit.ram,
-        ssd: sale.unit.ssd
-      },
-      items: sale.items.map((item) => ({
-        id: item.id,
-        name: item.name,
-        category: item.category,
-        qty: item.qty,
-        unitPrice: item.unitPrice,
-        lineTotal: item.lineTotal
-      }))
     };
   } catch {
     return null;
@@ -1044,7 +496,7 @@ export async function getFinancePageData() {
         invoiceNumber: sale.invoiceNumber,
         soldAt: sale.soldAt.toISOString().slice(0, 10),
         location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
-        unitNomor: sale.unit.nomorUnit,
+        unitNomor: displayUnitNumber(sale.unit.nomorUnit),
         model: sale.unit.model,
         soldPrice: sale.soldPrice,
         costPrice: sale.costPrice,
@@ -1055,12 +507,7 @@ export async function getFinancePageData() {
     };
   } catch {
     return {
-      stats: {
-        totalOmzet: 0,
-        totalModal: 0,
-        totalProfit: 0,
-        totalTransaksi: 0
-      },
+      stats: { totalOmzet: 0, totalModal: 0, totalProfit: 0, totalTransaksi: 0 },
       sales: []
     };
   }
