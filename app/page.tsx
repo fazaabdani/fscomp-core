@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getDashboardData } from "@/lib/db-data";
 import { getDueDailyQcUnits } from "@/lib/qc-due-data";
 import { getCurrentUser } from "@/lib/session";
+import { CopyWaButton } from "./CopyWaButton";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,23 @@ export default async function DashboardPage() {
     getDashboardData(),
     getDueDailyQcUnits()
   ]);
+  const publicUrl = process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id";
+  const dueDailyQcWaText = [
+    `*FS Comp Core - Unit Wajib QC Harian*`,
+    `Total: ${dueDailyQc.count} unit`,
+    `Batas QC: maksimal ${dueDailyQc.dueHours} jam sekali`,
+    "",
+    ...dueDailyQc.units.map((unit, index) => [
+      `${index + 1}. Unit ${unit.nomorUnit} - ${unit.model}`,
+      `   Lokasi: ${unit.stockLocation}`,
+      `   Spek: ${unit.processor} / ${unit.ram} / ${unit.ssd}`,
+      `   Last QC: ${unit.lastQcAt}${unit.qcAgeHours === null ? "" : ` (${unit.qcAgeHours} jam lalu)`}`,
+      `   Link QC: ${publicUrl}/qc-harian?unit=${unit.id}`,
+      `   Detail: ${publicUrl}/unit/${unit.id}`
+    ].join("\n")),
+    "",
+    "Mohon dicek hari ini."
+  ].join("\n");
 
   return (
     <section className="pageStack">
@@ -50,7 +68,10 @@ export default async function DashboardPage() {
             <p className="eyebrow">Wajib QC Harian</p>
             <h2>{dueDailyQc.count} unit perlu dicek</h2>
           </div>
-          <Link className="secondaryButton" href="/qc-harian">Input QC</Link>
+          <div className="buttonCluster">
+            <CopyWaButton text={dueDailyQcWaText} disabled={dueDailyQc.units.length === 0} />
+            <Link className="secondaryButton" href="/qc-harian">Input QC</Link>
+          </div>
         </div>
         <div className="infoBox">
           Unit wajib QC harian maksimal {dueDailyQc.dueHours} jam sekali. Unit tetap tampil di kasir dan katalog, bagian ini hanya alarm operasional.
