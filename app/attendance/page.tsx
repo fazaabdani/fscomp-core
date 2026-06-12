@@ -1,4 +1,4 @@
-import { Clock3, LogIn, LogOut, UsersRound } from "lucide-react";
+import { Clock3, Download, LogIn, LogOut, UsersRound } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { getOrCreateDbUserForSession } from "@/lib/user-store";
@@ -31,7 +31,15 @@ function endOfToday() {
   return new Date(`${todayJakartaDateString()}T23:59:59.999+07:00`);
 }
 
-export default async function AttendancePage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
+function exportUrl(from?: string, to?: string) {
+  const params = new URLSearchParams();
+  if (from) params.set("from", from);
+  if (to) params.set("to", to);
+  const query = params.toString();
+  return query ? `/api/attendance/export?${query}` : "/api/attendance/export";
+}
+
+export default async function AttendancePage({ searchParams }: { searchParams?: { error?: string; success?: string; from?: string; to?: string } }) {
   const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
   const dbUser = await getOrCreateDbUserForSession(currentUser);
   const todayStart = startOfToday();
@@ -89,6 +97,36 @@ export default async function AttendancePage({ searchParams }: { searchParams?: 
         </div>
         <Clock3 size={28} />
       </div>
+
+      {canSeeAttendanceDetail ? (
+        <section className="panel">
+          <div className="panelHeader">
+            <div>
+              <p className="eyebrow">Export admin</p>
+              <h2>Tarik rekap absensi CSV</h2>
+            </div>
+            <Download size={22} />
+          </div>
+          <form className="formGrid" action="/attendance">
+            <div className="numberGrid">
+              <label>Dari tanggal
+                <input type="date" name="from" defaultValue={searchParams?.from ?? todayJakartaDateString()} />
+              </label>
+              <label>Sampai tanggal
+                <input type="date" name="to" defaultValue={searchParams?.to ?? todayJakartaDateString()} />
+              </label>
+            </div>
+            <div className="buttonRow noMargin">
+              <button className="secondaryButton" type="submit">Set tanggal</button>
+              <a className="primaryButton" href={exportUrl(searchParams?.from ?? todayJakartaDateString(), searchParams?.to ?? todayJakartaDateString())}>
+                <Download size={16} /> Export rentang ini
+              </a>
+              <a className="secondaryButton" href={exportUrl(todayJakartaDateString(), todayJakartaDateString())}>Export hari ini</a>
+              <a className="secondaryButton" href={exportUrl()}>Export semua</a>
+            </div>
+          </form>
+        </section>
+      ) : null}
 
       {message ? <div className={`infoBox ${searchParams?.error ? "dangerInfo" : ""}`}>{message}</div> : null}
 
