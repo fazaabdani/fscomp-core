@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CheckCircle2, MapPin, MessageCircle, Search, SlidersHorizontal } from "lucide-react";
+import { CopyWaButton } from "@/app/CopyWaButton";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
 import { getCatalogPageData } from "@/lib/catalog-page-data";
@@ -126,6 +127,36 @@ function sortUnits(units: CatalogUnit[], sort: string) {
     if (sort === "unit") return a.nomorUnit.localeCompare(b.nomorUnit, "id", { numeric: true });
     return 0;
   });
+}
+
+function activeFilterText(filters: CatalogFilters) {
+  const parts = [
+    filters.q ? `cari "${filters.q}"` : "",
+    filters.lokasi !== "semua" ? `lokasi ${filters.lokasi}` : "",
+    filters.merek ? `merek ${filters.merek}` : "",
+    filters.ram ? `RAM ${filters.ram}` : "",
+    filters.storage ? `SSD ${filters.storage}` : "",
+    filters.windows ? filters.windows : ""
+  ].filter(Boolean);
+  return parts.length ? parts.join(", ") : "semua unit ready";
+}
+
+function catalogShareText(units: CatalogUnit[], filters: CatalogFilters) {
+  const lines = [
+    "Katalog Laptop Ready FS Comp",
+    `Filter: ${activeFilterText(filters)}`,
+    `Total: ${units.length} unit`,
+    "",
+    ...units.map((unit, index) => [
+      `${index + 1}. Unit ${unit.nomorUnit} - ${unit.model}`,
+      `   ${unit.processor} / ${unit.ram} / ${unit.ssd}`,
+      `   ${formatRupiah(unit.hargaJualRekomendasi)} - ${unit.stockLocation}`,
+      `   Detail: https://core.fscomp.id/unit/${unit.id}`
+    ].join("\n")),
+    "",
+    "Chat admin: 0816660056"
+  ];
+  return lines.join("\n");
 }
 
 function CatalogSection({
@@ -447,6 +478,7 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           <strong>{visibleUnits.length}</strong>
           <span>dari {total} unit ready</span>
         </div>
+        <CopyWaButton text={catalogShareText(visibleUnits, filters)} disabled={visibleUnits.length === 0} />
         <Link className={`sortPill ${filters.lokasi === "semua" ? "active" : ""}`} href={queryUrl(filters, { lokasi: "semua" })}>Semua ({total})</Link>
         <Link className={`sortPill ${filters.lokasi === "wiradesa" ? "active" : ""}`} href={queryUrl(filters, { lokasi: "wiradesa" })}>Wiradesa ({wiradesaUnits.length})</Link>
         <Link className={`sortPill ${filters.lokasi === "kajen" ? "active" : ""}`} href={queryUrl(filters, { lokasi: "kajen" })}>Kajen ({kajenUnits.length})</Link>
