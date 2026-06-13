@@ -167,7 +167,7 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div className="infoBox">
-          Ini khusus reminder software seperti OS, driver, jam, aplikasi, partisi, dan Office. Setelah beres, isi ulang QC harian supaya hilang dari daftar.
+          Ini khusus reminder software seperti OS, driver, jam, aplikasi, partisi, dan Office belum install. Office bajakan tidak masuk daftar perlu dibereskan.
         </div>
         <div className="listStack">
           {softwareResolution.units.length === 0 ? <div className="emptyState">Belum ada unit aktif yang punya PR software.</div> : softwareResolution.units.slice(0, 8).map((unit) => (
