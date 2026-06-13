@@ -28,7 +28,7 @@ function softwareResolutionItems(qc?: {
     qc.clockStatus !== "Sesuai" ? `Jam ${qc.clockStatus}` : "",
     qc.appStatus !== "Lengkap" ? `Aplikasi ${qc.appStatus}` : "",
     qc.partitionCount !== 2 ? "Partisi masih 1" : "",
-    qc.officeStatus === "Bajakan" || qc.officeStatus === "Belum install" ? `Office ${qc.officeStatus}` : ""
+    qc.officeStatus === "Belum install" ? `Office ${qc.officeStatus}` : ""
   ].filter(Boolean);
 }
 
