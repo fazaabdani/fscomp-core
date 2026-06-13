@@ -155,21 +155,19 @@ function activeFilterText(filters: CatalogFilters) {
 
 function catalogShareText(units: CatalogUnit[], filters: CatalogFilters) {
   const shownUnits = units.slice(0, 30);
-  const filterUrl = `https://core.fscomp.id${queryUrl(filters, {})}`;
   const lines = [
     "*Katalog Laptop Ready FS Comp*",
     `Filter: ${activeFilterText(filters)}`,
     `Urutan: ${sortLabel(filters.sort)}`,
     `Total: ${units.length} unit`,
-    `Link katalog: ${filterUrl}`,
+    "Link katalog: https://core.fscomp.id/katalog",
     "",
     ...shownUnits.map((unit, index) => [
       `${index + 1}. ${unit.nomorUnit} - ${unit.model}`,
       `   ${unit.processor} / ${unit.ram} / ${unit.ssd} / ${unit.windowsVersion}`,
-      `   ${formatRupiah(unit.hargaJualRekomendasi)} | ${unit.stockLocation}`,
-      `   Detail: https://core.fscomp.id/unit/${unit.id}`
+      `   ${formatRupiah(unit.hargaJualRekomendasi)} | ${unit.stockLocation}`
     ].join("\n")),
-    units.length > shownUnits.length ? `\nMasih ada ${units.length - shownUnits.length} unit lain. Buka link katalog untuk lihat lengkapnya.` : "",
+    units.length > shownUnits.length ? `\nMasih ada ${units.length - shownUnits.length} unit lain. Buka katalog untuk lihat lengkapnya.` : "",
     "",
     "Chat admin: 0816660056"
   ].filter(Boolean);
