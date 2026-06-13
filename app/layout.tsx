@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import { NavLinks } from "./NavLinks";
+import { PageTransition } from "./PageTransition";
 import "./globals.css";
 import "./ops-overrides.css";
 
@@ -21,14 +22,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <span className="brandMark">FS</span>
             <span>
               <strong>FS Comp Core</strong>
-              <small>Unit, QC, Batch, Label QR</small>
+              <small>Unit, QC, PSI, Label QR</small>
             </span>
           </Link>
           <nav>
             <NavLinks currentUser={currentUser} />
           </nav>
         </header>
-        <main>{children}</main>
+        <main>
+          <PageTransition>{children}</PageTransition>
+        </main>
         <footer className="siteFooter">
           <span>Dibuat oleh</span>
           <strong>Faza Abdani Auni Robbi S.T</strong>
