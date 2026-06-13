@@ -108,6 +108,22 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
         </div>
       </div>
 
+      <section className="panel">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Foto produk</p>
+            <h2>Tampilan unit untuk katalog</h2>
+          </div>
+          {isInternalUser ? <Link className="secondaryButton" href={`/unit/${unit.id}/edit`}>Edit Foto</Link> : null}
+        </div>
+        <CatalogPhoto
+          url={unit.catalogImageUrl}
+          className="publicUnitPhoto"
+          placeholderClassName="publicUnitPhoto placeholderPhoto"
+          alt={`Foto ${unit.model}`}
+        />
+      </section>
+
       <div className="contentGrid">
         <section className="panel wide">
           <div className="panelHeader">
