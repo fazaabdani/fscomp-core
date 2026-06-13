@@ -67,7 +67,7 @@ function buildResolutionItems({
     clockStatus !== "Sesuai" ? `Jam ${clockStatus}` : "",
     appStatus !== "Lengkap" ? `Aplikasi ${appStatus}` : "",
     partitionCount !== 2 ? "Partisi masih 1" : "",
-    officeStatus === "Bajakan" || officeStatus === "Belum install" ? `Office ${officeStatus}` : "",
+    officeStatus === "Belum install" ? `Office ${officeStatus}` : "",
     !trackpoint ? "Trackpoint perlu dicek" : "",
     !karetBawah ? "Karet bawah tidak lengkap" : "",
     paintCondition === "Repaint parah" || paintCondition === "Kelupas" ? `Kondisi cat ${paintCondition}` : ""
