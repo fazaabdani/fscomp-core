@@ -80,18 +80,6 @@ function uniqueSorted(values: string[]) {
   return Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.localeCompare(b, "id", { numeric: true }));
 }
 
-function queryUrl(filters: CatalogFilters, overrides: Partial<CatalogFilters>) {
-  const next = { ...filters, ...overrides };
-  const params = new URLSearchParams();
-  Object.entries(next).forEach(([key, value]) => {
-    if (value && !(key === "sort" && value === "unit") && !(key === "lokasi" && value === "semua")) {
-      params.set(key, value);
-    }
-  });
-  const query = params.toString();
-  return query ? `/katalog?${query}#produk-ready` : "/katalog#produk-ready";
-}
-
 function filterUnits(units: CatalogUnit[], filters: CatalogFilters) {
   const q = filters.q.toLowerCase();
   return units.filter((unit) => {
@@ -232,7 +220,7 @@ function CatalogPageStyles() {
     <style dangerouslySetInnerHTML={{ __html: `
       .catalogFilterPanel {
         display: grid;
-        grid-template-columns: repeat(7, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 12px;
         align-items: end;
         padding: 16px;
@@ -281,10 +269,38 @@ function CatalogPageStyles() {
 
       .catalogFilterActions {
         display: flex;
-        grid-column: 1 / -1;
+        grid-column: span 2;
         gap: 8px;
         align-items: center;
         justify-content: flex-end;
+      }
+
+      .catalogResultBar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px;
+        border: 1px solid rgba(55, 163, 255, 0.34);
+        border-radius: 10px;
+        background: rgba(8, 20, 36, 0.88);
+      }
+
+      .catalogResultCount {
+        display: grid;
+        gap: 2px;
+      }
+
+      .catalogResultCount strong {
+        color: #f8fbff;
+        font-size: 28px;
+        line-height: 1;
+      }
+
+      .catalogResultCount span {
+        color: #9ec1df;
+        font-size: 13px;
       }
 
       .catalogFilterActions .primaryButton,
@@ -347,6 +363,7 @@ function CatalogPageStyles() {
         }
 
         .catalogFilterActions {
+          grid-column: auto;
           justify-content: stretch;
         }
 
@@ -366,6 +383,7 @@ function CatalogPageStyles() {
         }
 
         .catalogFilterActions {
+          grid-column: 1 / -1;
           justify-content: flex-start;
         }
       }
@@ -457,7 +475,6 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
       </div>
 
       <form className="catalogFilterPanel" action="/katalog#produk-ready">
-        <input type="hidden" name="sort" value={filters.sort} />
         <label className="catalogSearchField">
           <span><Search size={17} /> Cari unit, model, processor, spek</span>
           <input name="q" defaultValue={filters.q} placeholder="Contoh: T480, i5 gen 8, 16GB, Dell, Kajen" />
@@ -498,30 +515,32 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
             {windowsOptions.map((windows) => <option value={windows} key={windows}>{windows}</option>)}
           </select>
         </label>
+        <label>
+          Urutkan
+          <select name="sort" defaultValue={filters.sort}>
+            <option value="unit">Nomor unit</option>
+            <option value="harga-termurah">Harga termurah</option>
+            <option value="harga-tertinggi">Harga tertinggi</option>
+            <option value="ram-terbesar">RAM terbesar</option>
+            <option value="ssd-terbesar">SSD terbesar</option>
+            <option value="nama">Nama/model</option>
+          </select>
+        </label>
         <div className="catalogFilterActions">
           <button className="primaryButton" type="submit"><SlidersHorizontal size={16} /> Terapkan</button>
           <Link className="secondaryButton" href="/katalog#produk-ready">Reset</Link>
         </div>
       </form>
 
-      <div className="catalogSortBar">
-        <div>
+      <div className="catalogResultBar">
+        <div className="catalogResultCount">
           <strong>{visibleUnits.length}</strong>
           <span>dari {total} unit ready</span>
         </div>
         <div className="catalogShareBox">
           <CopyWaButton text={catalogShareText(visibleUnits, filters)} disabled={visibleUnits.length === 0} label="Copy list WA" />
-          <small>Sesuai filter dan urutan aktif</small>
+          <small>Filter: {activeFilterText(filters)} | Urutan: {sortLabel(filters.sort)}</small>
         </div>
-        <Link className={`sortPill ${filters.lokasi === "semua" ? "active" : ""}`} href={queryUrl(filters, { lokasi: "semua" })}>Semua ({total})</Link>
-        <Link className={`sortPill ${filters.lokasi === "wiradesa" ? "active" : ""}`} href={queryUrl(filters, { lokasi: "wiradesa" })}>Wiradesa ({wiradesaUnits.length})</Link>
-        <Link className={`sortPill ${filters.lokasi === "kajen" ? "active" : ""}`} href={queryUrl(filters, { lokasi: "kajen" })}>Kajen ({kajenUnits.length})</Link>
-        <Link className={`sortPill ${filters.sort === "unit" ? "active" : ""}`} href={queryUrl(filters, { sort: "unit" })}>Urut unit</Link>
-        <Link className={`sortPill ${filters.sort === "harga-termurah" ? "active" : ""}`} href={queryUrl(filters, { sort: "harga-termurah" })}>Termurah</Link>
-        <Link className={`sortPill ${filters.sort === "harga-tertinggi" ? "active" : ""}`} href={queryUrl(filters, { sort: "harga-tertinggi" })}>Tertinggi</Link>
-        <Link className={`sortPill ${filters.sort === "ram-terbesar" ? "active" : ""}`} href={queryUrl(filters, { sort: "ram-terbesar" })}>RAM besar</Link>
-        <Link className={`sortPill ${filters.sort === "ssd-terbesar" ? "active" : ""}`} href={queryUrl(filters, { sort: "ssd-terbesar" })}>SSD besar</Link>
-        <Link className={`sortPill ${filters.sort === "nama" ? "active" : ""}`} href={queryUrl(filters, { sort: "nama" })}>Nama</Link>
       </div>
 
       {visibleUnits.length === 0 ? <div className="panel emptyState">Tidak ada unit yang cocok dengan filter ini.</div> : null}
