@@ -129,6 +129,18 @@ function sortUnits(units: CatalogUnit[], sort: string) {
   });
 }
 
+function sortLabel(sort: string) {
+  const labels: Record<string, string> = {
+    unit: "Nomor unit",
+    "harga-termurah": "Harga termurah",
+    "harga-tertinggi": "Harga tertinggi",
+    nama: "Nama/model",
+    "ram-terbesar": "RAM terbesar",
+    "ssd-terbesar": "SSD terbesar"
+  };
+  return labels[sort] ?? "Nomor unit";
+}
+
 function activeFilterText(filters: CatalogFilters) {
   const parts = [
     filters.q ? `cari "${filters.q}"` : "",
@@ -142,20 +154,25 @@ function activeFilterText(filters: CatalogFilters) {
 }
 
 function catalogShareText(units: CatalogUnit[], filters: CatalogFilters) {
+  const shownUnits = units.slice(0, 30);
+  const filterUrl = `https://core.fscomp.id${queryUrl(filters, {})}`;
   const lines = [
-    "Katalog Laptop Ready FS Comp",
+    "*Katalog Laptop Ready FS Comp*",
     `Filter: ${activeFilterText(filters)}`,
+    `Urutan: ${sortLabel(filters.sort)}`,
     `Total: ${units.length} unit`,
+    `Link katalog: ${filterUrl}`,
     "",
-    ...units.map((unit, index) => [
-      `${index + 1}. Unit ${unit.nomorUnit} - ${unit.model}`,
-      `   ${unit.processor} / ${unit.ram} / ${unit.ssd}`,
-      `   ${formatRupiah(unit.hargaJualRekomendasi)} - ${unit.stockLocation}`,
+    ...shownUnits.map((unit, index) => [
+      `${index + 1}. ${unit.nomorUnit} - ${unit.model}`,
+      `   ${unit.processor} / ${unit.ram} / ${unit.ssd} / ${unit.windowsVersion}`,
+      `   ${formatRupiah(unit.hargaJualRekomendasi)} | ${unit.stockLocation}`,
       `   Detail: https://core.fscomp.id/unit/${unit.id}`
     ].join("\n")),
+    units.length > shownUnits.length ? `\nMasih ada ${units.length - shownUnits.length} unit lain. Buka link katalog untuk lihat lengkapnya.` : "",
     "",
     "Chat admin: 0816660056"
-  ];
+  ].filter(Boolean);
   return lines.join("\n");
 }
 
@@ -276,6 +293,22 @@ function CatalogPageStyles() {
       .catalogFilterActions .secondaryButton {
         min-height: 42px;
         white-space: nowrap;
+      }
+
+      .catalogShareBox {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        padding: 8px;
+        border: 1px solid rgba(34, 211, 238, 0.28);
+        border-radius: 8px;
+        background: rgba(8, 22, 39, 0.72);
+      }
+
+      .catalogShareBox small {
+        color: #9ec1df;
+        font-weight: 700;
       }
 
       .catalogBrand {
@@ -478,7 +511,10 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           <strong>{visibleUnits.length}</strong>
           <span>dari {total} unit ready</span>
         </div>
-        <CopyWaButton text={catalogShareText(visibleUnits, filters)} disabled={visibleUnits.length === 0} />
+        <div className="catalogShareBox">
+          <CopyWaButton text={catalogShareText(visibleUnits, filters)} disabled={visibleUnits.length === 0} label="Copy list WA" />
+          <small>Sesuai filter dan urutan aktif</small>
+        </div>
         <Link className={`sortPill ${filters.lokasi === "semua" ? "active" : ""}`} href={queryUrl(filters, { lokasi: "semua" })}>Semua ({total})</Link>
         <Link className={`sortPill ${filters.lokasi === "wiradesa" ? "active" : ""}`} href={queryUrl(filters, { lokasi: "wiradesa" })}>Wiradesa ({wiradesaUnits.length})</Link>
         <Link className={`sortPill ${filters.lokasi === "kajen" ? "active" : ""}`} href={queryUrl(filters, { lokasi: "kajen" })}>Kajen ({kajenUnits.length})</Link>
