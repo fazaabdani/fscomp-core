@@ -56,7 +56,10 @@ export default async function BatchPaymentPage({ params }: { params: { id: strin
           {summary.normalUnits.map((unit) => (
             <div className="paymentRow" key={unit.id}>
               <span>Unit {unit.nomorUnit}</span>
-              <strong>{unit.model}</strong>
+              <div>
+                <strong>{unit.model}</strong>
+                <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
+              </div>
               <b>{formatRupiah(unit.hargaModal)}</b>
             </div>
           ))}
@@ -77,6 +80,7 @@ export default async function BatchPaymentPage({ params }: { params: { id: strin
               <span>Unit {unit.nomorUnit}</span>
               <div>
                 <strong>{unit.model}</strong>
+                <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
                 <small>Status: {unit.statusObservasi}</small>
                 <small>Problem: {unit.problem}</small>
                 <small>Catatan unit: {unit.catatan}</small>

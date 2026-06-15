@@ -52,6 +52,9 @@ export async function getBatchPaymentSummary(batchId: string) {
         id: unit.id,
         nomorUnit: unit.nomorUnit,
         model: unit.model,
+        processor: unit.processor,
+        ram: unit.ram,
+        ssd: unit.ssd,
         hargaModal: unit.hargaModal,
         statusObservasi: unit.statusObservasi.replaceAll("_", " ")
       })),
@@ -59,6 +62,9 @@ export async function getBatchPaymentSummary(batchId: string) {
         id: unit.id,
         nomorUnit: unit.nomorUnit,
         model: unit.model,
+        processor: unit.processor,
+        ram: unit.ram,
+        ssd: unit.ssd,
         hargaModal: unit.hargaModal,
         statusObservasi: unit.statusObservasi.replaceAll("_", " "),
         problem: [

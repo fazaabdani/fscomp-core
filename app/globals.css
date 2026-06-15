@@ -1327,6 +1327,231 @@ textarea {
   font-size: 20px;
 }
 
+.dynamicCatalogPage {
+  position: relative;
+  isolation: isolate;
+}
+
+.catalogCanvas,
+.catalogCursorGlow {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+}
+
+.catalogCanvas {
+  z-index: -2;
+  opacity: 0.82;
+}
+
+.catalogCursorGlow {
+  z-index: -1;
+  width: 300px;
+  height: 300px;
+  border-radius: 999px;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(55, 163, 255, 0.14), transparent 70%);
+  transition: opacity 0.25s ease;
+}
+
+.dynamicHeroPanel,
+.dynamicStatsPanel,
+.catalogPublicCard,
+.catalogFeatureStrip,
+.catalogSortBar,
+.catalogFilterPanel,
+.catalogResultBar {
+  backdrop-filter: blur(20px);
+}
+
+.dynamicHeroPanel,
+.dynamicStatsPanel {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(58, 140, 255, 0.5);
+  box-shadow: 0 24px 70px rgba(4, 12, 28, 0.42);
+}
+
+.dynamicHeroPanel::before,
+.dynamicStatsPanel::before,
+.catalogPublicCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.9), transparent);
+  opacity: 0.72;
+}
+
+.dynamicHeroPanel h1 span:first-child,
+.dynamicHeroPanel h1 span:last-child {
+  color: var(--ink);
+}
+
+.dynamicHeroPanel h1 span {
+  display: inline-block;
+  animation: catalogSlideUp 0.7s ease both;
+}
+
+.dynamicHeroPanel h1 span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.dynamicHeroPanel h1 span:nth-child(3) {
+  animation-delay: 0.18s;
+}
+
+.catalogHeroPill {
+  animation: catalogFadeUp 0.65s ease both;
+}
+
+.catalogHeroPill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #22d3ee;
+  box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.6);
+  animation: catalogPulse 2s ease infinite;
+}
+
+.catalogTicker {
+  position: relative;
+  z-index: 1;
+  margin: -2px 0 0;
+  overflow: hidden;
+  border: 1px solid rgba(55, 163, 255, 0.24);
+  border-radius: 8px;
+  background: rgba(8, 20, 36, 0.68);
+}
+
+.catalogTickerTrack {
+  display: flex;
+  width: max-content;
+  animation: catalogTicker 28s linear infinite;
+}
+
+.catalogTickerTrack span {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 34px;
+  color: #b8cbe1;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.catalogTickerTrack span::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #22d3ee;
+}
+
+.catalogReveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.72s cubic-bezier(0.23, 1, 0.32, 1), transform 0.72s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.catalogReveal.isVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.revealDelay1 {
+  transition-delay: 0.1s;
+}
+
+.catalogStatBox {
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+.catalogStatBox:hover {
+  border-color: rgba(34, 211, 238, 0.68);
+  background: rgba(38, 70, 96, 0.72);
+  transform: translateY(-3px);
+}
+
+.catalogPublicCard {
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.28s ease, box-shadow 0.28s ease, transform 0.28s ease;
+}
+
+.catalogPublicCard:hover {
+  border-color: rgba(34, 211, 238, 0.62);
+  box-shadow: 0 18px 52px rgba(26, 108, 246, 0.2);
+  transform: translateY(-5px);
+}
+
+.catalogCardShine {
+  position: absolute;
+  inset: 0 auto 0 -120%;
+  width: 90%;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.07) 50%, transparent 65%);
+  pointer-events: none;
+  transition: left 0.55s ease;
+}
+
+.catalogPublicCard:hover .catalogCardShine {
+  left: 120%;
+}
+
+.catalogPublicCard .catalogImage,
+.catalogPublicCard .catalogImagePlaceholder {
+  transition: border-color 0.28s ease, transform 0.28s ease;
+}
+
+.catalogPublicCard:hover .catalogImage,
+.catalogPublicCard:hover .catalogImagePlaceholder {
+  border-color: rgba(34, 211, 238, 0.55);
+  transform: scale(1.015);
+}
+
+@keyframes catalogTicker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes catalogPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(34, 211, 238, 0);
+  }
+}
+
+@keyframes catalogFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes catalogSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .backLink {
   display: inline-flex;
   align-items: center;

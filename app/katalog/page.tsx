@@ -4,6 +4,7 @@ import { CopyWaButton } from "@/app/CopyWaButton";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
 import { getCatalogPageData } from "@/lib/catalog-page-data";
+import { KatalogDynamics } from "./KatalogDynamics";
 
 export const dynamic = "force-dynamic";
 
@@ -182,7 +183,8 @@ function CatalogSection({
       </div>
       <div className="catalogPublicGrid">
         {units.length === 0 ? <div className="emptyState">Belum ada unit siap jual di lokasi ini.</div> : units.map((unit) => (
-          <article className="catalogPublicCard" key={unit.id}>
+          <article className="catalogPublicCard catalogReveal" key={unit.id}>
+            <span className="catalogCardShine" aria-hidden="true" />
             <CatalogPhoto url={unit.catalogImageUrl} className="catalogImage" alt={`Foto ${unit.model}`} />
             <div className="catalogCardTop">
               <span className="unitNumber">{unit.nomorUnit}</span>
@@ -419,12 +421,13 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
   ];
 
   return (
-    <section className="pageStack katalogPage">
+    <section className="pageStack katalogPage dynamicCatalogPage">
+      <KatalogDynamics />
       <CatalogPageStyles />
-      <div className="catalogLandingHero">
-        <div className="catalogHeroCopyPanel">
+      <div className="catalogLandingHero catalogReveal">
+        <div className="catalogHeroCopyPanel dynamicHeroPanel">
           <span className="catalogHeroPill"><CheckCircle2 size={16} /> Katalog Laptop Second FS Comp</span>
-          <h1>Laptop Second <span>Berkualitas</span> Siap Dipilih</h1>
+          <h1><span>Laptop Second</span> <span>Berkualitas</span> <span>Siap Dipilih</span></h1>
           <p>Cari laptop ready sesuai kebutuhan panjenengan. Data stok mengikuti sistem Core, lengkap dengan spesifikasi, harga, lokasi stok, foto, dan tombol chat admin.</p>
           <div className="buttonRow">
             <a className="primaryButton" href="#produk-ready">Lihat Katalog</a>
@@ -432,22 +435,22 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
             <a className="secondaryButton" href="https://fscomp.id" target="_blank" rel="noreferrer">fscomp.id</a>
           </div>
         </div>
-        <div className="catalogHeroStatsPanel">
+        <div className="catalogHeroStatsPanel dynamicStatsPanel">
           <div className="catalogHeroStatsGrid">
             <div className="catalogStatBox">
-              <strong>{total}</strong>
+              <strong data-count-target={total}>{total}</strong>
               <span>Total unit tampil</span>
             </div>
             <div className="catalogStatBox">
-              <strong>{total}</strong>
+              <strong data-count-target={total}>{total}</strong>
               <span>Ready stock</span>
             </div>
             <div className="catalogStatBox">
-              <strong>{wiradesaUnits.length}</strong>
+              <strong data-count-target={wiradesaUnits.length}>{wiradesaUnits.length}</strong>
               <span>Wiradesa</span>
             </div>
             <div className="catalogStatBox">
-              <strong>{kajenUnits.length}</strong>
+              <strong data-count-target={kajenUnits.length}>{kajenUnits.length}</strong>
               <span>Kajen</span>
             </div>
           </div>
@@ -455,7 +458,15 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
         </div>
       </div>
 
-      <div className="catalogFeatureStrip">
+      <div className="catalogTicker" aria-hidden="true">
+        <div className="catalogTickerTrack">
+          {["Laptop second bergaransi", "QC ketat sebelum jual", "Stok Wiradesa dan Kajen", "Chat admin cepat", "Harga update dari Core", "Siap dipakai kerja"].concat(["Laptop second bergaransi", "QC ketat sebelum jual", "Stok Wiradesa dan Kajen", "Chat admin cepat", "Harga update dari Core", "Siap dipakai kerja"]).map((item, index) => (
+            <span key={`${item}-${index}`}>{item}</span>
+          ))}
+        </div>
+      </div>
+
+      <div className="catalogFeatureStrip catalogReveal revealDelay1">
         {features.map(([number, title, desc]) => (
           <div className="catalogFeatureItem" key={number}>
             <span>{number}</span>
@@ -469,12 +480,12 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
         <div className="infoBox dangerInfo">Katalog belum tersambung ke database production.</div>
       ) : null}
 
-      <div className="catalogSectionTitle" id="produk-ready">
+      <div className="catalogSectionTitle catalogReveal" id="produk-ready">
         <p className="eyebrow">Produk Ready</p>
         <h2>Pilih laptop sesuai kebutuhan panjenengan</h2>
       </div>
 
-      <form className="catalogFilterPanel" action="/katalog#produk-ready">
+      <form className="catalogFilterPanel catalogReveal revealDelay1" action="/katalog#produk-ready">
         <label className="catalogSearchField">
           <span><Search size={17} /> Cari unit, model, processor, spek</span>
           <input name="q" defaultValue={filters.q} placeholder="Contoh: T480, i5 gen 8, 16GB, Dell, Kajen" />
@@ -532,7 +543,7 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
         </div>
       </form>
 
-      <div className="catalogResultBar">
+      <div className="catalogResultBar catalogReveal revealDelay1">
         <div className="catalogResultCount">
           <strong>{visibleUnits.length}</strong>
           <span>dari {total} unit ready</span>
