@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import { NavLinks } from "./NavLinks";
 import { PageTransition } from "./PageTransition";
+import { ThemeDynamics } from "./ThemeDynamics";
 import "./globals.css";
 import "./ops-overrides.css";
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id">
       <body>
+        <ThemeDynamics />
         <header className="topbar">
           <Link className="brand" href="/">
             <span className="brandMark">FS</span>

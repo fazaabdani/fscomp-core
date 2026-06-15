@@ -2446,3 +2446,373 @@ textarea {
     font-size: 7pt;
   }
 }
+
+/* FS Comp visual theme v2: color and motion only. */
+:root {
+  --ink: #f0f6ff;
+  --muted: rgba(240, 246, 255, 0.55);
+  --line: rgba(58, 140, 255, 0.18);
+  --line-strong: rgba(58, 140, 255, 0.5);
+  --surface: rgba(8, 18, 42, 0.75);
+  --surface-strong: rgba(8, 18, 42, 0.92);
+  --band: rgba(26, 108, 246, 0.1);
+  --blue: #1a6cf6;
+  --blue-br: #3d8eff;
+  --blue-dark: #1a6cf6;
+  --cyan: #00d4ff;
+  --green: #00d4ff;
+  --yellow: #ffc857;
+  --red: #ff6f61;
+  --shadow: 0 20px 60px rgba(26, 108, 246, 0.18);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+  background: #050b18;
+  color: var(--ink);
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -4;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 8%, rgba(26, 108, 246, 0.18), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(0, 212, 255, 0.12), transparent 26%),
+    linear-gradient(180deg, #050b18 0%, #071126 45%, #050b18 100%);
+}
+
+.themeCanvas,
+.themeCursorGlow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.themeCanvas {
+  z-index: -3;
+  opacity: 0.9;
+}
+
+.themeCursorGlow {
+  z-index: -2;
+  width: 300px;
+  height: 300px;
+  border-radius: 999px;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(26, 108, 246, 0.12) 0%, transparent 70%);
+  transition: opacity 0.3s ease;
+}
+
+main,
+.pageStack,
+.panel,
+.heroBand,
+.unitHero,
+.metric,
+.statCard,
+.catalogItem,
+.batchCard,
+.receiptPaper,
+.paymentNote,
+.catalogHeroCopyPanel,
+.catalogHeroStatsPanel,
+.catalogFeatureStrip,
+.catalogFilterPanel,
+.catalogResultBar,
+.catalogPublicCard {
+  position: relative;
+  z-index: 1;
+}
+
+.topbar {
+  border-bottom-color: var(--line);
+  background: rgba(5, 11, 24, 0.9);
+  backdrop-filter: blur(20px);
+  transition: padding 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+.brandMark {
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  box-shadow: 0 0 20px rgba(26, 108, 246, 0.6);
+  animation: fsLogoPulse 3s ease infinite;
+}
+
+.topbar nav a {
+  color: var(--muted);
+  position: relative;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.topbar nav a::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 5px;
+  height: 1px;
+  background: var(--cyan);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.topbar nav a:hover,
+.topbar nav a.active {
+  color: var(--cyan);
+  background: rgba(26, 108, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.topbar nav a:hover::after,
+.topbar nav a.active::after {
+  transform: scaleX(1);
+}
+
+.heroBand,
+.unitHero,
+.panel,
+.metric,
+.statCard,
+.catalogItem,
+.batchCard,
+.paymentSummary div,
+.paymentNote,
+.paymentRow,
+.unitRow,
+.receiptPaper,
+.receiptInfoGrid div,
+.receiptUnit,
+.receiptTerms,
+.receiptTotals,
+.downloadCard,
+.panelSubsection,
+.reminderGrid span,
+.catalogHeroCopyPanel,
+.catalogHeroStatsPanel,
+.catalogFeatureStrip,
+.catalogFilterPanel,
+.catalogResultBar,
+.catalogPublicCard {
+  border-color: var(--line);
+  background:
+    linear-gradient(135deg, rgba(8, 18, 42, 0.82), rgba(6, 16, 36, 0.72));
+  backdrop-filter: blur(24px);
+  box-shadow: 0 16px 48px rgba(3, 10, 24, 0.28);
+}
+
+.heroBand,
+.unitHero,
+.catalogHeroCopyPanel,
+.catalogHeroStatsPanel {
+  border-color: var(--line-strong);
+  background:
+    linear-gradient(135deg, rgba(8, 18, 42, 0.9), rgba(6, 16, 36, 0.76)),
+    linear-gradient(90deg, rgba(26, 108, 246, 0.16), transparent);
+}
+
+.panel,
+.metric,
+.statCard,
+.catalogPublicCard,
+.paymentRow,
+.unitRow,
+.catalogFeatureItem,
+.downloadCard,
+.reminderGrid span {
+  transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.panel:hover,
+.metric:hover,
+.statCard:hover,
+.catalogPublicCard:hover,
+.paymentRow:hover,
+.unitRow:hover,
+.downloadCard:hover,
+.reminderGrid span:hover {
+  border-color: var(--line-strong);
+  background:
+    linear-gradient(135deg, rgba(10, 24, 54, 0.9), rgba(7, 20, 43, 0.82));
+  box-shadow: 0 20px 60px rgba(26, 108, 246, 0.18);
+  transform: translateY(-2px);
+}
+
+.heroBand h1,
+.sectionTitle h1,
+.unitHero h1,
+.catalogHeroCopyPanel h1,
+.catalogSectionTitle h2 {
+  font-family: "Space Grotesk", Inter, Arial, Helvetica, sans-serif;
+  letter-spacing: -0.5px;
+}
+
+.catalogHeroCopyPanel h1 span,
+.catalogHeroCopyPanel h1 > span:nth-child(2),
+.grad,
+.catalogPrice,
+.metric strong,
+.statCard strong {
+  background: linear-gradient(90deg, var(--blue-br), var(--cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.eyebrow,
+.batchCode,
+.catalogBrand,
+.catalogHeroPill,
+.backLink {
+  color: var(--cyan);
+}
+
+.catalogHeroPill,
+.sortPill.active,
+.statusPill.green,
+.miniMetrics span,
+.catalogStatBox,
+.catalogFeatureItem span {
+  border-color: var(--line-strong);
+  background: rgba(26, 108, 246, 0.1);
+  color: var(--cyan);
+}
+
+.primaryButton,
+.greenButton {
+  position: relative;
+  overflow: hidden;
+  border: 0;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  color: #fff;
+  box-shadow: 0 0 30px rgba(26, 108, 246, 0.4);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.primaryButton::after,
+.greenButton::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -100%;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: left 0.4s ease;
+}
+
+.primaryButton:hover::after,
+.greenButton:hover::after {
+  left: 100%;
+}
+
+.primaryButton:hover,
+.greenButton:hover {
+  box-shadow: 0 0 50px rgba(0, 212, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.secondaryButton,
+.iconButton,
+.sortPill {
+  border-color: var(--line-strong);
+  background: rgba(8, 18, 42, 0.58);
+  color: var(--muted);
+  transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.secondaryButton:hover,
+.iconButton:hover,
+.sortPill:hover {
+  border-color: var(--cyan);
+  background: rgba(0, 212, 255, 0.05);
+  color: var(--cyan);
+  transform: translateY(-1px);
+}
+
+select,
+textarea,
+input[type="number"],
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input:not([type]) {
+  border-color: var(--line);
+  background: rgba(5, 11, 24, 0.72);
+  color: var(--ink);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+select:focus,
+textarea:focus,
+input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.12);
+  outline: none;
+}
+
+.assistantPanel {
+  --section-accent: var(--cyan);
+  background:
+    linear-gradient(180deg, rgba(26, 108, 246, 0.16), rgba(8, 18, 42, 0.78));
+}
+
+.batchPanel,
+.catalogPanel,
+.metric-blue,
+.metric-green,
+.metric-cyan {
+  --section-accent: var(--cyan);
+}
+
+.metric-red,
+.attentionPanel {
+  --section-accent: var(--red);
+}
+
+.metric::before,
+.dashboardPanel::before {
+  background: linear-gradient(90deg, transparent, var(--section-accent, var(--cyan)), transparent);
+}
+
+.techHero::after,
+.dynamicHeroPanel::before,
+.dynamicStatsPanel::before,
+.catalogPublicCard::before {
+  background-image:
+    linear-gradient(rgba(26, 108, 246, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26, 108, 246, 0.07) 1px, transparent 1px);
+}
+
+.siteFooter {
+  border-top-color: var(--line);
+  background: rgba(5, 11, 24, 0.6);
+}
+
+@keyframes fsLogoPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(26, 108, 246, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 36px rgba(0, 212, 255, 0.8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
