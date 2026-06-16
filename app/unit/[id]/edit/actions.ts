@@ -24,11 +24,31 @@ function rupiahValue(formData: FormData, key: string, fallback = 0) {
 }
 
 export async function updateUnitAction(unitId: string, formData: FormData) {
-  requireRole(["admin"]);
+  const currentUser = requireRole(["admin"]);
   const nomorUnit = text(formData, "nomorUnit");
   const currentUnit = await prisma.unit.findUnique({
     where: { id: unitId },
-    select: { batchId: true }
+    select: {
+      batchId: true,
+      nomorUnit: true,
+      model: true,
+      processor: true,
+      ram: true,
+      ssd: true,
+      ssdSerial: true,
+      chargerType: true,
+      lcdSize: true,
+      lcdResolution: true,
+      isTouchscreen: true,
+      hargaModal: true,
+      hargaJualRekomendasi: true,
+      stockLocation: true,
+      catalogImageUrl: true,
+      entryNotes: true,
+      ssdHealth: true,
+      batteryHealth: true,
+      statusObservasi: true
+    }
   });
 
   if (!currentUnit) {
@@ -48,29 +68,55 @@ export async function updateUnitAction(unitId: string, formData: FormData) {
     redirect(`/unit/${unitId}/edit?error=duplicate-unit`);
   }
 
-  await prisma.unit.update({
-    where: { id: unitId },
-    data: {
-      nomorUnit,
-      model: text(formData, "model"),
-      processor: text(formData, "processor"),
-      ram: text(formData, "ram"),
-      ssd: text(formData, "ssd"),
-      ssdSerial: text(formData, "ssdSerial"),
-      chargerType: text(formData, "chargerType") || null,
-      lcdSize: text(formData, "lcdSize"),
-      lcdResolution: text(formData, "lcdResolution"),
-      isTouchscreen: text(formData, "isTouchscreen") === "Ya",
-      hargaModal: rupiahValue(formData, "hargaModal"),
-      hargaJualRekomendasi: rupiahValue(formData, "hargaJualRekomendasi"),
-      stockLocation: (text(formData, "stockLocation") || "WIRADESA") as SaleLocation,
-      catalogImageUrl: text(formData, "catalogImageUrl") || null,
-      entryNotes: text(formData, "entryNotes") || null,
-      ssdHealth: numberValue(formData, "ssdHealth"),
-      batteryHealth: numberValue(formData, "batteryHealth"),
-      statusObservasi: text(formData, "statusObservasi") as UnitStatus
-    }
-  });
+  const updateData = {
+    nomorUnit,
+    model: text(formData, "model"),
+    processor: text(formData, "processor"),
+    ram: text(formData, "ram"),
+    ssd: text(formData, "ssd"),
+    ssdSerial: text(formData, "ssdSerial") || null,
+    chargerType: text(formData, "chargerType") || null,
+    lcdSize: text(formData, "lcdSize") || null,
+    lcdResolution: text(formData, "lcdResolution") || null,
+    isTouchscreen: text(formData, "isTouchscreen") === "Ya",
+    hargaModal: rupiahValue(formData, "hargaModal"),
+    hargaJualRekomendasi: rupiahValue(formData, "hargaJualRekomendasi"),
+    stockLocation: (text(formData, "stockLocation") || "WIRADESA") as SaleLocation,
+    catalogImageUrl: text(formData, "catalogImageUrl") || null,
+    entryNotes: text(formData, "entryNotes") || null,
+    ssdHealth: numberValue(formData, "ssdHealth"),
+    batteryHealth: numberValue(formData, "batteryHealth"),
+    statusObservasi: text(formData, "statusObservasi") as UnitStatus
+  };
+
+  const changes = Object.entries(updateData)
+    .map(([field, nextValue]) => ({
+      field,
+      before: currentUnit[field as keyof typeof currentUnit] ?? null,
+      after: nextValue ?? null
+    }))
+    .filter((change) => String(change.before ?? "") !== String(change.after ?? ""));
+
+  await prisma.$transaction([
+    prisma.unit.update({
+      where: { id: unitId },
+      data: updateData
+    }),
+    ...(changes.length > 0
+      ? [
+          prisma.unitAuditLog.create({
+            data: {
+              unitId,
+              action: "UPDATE_UNIT",
+              actorName: currentUser.name,
+              actorUsername: currentUser.username,
+              actorRole: currentUser.role,
+              changes
+            }
+          })
+        ]
+      : [])
+  ]);
 
   revalidatePath("/batch-psi");
   revalidatePath(`/unit/${unitId}`);

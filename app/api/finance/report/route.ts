@@ -22,10 +22,20 @@ function saleProfitSplit(location: string, grossProfit: number) {
   };
 }
 
-export async function GET() {
+function dateFilter(from: string | null, to: string | null) {
+  const soldAt: { gte?: Date; lte?: Date } = {};
+  if (from) soldAt.gte = new Date(`${from}T00:00:00+07:00`);
+  if (to) soldAt.lte = new Date(`${to}T23:59:59.999+07:00`);
+  return Object.keys(soldAt).length > 0 ? { soldAt } : {};
+}
+
+export async function GET(request: Request) {
   requireRole(["admin"]);
+  const { searchParams } = new URL(request.url);
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
   const sales = await prisma.sale.findMany({
-    where: { voidedAt: null },
+    where: { voidedAt: null, ...dateFilter(from, to) },
     include: { unit: true, items: true },
     orderBy: { soldAt: "desc" }
   });

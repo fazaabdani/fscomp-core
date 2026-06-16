@@ -1,4 +1,4 @@
-import { CalendarDays, FileClock, Plus, ReceiptText } from "lucide-react";
+import { CalendarDays, FileClock, Plus, ReceiptText, Search } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
 import { canEditBatch, canEditUnit } from "@/lib/auth";
@@ -32,13 +32,25 @@ function sortBatchUnits<T extends { nomorUnit: string; model: string; statusObse
   });
 }
 
-export default async function BatchPsiPage({ searchParams }: { searchParams?: { error?: string; deleted?: string; returned?: string; sort?: string } }) {
+function includesText(value: unknown, q: string) {
+  return String(value ?? "").toLowerCase().includes(q);
+}
+
+function batchHref(params: Record<string, string>) {
+  const query = new URLSearchParams(params);
+  const text = query.toString();
+  return text ? `/batch-psi?${text}` : "/batch-psi";
+}
+
+export default async function BatchPsiPage({ searchParams }: { searchParams?: { error?: string; deleted?: string; returned?: string; sort?: string; q?: string; status?: string } }) {
   const currentUser = getCurrentUser();
   const canManageBatch = currentUser ? canEditBatch(currentUser) : false;
   const canManageUnit = currentUser ? canEditUnit(currentUser) : false;
   const canDeleteBatch = currentUser?.role === "admin";
   const batches = await getBatchesForManagementPage();
   const activeSort = searchParams?.sort ?? "unit";
+  const q = (searchParams?.q ?? "").trim().toLowerCase();
+  const statusFilter = searchParams?.status ?? "semua";
 
   return (
     <section className="pageStack">
@@ -69,10 +81,50 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
       {searchParams?.error === "batch-has-sales" ? <div className="infoBox dangerInfo">Batch punya unit yang sudah terjual atau punya riwayat nota, jadi tidak bisa dihapus.</div> : null}
       {searchParams?.error === "batch-related-data" ? <div className="infoBox dangerInfo">Batch masih punya data terkait, jadi belum bisa dihapus aman.</div> : null}
 
+      <form className="panel formGrid" action="/batch-psi">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Filter batch</p>
+            <h2>Cari batch atau unit</h2>
+          </div>
+          <Search size={22} />
+        </div>
+        <input type="hidden" name="sort" value={activeSort} />
+        <div className="numberGrid">
+          <label>Cari
+            <input name="q" defaultValue={searchParams?.q ?? ""} placeholder="Nomor batch, supplier, unit, model, spek, charger" />
+          </label>
+          <label>Status unit
+            <select name="status" defaultValue={statusFilter}>
+              <option value="semua">Semua status</option>
+              <option value="VERIFIED">Verified</option>
+              <option value="VERIFIED WITH NOTES">Verified with notes</option>
+              <option value="RECHECK">Recheck</option>
+              <option value="CANDIDATE RETUR">Candidate retur</option>
+              <option value="RETUR DISTRIBUTOR">Retur distributor</option>
+            </select>
+          </label>
+        </div>
+        <div className="buttonRow noMargin">
+          <button className="secondaryButton" type="submit">Terapkan Filter</button>
+          <Link className="secondaryButton" href="/batch-psi">Reset</Link>
+        </div>
+      </form>
+
       <div className="batchManagement">
         {batches.map((batch) => {
           const soldUnits = batch.units.filter((unit) => unit.soldAt);
-          const batchUnits = sortBatchUnits(batch.units.filter((unit) => !unit.soldAt), activeSort);
+          const matchesBatch = q
+            ? [batch.nomorBatch, batch.supplier, batch.tanggalMasuk, batch.tanggalTempo, batch.statusPembayaran, batch.catatan].some((value) => includesText(value, q))
+            : true;
+          const filteredUnits = batch.units.filter((unit) => {
+            if (unit.soldAt) return false;
+            if (statusFilter !== "semua" && unit.statusObservasi !== statusFilter) return false;
+            if (!q || matchesBatch) return true;
+            return [unit.nomorUnit, unit.model, unit.processor, unit.ram, unit.ssd, unit.chargerType, unit.statusObservasi].some((value) => includesText(value, q));
+          });
+          if ((q || statusFilter !== "semua") && filteredUnits.length === 0) return null;
+          const batchUnits = sortBatchUnits(filteredUnits, activeSort);
           const totalModal = batchUnits.reduce((sum, unit) => sum + unit.hargaModal, 0);
           const chargerSummary = chargerTypes
             .map((chargerType) => ({ type: chargerType, count: batch.chargerCounts?.[chargerType] ?? 0 }))
@@ -104,12 +156,12 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
 
               <div className="batchUnitSortBar">
                 <span>Sortir unit</span>
-                <Link className={`sortPill ${activeSort === "unit" ? "active" : ""}`} href="/batch-psi?sort=unit">Nomor</Link>
-                <Link className={`sortPill ${activeSort === "ready" ? "active" : ""}`} href="/batch-psi?sort=ready">Ready</Link>
-                <Link className={`sortPill ${activeSort === "status" ? "active" : ""}`} href="/batch-psi?sort=status">Status</Link>
-                <Link className={`sortPill ${activeSort === "foto" ? "active" : ""}`} href="/batch-psi?sort=foto">Foto</Link>
-                <Link className={`sortPill ${activeSort === "model" ? "active" : ""}`} href="/batch-psi?sort=model">Model</Link>
-                <Link className={`sortPill ${activeSort === "modal" ? "active" : ""}`} href="/batch-psi?sort=modal">Modal</Link>
+                <Link className={`sortPill ${activeSort === "unit" ? "active" : ""}`} href={batchHref({ sort: "unit", q: searchParams?.q ?? "", status: statusFilter })}>Nomor</Link>
+                <Link className={`sortPill ${activeSort === "ready" ? "active" : ""}`} href={batchHref({ sort: "ready", q: searchParams?.q ?? "", status: statusFilter })}>Ready</Link>
+                <Link className={`sortPill ${activeSort === "status" ? "active" : ""}`} href={batchHref({ sort: "status", q: searchParams?.q ?? "", status: statusFilter })}>Status</Link>
+                <Link className={`sortPill ${activeSort === "foto" ? "active" : ""}`} href={batchHref({ sort: "foto", q: searchParams?.q ?? "", status: statusFilter })}>Foto</Link>
+                <Link className={`sortPill ${activeSort === "model" ? "active" : ""}`} href={batchHref({ sort: "model", q: searchParams?.q ?? "", status: statusFilter })}>Model</Link>
+                <Link className={`sortPill ${activeSort === "modal" ? "active" : ""}`} href={batchHref({ sort: "modal", q: searchParams?.q ?? "", status: statusFilter })}>Modal</Link>
               </div>
 
               <div className="tableLike compact">

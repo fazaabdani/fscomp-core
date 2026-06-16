@@ -6,9 +6,28 @@ import { requireRole } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-export default async function FinancePage() {
+function reportUrl(from?: string, to?: string) {
+  const params = new URLSearchParams();
+  if (from) params.set("from", from);
+  if (to) params.set("to", to);
+  const query = params.toString();
+  return query ? `/api/finance/report?${query}` : "/api/finance/report";
+}
+
+function todayJakartaDateString() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date());
+}
+
+export default async function FinancePage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
   requireRole(["admin"]);
-  const { stats, sales } = await getFinancePageData();
+  const from = searchParams?.from ?? "";
+  const to = searchParams?.to ?? "";
+  const { stats, sales } = await getFinancePageData({ from, to });
 
   return (
     <section className="pageStack">
@@ -18,8 +37,31 @@ export default async function FinancePage() {
           <h1>Laporan omzet, modal, dan profit kotor</h1>
           <p className="bodyText">Bagian ini hanya menghitung transaksi aktif. Transaksi batal tidak masuk omzet dan profit.</p>
         </div>
-        <Link className="primaryButton" href="/api/finance/report"><Download size={17} /> Tarik Laporan CSV</Link>
+        <Link className="primaryButton" href={reportUrl(from, to)}><Download size={17} /> Tarik Laporan CSV</Link>
       </div>
+
+      <form className="panel formGrid" action="/finance">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Filter tanggal</p>
+            <h2>Periode laporan finance</h2>
+          </div>
+        </div>
+        <div className="numberGrid">
+          <label>Dari tanggal
+            <input type="date" name="from" defaultValue={from || todayJakartaDateString()} />
+          </label>
+          <label>Sampai tanggal
+            <input type="date" name="to" defaultValue={to || todayJakartaDateString()} />
+          </label>
+        </div>
+        <div className="buttonRow noMargin">
+          <button className="secondaryButton" type="submit">Terapkan Filter</button>
+          <Link className="secondaryButton" href="/finance">Reset Semua</Link>
+          <Link className="primaryButton" href={reportUrl(from, to)}><Download size={16} /> Export Periode Ini</Link>
+          <Link className="secondaryButton" href="/api/admin/backup"><Download size={16} /> Backup Database JSON</Link>
+        </div>
+      </form>
 
       <div className="statsGrid">
         <div className="metric metric-cyan"><Banknote size={20} /><span>Omzet</span><strong>{formatRupiah(stats.totalOmzet)}</strong></div>

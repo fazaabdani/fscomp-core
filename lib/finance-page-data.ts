@@ -16,10 +16,22 @@ function saleProfitSplit(location: string, grossProfit: number) {
   };
 }
 
-export async function getFinancePageData() {
+type FinanceFilters = {
+  from?: string;
+  to?: string;
+};
+
+function dateFilter(filters: FinanceFilters) {
+  const soldAt: { gte?: Date; lte?: Date } = {};
+  if (filters.from) soldAt.gte = new Date(`${filters.from}T00:00:00+07:00`);
+  if (filters.to) soldAt.lte = new Date(`${filters.to}T23:59:59.999+07:00`);
+  return Object.keys(soldAt).length > 0 ? { soldAt } : {};
+}
+
+export async function getFinancePageData(filters: FinanceFilters = {}) {
   try {
     const sales = await prisma.sale.findMany({
-      where: { voidedAt: null },
+      where: { voidedAt: null, ...dateFilter(filters) },
       include: { unit: true, items: true },
       orderBy: { soldAt: "desc" },
       take: 120

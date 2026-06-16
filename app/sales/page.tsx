@@ -1,4 +1,4 @@
-import { Gift, MapPin, Receipt, ShoppingCart } from "lucide-react";
+import { Gift, MapPin, Receipt, Search, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
 import { getSalesPageData } from "@/lib/sales-page-data";
@@ -9,12 +9,47 @@ import { VoidSaleButton } from "./VoidSaleButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string; restored?: string; sort?: string } }) {
+function includesText(value: unknown, q: string) {
+  return String(value ?? "").toLowerCase().includes(q);
+}
+
+function salesHref(params: Record<string, string>) {
+  const query = new URLSearchParams(params);
+  const text = query.toString();
+  return text ? `/sales?${text}` : "/sales";
+}
+
+export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string; restored?: string; sort?: string; q?: string; lokasi?: string; status?: string } }) {
   const currentUser = requireRole(["admin", "teknisi", "sales"]);
   const { readyUnits, sales, stats, salesReady, blockedByDailyQc } = await getSalesPageData();
   const firstUnit = readyUnits[0];
   const sort = searchParams?.sort ?? "terbaru";
-  const sortedSales = [...sales].sort((a, b) => {
+  const q = (searchParams?.q ?? "").trim().toLowerCase();
+  const lokasi = searchParams?.lokasi ?? "semua";
+  const status = searchParams?.status ?? "semua";
+  const filteredSales = sales.filter((sale) => {
+    if (lokasi !== "semua" && sale.location.toLowerCase() !== lokasi) return false;
+    if (status === "aktif" && sale.voidedAt) return false;
+    if (status === "batal" && !sale.voidedAt) return false;
+    if (!q) return true;
+    return [
+      sale.invoiceNumber,
+      sale.nomorUnit,
+      sale.model,
+      sale.location,
+      sale.paymentMethod,
+      sale.buyerName,
+      sale.notes,
+      sale.voidReason,
+      sale.soldAt
+    ].some((value) => includesText(value, q));
+  });
+  const filteredReadyUnits = readyUnits.filter((unit) => {
+    if (lokasi !== "semua" && unit.stockLocation.toLowerCase() !== lokasi) return false;
+    if (!q) return true;
+    return [unit.nomorUnit, unit.model, unit.processor, unit.ram, unit.ssd, unit.stockLocation].some((value) => includesText(value, q));
+  });
+  const sortedSales = [...filteredSales].sort((a, b) => {
     if (sort === "lama") return a.soldAt.localeCompare(b.soldAt);
     if (sort === "terbesar") return b.soldPrice - a.soldPrice;
     if (sort === "batal") return Number(Boolean(b.voidedAt)) - Number(Boolean(a.voidedAt));
@@ -49,6 +84,40 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
           {blockedByDailyQc} unit tidak dimunculkan di stok siap jual karena QC harian terakhir tidak lolos hardware.
         </div>
       ) : null}
+
+      <form className="panel formGrid" action="/sales">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Filter sales</p>
+            <h2>Cari transaksi dan stok siap jual</h2>
+          </div>
+          <Search size={22} />
+        </div>
+        <input type="hidden" name="sort" value={sort} />
+        <div className="numberGrid">
+          <label>Cari
+            <input name="q" defaultValue={searchParams?.q ?? ""} placeholder="Invoice, unit, model, pembeli, metode bayar" />
+          </label>
+          <label>Lokasi
+            <select name="lokasi" defaultValue={lokasi}>
+              <option value="semua">Semua lokasi</option>
+              <option value="wiradesa">Wiradesa</option>
+              <option value="kajen">Kajen</option>
+            </select>
+          </label>
+        </div>
+        <label>Status transaksi
+          <select name="status" defaultValue={status}>
+            <option value="semua">Semua transaksi</option>
+            <option value="aktif">Aktif saja</option>
+            <option value="batal">Batal saja</option>
+          </select>
+        </label>
+        <div className="buttonRow noMargin">
+          <button className="secondaryButton" type="submit">Terapkan Filter</button>
+          <Link className="secondaryButton" href="/sales">Reset</Link>
+        </div>
+      </form>
 
       <form className="panel formGrid cashierPanel" action={createSaleAction}>
         <div className="panelHeader">
@@ -183,13 +252,13 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
         </div>
         <div className="salesControlBar">
           <div>
-            <strong>{sales.length}</strong>
-            <span>transaksi tercatat</span>
+            <strong>{filteredSales.length}</strong>
+            <span>dari {sales.length} transaksi</span>
           </div>
-          <Link className={`sortPill ${sort === "terbaru" ? "active" : ""}`} href="/sales?sort=terbaru">Terbaru</Link>
-          <Link className={`sortPill ${sort === "lama" ? "active" : ""}`} href="/sales?sort=lama">Terlama</Link>
-          <Link className={`sortPill ${sort === "terbesar" ? "active" : ""}`} href="/sales?sort=terbesar">Nominal besar</Link>
-          <Link className={`sortPill ${sort === "batal" ? "active" : ""}`} href="/sales?sort=batal">Batal</Link>
+          <Link className={`sortPill ${sort === "terbaru" ? "active" : ""}`} href={salesHref({ sort: "terbaru", q: searchParams?.q ?? "", lokasi, status })}>Terbaru</Link>
+          <Link className={`sortPill ${sort === "lama" ? "active" : ""}`} href={salesHref({ sort: "lama", q: searchParams?.q ?? "", lokasi, status })}>Terlama</Link>
+          <Link className={`sortPill ${sort === "terbesar" ? "active" : ""}`} href={salesHref({ sort: "terbesar", q: searchParams?.q ?? "", lokasi, status })}>Nominal besar</Link>
+          <Link className={`sortPill ${sort === "batal" ? "active" : ""}`} href={salesHref({ sort: "batal", q: searchParams?.q ?? "", lokasi, status })}>Batal</Link>
         </div>
         <div className="paymentRows transactionScroll">
           {sortedSales.length === 0 ? <div className="emptyState">Belum ada transaksi.</div> : sortedSales.map((sale) => (
@@ -231,7 +300,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
           <MapPin size={22} />
         </div>
         <div className="tableLike compact stockGrid">
-          {readyUnits.length === 0 ? <div className="emptyState">Belum ada stok siap jual.</div> : readyUnits.slice(0, 14).map((unit) => (
+          {filteredReadyUnits.length === 0 ? <div className="emptyState">Belum ada stok siap jual yang cocok.</div> : filteredReadyUnits.slice(0, 14).map((unit) => (
             <Link className="unitRow salesUnitRow" href={`/unit/${unit.id}`} key={unit.id}>
               <span className="unitNumber">{unit.nomorUnit}</span>
               <span>

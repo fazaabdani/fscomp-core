@@ -131,6 +131,10 @@ export async function getUnitForDetail(id: string) {
         qcHarian: {
           orderBy: { tanggal: "desc" },
           include: { checker: true }
+        },
+        auditLogs: {
+          orderBy: { createdAt: "desc" },
+          take: 20
         }
       }
     });
@@ -228,6 +232,22 @@ export async function getUnitForDetail(id: string) {
         kondisiHariIni: qc.kondisiHariIni,
         masihLolos: qc.masihLolos.replaceAll("_", " "),
         catatan: qc.catatan ?? "-"
+      })),
+      auditLogs: unit.auditLogs.map((log) => ({
+        id: log.id,
+        action: log.action,
+        actorName: log.actorName,
+        actorUsername: log.actorUsername ?? "",
+        actorRole: log.actorRole ?? "",
+        changes: Array.isArray(log.changes) ? log.changes as { field: string; before: unknown; after: unknown }[] : [],
+        createdAt: log.createdAt.toLocaleString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        })
       }))
     };
   } catch {

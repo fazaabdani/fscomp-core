@@ -565,3 +565,123 @@
     margin: 4px 0 0 !important;
   }
 }
+
+/* Extra compact print tuning for recurring paper output. */
+@media print {
+  .receiptPage,
+  .labelLayout,
+  .labelSheet,
+  .paymentPage {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .receiptPaper {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    padding: 5mm !important;
+    gap: 2.4mm !important;
+  }
+
+  .receiptTop {
+    padding-bottom: 2mm !important;
+  }
+
+  .receiptTop h2 {
+    font-size: 13pt !important;
+  }
+
+  .receiptTop p,
+  .receiptTop small,
+  .receiptInfoGrid span,
+  .receiptInfoGrid small,
+  .receiptLine small,
+  .receiptUnit span,
+  .receiptTerms p {
+    font-size: 6.7pt !important;
+    line-height: 1.15 !important;
+  }
+
+  .receiptInfoGrid {
+    gap: 1.5mm !important;
+  }
+
+  .receiptInfoGrid div,
+  .receiptUnit,
+  .receiptTerms,
+  .receiptTotals {
+    padding: 2mm !important;
+  }
+
+  .receiptTableHead,
+  .receiptLine {
+    padding: 1.6mm 2mm !important;
+    font-size: 7.1pt !important;
+  }
+
+  .receiptFooter {
+    gap: 2mm !important;
+  }
+
+  .receiptBankNote {
+    margin-top: 0.8mm !important;
+    padding-top: 0.8mm !important;
+    font-size: 6.2pt !important;
+  }
+
+  .labelLayout {
+    display: block !important;
+  }
+
+  .labelLayout > .panel {
+    display: none !important;
+  }
+
+  .labelSheet {
+    width: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .unitLabel {
+    width: 70mm !important;
+    height: 50mm !important;
+    padding: 3mm !important;
+    gap: 1.8mm !important;
+    border: 0.35mm solid #0f2f6b !important;
+    box-shadow: none !important;
+  }
+
+  .unitLabel h2 {
+    font-size: 10pt !important;
+  }
+
+  .labelBody strong,
+  .labelBody b {
+    font-size: 7.2pt !important;
+  }
+
+  .labelBody span,
+  .labelFooter span,
+  .qcMiniGrid span {
+    font-size: 5.8pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .qcMiniGrid {
+    gap: 0.8mm !important;
+  }
+
+  .qcCompleteLabel .labelTop svg {
+    width: 15mm !important;
+    height: 15mm !important;
+  }
+
+  .paymentPage .paymentRow,
+  .paymentPage .problemPaymentRow {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+}

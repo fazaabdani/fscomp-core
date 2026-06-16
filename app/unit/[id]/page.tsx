@@ -189,6 +189,28 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
         </div>
       </section> : null}
 
+      {isInternalUser ? <section className="panel">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Audit log</p>
+            <h2>Riwayat perubahan unit</h2>
+          </div>
+        </div>
+        <div className="noteList">
+          {unit.auditLogs.length === 0 ? <div className="emptyState">Belum ada perubahan unit yang tercatat.</div> : unit.auditLogs.map((log) => (
+            <div className="note" key={log.id}>
+              <strong>{log.createdAt} - {log.actorName}</strong>
+              <small>{log.action.replaceAll("_", " ")} {log.actorUsername ? `/ ${log.actorUsername}` : ""}</small>
+              <div className="miniMetrics">
+                {log.changes.slice(0, 8).map((change) => (
+                  <span key={change.field}>{change.field}: {String(change.before ?? "-")} ke {String(change.after ?? "-")}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section> : null}
+
       <section className="panel">
         <div className="panelHeader">
           <div>

@@ -144,8 +144,24 @@ model Unit {
   aiLogs      AiLog[]
   catalogSync CatalogSync[]
   sales       Sale[]
+  auditLogs   UnitAuditLog[]
 
   @@unique([batchId, nomorUnit])
+}
+
+model UnitAuditLog {
+  id            String   @id @default(cuid())
+  unitId        String
+  action        String
+  actorName     String
+  actorUsername String?
+  actorRole     String?
+  changes       Json
+  createdAt     DateTime @default(now())
+
+  unit          Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([unitId, createdAt])
 }
 
 model QcAwal {
