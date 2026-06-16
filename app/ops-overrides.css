@@ -342,3 +342,226 @@
 .localShareButton {
   color: #00d4ff;
 }
+
+/* Compact, readable supplier payment recap. */
+.paymentPage {
+  gap: 14px;
+}
+
+.paymentPage .paymentHeader {
+  gap: 12px;
+  margin-bottom: -2px;
+}
+
+.paymentPage .paymentHeader h1 {
+  font-size: 26px;
+  line-height: 1.05;
+}
+
+.paymentPage .paymentHeader p {
+  margin: 8px 0 0;
+  color: rgba(240, 246, 255, 0.72);
+}
+
+.paymentPage .paymentSummary {
+  gap: 8px;
+}
+
+.paymentPage .paymentSummary div {
+  padding: 12px;
+}
+
+.paymentPage .paymentSummary span {
+  margin-bottom: 5px;
+}
+
+.paymentPage .paymentSummary strong {
+  font-size: 17px;
+}
+
+.paymentPage .panel {
+  padding: 14px 16px;
+}
+
+.paymentPage .panelHeader {
+  margin-bottom: 12px;
+}
+
+.paymentPage .panelHeader h2 {
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.paymentPage .paymentRows {
+  gap: 4px;
+}
+
+.paymentPage .paymentRow {
+  grid-template-columns: 78px minmax(0, 1fr) 112px;
+  gap: 8px;
+  min-height: 0;
+  padding: 7px 9px;
+  line-height: 1.15;
+}
+
+.paymentPage .problemPaymentRow {
+  grid-template-columns: 78px minmax(0, 1fr) 112px;
+}
+
+.paymentPage .paymentRow span {
+  color: rgba(240, 246, 255, 0.74);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.paymentPage .paymentRow strong {
+  color: #f0f6ff;
+  font-size: 13px;
+  line-height: 1.15;
+}
+
+.paymentPage .paymentRow small {
+  display: inline;
+  margin-top: 0;
+  color: rgba(240, 246, 255, 0.62);
+  font-size: 10.5px;
+  line-height: 1.1;
+}
+
+.paymentPage .paymentRow b {
+  color: #dff8ff;
+  font-size: 12px;
+  line-height: 1.15;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 5mm;
+  }
+
+  body,
+  main,
+  .paymentPage {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  .themeCanvas,
+  .themeCursorGlow {
+    display: none !important;
+  }
+
+  .paymentPage {
+    gap: 7px !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .paymentPage .paymentHeader {
+    margin-bottom: 2px !important;
+  }
+
+  .paymentPage .paymentHeader h1 {
+    font-size: 22px !important;
+    color: #0f172a !important;
+  }
+
+  .paymentPage .paymentHeader p,
+  .paymentPage .eyebrow {
+    color: #475569 !important;
+  }
+
+  .paymentPage .paymentSummary {
+    gap: 6px !important;
+  }
+
+  .paymentPage .paymentSummary div {
+    padding: 8px 10px !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+  }
+
+  .paymentPage .paymentSummary span {
+    margin-bottom: 4px !important;
+    color: #64748b !important;
+    font-size: 10px !important;
+  }
+
+  .paymentPage .paymentSummary strong {
+    color: #0f172a !important;
+    font-size: 14px !important;
+  }
+
+  .paymentPage .panel {
+    padding: 9px 10px !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+  }
+
+  .paymentPage .panelHeader {
+    margin-bottom: 7px !important;
+  }
+
+  .paymentPage .panelHeader h2 {
+    color: #0f172a !important;
+    font-size: 17px !important;
+  }
+
+  .paymentPage .paymentRows {
+    gap: 3px !important;
+  }
+
+  .paymentPage .paymentRow,
+  .paymentPage .problemPaymentRow {
+    grid-template-columns: 68px minmax(0, 1fr) 92px !important;
+    gap: 6px !important;
+    padding: 5px 8px !important;
+    border-color: #d8e3f0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    transform: none !important;
+  }
+
+  .paymentPage .paymentRow span {
+    color: #64748b !important;
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+  }
+
+  .paymentPage .paymentRow strong {
+    color: #111827 !important;
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+  }
+
+  .paymentPage .paymentRow small {
+    color: #334155 !important;
+    font-size: 8.8px !important;
+    font-weight: 700 !important;
+    line-height: 1.05 !important;
+  }
+
+  .paymentPage .paymentRow b {
+    color: #0f172a !important;
+    font-size: 10.5px !important;
+    line-height: 1.1 !important;
+  }
+
+  .paymentPage .paymentNote {
+    padding: 7px 9px !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 10px !important;
+  }
+
+  .paymentPage .paymentNote p {
+    margin: 4px 0 0 !important;
+  }
+}
