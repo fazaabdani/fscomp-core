@@ -7,13 +7,12 @@ import { formatDateInput, formatDateWib, inventoryStatusLabel, warrantyInfo, war
 import { requireRole } from "@/lib/session";
 import { updateInventoryItemAction } from "../../actions";
 
-const categories = ["SSD", "RAM", "CHARGER", "BATERAI", "LCD", "KEYBOARD", "LISENSI", "AKSESORIS", "LAINNYA"];
+const categories = ["SSD", "RAM", "CHARGER", "BATERAI", "LCD", "KEYBOARD", "AKSESORIS", "LAINNYA"];
 const statuses: InventoryItemStatus[] = ["STOCK", "USED_IN_UNIT", "SOLD", "RETURNED", "DAMAGED", "LOST"];
 const warrantyUnits: WarrantyDurationUnit[] = ["DAY", "WEEK", "MONTH", "YEAR"];
 
 function categoryLabel(category: string) {
   if (category === "LAINNYA") return "Lainnya";
-  if (category === "LISENSI") return "Lisensi";
   return category;
 }
 
@@ -114,7 +113,7 @@ export default async function EditInventoryItemPage({
         </div>
 
         <div className="numberGrid">
-          <label>Pembeli / pemakai lisensi<input name="buyerName" defaultValue={item.buyerName ?? ""} /></label>
+          <label>Pembeli / pemakai barang<input name="buyerName" defaultValue={item.buyerName ?? ""} /></label>
           <label>WA pembeli<input name="buyerPhone" defaultValue={item.buyerPhone ?? ""} /></label>
         </div>
 

@@ -31,6 +31,7 @@ export function NavLinks({ currentUser }: { currentUser: NavUser | null }) {
     { href: "/attendance", label: "Absensi", show: true },
     { href: "/sales", label: "Penjualan", show: !isMagang },
     { href: "/inventory", label: "Inventaris", show: true },
+    { href: "/licenses", label: "Lisensi", show: currentUser.role === "admin" || currentUser.role === "sales" },
     { href: "/users", label: "User", show: currentUser.role === "admin" }
   ];
 

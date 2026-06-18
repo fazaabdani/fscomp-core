@@ -205,6 +205,44 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
           <div className="cashierSide">
             <div className="receiptWarranty">
               <Gift size={18} />
+              <span>Data lisensi otomatis masuk menu Lisensi kalau item tambahan berisi Office, Windows, software, atau kategori LISENSI/SOFTWARE.</span>
+            </div>
+            <div className="numberGrid">
+              <label>
+                Tipe lisensi
+                <select name="licenseType" defaultValue="AUTO">
+                  <option value="AUTO">Otomatis dari item</option>
+                  <option value="OFFICE">Office</option>
+                  <option value="WINDOWS">Windows</option>
+                  <option value="ANTIVIRUS">Antivirus</option>
+                  <option value="OTHER">Lainnya</option>
+                </select>
+              </label>
+              <label>
+                Versi lisensi
+                <input name="licenseVersion" placeholder="Office 2021 / Windows 11 Pro" defaultValue="2021" />
+              </label>
+            </div>
+            <div className="numberGrid">
+              <label>
+                Durasi lisensi
+                <select name="licenseDurationType" defaultValue="LIFETIME">
+                  <option value="LIFETIME">Lifetime</option>
+                  <option value="YEARLY">Tahunan</option>
+                  <option value="CUSTOM">Custom</option>
+                </select>
+              </label>
+              <label>
+                Berlaku sampai
+                <input name="licenseValidUntil" type="date" />
+              </label>
+            </div>
+            <label>
+              Product key / kode lisensi
+              <input name="licenseProductKey" placeholder="Opsional, bisa diisi nanti di menu Lisensi" />
+            </label>
+            <div className="receiptWarranty">
+              <Gift size={18} />
               <span>Garansi nota diisi manual. Pilih minggu atau bulan sesuai transaksi.</span>
             </div>
             <div className="numberGrid">

@@ -1,10 +1,11 @@
 "use server";
 
-import type { SaleLocation } from "@prisma/client";
+import type { LicenseDurationType, LicenseType, SaleLocation } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { inferLicenseType, inferLicenseVersion, licenseDisplayName } from "@/lib/licenses";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -31,6 +32,23 @@ function warrantyText(formData: FormData, key: string, fallbackAmount: number, f
   const unitInput = text(formData, `${key}Unit`).toLowerCase();
   const unit = unitInput === "minggu" || unitInput === "bulan" ? unitInput : fallbackUnit;
   return `${amount} ${unit}`;
+}
+
+function licenseTypeValue(value: string): LicenseType | null {
+  if (value === "WINDOWS" || value === "ANTIVIRUS" || value === "OTHER") return value;
+  if (value === "OFFICE") return "OFFICE";
+  return null;
+}
+
+function licenseDurationValue(value: string): LicenseDurationType {
+  if (value === "YEARLY" || value === "CUSTOM") return value;
+  return "LIFETIME";
+}
+
+function dateValue(rawDate: string) {
+  if (!rawDate) return null;
+  const date = new Date(`${rawDate}T00:00:00+07:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function hasBundledBagAndMouse(items: { name: string; qty: number }[]) {
@@ -160,7 +178,7 @@ async function notifySaleToN8n(payload: {
 }
 
 export async function createSaleAction(formData: FormData) {
-  requireRole(["admin", "teknisi", "sales"]);
+  const currentUser = requireRole(["admin", "teknisi", "sales"]);
 
   const unitId = text(formData, "unitId");
   const soldPrice = numberValue(formData, "soldPrice");
@@ -177,6 +195,11 @@ export async function createSaleAction(formData: FormData) {
   const itemQty = numberArray(formData, "itemQty");
   const itemPrices = numberArray(formData, "itemPrice");
   const itemCosts = numberArray(formData, "itemCost");
+  const selectedLicenseType = licenseTypeValue(text(formData, "licenseType"));
+  const licenseVersionInput = text(formData, "licenseVersion");
+  const licenseDurationType = licenseDurationValue(text(formData, "licenseDurationType"));
+  const licenseValidUntil = dateValue(text(formData, "licenseValidUntil"));
+  const licenseProductKey = text(formData, "licenseProductKey");
 
   if (!unitId || soldPrice <= 0) {
     redirect("/sales?error=data-kurang");
@@ -222,6 +245,7 @@ export async function createSaleAction(formData: FormData) {
       unitCost: Math.max(0, itemCosts[index] || 0)
     }))
   ].filter((item) => item.name && item.qty > 0);
+  const licenseItems = items.filter((item) => item.category !== "LAPTOP" && inferLicenseType(item.name, item.category));
 
   const subtotal = items.reduce((sum, item) => sum + item.qty * item.unitPrice, 0);
   const dpAmount = Math.min(Math.max(0, dpAmountInput), subtotal);
@@ -267,6 +291,44 @@ export async function createSaleAction(formData: FormData) {
         }))
       });
 
+      if (licenseItems.length > 0) {
+        const dbUser = await tx.user.findFirst({
+          where: { username: currentUser.username },
+          select: { id: true }
+        });
+
+        await tx.licenseRecord.createMany({
+          data: licenseItems.flatMap((item) => {
+            const inferredType = inferLicenseType(item.name, item.category) ?? "OTHER";
+            const type = selectedLicenseType ?? inferredType;
+            const version = licenseVersionInput || inferLicenseVersion(item.name, type);
+            const name = licenseDisplayName(type, version);
+
+            return Array.from({ length: item.qty }, () => ({
+              name,
+              licenseType: type,
+              version,
+              productKey: licenseProductKey || null,
+              durationType: licenseDurationType,
+              purchaseDate: new Date(),
+              validUntil: licenseDurationType === "LIFETIME" ? null : licenseValidUntil,
+              status: "ASSIGNED" as const,
+              buyerName: buyerName || null,
+              buyerPhone: buyerPhone || null,
+              unitId,
+              saleId: sale.id,
+              laptopSeries: `${unit.nomorUnit} - ${unit.model}`,
+              sourceItemName: item.name,
+              sourceItemCategory: item.category,
+              salePrice: item.unitPrice,
+              costPrice: item.unitCost,
+              notes: notes || null,
+              createdById: dbUser?.id ?? null
+            }));
+          })
+        });
+      }
+
       await tx.unit.update({
         where: { id: unitId },
         data: { soldAt: new Date() }
@@ -290,6 +352,7 @@ export async function createSaleAction(formData: FormData) {
   });
 
   revalidatePath("/sales");
+  revalidatePath("/licenses");
   revalidatePath("/");
   revalidatePath(`/unit/${unitId}`);
   redirect(`/sales/${saleId}/receipt`);

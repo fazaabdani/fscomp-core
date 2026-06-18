@@ -7,14 +7,13 @@ import { requireRole } from "@/lib/session";
 import { formatRupiah } from "@/lib/api";
 import { createInventoryItemAction } from "./actions";
 
-const categories = ["SSD", "RAM", "CHARGER", "BATERAI", "LCD", "KEYBOARD", "LISENSI", "AKSESORIS", "LAINNYA"];
+const categories = ["SSD", "RAM", "CHARGER", "BATERAI", "LCD", "KEYBOARD", "AKSESORIS", "LAINNYA"];
 
 const statuses: InventoryItemStatus[] = ["STOCK", "USED_IN_UNIT", "SOLD", "RETURNED", "DAMAGED", "LOST"];
 const warrantyUnits: WarrantyDurationUnit[] = ["DAY", "WEEK", "MONTH", "YEAR"];
 
 function categoryLabel(category: string) {
   if (category === "LAINNYA") return "Lainnya";
-  if (category === "LISENSI") return "Lisensi";
   return category;
 }
 
@@ -56,7 +55,7 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
       <div className="sectionTitle">
         <div>
           <p className="eyebrow">Inventaris</p>
-          <h1>Rekap barang masuk, garansi, dan lisensi</h1>
+          <h1>Rekap barang masuk dan garansi</h1>
           <p className="bodyText">Tanggal datang otomatis saat input. Status garansi dihitung dari tanggal beli dan lama garansi supplier.</p>
         </div>
         <Boxes size={30} />
@@ -95,7 +94,7 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
         </div>
 
         <div className="numberGrid">
-          <label>Serial number / kode<input name="serialNumber" placeholder="SN barang atau 4 digit akhir lisensi" /></label>
+          <label>Serial number / SN<input name="serialNumber" placeholder="SN barang dari supplier" /></label>
           <label>Supplier / distributor<input name="supplier" placeholder="Nama distributor / toko supplier" required /></label>
         </div>
 
@@ -133,7 +132,7 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
         </div>
 
         <div className="numberGrid">
-          <label>Pembeli / pemakai lisensi<input name="buyerName" placeholder="Isi kalau barang/lisensi sudah untuk customer" /></label>
+          <label>Pembeli / pemakai barang<input name="buyerName" placeholder="Isi kalau barang sudah untuk customer" /></label>
           <label>WA pembeli<input name="buyerPhone" placeholder="08xxxx" /></label>
         </div>
 
@@ -145,7 +144,7 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Rekap</p>
-            <h2>Barang, lisensi, dan status garansi</h2>
+            <h2>Barang dan status garansi</h2>
           </div>
           <ClipboardList size={22} />
         </div>

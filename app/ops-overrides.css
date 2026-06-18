@@ -392,6 +392,109 @@
   line-height: 1.15;
 }
 
+.licenseCardPage {
+  align-items: center;
+}
+
+.licenseCard {
+  width: min(100%, 760px);
+  aspect-ratio: 1.58;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 26px;
+  border: 1px solid rgba(55, 163, 255, 0.38);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(15, 47, 107, 0.96), rgba(7, 18, 43, 0.98));
+  color: #f7fbff;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.28);
+}
+
+.licenseCardTop,
+.licenseCardFooter {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.licenseCardBrand,
+.licenseCardGrid span,
+.licenseCardKeyBox span {
+  display: block;
+  color: rgba(247, 251, 255, 0.68);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.licenseCard h2 {
+  margin: 7px 0 4px;
+  color: #ffffff;
+  font-size: 30px;
+}
+
+.licenseCard p,
+.licenseCard small,
+.licenseCardFooter span {
+  color: rgba(247, 251, 255, 0.76);
+}
+
+.licenseCardBadge {
+  min-width: 122px;
+  padding: 10px 14px;
+  border: 1px solid rgba(79, 224, 255, 0.58);
+  border-radius: 8px;
+  background: rgba(79, 224, 255, 0.13);
+  color: #7deaff;
+  font-weight: 900;
+  text-align: center;
+}
+
+.licenseCardKeyBox {
+  padding: 16px;
+  border: 1px solid rgba(247, 251, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(247, 251, 255, 0.08);
+}
+
+.licenseCardKeyBox strong {
+  display: block;
+  margin-top: 8px;
+  color: #ffffff;
+  font-family: "Courier New", monospace;
+  font-size: clamp(18px, 3vw, 28px);
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.licenseCardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.licenseCardGrid div {
+  padding: 12px;
+  border: 1px solid rgba(247, 251, 255, 0.13);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.licenseCardGrid strong,
+.licenseCardFooter strong {
+  display: block;
+  color: #ffffff;
+}
+
+.licenseCardFooter {
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(247, 251, 255, 0.14);
+}
+
 .paymentPage .paymentRows {
   gap: 4px;
 }
@@ -571,6 +674,8 @@
   .receiptPage,
   .labelLayout,
   .labelSheet,
+  .licenseCardPage,
+  .licenseCard,
   .paymentPage {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
@@ -729,5 +834,27 @@
   .paymentPage .problemPaymentRow {
     padding-top: 4px !important;
     padding-bottom: 4px !important;
+  }
+
+  .licenseCardPage {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .licenseCard {
+    width: 148mm !important;
+    height: 94mm !important;
+    padding: 6mm !important;
+    gap: 3mm !important;
+    box-shadow: none !important;
+  }
+
+  .licenseCard h2 {
+    font-size: 22pt !important;
+  }
+
+  .licenseCardKeyBox strong {
+    font-size: 16pt !important;
   }
 }

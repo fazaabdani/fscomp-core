@@ -74,6 +74,27 @@ enum WarrantyDurationUnit {
   YEAR
 }
 
+enum LicenseType {
+  OFFICE
+  WINDOWS
+  ANTIVIRUS
+  OTHER
+}
+
+enum LicenseDurationType {
+  LIFETIME
+  YEARLY
+  CUSTOM
+}
+
+enum LicenseStatus {
+  AVAILABLE
+  ASSIGNED
+  SENT
+  PROBLEM
+  REPLACED
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -89,6 +110,7 @@ model User {
   qcHarian  QcHarian[]
   attendance Attendance[]
   inventoryItems InventoryItem[]
+  licenseRecords LicenseRecord[]
 }
 
 model Attendance {
@@ -163,6 +185,7 @@ model Unit {
   sales       Sale[]
   auditLogs   UnitAuditLog[]
   inventoryItems InventoryItem[]
+  licenseRecords LicenseRecord[]
 
   @@unique([batchId, nomorUnit])
 }
@@ -328,6 +351,44 @@ model Sale {
 
   unit          Unit         @relation(fields: [unitId], references: [id])
   items         SaleItem[]
+  licenseRecords LicenseRecord[]
+}
+
+model LicenseRecord {
+  id             String              @id @default(cuid())
+  name           String
+  licenseType    LicenseType
+  version        String
+  edition        String?
+  productKey     String?
+  durationType   LicenseDurationType @default(LIFETIME)
+  purchaseDate   DateTime
+  validUntil     DateTime?
+  status         LicenseStatus       @default(ASSIGNED)
+  supplier       String?
+  buyerName      String?
+  buyerPhone     String?
+  unitId         String?
+  saleId         String?
+  laptopSeries   String?
+  sourceItemName String?
+  sourceItemCategory String?
+  salePrice      Int                 @default(0)
+  costPrice      Int                 @default(0)
+  notes          String?
+  createdById    String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  unit           Unit?               @relation(fields: [unitId], references: [id])
+  sale           Sale?               @relation(fields: [saleId], references: [id])
+  createdBy      User?               @relation(fields: [createdById], references: [id])
+
+  @@index([licenseType, status])
+  @@index([buyerPhone])
+  @@index([unitId])
+  @@index([saleId])
+  @@index([purchaseDate])
 }
 
 model SaleItem {
