@@ -58,6 +58,22 @@ enum SaleLocation {
   KAJEN
 }
 
+enum InventoryItemStatus {
+  STOCK
+  USED_IN_UNIT
+  SOLD
+  RETURNED
+  DAMAGED
+  LOST
+}
+
+enum WarrantyDurationUnit {
+  DAY
+  WEEK
+  MONTH
+  YEAR
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -72,6 +88,7 @@ model User {
   qcAwal    QcAwal[]
   qcHarian  QcHarian[]
   attendance Attendance[]
+  inventoryItems InventoryItem[]
 }
 
 model Attendance {
@@ -145,8 +162,42 @@ model Unit {
   catalogSync CatalogSync[]
   sales       Sale[]
   auditLogs   UnitAuditLog[]
+  inventoryItems InventoryItem[]
 
   @@unique([batchId, nomorUnit])
+}
+
+model InventoryItem {
+  id                    String                @id @default(cuid())
+  category              String
+  name                  String
+  brandModel            String?
+  specification         String?
+  serialNumber          String?
+  supplier              String
+  invoiceNumber         String?
+  invoiceImageUrl       String?
+  purchaseDate          DateTime
+  arrivedAt             DateTime              @default(now())
+  warrantyDuration      Int                   @default(0)
+  warrantyDurationUnit  WarrantyDurationUnit  @default(MONTH)
+  status                InventoryItemStatus   @default(STOCK)
+  unitId                String?
+  buyerName             String?
+  buyerPhone            String?
+  costPrice             Int                   @default(0)
+  notes                 String?
+  createdById           String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  unit                  Unit?                 @relation(fields: [unitId], references: [id])
+  createdBy             User?                 @relation(fields: [createdById], references: [id])
+
+  @@index([category, status])
+  @@index([supplier])
+  @@index([serialNumber])
+  @@index([purchaseDate])
 }
 
 model UnitAuditLog {
