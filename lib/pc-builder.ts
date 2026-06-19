@@ -19,7 +19,9 @@ export async function getPublicPcBuilderData() {
         include: { items: { select: { componentId: true } } }
       })
     ]);
-    return { connected: true, components, presets };
+    const availableIds=new Set(components.map(component=>component.id));
+    const availablePresets=presets.filter(preset=>preset.items.length>0&&preset.items.every(item=>availableIds.has(item.componentId)));
+    return { connected: true, components, presets:availablePresets };
   } catch {
     return { connected: false, components: [], presets: [] };
   }

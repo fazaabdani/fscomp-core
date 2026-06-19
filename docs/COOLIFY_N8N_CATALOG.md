@@ -91,6 +91,8 @@ Kalau Coolify punya field **Pre-deploy Command**, isi:
 npm run db:migrate
 ```
 
+Untuk deployment fitur Rakit PC, ikuti checklist backup, migration, pengisian komponen, dan smoke test di `docs/PC_BUILDER_DEPLOYMENT.md`.
+
 ## Perlu Login User?
 
 Ya, untuk production perlu login.
