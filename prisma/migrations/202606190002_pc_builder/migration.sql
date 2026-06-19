@@ -4,7 +4,12 @@ CREATE TYPE "PcBuildDraftStatus" AS ENUM ('NEW', 'CONTACTED', 'QUOTED', 'CONFIRM
 CREATE TABLE "PcComponent" (
   "id" TEXT NOT NULL, "inventoryItemId" TEXT, "category" "PcComponentCategory" NOT NULL,
   "name" TEXT NOT NULL, "brand" TEXT, "specification" TEXT, "salePrice" INTEGER NOT NULL,
-  "socket" TEXT, "memoryType" TEXT, "formFactor" TEXT, "wattage" INTEGER,
+  "socket" TEXT, "supportedSockets" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+  "memoryType" TEXT, "formFactor" TEXT, "supportedFormFactors" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+  "storageInterface" TEXT, "supportedStorageInterfaces" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+  "powerDraw" INTEGER, "psuCapacity" INTEGER, "gpuLengthMm" INTEGER, "maxGpuLengthMm" INTEGER,
+  "coolerHeightMm" INTEGER, "maxCoolerHeightMm" INTEGER, "radiatorSizeMm" INTEGER,
+  "supportedRadiatorSizes" INTEGER[] NOT NULL DEFAULT ARRAY[]::INTEGER[],
   "active" BOOLEAN NOT NULL DEFAULT true, "sortOrder" INTEGER NOT NULL DEFAULT 0,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL,
   CONSTRAINT "PcComponent_pkey" PRIMARY KEY ("id")

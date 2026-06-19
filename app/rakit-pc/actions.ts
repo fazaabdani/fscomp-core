@@ -8,12 +8,14 @@ import { requireRole } from "@/lib/session";
 
 function text(data: FormData, key: string) { return String(data.get(key) ?? "").trim(); }
 function int(data: FormData, key: string) { const value = Number(data.get(key)); return Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0; }
+function list(data: FormData,key:string){return text(data,key).split(",").map(value=>value.trim()).filter(Boolean);}
+function intList(data:FormData,key:string){return list(data,key).map(Number).filter(value=>Number.isFinite(value)&&value>0);}
 const categories = ["CPU","MOTHERBOARD","RAM","STORAGE","GPU","PSU","CASING","COOLER","MONITOR","ACCESSORY"];
 function category(value: string) { return (categories.includes(value) ? value : "ACCESSORY") as PcComponentCategory; }
 
 export async function createPcComponentAction(data: FormData) {
   requireRole(["admin", "sales"]); const name = text(data, "name"); if (!name) redirect("/rakit-pc?error=name");
-  await prisma.pcComponent.create({ data: { name, category: category(text(data,"category")), brand:text(data,"brand")||null, specification:text(data,"specification")||null, salePrice:int(data,"salePrice"), socket:text(data,"socket")||null, memoryType:text(data,"memoryType")||null, formFactor:text(data,"formFactor")||null, wattage:int(data,"wattage")||null, inventoryItemId:text(data,"inventoryItemId")||null } });
+  await prisma.pcComponent.create({ data: { name, category: category(text(data,"category")), brand:text(data,"brand")||null, specification:text(data,"specification")||null, salePrice:int(data,"salePrice"), socket:text(data,"socket")||null, supportedSockets:list(data,"supportedSockets"), memoryType:text(data,"memoryType")||null, formFactor:text(data,"formFactor")||null, supportedFormFactors:list(data,"supportedFormFactors"), storageInterface:text(data,"storageInterface")||null, supportedStorageInterfaces:list(data,"supportedStorageInterfaces"), powerDraw:int(data,"powerDraw")||null, psuCapacity:int(data,"psuCapacity")||null, gpuLengthMm:int(data,"gpuLengthMm")||null, maxGpuLengthMm:int(data,"maxGpuLengthMm")||null, coolerHeightMm:int(data,"coolerHeightMm")||null, maxCoolerHeightMm:int(data,"maxCoolerHeightMm")||null, radiatorSizeMm:int(data,"radiatorSizeMm")||null, supportedRadiatorSizes:intList(data,"supportedRadiatorSizes"), inventoryItemId:text(data,"inventoryItemId")||null } });
   revalidatePath("/rakit-pc"); revalidatePath("/katalog/rakit-pc"); redirect("/rakit-pc?saved=component");
 }
 export async function togglePcComponentAction(id: string) { requireRole(["admin","sales"]); const item=await prisma.pcComponent.findUnique({where:{id},select:{active:true}}); if(item) await prisma.pcComponent.update({where:{id},data:{active:!item.active}}); revalidatePath("/rakit-pc"); revalidatePath("/katalog/rakit-pc"); }

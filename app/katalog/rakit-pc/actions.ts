@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getPcCompatibilityIssues } from "@/lib/pc-compatibility";
 
 function text(formData: FormData, key: string) { return String(formData.get(key) ?? "").trim(); }
 function positiveNumber(value: FormDataEntryValue | null) {
@@ -21,6 +22,7 @@ export async function createPcBuildDraftAction(formData: FormData) {
   if (selectedCategories.size !== components.length || requiredCategories.some((category) => !selectedCategories.has(category))) {
     redirect("/katalog/rakit-pc?error=components");
   }
+  if (getPcCompatibilityIssues(components).some((issue) => issue.level === "bad")) redirect("/katalog/rakit-pc?error=compatibility");
 
   const referenceCode = `RPC-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
   const totalPrice = components.reduce((sum, component) => sum + component.salePrice, 0);

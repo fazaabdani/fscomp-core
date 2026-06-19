@@ -254,9 +254,20 @@ model PcComponent {
   specification   String?
   salePrice       Int
   socket          String?
+  supportedSockets String[]
   memoryType      String?
   formFactor      String?
-  wattage         Int?
+  supportedFormFactors String[]
+  storageInterface String?
+  supportedStorageInterfaces String[]
+  powerDraw       Int?
+  psuCapacity     Int?
+  gpuLengthMm     Int?
+  maxGpuLengthMm  Int?
+  coolerHeightMm  Int?
+  maxCoolerHeightMm Int?
+  radiatorSizeMm  Int?
+  supportedRadiatorSizes Int[]
   active          Boolean             @default(true)
   sortOrder       Int                 @default(0)
   createdAt       DateTime            @default(now())

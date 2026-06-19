@@ -1,62 +1,55 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, MessageCircle, TriangleAlert } from "lucide-react";
+import { Check, ChevronRight, CircleAlert, MessageCircle, RotateCcw, Trash2, X } from "lucide-react";
 import { formatRupiah } from "@/lib/api";
+import { candidateCompatibility, getPcCompatibilityIssues, pcPowerLoad, type PcCompatibilityComponent } from "@/lib/pc-compatibility";
 import { createPcBuildDraftAction } from "./actions";
 
-type Component = { id: string; category: string; name: string; brand: string | null; specification: string | null; salePrice: number; socket: string | null; memoryType: string | null; formFactor: string | null; wattage: number | null; inventoryItemId: string | null };
-type Preset = { id: string; name: string; slug: string; description: string | null; useCase: string; items: { componentId: string }[] };
-const categories = ["CPU", "MOTHERBOARD", "RAM", "STORAGE", "GPU", "PSU", "CASING", "COOLER", "MONITOR", "ACCESSORY"];
-const pcCategoryLabels: Record<string, string> = { CPU:"Processor",MOTHERBOARD:"Motherboard",RAM:"RAM",STORAGE:"Storage",GPU:"Kartu grafis",PSU:"Power supply",CASING:"Casing",COOLER:"Cooler",MONITOR:"Monitor",ACCESSORY:"Aksesori" };
+type Component = PcCompatibilityComponent & { name:string;brand:string|null;specification:string|null;salePrice:number;inventoryItemId:string|null };
+type Preset = { id:string;name:string;slug:string;description:string|null;useCase:string;items:{componentId:string}[] };
+const categories = ["CPU","MOTHERBOARD","RAM","GPU","STORAGE","PSU","CASING","COOLER","MONITOR","ACCESSORY"];
+const requiredCategories = ["CPU","MOTHERBOARD","RAM","STORAGE","PSU","CASING"];
+const labels:Record<string,string>={CPU:"Prosesor",MOTHERBOARD:"Motherboard",RAM:"Memori (RAM)",GPU:"Kartu Grafis (GPU)",STORAGE:"Penyimpanan",PSU:"Power Supply (PSU)",CASING:"Casing",COOLER:"Pendingin",MONITOR:"Monitor",ACCESSORY:"Aksesori"};
 
-export function PcBuilder({ components, presets, draftCode }: { components: Component[]; presets: Preset[]; draftCode?: string }) {
-  const [selected, setSelected] = useState<Record<string, string>>({});
-  const [presetName, setPresetName] = useState("");
-  const selectedComponents = useMemo(() => Object.values(selected).map((id) => components.find((item) => item.id === id)).filter(Boolean) as Component[], [components, selected]);
-  const total = selectedComponents.reduce((sum, item) => sum + item.salePrice, 0);
-  const byCategory = (category: string) => components.filter((item) => item.category === category);
-  const chosen = (category: string) => selectedComponents.find((item) => item.category === category);
-  const warnings: string[] = [];
-  const cpu = chosen("CPU"), motherboard = chosen("MOTHERBOARD"), ram = chosen("RAM"), psu = chosen("PSU"), gpu = chosen("GPU"), casing = chosen("CASING");
-  const requiredCategories = ["CPU", "MOTHERBOARD", "RAM", "STORAGE", "PSU", "CASING"];
-  const missingCategories = requiredCategories.filter((category) => !chosen(category));
-  const formFactorFits = !casing?.formFactor || !motherboard?.formFactor || casing.formFactor === motherboard.formFactor || (casing.formFactor === "ATX" && ["MATX", "MICRO-ATX", "ITX"].includes(motherboard.formFactor.toUpperCase())) || (["MATX", "MICRO-ATX"].includes(casing.formFactor.toUpperCase()) && motherboard.formFactor.toUpperCase() === "ITX");
-  if (cpu?.socket && motherboard?.socket && cpu.socket !== motherboard.socket) warnings.push(`Socket CPU ${cpu.socket} tidak cocok dengan motherboard ${motherboard.socket}.`);
-  if (ram?.memoryType && motherboard?.memoryType && ram.memoryType !== motherboard.memoryType) warnings.push(`${ram.memoryType} tidak cocok dengan motherboard ${motherboard.memoryType}.`);
-  if (!formFactorFits) warnings.push(`Form factor casing ${casing?.formFactor} tidak mendukung motherboard ${motherboard?.formFactor}.`);
-  const estimatedPower = (cpu?.wattage ?? 0) + (gpu?.wattage ?? 0) + 150;
-  if (psu?.wattage && psu.wattage < estimatedPower) warnings.push(`PSU ${psu.wattage}W di bawah estimasi kebutuhan ${estimatedPower}W.`);
+export function PcBuilder({components,presets,draftCode}:{components:Component[];presets:Preset[];draftCode?:string}) {
+  const [mode,setMode]=useState<"package"|"custom">("package");
+  const [selected,setSelected]=useState<Record<string,string>>({});
+  const [presetName,setPresetName]=useState("");
+  const [pickerCategory,setPickerCategory]=useState<string|null>(null);
+  const [sort,setSort]=useState<"recommended"|"asc"|"desc">("recommended");
+  const [onlyCompatible,setOnlyCompatible]=useState(true);
+  const selectedComponents=useMemo(()=>Object.values(selected).map(id=>components.find(item=>item.id===id)).filter(Boolean) as Component[],[components,selected]);
+  const chosen=(category:string)=>selectedComponents.find(item=>item.category===category);
+  const total=selectedComponents.reduce((sum,item)=>sum+item.salePrice,0);
+  const load=pcPowerLoad(selectedComponents),psu=chosen("PSU");
+  const issues=getPcCompatibilityIssues(selectedComponents);
+  const badIssues=issues.filter(issue=>issue.level==="bad"), missing=requiredCategories.filter(category=>!chosen(category));
+  const progress=Math.round(selectedComponents.length/categories.length*100);
 
-  function applyPreset(preset: Preset) {
-    const next: Record<string, string> = {};
-    preset.items.forEach(({ componentId }) => { const item = components.find((component) => component.id === componentId); if (item) next[item.category] = item.id; });
-    setSelected(next); setPresetName(preset.name);
-  }
-  const waText = ["Assalamu'alaikum FS Comp.", "Saya ingin konsultasi rakit PC.", presetName ? `Preset: ${presetName}` : "Konfigurasi: Custom", ...selectedComponents.map((item) => `${pcCategoryLabels[item.category]}: ${item.name} - ${formatRupiah(item.salePrice)}`), `Estimasi total: ${formatRupiah(total)}`, "Mohon dicek kembali kompatibilitas dan stoknya."].join("\n");
+  function applyPreset(preset:Preset){const next:Record<string,string>={};preset.items.forEach(({componentId})=>{const item=components.find(component=>component.id===componentId);if(item)next[item.category]=item.id;});setSelected(next);setPresetName(preset.name);setMode("custom");}
+  function pick(item:Component){if(candidateCompatibility(selectedComponents,item).some(issue=>issue.level==="bad"))return;setSelected(current=>({...current,[item.category]:item.id}));setPickerCategory(null);}
+  function remove(category:string){setSelected(current=>{const next={...current};delete next[category];return next;});setPresetName("");}
+  const pickerItems=useMemo(()=>{if(!pickerCategory)return[];let items=components.filter(item=>item.category===pickerCategory).map(item=>({item,issues:candidateCompatibility(selectedComponents,item)}));if(onlyCompatible)items=items.filter(entry=>!entry.issues.some(issue=>issue.level==="bad"));if(sort==="asc")items.sort((a,b)=>a.item.salePrice-b.item.salePrice);if(sort==="desc")items.sort((a,b)=>b.item.salePrice-a.item.salePrice);return items;},[components,pickerCategory,selectedComponents,onlyCompatible,sort]);
+  const checks=[
+    {label:"Soket CPU & Motherboard",keys:["socket"],idle:"Pilih CPU & motherboard"},
+    {label:"Tipe memori",keys:["memory","cpu-memory"],idle:"Pilih RAM & motherboard"},
+    {label:"Casing & dimensi",keys:["case-form","gpu-length","cooler-height","radiator"],idle:"Pilih casing dan komponen"},
+    {label:"Kapasitas daya PSU",keys:["psu"],idle:"Pilih PSU"}
+  ].map(check=>{const issue=issues.find(item=>check.keys.includes(item.key));const complete=check.keys[0]==="socket"?Boolean(chosen("CPU")&&chosen("MOTHERBOARD")):check.keys[0]==="memory"?Boolean(chosen("RAM")&&chosen("MOTHERBOARD")):check.keys[0]==="case-form"?Boolean(chosen("CASING")&&chosen("MOTHERBOARD")):Boolean(psu&&load);return{...check,issue,status:issue?.level??(complete?"ok":"idle"),text:issue?.message??(complete?"Cocok":""+check.idle)};});
+  const waText=["Assalamu'alaikum FS Comp.","Saya mau konsultasi dan pesan rakit PC.",presetName?`Paket: ${presetName}`:"Konfigurasi: Custom",...selectedComponents.map(item=>`- ${labels[item.category]}: ${item.brand??""} ${item.name}`),`Total estimasi: ${formatRupiah(total)}`,"Mohon cek stok dan kompatibilitas final."].join("\n");
 
-  return <div className="pcBuilderLayout">
-    <div className="pcBuilderMain">
-      <section className="pcPresetGrid">
-        {presets.map((preset) => <button type="button" className={`pcPresetCard ${presetName === preset.name ? "active" : ""}`} onClick={() => applyPreset(preset)} key={preset.id}><strong>{preset.name}</strong><span>{preset.useCase}</span><small>{preset.description}</small></button>)}
-        <button type="button" className={`pcPresetCard ${presetName === "" ? "active" : ""}`} onClick={() => { setSelected({}); setPresetName(""); }}><strong>Custom</strong><span>Pilih sendiri</span><small>Susun komponen sesuai kebutuhan dan budget.</small></button>
-      </section>
-      <section className="panel pcComponentList">
-        {categories.map((category) => <label key={category}><span><strong>{pcCategoryLabels[category]}</strong>{["CPU", "MOTHERBOARD", "RAM", "STORAGE", "PSU", "CASING"].includes(category) ? <small>Disarankan</small> : <small>Opsional</small>}</span><select value={selected[category] ?? ""} onChange={(event) => setSelected((current) => ({ ...current, [category]: event.target.value }))}><option value="">Belum dipilih</option>{byCategory(category).map((item) => <option value={item.id} key={item.id}>{item.name} - {formatRupiah(item.salePrice)}{item.inventoryItemId ? " (stok inventaris)" : ""}</option>)}</select>{chosen(category)?.specification ? <small>{chosen(category)?.specification}</small> : null}</label>)}
-      </section>
-    </div>
-    <aside className="panel pcBuildSummary">
-      <div><p className="eyebrow">Ringkasan rakitan</p><h2>{presetName || "Custom PC"}</h2></div>
-      {selectedComponents.length ? selectedComponents.map((item) => <div className="pcSummaryLine" key={item.id}><span>{pcCategoryLabels[item.category]}<small>{item.name}</small></span><strong>{formatRupiah(item.salePrice)}</strong></div>) : <div className="emptyState">Pilih preset atau komponen untuk mulai.</div>}
-      <div className="pcTotal"><span>Estimasi total</span><strong>{formatRupiah(total)}</strong></div>
-      <div className={`pcCompatibility ${warnings.length || missingCategories.length ? "warning" : "ok"}`}>{warnings.length ? <><TriangleAlert size={19} /><span>{warnings.map((warning) => <small key={warning}>{warning}</small>)}</span></> : missingCategories.length ? <><TriangleAlert size={19}/><span><strong>Lengkapi komponen inti</strong><small>{missingCategories.map((category) => pcCategoryLabels[category]).join(", ")}</small></span></> : <><CheckCircle2 size={19} /><span><strong>Kompatibilitas dasar aman</strong><small>Admin tetap akan memverifikasi sebelum transaksi.</small></span></>}</div>
-      {draftCode ? <div className="successBox">Draft tersimpan: <strong>{draftCode}</strong>. Stok belum dikurangi.</div> : null}
-      <a className="greenButton" href={`https://wa.me/62816660056?text=${encodeURIComponent(waText)}`} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Kirim via WhatsApp</a>
-      <form action={createPcBuildDraftAction} className="pcDraftForm">
-        {selectedComponents.map((item) => <input type="hidden" name="componentId" value={item.id} key={item.id} />)}<input type="hidden" name="presetName" value={presetName} />
-        <input name="customerName" placeholder="Nama (opsional)" /><input name="customerPhone" placeholder="Nomor WhatsApp" /><input name="need" placeholder="Kebutuhan: gaming, kantor, editing" /><input name="budget" type="number" min="0" step="100000" placeholder="Budget maksimal" /><textarea name="notes" placeholder="Catatan tambahan" />
-        <button className="primaryButton" type="submit" disabled={Boolean(missingCategories.length || warnings.length)}>Simpan Draft Penawaran</button>
-      </form>
-    </aside>
+  return <div className="pcReferenceBuilder">
+    <div className="pcModeBar"><div className="pcModeTabs"><button className={mode==="package"?"active":""} onClick={()=>setMode("package")} type="button">Paket Rekomendasi</button><button className={mode==="custom"?"active":""} onClick={()=>setMode("custom")} type="button">Rakit Sendiri</button></div><span><i/>Semua rakitan <strong>pre-order</strong> · estimasi 5–7 hari kerja</span></div>
+
+    {mode==="package"?<div><section className="pcPackageGrid">{presets.length?presets.map((preset,index)=>{const items=preset.items.map(({componentId})=>components.find(item=>item.id===componentId)).filter(Boolean) as Component[];const packageTotal=items.reduce((sum,item)=>sum+item.salePrice,0);return <article className={`pcPackageCard ${index===1?"featured":""}`} key={preset.id}><div className="pcPackageTop"><span>{index===1?"PALING LARIS":index===0?"ENTRY":"REKOMENDASI"}</span><small>~5–7 hari</small></div><h3>{preset.name}</h3><p>{preset.description||preset.useCase}</p>{["CPU","GPU","RAM"].map(category=><div className="pcPackageSpec" key={category}><span>{category}</span><strong>{chosenFrom(items,category)}</strong></div>)}<div className="pcPackagePrice"><small>MULAI DARI</small><strong>{formatRupiah(packageTotal)}</strong></div><button type="button" onClick={()=>applyPreset(preset)}>Pakai & sesuaikan <ChevronRight size={16}/></button></article>}):<div className="emptyState">Admin belum membuat paket rekomendasi. Pilih Rakit Sendiri untuk mulai.</div>}</section><p className="pcPackageHint">Setiap paket bisa diutak-atik setelah dipilih — atau <button type="button" onClick={()=>setMode("custom")}>rakit dari nol</button>.</p></div>:
+    <div className="pcCustomLayout"><section><div className="pcBuildHeading"><div><h2>Komponen rakitan</h2><p>{selectedComponents.length} dari {categories.length} komponen dipilih</p></div><button type="button" onClick={()=>{setSelected({});setPresetName("");}}><RotateCcw size={15}/> Reset</button></div><div className="pcBuildRows">{categories.map((category,index)=>{const item=chosen(category);return <article className={item?"selected":""} key={category}><span className="pcRowNumber">{String(index+1).padStart(2,"0")}</span><div className="pcRowLabel"><strong>{labels[category]}</strong><small>{requiredCategories.includes(category)?"Wajib":"Opsional"}</small></div>{item?<><div className="pcRowPart"><strong>{item.brand} {item.name}</strong><small>{item.specification||"Spesifikasi belum diisi"}</small></div><strong className="pcRowPrice">{formatRupiah(item.salePrice)}</strong><button className="pcRemoveButton" type="button" aria-label={`Hapus ${labels[category]}`} onClick={()=>remove(category)}><Trash2 size={16}/></button></>:<button className="pcPickButton" type="button" onClick={()=>{setPickerCategory(category);setSort("recommended");}}>+ Pilih {labels[category]}</button>}</article>})}</div></section>
+
+      <aside className="pcSummaryPanel"><div className="pcSummaryHeader"><span>ESTIMASI TOTAL</span><strong>{formatRupiah(total)}</strong><small>Harga dapat berubah mengikuti stok</small></div><div className="pcProgress"><div><span>Komponen</span><strong>{selectedComponents.length}/{categories.length}</strong></div><i><b style={{width:`${progress}%`}}/></i></div><div className="pcPower"><div><span>Estimasi beban</span><strong>{load} W</strong></div><div><span>Kapasitas PSU</span><strong>{psu?.psuCapacity?`${psu.psuCapacity} W`:"—"}</strong></div></div><div className="pcChecks"><h3>Cek kompatibilitas</h3>{checks.map(check=><div className={check.status} key={check.label}><i>{check.status==="ok"?<Check size={13}/>:check.status==="idle"?"–":"!"}</i><span><strong>{check.label}</strong><small>{check.text}</small></span></div>)}</div>{draftCode?<div className="successBox">Draft tersimpan: <strong>{draftCode}</strong>. Stok belum dikurangi.</div>:null}<a className="pcWaButton" href={`https://wa.me/62816660056?text=${encodeURIComponent(waText)}`} target="_blank" rel="noreferrer"><MessageCircle size={17}/> Chat & pesan via WhatsApp</a><details className="pcDraftDetails"><summary>Simpan sebagai draft penawaran</summary><form action={createPcBuildDraftAction}>{selectedComponents.map(item=><input type="hidden" name="componentId" value={item.id} key={item.id}/>)}<input type="hidden" name="presetName" value={presetName}/><input name="customerName" placeholder="Nama (opsional)"/><input name="customerPhone" placeholder="Nomor WhatsApp"/><input name="need" placeholder="Kebutuhan PC"/><input name="budget" type="number" min="0" step="100000" placeholder="Budget maksimal"/><textarea name="notes" placeholder="Catatan tambahan"/><button className="primaryButton" type="submit" disabled={Boolean(missing.length||badIssues.length)}>Simpan Draft</button></form></details></aside>
+    </div>}
+
+    {pickerCategory?<div className="pcPickerOverlay" role="presentation" onMouseDown={()=>setPickerCategory(null)}><section className="pcPickerModal" role="dialog" aria-modal="true" aria-label={`Pilih ${labels[pickerCategory]}`} onMouseDown={event=>event.stopPropagation()}><header><div><span>PILIH KOMPONEN</span><h2>{labels[pickerCategory]}</h2></div><div className="pcPickerTools"><button className={onlyCompatible?"active":""} type="button" onClick={()=>setOnlyCompatible(value=>!value)}><i/> Hanya kompatibel</button><div><button className={sort==="recommended"?"active":""} onClick={()=>setSort("recommended")} type="button">Rekomendasi</button><button className={sort==="asc"?"active":""} onClick={()=>setSort("asc")} type="button">Termurah</button><button className={sort==="desc"?"active":""} onClick={()=>setSort("desc")} type="button">Termahal</button></div><button className="pcPickerClose" type="button" onClick={()=>setPickerCategory(null)} aria-label="Tutup"><X size={18}/></button></div></header><div className="pcPickerGrid">{pickerItems.map(({item,issues:candidateIssues})=>{const bad=candidateIssues.find(issue=>issue.level==="bad"),warn=candidateIssues.find(issue=>issue.level==="warn"),isSelected=selected[item.category]===item.id;return <button className={`${bad?"incompatible":""} ${isSelected?"selected":""}`} disabled={Boolean(bad)} type="button" onClick={()=>pick(item)} key={item.id}><div className="pcPickerCardTop"><span>{item.brand||"FS COMP"}</span><small>{item.powerDraw?`${item.powerDraw}W`:item.psuCapacity?`${item.psuCapacity}W`:"—"}</small></div><h3>{item.name}</h3><div className="pcSpecChips">{(item.specification||"Spesifikasi menyusul").split(/\s*[·/]\s*/).map(chip=><span key={chip}>{chip}</span>)}</div><footer><strong>{formatRupiah(item.salePrice)}</strong><span className={bad?"bad":warn?"warn":"ok"}>{isSelected?"✓ Terpilih":bad?`✕ ${bad.message}`:warn?`! ${warn.message}`:"✓ Cocok"}</span></footer></button>})}{pickerItems.length===0?<div className="pcPickerEmpty"><CircleAlert size={24}/><span>Tidak ada komponen kompatibel. Matikan filter “Hanya kompatibel” atau ganti komponen lain dulu.</span></div>:null}</div></section></div>:null}
   </div>;
 }
+
+function chosenFrom(items:Component[],category:string){const item=items.find(component=>component.category===category);return item?`${item.brand??""} ${item.name}`:"Bisa disesuaikan";}
