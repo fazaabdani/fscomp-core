@@ -56,6 +56,7 @@ export function NavLinks({ currentUser }: { currentUser: NavUser | null }) {
   ];
   const operationLinks = [
     { href: "/inventory", label: "Inventaris", show: true },
+    { href: "/rakit-pc", label: "Rakit PC", show: canSeeLicense },
     { href: "/licenses", label: "Lisensi", show: canSeeLicense }
   ];
   const links = [

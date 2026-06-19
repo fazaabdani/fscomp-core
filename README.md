@@ -7,6 +7,7 @@ Sistem internal untuk mengelola unit laptop FS Comp dari list PSI sampai terjual
 - Detail unit lengkap dengan riwayat QC.
 - Label QR ukuran 7x5cm bertema biru FS Comp.
 - Data dummy realistis agar siap dipakai sebagai dasar integrasi database, katalog.fscomp.id, dan WhatsApp AI.
+- Builder Rakit PC publik dengan preset, pemeriksaan kompatibilitas, estimasi harga/daya, WhatsApp, dan draft penawaran.
 
 ## Jalankan Lokal
 
@@ -23,6 +24,7 @@ Database production disarankan memakai PostgreSQL di Coolify dan Prisma sebagai 
 
 Lihat detailnya di `docs/DATABASE_AI_PLAN.md`.
 Panduan klik Coolify, n8n WhatsApp, dan sync spreadsheet ada di `docs/COOLIFY_N8N_CATALOG.md`.
+Panduan deployment aman Rakit PC ada di `docs/PC_BUILDER_DEPLOYMENT.md`.
 
 Total tabel utama: `User`, `BatchPSI`, `Unit`, `QcAwal`, `QcHarian`, `AiLog`, dan `CatalogSync`.
 
