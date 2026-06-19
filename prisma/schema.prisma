@@ -95,6 +95,27 @@ enum LicenseStatus {
   REPLACED
 }
 
+enum PcComponentCategory {
+  CPU
+  MOTHERBOARD
+  RAM
+  STORAGE
+  GPU
+  PSU
+  CASING
+  COOLER
+  MONITOR
+  ACCESSORY
+}
+
+enum PcBuildDraftStatus {
+  NEW
+  CONTACTED
+  QUOTED
+  CONFIRMED
+  CANCELLED
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -216,11 +237,92 @@ model InventoryItem {
 
   unit                  Unit?                 @relation(fields: [unitId], references: [id])
   createdBy             User?                 @relation(fields: [createdById], references: [id])
+  pcComponent           PcComponent?
 
   @@index([category, status])
   @@index([supplier])
   @@index([serialNumber])
   @@index([purchaseDate])
+}
+
+model PcComponent {
+  id              String              @id @default(cuid())
+  inventoryItemId String?             @unique
+  category        PcComponentCategory
+  name            String
+  brand           String?
+  specification   String?
+  salePrice       Int
+  socket          String?
+  memoryType      String?
+  formFactor      String?
+  wattage         Int?
+  active          Boolean             @default(true)
+  sortOrder       Int                 @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  inventoryItem   InventoryItem?      @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+  presetItems     PcBuildPresetItem[]
+
+  @@index([category, active, sortOrder])
+}
+
+model PcBuildPreset {
+  id          String              @id @default(cuid())
+  name        String              @unique
+  slug        String              @unique
+  description String?
+  useCase     String
+  active      Boolean             @default(true)
+  sortOrder   Int                 @default(0)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  items       PcBuildPresetItem[]
+}
+
+model PcBuildPresetItem {
+  id          String        @id @default(cuid())
+  presetId    String
+  componentId String
+
+  preset      PcBuildPreset @relation(fields: [presetId], references: [id], onDelete: Cascade)
+  component   PcComponent   @relation(fields: [componentId], references: [id], onDelete: Cascade)
+
+  @@unique([presetId, componentId])
+}
+
+model PcBuildDraft {
+  id            String             @id @default(cuid())
+  referenceCode String             @unique
+  presetName    String?
+  customerName  String?
+  customerPhone String?
+  need          String?
+  budget        Int?
+  totalPrice    Int
+  status        PcBuildDraftStatus @default(NEW)
+  notes         String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  items         PcBuildDraftItem[]
+
+  @@index([status, createdAt])
+}
+
+model PcBuildDraftItem {
+  id            String       @id @default(cuid())
+  draftId       String
+  componentId   String?
+  category      String
+  componentName String
+  unitPrice     Int
+
+  draft         PcBuildDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@index([draftId])
 }
 
 model UnitAuditLog {
