@@ -1,0 +1,74 @@
+.pcAdminGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(380px, 0.85fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.pcAdminGrid > .panel,
+.pcAdminGrid > form {
+  margin: 0;
+}
+
+.pcComponentEditor .twoColumns,
+.pcPresetEditor .twoColumns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pcComponentEditor .wideField {
+  grid-column: 1 / -1;
+}
+
+.pcAdminListPanel {
+  max-height: 690px;
+  overflow: hidden;
+}
+
+.pcAdminListPanel .tableLike {
+  max-height: 590px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.pcAdminListPanel .unitRow {
+  grid-template-columns: minmax(95px, 0.55fr) minmax(0, 1.45fr);
+  gap: 10px;
+}
+
+.pcAdminListPanel .unitRow > b,
+.pcAdminListPanel .unitRow > .buttonRow,
+.pcAdminListPanel .unitRow > form {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.pcPresetEditor .checkboxGrid {
+  max-height: 330px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+@media (max-width: 1100px) {
+  .pcAdminGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pcAdminListPanel {
+    max-height: none;
+  }
+
+  .pcAdminListPanel .tableLike {
+    max-height: 440px;
+  }
+}
+
+@media (max-width: 640px) {
+  .pcComponentEditor .twoColumns,
+  .pcPresetEditor .twoColumns {
+    grid-template-columns: 1fr;
+  }
+
+  .pcComponentEditor .wideField {
+    grid-column: auto;
+  }
+}
