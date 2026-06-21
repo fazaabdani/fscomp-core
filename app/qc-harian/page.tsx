@@ -1,7 +1,10 @@
 import { Bluetooth, Camera, CheckCircle2, Keyboard, Mic, Usb, Volume2, Wifi } from "lucide-react";
 import Link from "next/link";
 import { getQcHarianPageData } from "@/lib/db-data";
+import { requireRole } from "@/lib/session";
 import { createDailyQcAction } from "./actions";
+import { QcUnitSelect } from "./QcUnitSelect";
+import { StockLocationField } from "./StockLocationField";
 
 const checklist = [
   { label: "Keyboard", name: "keyboard", icon: Keyboard },
@@ -17,6 +20,7 @@ const checklist = [
 ];
 
 export default async function QcHarianPage({ searchParams }: { searchParams?: { saved?: string; error?: string; unit?: string } }) {
+  const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
   const { units, dailyQcs } = await getQcHarianPageData();
   const selectedUnit = units.find((unit) => unit.id === searchParams?.unit) ?? units[0];
 
@@ -30,24 +34,18 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
       </div>
 
       <div className="qcLayout">
-        <form className="panel qcForm qcCompactForm" action={createDailyQcAction}>
+        <form className="panel qcForm qcCompactForm" action={createDailyQcAction} key={selectedUnit?.id ?? "empty"}>
           <div className="panelHeader">
             <div>
               <p className="eyebrow">Input cepat</p>
               <h2>Catat QC lengkap hari ini</h2>
             </div>
           </div>
-          <label>
-            Unit
-            <select name="unitId" defaultValue={selectedUnit?.id} required>
-              {units.map((unit) => (
-                <option value={unit.id} key={unit.id}>Unit {unit.nomorUnit} - {unit.model}</option>
-              ))}
-            </select>
-          </label>
+          <QcUnitSelect units={units} selectedUnitId={selectedUnit?.id} />
           <label>
             Nama checker
-            <input name="checkerName" placeholder="Contoh: Raka PKL" required />
+            <input value={currentUser.name} readOnly />
+            <small className="formHint">Otomatis mengikuti akun yang sedang login.</small>
           </label>
           {searchParams?.saved ? <div className="successBox">QC harian berhasil disimpan.</div> : null}
           {searchParams?.error ? <div className="infoBox dangerInfo">QC gagal disimpan: {searchParams.error}</div> : null}
@@ -77,13 +75,7 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
               </select>
             </label>
           </div>
-          <label>
-            Lokasi stok
-            <select name="stockLocation" defaultValue={selectedUnit?.stockLocation ?? "WIRADESA"}>
-              <option value="WIRADESA">Wiradesa utama</option>
-              <option value="KAJEN">Kajen secondary</option>
-            </select>
-          </label>
+          <StockLocationField location={selectedUnit?.stockLocation ?? "WIRADESA"} canChange={currentUser.role === "admin"} />
           <div className="checkGrid">
             {checklist.map((item) => {
               const Icon = item.icon;

@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/session";
 import { createSaleAction, restoreSaleAction, voidSaleAction } from "./actions";
 import { RestoreSaleButton } from "./RestoreSaleButton";
 import { VoidSaleButton } from "./VoidSaleButton";
+import { SaleUnitFields } from "./SaleUnitFields";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,6 @@ function salesHref(params: Record<string, string>) {
 export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string; restored?: string; sort?: string; q?: string; lokasi?: string; status?: string } }) {
   const currentUser = requireRole(["admin", "teknisi", "sales"]);
   const { readyUnits, sales, stats, salesReady, blockedByDailyQc } = await getSalesPageData();
-  const firstUnit = readyUnits[0];
   const sort = searchParams?.sort ?? "terbaru";
   const q = (searchParams?.q ?? "").trim().toLowerCase();
   const lokasi = searchParams?.lokasi ?? "semua";
@@ -132,21 +132,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
         {searchParams?.error ? <div className="infoBox dangerInfo">Transaksi gagal: {searchParams.error}</div> : null}
 
         <div className="cashierMainGrid">
-          <label>
-            Unit dan lokasi toko nota
-            <select name="unitId" defaultValue={firstUnit?.id} required>
-              {readyUnits.map((unit) => (
-                <option value={unit.id} key={unit.id}>
-                  Unit {unit.nomorUnit} - {unit.model} - {unit.stockLocation} - {formatRupiah(unit.hargaJualRekomendasi)}
-                </option>
-              ))}
-            </select>
-            <small className="formHint">Lokasi nota otomatis mengikuti lokasi unit: Wiradesa memakai kop FS Comp, Kajen memakai kop FS.ID.</small>
-          </label>
-          <label>
-            Harga jual final
-            <input name="soldPrice" type="number" inputMode="numeric" min="0" step="1000" defaultValue={firstUnit?.hargaJualRekomendasi ?? 0} required />
-          </label>
+          <SaleUnitFields units={readyUnits} />
           <label>
             Metode bayar
             <select name="paymentMethod" defaultValue="Cash">

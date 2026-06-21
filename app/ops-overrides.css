@@ -62,7 +62,8 @@
 }
 
 .navDropdown:hover .navDropdownMenu,
-.navDropdown:focus-within .navDropdownMenu {
+.navDropdown:focus-within .navDropdownMenu,
+.navDropdownMenu.open {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) translateY(0) scale(1);
@@ -959,7 +960,8 @@
   }
 
   .navDropdown:hover .navDropdownMenu,
-  .navDropdown:focus-within .navDropdownMenu {
+  .navDropdown:focus-within .navDropdownMenu,
+  .navDropdownMenu.open {
     transform: translateY(0) scale(1);
   }
 }
