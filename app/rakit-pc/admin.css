@@ -1,3 +1,165 @@
+.pcAdminHero {
+  align-items: center;
+}
+
+.pcHeroActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pcAdminTabs {
+  position: sticky;
+  top: 76px;
+  z-index: 8;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid rgba(58, 140, 255, 0.24);
+  border-radius: 14px;
+  background: rgba(5, 14, 30, 0.94);
+  box-shadow: 0 14px 34px rgba(1, 7, 18, 0.32);
+  backdrop-filter: blur(18px);
+}
+
+.pcAdminTabs a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: rgba(226, 238, 255, 0.66);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.pcAdminTabs a:hover {
+  border-color: rgba(0, 212, 255, 0.28);
+  background: rgba(26, 108, 246, 0.1);
+  color: #ffffff;
+}
+
+.pcAdminTabs a.active {
+  border-color: rgba(0, 212, 255, 0.62);
+  background: linear-gradient(135deg, rgba(26, 108, 246, 0.32), rgba(0, 212, 255, 0.13));
+  color: #ffffff;
+  box-shadow: inset 0 -2px 0 #00d4ff, 0 8px 24px rgba(26, 108, 246, 0.2);
+}
+
+.pcAdminTabs b {
+  display: inline-grid;
+  place-items: center;
+  min-width: 23px;
+  height: 23px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #77dfff;
+  font-size: 11px;
+}
+
+.pcQuickGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.pcQuickCard {
+  position: relative;
+  display: grid;
+  gap: 9px;
+  min-height: 190px;
+  padding: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(58, 140, 255, 0.24);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(11, 29, 61, 0.92), rgba(6, 17, 38, 0.9));
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: 0 18px 42px rgba(1, 8, 24, 0.22);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.pcQuickCard::after {
+  content: "";
+  position: absolute;
+  right: -45px;
+  bottom: -60px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: var(--quick-glow, rgba(0, 212, 255, 0.13));
+  filter: blur(4px);
+}
+
+.pcQuickCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0, 212, 255, 0.58);
+}
+
+.pcQuickCard.cyan { --quick-glow: rgba(0, 212, 255, 0.2); }
+.pcQuickCard.blue { --quick-glow: rgba(61, 142, 255, 0.24); }
+.pcQuickCard.amber { --quick-glow: rgba(255, 190, 64, 0.18); }
+
+.pcQuickCard > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #43d9ff;
+}
+
+.pcQuickCard > span b {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.pcQuickCard > strong {
+  font-size: 18px;
+}
+
+.pcQuickCard > small {
+  color: rgba(226, 238, 255, 0.62);
+  line-height: 1.55;
+}
+
+.pcQuickCard > em {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: end;
+  color: #62dfff;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.pcOverviewPanel,
+.pcViewPanel {
+  animation: pcViewIn 0.24s ease both;
+}
+
+@keyframes pcViewIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pcPanelCount {
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 212, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(0, 212, 255, 0.08);
+  color: #6ee7ff;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
 .pcAdminGrid {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(380px, 0.85fr);
@@ -48,7 +210,58 @@
   padding-right: 4px;
 }
 
+.pcPresetChoices label {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  padding: 9px 10px;
+  border: 1px solid rgba(58, 140, 255, 0.16);
+  border-radius: 9px;
+  background: rgba(5, 14, 29, 0.56);
+}
+
+.pcPresetChoices label span {
+  display: grid;
+  gap: 2px;
+  color: rgba(226, 238, 255, 0.76);
+  font-size: 12px;
+}
+
+.pcPresetChoices label strong {
+  color: #57d9ff;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pcInactiveRow {
+  opacity: 0.56;
+}
+
+.pcDraftStatus {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.pcDraftStatus.new { background: rgba(0, 212, 255, 0.12); color: #67e8f9; }
+.pcDraftStatus.contacted { background: rgba(61, 142, 255, 0.14); color: #93c5fd; }
+.pcDraftStatus.quoted { background: rgba(245, 158, 11, 0.14); color: #fcd34d; }
+.pcDraftStatus.confirmed { background: rgba(34, 197, 94, 0.14); color: #86efac; }
+.pcDraftStatus.cancelled { background: rgba(239, 68, 68, 0.14); color: #fca5a5; }
+
 @media (max-width: 1100px) {
+  .pcQuickGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pcQuickCard {
+    min-height: 155px;
+  }
+
   .pcAdminGrid {
     grid-template-columns: 1fr;
   }
@@ -63,6 +276,26 @@
 }
 
 @media (max-width: 640px) {
+  .pcHeroActions > svg {
+    display: none;
+  }
+
+  .pcAdminTabs {
+    top: 68px;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .pcAdminTabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pcAdminTabs a {
+    min-width: max-content;
+    flex: 0 0 auto;
+  }
+
   .pcComponentEditor .twoColumns,
   .pcPresetEditor .twoColumns {
     grid-template-columns: 1fr;
