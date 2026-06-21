@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
-import { ensureDefaultLoginUsers, roleFromDb } from "@/lib/user-store";
+import { roleFromDb } from "@/lib/user-store";
 
 function csvCell(value: string | null | undefined) {
   const text = value ?? "";
@@ -13,28 +13,26 @@ export async function GET() {
     return new Response("Forbidden", { status: 403 });
   }
 
-  await ensureDefaultLoginUsers();
   const users = await prisma.user.findMany({
     orderBy: [{ active: "desc" }, { role: "asc" }, { name: "asc" }],
     select: {
       name: true,
       username: true,
-      password: true,
       email: true,
       role: true,
       active: true
     }
   });
 
-  const header = ["Nama", "Username", "Password", "Role", "Status", "Email", "Catatan"];
+  const header = ["Nama", "Username", "Password Baru", "Role", "Status", "Email", "Catatan"];
   const rows = users.map((user) => [
     user.name,
     user.username ?? "",
-    user.password ?? "",
+    "",
     roleFromDb(user.role),
     user.active ? "Aktif" : "Nonaktif",
     user.email,
-    !user.username ? "USERNAME KOSONG" : !user.password ? "PASSWORD KOSONG" : ""
+    !user.username ? "USERNAME KOSONG" : ""
   ]);
   const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
   const today = new Date().toISOString().slice(0, 10);

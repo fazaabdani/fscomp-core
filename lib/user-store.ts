@@ -1,5 +1,6 @@
 import { Role } from "@prisma/client";
-import { demoUsers, type User } from "./auth";
+import type { User } from "./auth";
+import { hashPassword, isPasswordHash, verifyPassword } from "./password";
 import { prisma } from "./prisma";
 
 export function roleToDb(role: User["role"]): Role {
@@ -16,73 +17,29 @@ export function roleFromDb(role: Role): User["role"] {
   return "magang";
 }
 
-async function syncLoginUser(user: User) {
-  const email = `${user.username}@fscomp.local`;
-  const existingByUsername = await prisma.user.findUnique({ where: { username: user.username } });
-  const existingByEmail = await prisma.user.findUnique({ where: { email } });
-  const existing = existingByUsername ?? existingByEmail;
+export async function getLoginUser(username: string, password: string) {
+  const user = await prisma.user.findFirst({
+    where: { username, active: true }
+  });
+  if (!user || !user.username || !user.password) return null;
+  if (!(await verifyPassword(password, user.password))) return null;
 
-  if (existing) {
-    return prisma.user.update({
-      where: { id: existing.id },
-      data: {
-        name: user.name,
-        username: user.username,
-        password: existing.password || user.password,
-        role: roleToDb(user.role),
-        active: true
-      }
+  if (!isPasswordHash(user.password)) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: await hashPassword(password) }
     });
   }
-
-  return prisma.user.create({
-    data: {
-      name: user.name,
-      username: user.username,
-      password: user.password,
-      email,
-      role: roleToDb(user.role),
-      active: true
-    }
-  });
-}
-
-export async function ensureDefaultLoginUsers() {
-  for (const user of demoUsers) {
-    try {
-      await syncLoginUser(user);
-    } catch {
-      // Sync user default tidak boleh membuat login user lain ikut gagal.
-    }
-  }
-}
-
-export async function getLoginUser(username: string, password: string) {
-  const findUser = () => prisma.user.findFirst({
-    where: {
-      username,
-      password,
-      active: true
-    }
-  });
-
-  let user = await findUser();
-  if (!user) {
-    await ensureDefaultLoginUsers();
-    user = await findUser();
-  }
-
-  if (!user || !user.username || !user.password) return null;
 
   return {
     name: user.name,
     username: user.username,
-    password: user.password,
     role: roleFromDb(user.role)
   } satisfies User;
 }
 
 export async function getOrCreateDbUserForSession(user: User) {
-  await ensureDefaultLoginUsers();
-  return syncLoginUser(user);
+  const dbUser = await prisma.user.findUnique({ where: { username: user.username } });
+  if (!dbUser || !dbUser.active) throw new Error("User sesi tidak ditemukan atau nonaktif.");
+  return dbUser;
 }

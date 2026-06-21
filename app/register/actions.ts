@@ -2,6 +2,7 @@
 
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { hashPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { formValues, optionalText, requiredText, z } from "@/lib/form-validation";
 
@@ -33,6 +34,7 @@ export async function registerUserAction(formData: FormData) {
   if (!name || !username || !password) {
     redirect("/register?error=required");
   }
+  if (password.length < 8) redirect("/register?error=password-short");
 
   const duplicate = await prisma.user.findFirst({
     where: {
@@ -49,7 +51,7 @@ export async function registerUserAction(formData: FormData) {
     data: {
       name,
       username,
-      password,
+      password: await hashPassword(password),
       email,
       role: roleFromForm(formData),
       active: false

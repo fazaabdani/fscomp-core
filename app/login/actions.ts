@@ -1,11 +1,13 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { demoUsers } from "@/lib/auth";
-import { getSessionCookieName } from "@/lib/session";
+import { createSessionToken, getSessionCookieName } from "@/lib/session";
+import { SESSION_DURATION_SECONDS } from "@/lib/session-token";
 import { getLoginUser } from "@/lib/user-store";
 import { formValues, requiredText, z } from "@/lib/form-validation";
+import type { User } from "@/lib/auth";
+import { clearFailedLogins, isLoginRateLimited, recordFailedLogin } from "@/lib/login-rate-limit";
 
 export async function loginAction(formData: FormData) {
   if (!z.object({ username: requiredText(80), password: requiredText(200) }).safeParse(formValues(formData)).success) {
@@ -13,28 +15,35 @@ export async function loginAction(formData: FormData) {
   }
   const username = String(formData.get("username") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  let user = null;
+  const forwardedFor = headers().get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const rateLimitKey = `${forwardedFor}:${username}`;
+  if (isLoginRateLimited(rateLimitKey)) redirect("/login?error=rate-limit");
+  let user: User | null = null;
 
   try {
     user = await getLoginUser(username, password);
   } catch {
-    user = demoUsers.find((item) => item.username === username && item.password === password) ?? null;
+    redirect("/login?error=server");
   }
-
   if (!user) {
+    recordFailedLogin(rateLimitKey);
     redirect("/login?error=login");
   }
+  clearFailedLogins(rateLimitKey);
 
-  cookies().set(getSessionCookieName(), JSON.stringify({
-    name: user.name,
-    username: user.username,
-    password: "",
-    role: user.role
-  }), {
+  let sessionToken = "";
+  try {
+    sessionToken = createSessionToken(user);
+  } catch {
+    redirect("/login?error=server");
+  }
+
+  cookies().set(getSessionCookieName(), sessionToken, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 12
+    maxAge: SESSION_DURATION_SECONDS
   });
 
   redirect("/");

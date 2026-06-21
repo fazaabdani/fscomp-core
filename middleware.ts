@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 function isPublicPath(pathname: string) {
   if (pathname === "/login") return true;
+  if (pathname === "/register") return true;
   if (pathname === "/katalog" || pathname.startsWith("/katalog/")) return true;
   const parts = pathname.split("/").filter(Boolean);
   if (parts.length === 2 && parts[0] === "unit" && parts[1] !== "new") return true;
@@ -9,17 +10,26 @@ function isPublicPath(pathname: string) {
   return false;
 }
 
-function roleFromSession(session?: string) {
-  if (!session) return null;
+async function roleFromSession(session?: string) {
+  const secret = process.env.SESSION_SECRET;
+  if (!session || !secret || secret.length < 32) return null;
   try {
-    const parsed = JSON.parse(session) as { role?: string };
-    if (parsed.role === "admin") return "admin";
-    if (parsed.role === "teknisi") return "teknisi";
-    if (parsed.role === "magang") return "magang";
+    const [payload, providedSignature, extra] = session.split(".");
+    if (!payload || !providedSignature || extra) return null;
+    const decode = (value: string) => {
+      const base64 = value.replaceAll("-", "+").replaceAll("_", "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
+      return Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+    };
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+    const signature = decode(providedSignature);
+    const valid = await crypto.subtle.verify("HMAC", key, signature, new TextEncoder().encode(payload));
+    if (!valid) return null;
+    const json = new TextDecoder().decode(decode(payload));
+    const parsed = JSON.parse(json) as { role?: string; exp?: number };
+    if (!parsed.exp || parsed.exp <= Math.floor(Date.now() / 1000)) return null;
+    if (parsed.role === "admin" || parsed.role === "teknisi" || parsed.role === "sales" || parsed.role === "magang") return parsed.role;
   } catch {
-    if (session === "admin") return "admin";
-    if (session === "teknisi") return "teknisi";
-    if (session === "pkl") return "magang";
+    return null;
   }
   return null;
 }
@@ -34,11 +44,11 @@ function isMagangAllowedPath(pathname: string) {
   return false;
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = request.cookies.get("fscomp_user")?.value;
-  const hasSession = Boolean(session);
-  const role = roleFromSession(session);
+  const role = await roleFromSession(session);
+  const hasSession = Boolean(role);
 
   if (role === "magang" && !isMagangAllowedPath(pathname) && !isPublicPath(pathname)) {
     return NextResponse.redirect(new URL("/qc-harian", request.url));

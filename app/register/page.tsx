@@ -10,6 +10,8 @@ export default function RegisterPage({ searchParams }: { searchParams?: { error?
         ? "Nama, username, dan password wajib diisi."
         : searchParams?.error === "invalid-input"
           ? "Data akun belum valid. Username minimal 3 karakter dan password minimal 8 karakter."
+        : searchParams?.error === "password-short"
+          ? "Password minimal 8 karakter."
         : searchParams?.success === "waiting"
           ? "Pengajuan akun berhasil. Tunggu admin mengaktifkan akun ini."
           : "";
@@ -44,7 +46,7 @@ export default function RegisterPage({ searchParams }: { searchParams?: { error?
         </label>
         <label>
           Password
-          <input name="password" type="password" placeholder="Password login" required />
+          <input name="password" type="password" minLength={8} autoComplete="new-password" placeholder="Minimal 8 karakter" required />
         </label>
         <label>
           Email internal
