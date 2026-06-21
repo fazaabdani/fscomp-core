@@ -33,23 +33,23 @@ function componentError(item:ReturnType<typeof componentData>){
 function revalidatePcBuilder(){revalidatePath("/rakit-pc");revalidatePath("/katalog/rakit-pc");}
 
 export async function createPcComponentAction(data:FormData){
-  requireRole(["admin","sales"]);const item=componentData(data);const error=componentError(item);if(error)redirect(`/rakit-pc?error=${error}`);
-  await prisma.pcComponent.create({data:item});revalidatePcBuilder();redirect("/rakit-pc?saved=component");
+  requireRole(["admin","sales"]);const item=componentData(data);const error=componentError(item);if(error)redirect(`/rakit-pc?view=components&error=${error}`);
+  await prisma.pcComponent.create({data:item});revalidatePcBuilder();redirect("/rakit-pc?view=components&saved=component");
 }
 
 export async function updatePcComponentAction(id:string,data:FormData){
   requireRole(["admin","sales"]);const item=componentData(data);const error=componentError(item);if(error)redirect(`/rakit-pc/components/${id}/edit?error=${error}`);
-  await prisma.pcComponent.update({where:{id},data:item});revalidatePcBuilder();revalidatePath(`/rakit-pc/components/${id}/edit`);redirect("/rakit-pc?saved=component-updated");
+  await prisma.pcComponent.update({where:{id},data:item});revalidatePcBuilder();revalidatePath(`/rakit-pc/components/${id}/edit`);redirect("/rakit-pc?view=components&saved=component-updated");
 }
 
 export async function togglePcComponentAction(id:string){requireRole(["admin","sales"]);const item=await prisma.pcComponent.findUnique({where:{id},select:{active:true}});if(item)await prisma.pcComponent.update({where:{id},data:{active:!item.active}});revalidatePcBuilder();}
 
 export async function createPcPresetAction(data:FormData){
-  requireRole(["admin","sales"]);const name=text(data,"name");const slug=text(data,"slug").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");const ids=Array.from(new Set(data.getAll("componentId").map(String).filter(Boolean)));if(!name||!slug)redirect("/rakit-pc?error=preset");
+  requireRole(["admin","sales"]);const name=text(data,"name");const slug=text(data,"slug").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");const ids=Array.from(new Set(data.getAll("componentId").map(String).filter(Boolean)));if(!name||!slug)redirect("/rakit-pc?view=presets&error=preset");
   const components=await prisma.pcComponent.findMany({where:{id:{in:ids},active:true}});const selectedCategories=new Set<string>(components.map(item=>item.category));
-  if(components.length!==ids.length||selectedCategories.size!==components.length||requiredPresetCategories.some(item=>!selectedCategories.has(item)))redirect("/rakit-pc?error=preset-components");
-  if(getPcCompatibilityIssues(components).some(issue=>issue.level==="bad"))redirect("/rakit-pc?error=preset-compatibility");
-  await prisma.pcBuildPreset.create({data:{name,slug,useCase:text(data,"useCase")||"Custom",description:text(data,"description")||null,items:{create:components.map(item=>({componentId:item.id}))}}});revalidatePcBuilder();redirect("/rakit-pc?saved=preset");
+  if(components.length!==ids.length||selectedCategories.size!==components.length||requiredPresetCategories.some(item=>!selectedCategories.has(item)))redirect("/rakit-pc?view=presets&error=preset-components");
+  if(getPcCompatibilityIssues(components).some(issue=>issue.level==="bad"))redirect("/rakit-pc?view=presets&error=preset-compatibility");
+  await prisma.pcBuildPreset.create({data:{name,slug,useCase:text(data,"useCase")||"Custom",description:text(data,"description")||null,items:{create:components.map(item=>({componentId:item.id}))}}});revalidatePcBuilder();redirect("/rakit-pc?view=presets&saved=preset");
 }
 
 export async function togglePcPresetAction(id:string){requireRole(["admin","sales"]);const preset=await prisma.pcBuildPreset.findUnique({where:{id},select:{active:true}});if(preset)await prisma.pcBuildPreset.update({where:{id},data:{active:!preset.active}});revalidatePcBuilder();}
