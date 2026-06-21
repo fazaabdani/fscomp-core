@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { forbidden, hasIntegrationAccess, hasStaffAccess } from "@/lib/api-auth";
 import { getCatalogReadyUnits } from "@/lib/api";
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!hasStaffAccess(["admin", "sales"]) && !hasIntegrationAccess(request, "CORE_INTEGRATION_TOKEN")) return forbidden();
   const rows = getCatalogReadyUnits().map((unit) => ({
     nomor_unit: unit.nomorUnit,
     model: unit.model,

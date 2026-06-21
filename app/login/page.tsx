@@ -31,6 +31,8 @@ export default function LoginPage({ searchParams }: { searchParams?: { error?: s
       ) : (
       <form className="panel formGrid loginCard" action={loginAction}>
         {searchParams?.error === "login" ? <div className="infoBox dangerInfo">Username atau password salah, atau user sedang nonaktif.</div> : null}
+        {searchParams?.error === "server" ? <div className="infoBox dangerInfo">Login belum dapat diproses. Hubungi admin untuk memeriksa konfigurasi server.</div> : null}
+        {searchParams?.error === "rate-limit" ? <div className="infoBox dangerInfo">Terlalu banyak percobaan login. Tunggu 10 menit lalu coba lagi.</div> : null}
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Akses internal</p>
@@ -40,11 +42,11 @@ export default function LoginPage({ searchParams }: { searchParams?: { error?: s
         </div>
         <label>
           Username
-          <input name="username" placeholder="faza / zume / ludfy / rosyadi / sales" required />
+          <input name="username" placeholder="Masukkan username" autoComplete="username" required />
         </label>
         <label>
           Password
-          <input name="password" type="password" placeholder="Masukkan password" required />
+          <input name="password" type="password" placeholder="Masukkan password" autoComplete="current-password" required />
         </label>
         <button className="primaryButton" type="submit">Login</button>
         <Link className="secondaryButton" href="/register">Daftar akun baru</Link>

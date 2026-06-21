@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Download, Edit3, ShieldCheck, Upload, UserPlus, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
-import { ensureDefaultLoginUsers, roleFromDb } from "@/lib/user-store";
+import { roleFromDb } from "@/lib/user-store";
 import { activateUserAction, createUserAction, deactivateUserAction, importUsersCsvAction } from "./actions";
 
 function roleLabel(role: string) {
@@ -14,14 +14,15 @@ function roleLabel(role: string) {
 
 export default async function UsersPage({ searchParams }: { searchParams?: { error?: string; success?: string; count?: string } }) {
   requireRole(["admin"]);
-  await ensureDefaultLoginUsers();
   const users = await prisma.user.findMany({ orderBy: [{ active: "desc" }, { role: "asc" }, { name: "asc" }] });
 
   const message =
     searchParams?.error === "duplicate"
       ? "Username atau email sudah dipakai user lain."
-      : searchParams?.error === "required"
-        ? "Nama, username, dan password wajib diisi."
+        : searchParams?.error === "required"
+          ? "Nama, username, dan password wajib diisi."
+        : searchParams?.error === "password-short"
+          ? "Password minimal 8 karakter."
         : searchParams?.error === "last-admin"
           ? "Admin aktif terakhir tidak boleh dinonaktifkan."
           : searchParams?.error === "password-required"
@@ -67,7 +68,7 @@ export default async function UsersPage({ searchParams }: { searchParams?: { err
           <label>Username<input name="username" placeholder="contoh: zume / pkl2" required /></label>
         </div>
         <div className="numberGrid">
-          <label>Password<input name="password" type="password" placeholder="Password login" required /></label>
+          <label>Password<input name="password" type="password" minLength={8} autoComplete="new-password" placeholder="Minimal 8 karakter" required /></label>
           <label>Email internal<input name="email" placeholder="Opsional, otomatis dibuat bila kosong" /></label>
         </div>
         <label>Role
@@ -85,12 +86,12 @@ export default async function UsersPage({ searchParams }: { searchParams?: { err
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Import CSV</p>
-            <h2>Update username dan password</h2>
+            <h2>Update data user</h2>
           </div>
           <Upload size={22} />
         </div>
         <div className="infoBox">
-          Upload CSV dari tombol Export User. Password kosong tidak akan menghapus password lama, dan baris user baru tanpa password akan dilewati.
+          Kolom Password Baru pada hasil export selalu kosong demi keamanan. Isi hanya saat ingin mengganti password; password kosong mempertahankan password lama.
         </div>
         <div className="buttonRow">
           <input name="csvFile" type="file" accept=".csv,text/csv" required />

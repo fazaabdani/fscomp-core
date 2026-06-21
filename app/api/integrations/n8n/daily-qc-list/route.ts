@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { forbidden, hasIntegrationAccess } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 import { QC_DUE_HOURS, isQcFresh, qcAgeHours } from "@/lib/qc-due";
 
@@ -22,7 +23,8 @@ function formatDateTimeWib(date?: Date | null) {
   }).format(date);
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!hasIntegrationAccess(request, "N8N_WEBHOOK_SECRET")) return forbidden();
   const publicUrl = process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id";
   const now = new Date();
   const today = jakartaDateKey(now);

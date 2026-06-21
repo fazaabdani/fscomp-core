@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
+import { hasIntegrationAccess } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 function requireBackupAccess(request: Request) {
-  const backupToken = process.env.BACKUP_EXPORT_TOKEN;
-  const { searchParams } = new URL(request.url);
-  const requestToken = request.headers.get("x-backup-token") ?? searchParams.get("token");
-
-  if (backupToken && requestToken === backupToken) return;
+  if (hasIntegrationAccess(request, "BACKUP_EXPORT_TOKEN")) return;
   requireRole(["admin"]);
 }
 
@@ -29,7 +26,10 @@ export async function GET(request: Request) {
     catalogSync,
     unitAuditLogs
   ] = await Promise.all([
-    prisma.user.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.user.findMany({
+      orderBy: { createdAt: "asc" },
+      select: { id: true, name: true, username: true, email: true, role: true, active: true, createdAt: true, updatedAt: true }
+    }),
     prisma.attendance.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.batchPSI.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.unit.findMany({ orderBy: { createdAt: "asc" } }),
