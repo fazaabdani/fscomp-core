@@ -1,0 +1,399 @@
+.topbar nav a.activeNav {
+  border: 1px solid rgba(55, 163, 255, 0.5);
+  background: rgba(55, 163, 255, 0.2);
+  color: #ffffff;
+  box-shadow: inset 0 -2px 0 #37a3ff;
+}
+
+.topbar nav .navDropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.topbar nav .navDropdown > button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 13px 15px;
+  border-radius: 8px;
+  transition: 0.2s ease;
+}
+
+.topbar nav .navDropdown > button:hover,
+.topbar nav .navDropdown:focus-within > button,
+.topbar nav .navDropdown > button.activeNav {
+  border-color: rgba(55, 163, 255, 0.5);
+  background: rgba(55, 163, 255, 0.2);
+  color: #ffffff;
+  box-shadow: inset 0 -2px 0 #37a3ff;
+}
+
+.navDropdownMenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(130px, 1fr));
+  gap: 8px;
+  min-width: 300px;
+  padding: 10px;
+  border: 1px solid rgba(55, 163, 255, 0.34);
+  border-radius: 8px;
+  background: rgba(7, 18, 43, 0.97);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(8px) scale(0.98);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.navDropdownMenu::before {
+  content: "";
+  position: absolute;
+  top: -11px;
+  left: 0;
+  right: 0;
+  height: 11px;
+}
+
+.navDropdown:hover .navDropdownMenu,
+.navDropdown:focus-within .navDropdownMenu,
+.navDropdownMenu.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.topbar nav .navDropdownMenu a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  border: 1px solid rgba(55, 163, 255, 0.18);
+  background: linear-gradient(135deg, rgba(55, 163, 255, 0.11), rgba(79, 224, 255, 0.05));
+  color: #d9ecff;
+  text-align: center;
+}
+
+.topbar nav .navDropdownMenu a:hover,
+.topbar nav .navDropdownMenu a.activeNav {
+  border-color: rgba(79, 224, 255, 0.72);
+  background: linear-gradient(135deg, rgba(26, 108, 246, 0.28), rgba(79, 224, 255, 0.18));
+  color: #ffffff;
+}
+
+.salesControlBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.salesControlBar > div {
+  display: grid;
+  margin-right: auto;
+}
+
+.salesControlBar strong {
+  font-size: 22px;
+}
+
+.salesControlBar span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.transactionScroll {
+  max-height: 760px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.unitRow form,
+.paymentRow form {
+  margin: 0;
+}
+
+.unitRow {
+  grid-template-columns: 60px minmax(0, 1fr) auto auto;
+}
+
+.salesUnitRow {
+  grid-template-columns: 60px minmax(0, 1fr) auto;
+}
+
+.unitNumber {
+  width: 50px;
+  font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.batchUnitSortBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 12px;
+}
+
+.batchUnitSortBar > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.chargerCountGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.panelSubsection {
+  display: grid;
+  gap: 10px;
+}
+
+.chargerSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chargerSummary span,
+.photoPill {
+  border: 1px solid rgba(55, 163, 255, 0.35);
+  background: rgba(55, 163, 255, 0.12);
+  color: #7cc7ff;
+}
+
+.unitBadgeStack {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.readyUnitRow {
+  border-color: rgba(40, 232, 154, 0.48);
+  background: linear-gradient(90deg, rgba(40, 232, 154, 0.1), rgba(10, 22, 38, 0.72));
+}
+
+.photoUnitRow {
+  box-shadow: inset 3px 0 0 rgba(55, 163, 255, 0.75);
+}
+
+.localShareButton {
+  width: fit-content;
+  border: 0;
+  background: transparent;
+  color: #7cc7ff;
+  padding: 0;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.localShareButton:hover {
+  color: #ffffff;
+}
+
+.labelProblemNote {
+  display: block;
+  max-height: 24px;
+  overflow: hidden;
+  color: #c7251e;
+  font-size: 7pt;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.receiptMeta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 12px;
+  text-align: right;
+}
+
+.receiptMetaText {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.receiptMetaText span:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.attendanceCapture {
+  display: grid;
+  gap: 10px;
+}
+
+.attendancePhotoPreview,
+.attendanceThumb {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.attendancePhotoPreview {
+  width: 150px;
+  height: 110px;
+}
+
+.attendanceThumb {
+  display: block;
+  width: 72px;
+  height: 52px;
+  margin-bottom: 6px;
+}
+
+@page receipt {
+  size: A4 portrait;
+  margin: 8mm;
+}
+
+@media print {
+  body,
+  main,
+  .pageStack {
+    width: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .receiptPage {
+    max-width: none;
+    page: receipt;
+  }
+
+  .receiptPaper {
+    width: 186mm;
+    min-height: 0;
+    height: auto;
+    max-height: 132mm;
+    overflow: visible;
+    margin: 0 auto;
+    font-size: 8.6pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .receiptTop {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 3mm;
+    padding-bottom: 2mm;
+  }
+
+  .receiptLogo {
+    width: 6mm;
+    height: 6mm;
+    margin-bottom: 0.8mm;
+    border-radius: 1mm;
+    font-size: 6pt;
+  }
+
+  .receiptTop h2 {
+    font-size: 15pt;
+    line-height: 1;
+  }
+
+  .receiptTop p,
+  .receiptTop small,
+  .receiptTerms p {
+    margin-top: 0.5mm;
+    line-height: 1.08;
+  }
+
+  .receiptMeta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 1.6mm;
+    text-align: right;
+  }
+
+  .receiptMetaText {
+    gap: 0.6mm;
+  }
+
+  .receiptMeta strong {
+    font-size: 9pt;
+  }
+
+  .receiptMeta svg {
+    width: 12mm;
+    height: 12mm;
+    flex: 0 0 auto;
+  }
+
+  .receiptInfoGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.4mm;
+    margin: 2mm 0;
+  }
+
+  .receiptInfoGrid div,
+  .receiptUnit,
+  .receiptTerms,
+  .receiptTotals {
+    padding: 1.4mm 1.8mm;
+    border-radius: 1.2mm;
+  }
+
+  .receiptUnit {
+    gap: 2mm;
+    margin-bottom: 2mm;
+  }
+
+  .receiptUnit svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .receiptTableHead,
+  .receiptLine {
+    grid-template-columns: minmax(0, 1fr) 13mm 24mm 26mm;
+    padding: 1mm 1.8mm;
+    gap: 1.5mm;
+  }
+
+  .receiptLine small,
+  .receiptInfoGrid small,
+  .receiptUnit span {
+    margin-top: 0.3mm;
+  }
+
+  .receiptFooter {
+    grid-template-columns: minmax(0, 1fr) 34mm;
+    gap: 1.5mm;
+    margin-top: 1.6mm;
+  }
+
+  .receiptTotals strong {
+    font-size: 14pt;
+  }
+
+  .receiptBankNote {
+    gap: 0.5mm;
+    margin-top: 1.5mm;
+    padding-top: 1mm;
+    font-size: 6.4pt;
+  }
+}
+

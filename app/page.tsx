@@ -7,6 +7,7 @@ import { getDueDailyQcUnits } from "@/lib/qc-due-data";
 import { getCurrentUser } from "@/lib/session";
 import { getSoftwareResolutionUnits } from "@/lib/software-resolution-data";
 import { CopyWaButton } from "./CopyWaButton";
+import { AutoRefresh } from "./AutoRefresh";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,12 @@ export default async function DashboardPage() {
     getSoftwareResolutionUnits()
   ]);
   const publicUrl = process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id";
+  const groupedAiLogs = Array.from(aiLogs.reduce((groups, log) => {
+    const logs = groups.get(log.unitNomor) ?? [];
+    logs.push(log);
+    groups.set(log.unitNomor, logs);
+    return groups;
+  }, new Map<string, typeof aiLogs>()));
   const dueDailyQcWaText = [
     `*FS Comp Core - Unit Wajib QC Harian*`,
     `Total: ${dueDailyQc.count} unit`,
@@ -75,6 +82,7 @@ export default async function DashboardPage() {
 
   return (
     <section className="pageStack">
+      <AutoRefresh />
       <div className="heroPanel">
         <div>
           <p className="eyebrow">Operasional hari ini</p>
@@ -214,10 +222,10 @@ export default async function DashboardPage() {
             <Sparkles size={22} />
           </div>
           <div className="listStack">
-            {aiLogs.length === 0 ? <div className="emptyState">Belum ada AI log dari database.</div> : aiLogs.map((log) => (
-              <div className="aiLog" key={log.id}>
-                <strong>Unit {log.unitNomor}</strong>
-                <p>{log.rekomendasi}</p>
+            {groupedAiLogs.length === 0 ? <div className="emptyState">Belum ada AI log dari database.</div> : groupedAiLogs.map(([unitNomor, logs]) => (
+              <div className="aiLog" key={unitNomor}>
+                <strong>Unit {unitNomor}</strong>
+                {logs.map((log) => <p key={log.id}>{log.rekomendasi}</p>)}
               </div>
             ))}
           </div>

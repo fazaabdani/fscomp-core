@@ -5,7 +5,7 @@ import { getBatchForEdit } from "@/lib/db-data";
 import { requireRole } from "@/lib/session";
 import { updateBatchAction } from "../../actions";
 
-export default async function EditBatchPage({ params }: { params: { id: string } }) {
+export default async function EditBatchPage({ params, searchParams }: { params: { id: string }; searchParams?: { error?: string } }) {
   requireRole(["admin", "teknisi"]);
   const batch = await getBatchForEdit(params.id);
   if (!batch) notFound();
@@ -20,6 +20,8 @@ export default async function EditBatchPage({ params }: { params: { id: string }
           <h1>{batch.nomorBatch}</h1>
         </div>
       </div>
+
+      {searchParams?.error ? <div className="infoBox dangerInfo">Data batch belum valid. Periksa semua field wajib.</div> : null}
 
       <form className="panel formGrid" action={action}>
         <label>Nomor Batch<input name="nomorBatch" defaultValue={batch.nomorBatch} required /></label>

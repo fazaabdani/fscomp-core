@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/session";
 import { createDailyQcAction } from "./actions";
 import { QcUnitSelect } from "./QcUnitSelect";
 import { StockLocationField } from "./StockLocationField";
+import { AutoRefresh } from "../AutoRefresh";
 
 const checklist = [
   { label: "Keyboard", name: "keyboard", icon: Keyboard },
@@ -26,6 +27,7 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
 
   return (
     <section className="pageStack">
+      <AutoRefresh />
       <div className="sectionTitle">
         <div>
           <p className="eyebrow">QC Harian</p>

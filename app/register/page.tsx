@@ -8,6 +8,8 @@ export default function RegisterPage({ searchParams }: { searchParams?: { error?
       ? "Username atau email sudah dipakai. Pilih username lain."
       : searchParams?.error === "required"
         ? "Nama, username, dan password wajib diisi."
+        : searchParams?.error === "invalid-input"
+          ? "Data akun belum valid. Username minimal 3 karakter dan password minimal 8 karakter."
         : searchParams?.success === "waiting"
           ? "Pengajuan akun berhasil. Tunggu admin mengaktifkan akun ini."
           : "";

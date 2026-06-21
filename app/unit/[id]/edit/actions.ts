@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { entityId, formValues, percentage, requiredText, rupiahInput, z } from "@/lib/form-validation";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -25,6 +26,20 @@ function rupiahValue(formData: FormData, key: string, fallback = 0) {
 
 export async function updateUnitAction(unitId: string, formData: FormData) {
   const currentUser = requireRole(["admin"]);
+  const validation = z.object({
+    nomorUnit: requiredText(100),
+    model: requiredText(200),
+    processor: requiredText(200),
+    ram: requiredText(100),
+    ssd: requiredText(100),
+    hargaModal: rupiahInput,
+    hargaJualRekomendasi: rupiahInput,
+    stockLocation: z.enum(["WIRADESA", "KAJEN"]),
+    ssdHealth: percentage,
+    batteryHealth: percentage,
+    statusObservasi: z.enum(["RECHECK", "CANDIDATE_RETUR", "RETUR_DISTRIBUTOR", "VERIFIED", "VERIFIED_WITH_NOTES"])
+  }).safeParse(formValues(formData));
+  if (!entityId.safeParse(unitId).success || !validation.success) redirect(`/unit/${unitId}/edit?error=invalid-input`);
   const nomorUnit = text(formData, "nomorUnit");
   const currentUnit = await prisma.unit.findUnique({
     where: { id: unitId },

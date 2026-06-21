@@ -7,6 +7,7 @@ import { batches as demoBatches } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { unitNumberWithBatchDate } from "@/lib/unit-number";
+import { entityId, formValues, requiredText, rupiahInput, z } from "@/lib/form-validation";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -27,6 +28,15 @@ function qcStatusFromFlow(value: string): UnitStatus {
 
 export async function createUnitWithInitialQcAction(formData: FormData) {
   requireRole(["admin", "teknisi"]);
+  const validation = z.object({
+    batchId: entityId,
+    nomorUnit: requiredText(100),
+    processor: requiredText(200),
+    ram: requiredText(100),
+    hargaModal: rupiahInput,
+    hargaJualRekomendasi: rupiahInput
+  }).safeParse(formValues(formData));
+  if (!validation.success) redirect(`/unit/new?batch=${text(formData, "batchId")}&error=invalid-input`);
   const batchId = text(formData, "batchId");
   const rawNomorUnit = text(formData, "nomorUnit");
   const merk = text(formData, "merk");

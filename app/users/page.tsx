@@ -20,8 +20,10 @@ export default async function UsersPage({ searchParams }: { searchParams?: { err
   const message =
     searchParams?.error === "duplicate"
       ? "Username atau email sudah dipakai user lain."
-      : searchParams?.error === "required"
-        ? "Nama, username, dan password wajib diisi."
+        : searchParams?.error === "required"
+          ? "Nama, username, dan password wajib diisi."
+        : searchParams?.error === "invalid-input"
+          ? "Data user belum valid. Periksa username, password, email, dan role."
         : searchParams?.error === "last-admin"
           ? "Admin aktif terakhir tidak boleh dinonaktifkan."
           : searchParams?.error === "password-required"

@@ -137,7 +137,8 @@ export function ThemeDynamics() {
     }
 
     resize();
-    particles.push(...Array.from({ length: 80 }, makeParticle));
+    const particleCount = window.matchMedia("(max-width: 600px)").matches ? 40 : 80;
+    particles.push(...Array.from({ length: particleCount }, makeParticle));
     window.addEventListener("resize", resize);
     window.addEventListener("mousemove", handleMouseMove);
     frame = window.requestAnimationFrame(draw);

@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { windowsVersionReminder } from "@/lib/windows-recommendation";
+import { entityId, formValues, percentage, z } from "@/lib/form-validation";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -87,6 +88,14 @@ async function ensureChecker(name: string, role: "admin" | "teknisi" | "sales" |
 
 export async function createDailyQcAction(formData: FormData) {
   const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
+  const validation = z.object({
+    unitId: entityId,
+    ssdHealth: percentage,
+    batteryHealth: percentage,
+    stockLocation: z.enum(["WIRADESA", "KAJEN"]),
+    partitionCount: z.coerce.number().int().min(1).max(20)
+  }).safeParse(formValues(formData));
+  if (!validation.success) redirect("/qc-harian?error=invalid-input");
   const unitId = text(formData, "unitId");
 
   if (!unitId) {

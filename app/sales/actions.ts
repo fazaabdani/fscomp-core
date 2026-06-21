@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { entityId, formValues, nonNegativeInteger, optionalText, positiveInteger, requiredText, z } from "@/lib/form-validation";
 import { inferLicenseType, inferLicenseVersion, licenseDisplayName } from "@/lib/licenses";
 
 function text(formData: FormData, key: string) {
@@ -179,6 +180,18 @@ async function notifySaleToN8n(payload: {
 
 export async function createSaleAction(formData: FormData) {
   const currentUser = requireRole(["admin", "teknisi", "sales"]);
+
+  const validation = z.object({
+    unitId: entityId,
+    soldPrice: positiveInteger,
+    dpAmount: nonNegativeInteger.optional().or(z.literal("")),
+    paymentMethod: requiredText(40),
+    buyerName: optionalText(120),
+    buyerPhone: optionalText(30),
+    buyerAddress: optionalText(500),
+    notes: optionalText(1000)
+  }).safeParse(formValues(formData));
+  if (!validation.success) redirect("/sales?error=invalid-input");
 
   const unitId = text(formData, "unitId");
   const soldPrice = numberValue(formData, "soldPrice");
@@ -360,6 +373,7 @@ export async function createSaleAction(formData: FormData) {
 
 export async function voidSaleAction(saleId: string, formData: FormData) {
   requireRole(["admin"]);
+  if (!entityId.safeParse(saleId).success) redirect("/sales?error=invalid-input");
   const reason = text(formData, "voidReason") || "Transaksi dibatalkan";
 
   const sale = await prisma.sale.findUnique({ where: { id: saleId } });
@@ -391,6 +405,7 @@ export async function voidSaleAction(saleId: string, formData: FormData) {
 
 export async function restoreSaleAction(saleId: string) {
   requireRole(["admin"]);
+  if (!entityId.safeParse(saleId).success) redirect("/sales?error=invalid-input");
 
   const sale = await prisma.sale.findUnique({ where: { id: saleId } });
   if (!sale) {

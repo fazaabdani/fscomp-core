@@ -6,6 +6,15 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { ensureDefaultLoginUsers, roleToDb } from "@/lib/user-store";
 import type { User } from "@/lib/auth";
+import { entityId, formValues, optionalText, requiredText, z } from "@/lib/form-validation";
+
+const userFormSchema = z.object({
+  name: requiredText(160),
+  username: z.string().trim().min(3).max(80).regex(/^[a-zA-Z0-9._-]+$/),
+  password: z.string().max(200),
+  email: optionalText(200),
+  role: z.enum(["admin", "teknisi", "sales", "magang"])
+});
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -101,6 +110,8 @@ async function isLastActiveAdmin(userId: string) {
 export async function createUserAction(formData: FormData) {
   requireRole(["admin"]);
   await ensureDefaultLoginUsers();
+  const validation = userFormSchema.extend({ password: z.string().min(8).max(200) }).safeParse(formValues(formData));
+  if (!validation.success) redirect("/users?error=invalid-input");
 
   const name = text(formData, "name");
   const username = text(formData, "username").toLowerCase();
@@ -143,7 +154,7 @@ export async function importUsersCsvAction(formData: FormData) {
   await ensureDefaultLoginUsers();
 
   const file = formData.get("csvFile");
-  if (!isUploadedTextFile(file) || file.size === 0) {
+  if (!isUploadedTextFile(file) || file.size === 0 || file.size > 5_000_000) {
     redirect("/users?error=csv-required");
   }
 
@@ -218,6 +229,9 @@ export async function importUsersCsvAction(formData: FormData) {
 export async function updateUserAction(userId: string, formData: FormData) {
   requireRole(["admin"]);
   await ensureDefaultLoginUsers();
+  if (!entityId.safeParse(userId).success || !userFormSchema.safeParse(formValues(formData)).success) {
+    redirect(`/users/${userId}/edit?error=invalid-input`);
+  }
 
   const name = text(formData, "name");
   const username = text(formData, "username").toLowerCase();
@@ -279,6 +293,7 @@ export async function updateUserAction(userId: string, formData: FormData) {
 export async function deactivateUserAction(userId: string) {
   requireRole(["admin"]);
   await ensureDefaultLoginUsers();
+  if (!entityId.safeParse(userId).success) redirect("/users?error=invalid-input");
 
   if (await isLastActiveAdmin(userId)) {
     redirect("/users?error=last-admin");
@@ -296,6 +311,7 @@ export async function deactivateUserAction(userId: string) {
 export async function activateUserAction(userId: string) {
   requireRole(["admin"]);
   await ensureDefaultLoginUsers();
+  if (!entityId.safeParse(userId).success) redirect("/users?error=invalid-input");
 
   const user = await prisma.user.findUnique({
     where: { id: userId },

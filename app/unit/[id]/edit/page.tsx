@@ -15,6 +15,8 @@ export default async function EditUnitPage({ params, searchParams }: { params: {
   const errorMessage =
     searchParams?.error === "duplicate-unit"
       ? "Nomor unit ini sudah dipakai unit lain di batch yang sama."
+      : searchParams?.error === "invalid-input"
+        ? "Data unit belum valid. Periksa field wajib, health, harga, lokasi, dan status."
       : "";
 
   return (

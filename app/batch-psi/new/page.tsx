@@ -4,7 +4,7 @@ import { chargerFieldName, chargerTypes } from "@/lib/charger-options";
 import { requireRole } from "@/lib/session";
 import { createBatchAction } from "../actions";
 
-export default function NewBatchPage() {
+export default function NewBatchPage({ searchParams }: { searchParams?: { error?: string } }) {
   requireRole(["admin", "teknisi"]);
 
   return (
@@ -16,6 +16,8 @@ export default function NewBatchPage() {
           <h1>Input batch PSI baru</h1>
         </div>
       </div>
+
+      {searchParams?.error ? <div className="infoBox dangerInfo">Data batch belum valid. Periksa nomor batch, supplier, dan tanggal.</div> : null}
 
       <form className="panel formGrid" action={createBatchAction}>
         <label>Nomor Batch<input name="nomorBatch" placeholder="PSI-2026-05-C" required /></label>

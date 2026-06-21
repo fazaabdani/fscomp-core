@@ -16,6 +16,8 @@ export default async function EditUserPage({ params, searchParams }: { params: {
       ? "Username atau email sudah dipakai user lain."
       : searchParams?.error === "required"
         ? "Nama dan username wajib diisi."
+        : searchParams?.error === "invalid-input"
+          ? "Data user belum valid. Periksa username, password, email, dan role."
         : searchParams?.error === "last-admin"
           ? "Admin aktif terakhir tidak boleh dinonaktifkan."
           : searchParams?.error === "password-required"

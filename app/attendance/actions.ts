@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { getOrCreateDbUserForSession } from "@/lib/user-store";
+import { formValues, requiredText, z } from "@/lib/form-validation";
 
 function requiredString(formData: FormData, name: string) {
   return String(formData.get(name) ?? "").trim();
@@ -34,6 +35,13 @@ function endOfToday() {
 
 export async function checkInAction(formData: FormData) {
   const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
+  const validation = z.object({
+    photoDataUrl: requiredText(8_000_000),
+    latitude: z.coerce.number().min(-90).max(90),
+    longitude: z.coerce.number().min(-180).max(180),
+    accuracy: z.coerce.number().min(0).max(100_000).optional()
+  }).safeParse(formValues(formData));
+  if (!validation.success) redirect("/attendance?error=invalid-input");
   const dbUser = await getOrCreateDbUserForSession(currentUser);
   const now = new Date();
   const photoDataUrl = requiredString(formData, "photoDataUrl");

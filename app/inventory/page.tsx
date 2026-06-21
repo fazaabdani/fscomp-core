@@ -6,6 +6,7 @@ import { formatDateInput, formatDateWib, inventoryStatusLabel, inventoryStatusTo
 import { requireRole } from "@/lib/session";
 import { formatRupiah } from "@/lib/api";
 import { createInventoryItemAction } from "./actions";
+import { FlashNotice } from "../FlashNotice";
 
 const categories = ["SSD", "RAM", "CHARGER", "BATERAI", "LCD", "KEYBOARD", "AKSESORIS", "LAINNYA"];
 
@@ -44,6 +45,8 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
   const message =
     searchParams?.error === "required"
       ? "Nama barang, supplier, dan tanggal beli wajib diisi."
+      : searchParams?.error === "invalid-input"
+        ? "Data inventaris belum valid. Periksa tanggal dan nilai angka."
       : searchParams?.success === "created"
         ? "Barang masuk berhasil direkap."
         : searchParams?.success === "updated"
@@ -61,7 +64,7 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
         <Boxes size={30} />
       </div>
 
-      {message ? <div className={`infoBox ${searchParams?.error ? "dangerInfo" : ""}`}>{message}</div> : null}
+      <FlashNotice message={message} tone={searchParams?.error ? "error" : "success"} queryKeys={["error", "success"]} />
 
       <section className="statGrid">
         <article className="statCard"><PackagePlus size={19} /><span>Stok barang</span><strong>{stockCount}</strong></article>

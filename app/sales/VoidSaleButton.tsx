@@ -3,7 +3,7 @@
 export function VoidSaleButton({ saleLabel, compact = false }: { saleLabel: string; compact?: boolean }) {
   return (
     <button
-      className={`secondaryButton ${compact ? "compactButton" : ""}`}
+      className={`secondaryButton dangerButton ${compact ? "compactButton" : ""}`}
       type="submit"
       onClick={(event) => {
         const confirmed = window.confirm(

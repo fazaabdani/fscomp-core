@@ -7,6 +7,7 @@ import { formatRupiah } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { createLicenseRecordAction } from "./actions";
+import { FlashNotice } from "../FlashNotice";
 
 const licenseTypes: LicenseType[] = ["OFFICE", "WINDOWS", "ANTIVIRUS", "OTHER"];
 const durationTypes: LicenseDurationType[] = ["LIFETIME", "YEARLY", "CUSTOM"];
@@ -43,6 +44,8 @@ export default async function LicensesPage({ searchParams }: { searchParams?: { 
   const message =
     searchParams?.error === "required"
       ? "Versi lisensi dan tanggal pembelian wajib diisi."
+      : searchParams?.error === "invalid-input"
+        ? "Data lisensi belum valid. Periksa versi, tanggal, dan harga."
       : searchParams?.success === "created"
         ? "Lisensi berhasil direkap."
         : "";
@@ -58,7 +61,7 @@ export default async function LicensesPage({ searchParams }: { searchParams?: { 
         <KeyRound size={31} />
       </div>
 
-      {message ? <div className={`infoBox ${searchParams?.error ? "dangerInfo" : ""}`}>{message}</div> : null}
+      <FlashNotice message={message} tone={searchParams?.error ? "error" : "success"} queryKeys={["error", "success"]} />
 
       <section className="statGrid">
         <article className="statCard"><BadgeCheck size={19} /><span>Lifetime</span><strong>{lifetimeCount}</strong></article>

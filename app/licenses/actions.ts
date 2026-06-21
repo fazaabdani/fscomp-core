@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { licenseDisplayName } from "@/lib/licenses";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { dateInput, formValues, nonNegativeInteger, requiredText, z } from "@/lib/form-validation";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -39,6 +40,13 @@ function statusValue(value: string): LicenseStatus {
 
 export async function createLicenseRecordAction(formData: FormData) {
   const currentUser = requireRole(["admin", "sales"]);
+  const validation = z.object({
+    version: requiredText(100),
+    purchaseDate: dateInput,
+    salePrice: nonNegativeInteger,
+    costPrice: nonNegativeInteger
+  }).safeParse(formValues(formData));
+  if (!validation.success) redirect("/licenses?error=invalid-input");
   const licenseType = licenseTypeValue(text(formData, "licenseType"));
   const version = text(formData, "version");
   const purchaseDate = dateValue(text(formData, "purchaseDate"));
