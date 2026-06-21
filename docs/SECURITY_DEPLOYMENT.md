@@ -9,6 +9,14 @@ N8N_WEBHOOK_SECRET=<token-acak-minimal-24-karakter>
 BACKUP_EXPORT_TOKEN=<token-acak-minimal-24-karakter>
 ```
 
+Semua nilai dapat dibuat sekaligus dengan:
+
+```bash
+npm run security:generate
+```
+
+Salin hasilnya langsung ke Coolify dan jangan kirim screenshot yang menampilkan nilainya.
+
 Gunakan token berbeda untuk setiap variabel. `SESSION_SECRET` tidak boleh diganti rutin karena penggantian akan mengeluarkan semua sesi aktif.
 
 Endpoint n8n menerima token melalui header `x-api-key` atau `Authorization: Bearer <token>`. Backup otomatis menerima `x-backup-token`, `x-api-key`, atau bearer token. Token tidak lagi diterima lewat query string agar tidak masuk log URL.
