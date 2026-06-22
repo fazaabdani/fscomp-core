@@ -9,6 +9,8 @@ import { statusTone } from "@/lib/constants";
 import { deleteBatchAction, deleteUnitFromBatchAction, markUnitReturnedAction } from "./actions";
 import { DeleteBatchButton } from "./DeleteBatchButton";
 import { DeleteUnitButton } from "./DeleteUnitButton";
+import { BatchUnitSorter } from "./BatchUnitSorter";
+import { FlashNotice } from "../FlashNotice";
 
 const paymentTone: Record<string, string> = {
   Lunas: "green",
@@ -17,29 +19,8 @@ const paymentTone: Record<string, string> = {
   "Butuh follow up": "red"
 };
 
-function sortBatchUnits<T extends { nomorUnit: string; model: string; statusObservasi: string; catalogImageUrl?: string; hargaModal: number }>(units: T[], sort: string) {
-  return [...units].sort((a, b) => {
-    if (sort === "model") return a.model.localeCompare(b.model, "id", { numeric: true });
-    if (sort === "status") return a.statusObservasi.localeCompare(b.statusObservasi, "id", { numeric: true });
-    if (sort === "modal") return b.hargaModal - a.hargaModal;
-    if (sort === "foto") return Number(Boolean(b.catalogImageUrl)) - Number(Boolean(a.catalogImageUrl));
-    if (sort === "ready") {
-      const readyA = a.statusObservasi === "VERIFIED" || a.statusObservasi === "VERIFIED WITH NOTES";
-      const readyB = b.statusObservasi === "VERIFIED" || b.statusObservasi === "VERIFIED WITH NOTES";
-      return Number(readyB) - Number(readyA);
-    }
-    return a.nomorUnit.localeCompare(b.nomorUnit, "id", { numeric: true });
-  });
-}
-
 function includesText(value: unknown, q: string) {
   return String(value ?? "").toLowerCase().includes(q);
-}
-
-function batchHref(params: Record<string, string>) {
-  const query = new URLSearchParams(params);
-  const text = query.toString();
-  return text ? `/batch-psi?${text}` : "/batch-psi";
 }
 
 export default async function BatchPsiPage({ searchParams }: { searchParams?: { error?: string; deleted?: string; returned?: string; sort?: string; q?: string; status?: string } }) {
@@ -51,6 +32,29 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
   const activeSort = searchParams?.sort ?? "unit";
   const q = (searchParams?.q ?? "").trim().toLowerCase();
   const statusFilter = searchParams?.status ?? "semua";
+  const flashMessage = searchParams?.deleted === "unit"
+    ? "Unit berhasil dihapus dari batch."
+    : searchParams?.deleted === "batch"
+      ? "Batch berhasil dihapus."
+      : searchParams?.returned === "unit"
+        ? "Unit ditandai retur distributor dan tidak dihitung sebagai unit dibayar."
+        : searchParams?.error === "unit-sold"
+          ? "Unit sudah terjual, jadi tidak bisa dihapus dari batch."
+          : searchParams?.error === "unit-sale-history"
+            ? "Unit punya riwayat transaksi/nota dan tidak bisa dihapus."
+            : searchParams?.error === "unit-related-data"
+              ? "Unit masih punya data terkait. Tandai retur atau hubungi admin teknis."
+              : searchParams?.error === "unit-sold-retur"
+                ? "Unit sudah terjual dan tidak bisa ditandai retur distributor."
+                : searchParams?.error === "batch-confirm"
+                  ? "Konfirmasi hapus batch gagal. Username login tidak cocok."
+                  : searchParams?.error === "batch-not-found"
+                    ? "Batch tidak ditemukan."
+                    : searchParams?.error === "batch-has-sales"
+                      ? "Batch memiliki unit terjual atau riwayat nota dan tidak bisa dihapus."
+                      : searchParams?.error === "batch-related-data"
+                        ? "Batch masih punya data terkait dan belum bisa dihapus aman."
+                        : "";
 
   return (
     <section className="pageStack">
@@ -69,17 +73,7 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
         )}
       </div>
 
-      {searchParams?.deleted === "unit" ? <div className="successBox">Unit berhasil dihapus dari batch.</div> : null}
-      {searchParams?.deleted === "batch" ? <div className="successBox">Batch berhasil dihapus.</div> : null}
-      {searchParams?.returned === "unit" ? <div className="successBox">Unit ditandai retur distributor dan tidak dihitung sebagai unit dibayar.</div> : null}
-      {searchParams?.error === "unit-sold" ? <div className="infoBox dangerInfo">Unit sudah terjual, jadi tidak bisa dihapus dari batch.</div> : null}
-      {searchParams?.error === "unit-sale-history" ? <div className="infoBox dangerInfo">Unit punya riwayat transaksi/nota, jadi tidak bisa dihapus. Batalkan transaksi dulu atau biarkan sebagai arsip.</div> : null}
-      {searchParams?.error === "unit-related-data" ? <div className="infoBox dangerInfo">Unit masih punya data terkait, jadi belum bisa dihapus aman. Coba tandai retur atau hubungi admin teknis.</div> : null}
-      {searchParams?.error === "unit-sold-retur" ? <div className="infoBox dangerInfo">Unit sudah terjual, jadi tidak bisa ditandai retur distributor.</div> : null}
-      {searchParams?.error === "batch-confirm" ? <div className="infoBox dangerInfo">Konfirmasi hapus batch gagal. Username login tidak cocok.</div> : null}
-      {searchParams?.error === "batch-not-found" ? <div className="infoBox dangerInfo">Batch tidak ditemukan.</div> : null}
-      {searchParams?.error === "batch-has-sales" ? <div className="infoBox dangerInfo">Batch punya unit yang sudah terjual atau punya riwayat nota, jadi tidak bisa dihapus.</div> : null}
-      {searchParams?.error === "batch-related-data" ? <div className="infoBox dangerInfo">Batch masih punya data terkait, jadi belum bisa dihapus aman.</div> : null}
+      <FlashNotice message={flashMessage} tone={searchParams?.error ? "error" : "success"} queryKeys={["error", "deleted", "returned"]} />
 
       <form className="panel formGrid" action="/batch-psi">
         <div className="panelHeader">
@@ -89,7 +83,6 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
           </div>
           <Search size={22} />
         </div>
-        <input type="hidden" name="sort" value={activeSort} />
         <div className="numberGrid">
           <label>Cari
             <input name="q" defaultValue={searchParams?.q ?? ""} placeholder="Nomor batch, supplier, unit, model, spek, charger" />
@@ -124,7 +117,7 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
             return [unit.nomorUnit, unit.model, unit.processor, unit.ram, unit.ssd, unit.chargerType, unit.statusObservasi].some((value) => includesText(value, q));
           });
           if ((q || statusFilter !== "semua") && filteredUnits.length === 0) return null;
-          const batchUnits = sortBatchUnits(filteredUnits, activeSort);
+          const batchUnits = filteredUnits;
           const totalModal = batchUnits.reduce((sum, unit) => sum + unit.hargaModal, 0);
           const chargerSummary = chargerTypes
             .map((chargerType) => ({ type: chargerType, count: batch.chargerCounts?.[chargerType] ?? 0 }))
@@ -154,21 +147,17 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
               ) : null}
               <p className="bodyText">{batch.catatan}</p>
 
-              <div className="batchUnitSortBar">
-                <span>Sortir unit</span>
-                <Link className={`sortPill ${activeSort === "unit" ? "active" : ""}`} href={batchHref({ sort: "unit", q: searchParams?.q ?? "", status: statusFilter })}>Nomor</Link>
-                <Link className={`sortPill ${activeSort === "ready" ? "active" : ""}`} href={batchHref({ sort: "ready", q: searchParams?.q ?? "", status: statusFilter })}>Ready</Link>
-                <Link className={`sortPill ${activeSort === "status" ? "active" : ""}`} href={batchHref({ sort: "status", q: searchParams?.q ?? "", status: statusFilter })}>Status</Link>
-                <Link className={`sortPill ${activeSort === "foto" ? "active" : ""}`} href={batchHref({ sort: "foto", q: searchParams?.q ?? "", status: statusFilter })}>Foto</Link>
-                <Link className={`sortPill ${activeSort === "model" ? "active" : ""}`} href={batchHref({ sort: "model", q: searchParams?.q ?? "", status: statusFilter })}>Model</Link>
-                <Link className={`sortPill ${activeSort === "modal" ? "active" : ""}`} href={batchHref({ sort: "modal", q: searchParams?.q ?? "", status: statusFilter })}>Modal</Link>
-              </div>
-
-              <div className="tableLike compact">
-                {batchUnits.map((unit) => {
+              <BatchUnitSorter initialSort={activeSort} units={batchUnits.map((unit) => {
                   const isReady = unit.statusObservasi === "VERIFIED" || unit.statusObservasi === "VERIFIED WITH NOTES";
                   const hasPhoto = Boolean(unit.catalogImageUrl);
-                  return (
+                  return {
+                    id: unit.id,
+                    nomorUnit: unit.nomorUnit,
+                    model: unit.model,
+                    statusObservasi: unit.statusObservasi,
+                    catalogImageUrl: unit.catalogImageUrl,
+                    hargaModal: unit.hargaModal,
+                    content: (
                   <div className={`unitRow ${isReady ? "readyUnitRow" : ""} ${hasPhoto ? "photoUnitRow" : ""}`} key={unit.id}>
                     <span className="unitNumber">{unit.nomorUnit}</span>
                     <span>
@@ -185,7 +174,7 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                         <Link className="secondaryButton compactButton" href={`/unit/${unit.id}/edit`}>Edit Unit</Link>
                         {unit.statusObservasi !== "RETUR DISTRIBUTOR" ? (
                           <form action={markUnitReturnedAction.bind(null, unit.id)}>
-                            <button className="secondaryButton compactButton" type="submit">Retur</button>
+                            <button className="secondaryButton compactButton dangerButton" type="submit">Retur</button>
                           </form>
                         ) : null}
                         <form action={deleteUnitFromBatchAction.bind(null, unit.id)}>
@@ -194,9 +183,9 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                       </div>
                     ) : null}
                   </div>
-                );})}
-                {batchUnits.length === 0 ? <div className="emptyState">Tidak ada unit aktif di batch ini.</div> : null}
-              </div>
+                    )
+                  };
+                })} />
 
               {canManageBatch ? (
                 <div className="buttonRow">

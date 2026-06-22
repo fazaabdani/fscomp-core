@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { dateInput, formValues, requiredText, z } from "@/lib/form-validation";
 
 type ImportRow = {
   merk: string;
@@ -81,6 +82,14 @@ function cleanBatchToken(value: string) {
 
 export async function importSpreadsheetBatchAction(formData: FormData) {
   requireRole(["admin", "teknisi"]);
+  const validation = z.object({
+    nomorBatch: requiredText(100),
+    supplier: requiredText(160),
+    tanggalMasuk: dateInput,
+    tanggalTempo: dateInput,
+    rows: requiredText(2_000_000)
+  }).safeParse(formValues(formData));
+  if (!validation.success) redirect("/batch-psi/import?error=invalid-input");
 
   const nomorBatch = text(formData, "nomorBatch");
   const supplier = text(formData, "supplier");

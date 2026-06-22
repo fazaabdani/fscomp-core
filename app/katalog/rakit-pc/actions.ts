@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { randomUUID } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { getPcCompatibilityIssues } from "@/lib/pc-compatibility";
+import { entityId, optionalText, z } from "@/lib/form-validation";
 
 function text(formData: FormData, key: string) { return String(formData.get(key) ?? "").trim(); }
 function limitedText(formData:FormData,key:string,max:number){return text(formData,key).slice(0,max);}
@@ -14,6 +15,20 @@ function positiveNumber(value: FormDataEntryValue | null) {
 export async function createPcBuildDraftAction(formData: FormData) {
   if(text(formData,"website"))redirect("/katalog/rakit-pc?error=invalid");
   const componentIds = Array.from(new Set(formData.getAll("componentId").map(String).filter(Boolean)));
+  const validation = z.object({
+    componentIds: z.array(entityId).min(6).max(12),
+    customerName: optionalText(100),
+    customerPhone: z.string().trim().regex(/^\+?[\d\s-]{9,20}$/),
+    need: optionalText(300),
+    notes: optionalText(1000)
+  }).safeParse({
+    componentIds,
+    customerName: text(formData, "customerName"),
+    customerPhone: text(formData, "customerPhone"),
+    need: text(formData, "need"),
+    notes: text(formData, "notes")
+  });
+  if (!validation.success) redirect("/katalog/rakit-pc?error=invalid");
   if (!componentIds.length) redirect("/katalog/rakit-pc?error=components");
 
   const components = await prisma.pcComponent.findMany({

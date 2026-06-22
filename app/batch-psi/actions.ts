@@ -6,6 +6,15 @@ import { redirect } from "next/navigation";
 import { chargerFieldName, chargerTypes } from "@/lib/charger-options";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { dateInput, entityId, formValues, requiredText, z } from "@/lib/form-validation";
+
+const batchFormSchema = z.object({
+  nomorBatch: requiredText(100),
+  supplier: requiredText(160),
+  tanggalMasuk: dateInput,
+  tanggalTempo: dateInput,
+  statusPembayaran: requiredText(80)
+});
 
 const paymentStatusMap: Record<string, PaymentStatus> = {
   "Belum jatuh tempo": "BELUM_JATUH_TEMPO",
@@ -33,6 +42,7 @@ function chargerCountsFromForm(formData: FormData) {
 
 export async function createBatchAction(formData: FormData) {
   requireRole(["admin", "teknisi"]);
+  if (!batchFormSchema.safeParse(formValues(formData)).success) redirect("/batch-psi/new?error=invalid-input");
 
   const nomorBatch = text(formData, "nomorBatch");
   const supplier = text(formData, "supplier");
@@ -65,6 +75,9 @@ export async function createBatchAction(formData: FormData) {
 
 export async function updateBatchAction(batchId: string, formData: FormData) {
   requireRole(["admin", "teknisi"]);
+  if (!entityId.safeParse(batchId).success || !batchFormSchema.safeParse(formValues(formData)).success) {
+    redirect(`/batch-psi/${batchId}/edit?error=invalid-input`);
+  }
 
   const nomorBatch = text(formData, "nomorBatch");
   const supplier = text(formData, "supplier");
@@ -102,6 +115,7 @@ export async function updateBatchAction(batchId: string, formData: FormData) {
 
 export async function deleteBatchAction(batchId: string, formData: FormData) {
   const currentUser = requireRole(["admin"]);
+  if (!entityId.safeParse(batchId).success) redirect("/batch-psi?error=invalid-input");
   const confirmUsername = text(formData, "confirmUsername");
 
   if (confirmUsername !== currentUser.username) {
@@ -158,6 +172,7 @@ export async function deleteBatchAction(batchId: string, formData: FormData) {
 
 export async function deleteUnitFromBatchAction(unitId: string) {
   requireRole(["admin", "teknisi"]);
+  if (!entityId.safeParse(unitId).success) redirect("/batch-psi?error=invalid-input");
 
   const unit = await prisma.unit.findUnique({
     where: { id: unitId },
@@ -205,6 +220,7 @@ export async function deleteUnitFromBatchAction(unitId: string) {
 
 export async function markUnitReturnedAction(unitId: string) {
   requireRole(["admin", "teknisi"]);
+  if (!entityId.safeParse(unitId).success) redirect("/batch-psi?error=invalid-input");
 
   const unit = await prisma.unit.findUnique({
     where: { id: unitId },

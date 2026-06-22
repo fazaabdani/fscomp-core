@@ -3,9 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { hashPassword } from "@/lib/password";
 import { requireRole } from "@/lib/session";
-import { ensureDefaultLoginUsers, roleToDb } from "@/lib/user-store";
+import { roleToDb } from "@/lib/user-store";
 import type { User } from "@/lib/auth";
+import { entityId, formValues, optionalText, requiredText, z } from "@/lib/form-validation";
+
+const userFormSchema = z.object({
+  name: requiredText(160),
+  username: z.string().trim().min(3).max(80).regex(/^[a-zA-Z0-9._-]+$/),
+  password: z.string().max(200),
+  email: optionalText(200),
+  role: z.enum(["admin", "teknisi", "sales", "magang"])
+});
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -100,7 +110,8 @@ async function isLastActiveAdmin(userId: string) {
 
 export async function createUserAction(formData: FormData) {
   requireRole(["admin"]);
-  await ensureDefaultLoginUsers();
+  const validation = userFormSchema.extend({ password: z.string().min(8).max(200) }).safeParse(formValues(formData));
+  if (!validation.success) redirect("/users?error=invalid-input");
 
   const name = text(formData, "name");
   const username = text(formData, "username").toLowerCase();
@@ -111,6 +122,7 @@ export async function createUserAction(formData: FormData) {
   if (!name || !username || !password) {
     redirect("/users?error=required");
   }
+  if (password.length < 8) redirect("/users?error=password-short");
 
   const existing = await prisma.user.findFirst({
     where: {
@@ -127,7 +139,7 @@ export async function createUserAction(formData: FormData) {
     data: {
       name,
       username,
-      password,
+      password: await hashPassword(password),
       email,
       role: roleToDb(role),
       active: true
@@ -140,10 +152,9 @@ export async function createUserAction(formData: FormData) {
 
 export async function importUsersCsvAction(formData: FormData) {
   requireRole(["admin"]);
-  await ensureDefaultLoginUsers();
 
   const file = formData.get("csvFile");
-  if (!isUploadedTextFile(file) || file.size === 0) {
+  if (!isUploadedTextFile(file) || file.size === 0 || file.size > 5_000_000) {
     redirect("/users?error=csv-required");
   }
 
@@ -161,7 +172,7 @@ export async function importUsersCsvAction(formData: FormData) {
     const username = pick(row, "username").toLowerCase();
     const email = pick(row, "email").toLowerCase();
     const name = pick(row, "nama") || username || email;
-    const password = pick(row, "password");
+    const password = pick(row, "password baru") || pick(row, "password");
     const role = roleFromCsv(pick(row, "role"));
     const status = pick(row, "status").toLowerCase();
     const active = status ? status === "aktif" || status === "active" : true;
@@ -178,7 +189,8 @@ export async function importUsersCsvAction(formData: FormData) {
       select: { id: true, password: true }
     });
 
-    const finalPassword = password || existing?.password || "";
+    if (password && password.length < 8) continue;
+    const finalPassword = password ? await hashPassword(password) : existing?.password || "";
     if (active && (!username || !finalPassword)) continue;
 
     if (existing) {
@@ -217,7 +229,9 @@ export async function importUsersCsvAction(formData: FormData) {
 
 export async function updateUserAction(userId: string, formData: FormData) {
   requireRole(["admin"]);
-  await ensureDefaultLoginUsers();
+  if (!entityId.safeParse(userId).success || !userFormSchema.safeParse(formValues(formData)).success) {
+    redirect(`/users/${userId}/edit?error=invalid-input`);
+  }
 
   const name = text(formData, "name");
   const username = text(formData, "username").toLowerCase();
@@ -239,7 +253,8 @@ export async function updateUserAction(userId: string, formData: FormData) {
     redirect("/users?error=required");
   }
 
-  const finalPassword = password || existingUser.password || "";
+  if (password && password.length < 8) redirect(`/users/${userId}/edit?error=password-short`);
+  const finalPassword = password ? await hashPassword(password) : existingUser.password || "";
   if (active && !finalPassword) {
     redirect(`/users/${userId}/edit?error=password-required`);
   }
@@ -278,7 +293,7 @@ export async function updateUserAction(userId: string, formData: FormData) {
 
 export async function deactivateUserAction(userId: string) {
   requireRole(["admin"]);
-  await ensureDefaultLoginUsers();
+  if (!entityId.safeParse(userId).success) redirect("/users?error=invalid-input");
 
   if (await isLastActiveAdmin(userId)) {
     redirect("/users?error=last-admin");
@@ -295,7 +310,7 @@ export async function deactivateUserAction(userId: string) {
 
 export async function activateUserAction(userId: string) {
   requireRole(["admin"]);
-  await ensureDefaultLoginUsers();
+  if (!entityId.safeParse(userId).success) redirect("/users?error=invalid-input");
 
   const user = await prisma.user.findUnique({
     where: { id: userId },

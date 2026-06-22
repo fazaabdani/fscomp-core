@@ -1,0 +1,543 @@
+/* Keep operational overrides aligned with FS Comp v2 visual theme. */
+.topbar nav a.activeNav {
+  border-color: rgba(58, 140, 255, 0.5);
+  background: rgba(26, 108, 246, 0.14);
+  color: #00d4ff;
+  box-shadow: inset 0 -2px 0 #00d4ff, 0 0 18px rgba(0, 212, 255, 0.12);
+}
+
+.chargerSummary span,
+.photoPill {
+  border-color: rgba(58, 140, 255, 0.5);
+  background: rgba(26, 108, 246, 0.1);
+  color: #00d4ff;
+}
+
+.readyUnitRow {
+  border-color: rgba(0, 212, 255, 0.48);
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.08), rgba(8, 18, 42, 0.72));
+}
+
+.photoUnitRow {
+  box-shadow: inset 3px 0 0 rgba(0, 212, 255, 0.75);
+}
+
+.localShareButton {
+  color: #00d4ff;
+}
+
+/* Compact, readable supplier payment recap. */
+.paymentPage {
+  gap: 14px;
+}
+
+.paymentPage .paymentHeader {
+  gap: 12px;
+  margin-bottom: -2px;
+}
+
+.paymentPage .paymentHeader h1 {
+  font-size: 26px;
+  line-height: 1.05;
+}
+
+.paymentPage .paymentHeader p {
+  margin: 8px 0 0;
+  color: rgba(240, 246, 255, 0.72);
+}
+
+.paymentPage .paymentSummary {
+  gap: 8px;
+}
+
+.paymentPage .paymentSummary div {
+  padding: 12px;
+}
+
+.paymentPage .paymentSummary span {
+  margin-bottom: 5px;
+}
+
+.paymentPage .paymentSummary strong {
+  font-size: 17px;
+}
+
+.paymentPage .panel {
+  padding: 14px 16px;
+}
+
+.paymentPage .panelHeader {
+  margin-bottom: 12px;
+}
+
+.paymentPage .panelHeader h2 {
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.licenseCardPage {
+  align-items: center;
+}
+
+.licenseCard {
+  width: min(100%, 760px);
+  aspect-ratio: 1.58;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 26px;
+  border: 1px solid rgba(55, 163, 255, 0.38);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(15, 47, 107, 0.96), rgba(7, 18, 43, 0.98));
+  color: #f7fbff;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.28);
+}
+
+.licenseCardTop,
+.licenseCardFooter {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.licenseCardBrand,
+.licenseCardGrid span,
+.licenseCardKeyBox span {
+  display: block;
+  color: rgba(247, 251, 255, 0.68);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.licenseCard h2 {
+  margin: 7px 0 4px;
+  color: #ffffff;
+  font-size: 30px;
+}
+
+.licenseCard p,
+.licenseCard small,
+.licenseCardFooter span {
+  color: rgba(247, 251, 255, 0.76);
+}
+
+.licenseCardBadge {
+  min-width: 122px;
+  padding: 10px 14px;
+  border: 1px solid rgba(79, 224, 255, 0.58);
+  border-radius: 8px;
+  background: rgba(79, 224, 255, 0.13);
+  color: #7deaff;
+  font-weight: 900;
+  text-align: center;
+}
+
+.licenseCardKeyBox {
+  padding: 16px;
+  border: 1px solid rgba(247, 251, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(247, 251, 255, 0.08);
+}
+
+.licenseCardKeyBox strong {
+  display: block;
+  margin-top: 8px;
+  color: #ffffff;
+  font-family: "Courier New", monospace;
+  font-size: clamp(18px, 3vw, 28px);
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.licenseCardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.licenseCardGrid div {
+  padding: 12px;
+  border: 1px solid rgba(247, 251, 255, 0.13);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.licenseCardGrid strong,
+.licenseCardFooter strong {
+  display: block;
+  color: #ffffff;
+}
+
+.licenseCardFooter {
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(247, 251, 255, 0.14);
+}
+
+.paymentPage .paymentRows {
+  gap: 4px;
+}
+
+.paymentPage .paymentRow {
+  grid-template-columns: 78px minmax(0, 1fr) 112px;
+  gap: 8px;
+  min-height: 0;
+  padding: 7px 9px;
+  line-height: 1.15;
+}
+
+.paymentPage .problemPaymentRow {
+  grid-template-columns: 78px minmax(0, 1fr) 112px;
+}
+
+.paymentPage .paymentRow span {
+  color: rgba(240, 246, 255, 0.74);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.paymentPage .paymentRow strong {
+  color: #f0f6ff;
+  font-size: 13px;
+  line-height: 1.15;
+}
+
+.paymentPage .paymentRow small {
+  display: inline;
+  margin-top: 0;
+  color: rgba(240, 246, 255, 0.62);
+  font-size: 10.5px;
+  line-height: 1.1;
+}
+
+.paymentPage .paymentRow b {
+  color: #dff8ff;
+  font-size: 12px;
+  line-height: 1.15;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 5mm;
+  }
+
+  body,
+  main,
+  .paymentPage {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  .themeCanvas,
+  .themeCursorGlow {
+    display: none !important;
+  }
+
+  .paymentPage {
+    gap: 7px !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .paymentPage .paymentHeader {
+    margin-bottom: 2px !important;
+  }
+
+  .paymentPage .paymentHeader h1 {
+    font-size: 22px !important;
+    color: #0f172a !important;
+  }
+
+  .paymentPage .paymentHeader p,
+  .paymentPage .eyebrow {
+    color: #475569 !important;
+  }
+
+  .paymentPage .paymentSummary {
+    gap: 6px !important;
+  }
+
+  .paymentPage .paymentSummary div {
+    padding: 8px 10px !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+  }
+
+  .paymentPage .paymentSummary span {
+    margin-bottom: 4px !important;
+    color: #64748b !important;
+    font-size: 10px !important;
+  }
+
+  .paymentPage .paymentSummary strong {
+    color: #0f172a !important;
+    font-size: 14px !important;
+  }
+
+  .paymentPage .panel {
+    padding: 9px 10px !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+  }
+
+  .paymentPage .panelHeader {
+    margin-bottom: 7px !important;
+  }
+
+  .paymentPage .panelHeader h2 {
+    color: #0f172a !important;
+    font-size: 17px !important;
+  }
+
+  .paymentPage .paymentRows {
+    gap: 3px !important;
+  }
+
+  .paymentPage .paymentRow,
+  .paymentPage .problemPaymentRow {
+    grid-template-columns: 68px minmax(0, 1fr) 92px !important;
+    gap: 6px !important;
+    padding: 5px 8px !important;
+    border-color: #d8e3f0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    transform: none !important;
+  }
+
+  .paymentPage .paymentRow span {
+    color: #64748b !important;
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+  }
+
+  .paymentPage .paymentRow strong {
+    color: #111827 !important;
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+  }
+
+  .paymentPage .paymentRow small {
+    color: #334155 !important;
+    font-size: 8.8px !important;
+    font-weight: 700 !important;
+    line-height: 1.05 !important;
+  }
+
+  .paymentPage .paymentRow b {
+    color: #0f172a !important;
+    font-size: 10.5px !important;
+    line-height: 1.1 !important;
+  }
+
+  .paymentPage .paymentNote {
+    padding: 7px 9px !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 10px !important;
+  }
+
+  .paymentPage .paymentNote p {
+    margin: 4px 0 0 !important;
+  }
+}
+
+/* Extra compact print tuning for recurring paper output. */
+@media print {
+  .receiptPage,
+  .labelLayout,
+  .labelSheet,
+  .licenseCardPage,
+  .licenseCard,
+  .paymentPage {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .receiptPaper {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    padding: 5mm !important;
+    gap: 2.4mm !important;
+  }
+
+  .receiptTop {
+    padding-bottom: 2mm !important;
+  }
+
+  .receiptTop h2 {
+    font-size: 13pt !important;
+  }
+
+  .receiptTop p,
+  .receiptTop small,
+  .receiptInfoGrid span,
+  .receiptInfoGrid small,
+  .receiptLine small,
+  .receiptUnit span,
+  .receiptTerms p {
+    font-size: 6.7pt !important;
+    line-height: 1.15 !important;
+  }
+
+  .receiptInfoGrid {
+    gap: 1.5mm !important;
+  }
+
+  .receiptInfoGrid div,
+  .receiptUnit,
+  .receiptTerms,
+  .receiptTotals {
+    padding: 2mm !important;
+  }
+
+  .receiptTableHead,
+  .receiptLine {
+    padding: 1.6mm 2mm !important;
+    font-size: 7.1pt !important;
+  }
+
+  .receiptFooter {
+    gap: 2mm !important;
+  }
+
+  .receiptBankNote {
+    margin-top: 0.8mm !important;
+    padding-top: 0.8mm !important;
+    font-size: 6.2pt !important;
+  }
+
+  .labelLayout {
+    display: block !important;
+  }
+
+  .labelLayout > .panel {
+    display: none !important;
+  }
+
+  .labelSheet {
+    width: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .labelSheet:has(.qcCompleteLabel) {
+    width: 100mm !important;
+    height: 70mm !important;
+  }
+
+  .unitLabel {
+    width: 70mm !important;
+    height: 50mm !important;
+    padding: 3mm !important;
+    gap: 1.8mm !important;
+    border: 0.35mm solid #0f2f6b !important;
+    box-shadow: none !important;
+  }
+
+  .unitLabel h2 {
+    font-size: 18pt !important;
+  }
+
+  .labelBody strong,
+  .labelBody b {
+    font-size: 9pt !important;
+  }
+
+  .labelBody span,
+  .labelFooter span {
+    font-size: 7pt !important;
+    line-height: 1.15 !important;
+  }
+
+  .qcMiniGrid {
+    gap: 1px !important;
+  }
+
+  .qcMiniGrid span,
+  .qcMiniGrid strong {
+    font-size: 5.2pt !important;
+    line-height: 1 !important;
+  }
+
+  .qcMiniGrid span {
+    min-height: 2.2mm !important;
+    padding: 0 0.4mm !important;
+  }
+
+  .qcCompleteLabel {
+    width: 100mm !important;
+    height: 70mm !important;
+    gap: 0.8mm !important;
+    padding: 2mm !important;
+  }
+
+  .qcCompleteLabel .labelTop svg {
+    width: 13.5mm !important;
+    height: 13.5mm !important;
+  }
+
+  .qcCompleteLabel h2 {
+    font-size: 15pt !important;
+    line-height: 0.95 !important;
+  }
+
+  .qcCompleteLabel .labelBody {
+    gap: 0.3mm !important;
+  }
+
+  .qcCompleteLabel .labelBody strong {
+    font-size: 7.5pt !important;
+    line-height: 1 !important;
+  }
+
+  .qcCompleteLabel .labelBody > span,
+  .qcCompleteLabel .labelBody b {
+    font-size: 6.5pt !important;
+    line-height: 1 !important;
+  }
+
+  .qcCompleteLabel .labelFooter {
+    min-height: 3.2mm !important;
+  }
+
+  .paymentPage .paymentRow,
+  .paymentPage .problemPaymentRow {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .licenseCardPage {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .licenseCard {
+    width: 148mm !important;
+    height: 94mm !important;
+    padding: 6mm !important;
+    gap: 3mm !important;
+    box-shadow: none !important;
+  }
+
+  .licenseCard h2 {
+    font-size: 22pt !important;
+  }
+
+  .licenseCardKeyBox strong {
+    font-size: 16pt !important;
+  }
+}

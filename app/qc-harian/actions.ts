@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { windowsVersionReminder } from "@/lib/windows-recommendation";
+import { entityId, formValues, percentage, z } from "@/lib/form-validation";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -74,9 +75,9 @@ function buildResolutionItems({
   ].filter(Boolean);
 }
 
-async function ensureChecker(name: string, role: "admin" | "teknisi" | "magang") {
+async function ensureChecker(name: string, role: "admin" | "teknisi" | "sales" | "magang") {
   const email = `${name.toLowerCase().replaceAll(" ", ".")}@fscomp.local`;
-  const dbRole: Role = role === "admin" ? "ADMIN" : role === "teknisi" ? "TEKNISI" : "MAGANG";
+  const dbRole: Role = role === "admin" ? "ADMIN" : role === "teknisi" ? "TEKNISI" : role === "sales" ? "SALES" : "MAGANG";
 
   return prisma.user.upsert({
     where: { email },
@@ -87,8 +88,15 @@ async function ensureChecker(name: string, role: "admin" | "teknisi" | "magang")
 
 export async function createDailyQcAction(formData: FormData) {
   const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
+  const validation = z.object({
+    unitId: entityId,
+    ssdHealth: percentage,
+    batteryHealth: percentage,
+    stockLocation: z.enum(["WIRADESA", "KAJEN"]),
+    partitionCount: z.coerce.number().int().min(1).max(20)
+  }).safeParse(formValues(formData));
+  if (!validation.success) redirect("/qc-harian?error=invalid-input");
   const unitId = text(formData, "unitId");
-  const checkerName = text(formData, "checkerName");
 
   if (!unitId) {
     redirect("/qc-harian?error=unit-required");
@@ -99,7 +107,8 @@ export async function createDailyQcAction(formData: FormData) {
     redirect("/qc-harian?error=unit-not-found");
   }
 
-  const checker = await ensureChecker(checkerName || currentUser.name, "magang");
+  const checker = await prisma.user.findUnique({ where: { username: currentUser.username } })
+    ?? await ensureChecker(currentUser.name, currentUser.role);
   const ssdHealth = numberValue(formData, "ssdHealth");
   const batteryHealth = numberValue(formData, "batteryHealth");
   const ssdSerial = text(formData, "ssdSerial");
@@ -110,7 +119,9 @@ export async function createDailyQcAction(formData: FormData) {
   const appStatus = text(formData, "appStatus") || "Lengkap";
   const officeStatus = text(formData, "officeStatus") || "Tidak dicek";
   const partitionCount = numberValue(formData, "partitionCount", 1);
-  const stockLocation = (text(formData, "stockLocation") || "WIRADESA") as SaleLocation;
+  const requestedLocation: SaleLocation = text(formData, "stockLocation") === "KAJEN" ? "KAJEN" : "WIRADESA";
+  const stockLocation = currentUser.role === "admin" ? requestedLocation : unit.stockLocation;
+  const locationChanged = stockLocation !== unit.stockLocation;
   const bodyBroken = text(formData, "bodyBroken") === "Ya";
   const paintCondition = text(formData, "paintCondition") || "Normal";
   const catatan = text(formData, "catatan");
@@ -220,6 +231,22 @@ export async function createDailyQcAction(formData: FormData) {
         statusObservasi: nextUnitStatus
       }
     });
+
+    if (locationChanged) {
+      await tx.unitAuditLog.create({
+        data: {
+          unitId,
+          action: "STOCK_LOCATION_CHANGED_FROM_DAILY_QC",
+          actorName: currentUser.name,
+          actorUsername: currentUser.username,
+          actorRole: currentUser.role,
+          changes: {
+            stockLocation: { from: unit.stockLocation, to: stockLocation },
+            source: "QC_HARIAN"
+          }
+        }
+      });
+    }
 
     if (perluKonfirmasi) {
       await tx.aiLog.create({

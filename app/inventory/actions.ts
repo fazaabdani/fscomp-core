@@ -5,6 +5,15 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { dateInput, entityId, formValues, nonNegativeInteger, requiredText, z } from "@/lib/form-validation";
+
+const inventoryFormSchema = z.object({
+  name: requiredText(200),
+  supplier: requiredText(200),
+  purchaseDate: dateInput,
+  warrantyDuration: nonNegativeInteger,
+  costPrice: nonNegativeInteger
+});
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -34,6 +43,7 @@ function statusValue(value: string): InventoryItemStatus {
 
 export async function createInventoryItemAction(formData: FormData) {
   const user = requireRole(["admin", "teknisi", "sales", "magang"]);
+  if (!inventoryFormSchema.safeParse(formValues(formData)).success) redirect("/inventory?error=invalid-input");
 
   const category = text(formData, "category") || "LAINNYA";
   const name = text(formData, "name");
@@ -82,6 +92,9 @@ export async function createInventoryItemAction(formData: FormData) {
 
 export async function updateInventoryItemAction(itemId: string, formData: FormData) {
   requireRole(["admin", "sales"]);
+  if (!entityId.safeParse(itemId).success || !inventoryFormSchema.safeParse(formValues(formData)).success) {
+    redirect(`/inventory/${itemId}/edit?error=invalid-input`);
+  }
 
   const category = text(formData, "category") || "LAINNYA";
   const name = text(formData, "name");

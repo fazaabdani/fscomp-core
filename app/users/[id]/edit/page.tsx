@@ -16,10 +16,14 @@ export default async function EditUserPage({ params, searchParams }: { params: {
       ? "Username atau email sudah dipakai user lain."
       : searchParams?.error === "required"
         ? "Nama dan username wajib diisi."
+        : searchParams?.error === "invalid-input"
+          ? "Data user belum valid. Periksa username, password, email, dan role."
         : searchParams?.error === "last-admin"
           ? "Admin aktif terakhir tidak boleh dinonaktifkan."
           : searchParams?.error === "password-required"
             ? "Password wajib diisi untuk user aktif. Isi Password baru lalu simpan."
+          : searchParams?.error === "password-short"
+            ? "Password baru minimal 8 karakter."
             : "";
 
   return (
@@ -40,7 +44,7 @@ export default async function EditUserPage({ params, searchParams }: { params: {
           <label>Username<input name="username" defaultValue={user.username ?? ""} required /></label>
         </div>
         <div className="numberGrid">
-          <label>Password baru<input name="password" type="password" autoComplete="new-password" placeholder="Kosongkan jika tidak diganti" /></label>
+          <label>Password baru<input name="password" type="password" minLength={8} autoComplete="new-password" placeholder="Kosongkan jika tidak diganti" /></label>
           <label>Email internal<input name="email" defaultValue={user.email} /></label>
         </div>
         <div className="numberGrid">

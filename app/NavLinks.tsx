@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 type NavUser = {
   name: string;
@@ -24,15 +25,35 @@ function groupActive(pathname: string, links: NavLink[]) {
 }
 
 function NavDropdown({ label, links, pathname }: { label: string; links: NavLink[]; pathname: string }) {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const visibleLinks = links.filter((link) => link.show);
+
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    function closeFromOutside(event: PointerEvent) {
+      if (!dropdownRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    document.addEventListener("pointerdown", closeFromOutside);
+    return () => document.removeEventListener("pointerdown", closeFromOutside);
+  }, []);
+
   if (visibleLinks.length === 0) return null;
 
   return (
-    <div className="navDropdown">
-      <button className={groupActive(pathname, visibleLinks) ? "activeNav" : ""} type="button">{label}</button>
-      <div className="navDropdownMenu">
+    <div className={`navDropdown ${open ? "open" : ""}`} ref={dropdownRef}>
+      <button
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className={groupActive(pathname, visibleLinks) ? "activeNav" : ""}
+        onClick={() => setOpen((value) => !value)}
+        type="button"
+      >
+        {label}
+      </button>
+      <div className={`navDropdownMenu ${open ? "open" : ""}`} role="menu">
         {visibleLinks.map((link) => (
-          <Link className={isActive(pathname, link.href) ? "activeNav" : ""} href={link.href} key={link.href}>
+          <Link className={isActive(pathname, link.href) ? "activeNav" : ""} href={link.href} key={link.href} onClick={() => setOpen(false)}>
             {link.label}
           </Link>
         ))}

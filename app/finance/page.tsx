@@ -34,8 +34,8 @@ export default async function FinancePage({ searchParams }: { searchParams?: { f
       <div className="sectionTitle">
         <div>
           <p className="eyebrow">Keuangan</p>
-          <h1>Laporan omzet, modal, dan profit kotor</h1>
-          <p className="bodyText">Bagian ini hanya menghitung transaksi aktif. Transaksi batal tidak masuk omzet dan profit.</p>
+          <h1>Laporan omzet, modal, dan estimasi profit kotor</h1>
+          <p className="bodyText">Transaksi batal tidak dihitung. Estimasi profit kotor belum termasuk biaya retur, servis, operasional, dan overhead.</p>
         </div>
         <Link className="primaryButton" href={reportUrl(from, to)}><Download size={17} /> Tarik Laporan CSV</Link>
       </div>
@@ -66,9 +66,9 @@ export default async function FinancePage({ searchParams }: { searchParams?: { f
       <div className="statsGrid">
         <div className="metric metric-cyan"><Banknote size={20} /><span>Omzet</span><strong>{formatRupiah(stats.totalOmzet)}</strong></div>
         <div className="metric metric-blue"><Receipt size={20} /><span>Total modal</span><strong>{formatRupiah(stats.totalModal)}</strong></div>
-        <div className="metric metric-green"><TrendingUp size={20} /><span>Profit kotor</span><strong>{formatRupiah(stats.totalProfit)}</strong></div>
-        <div className="metric metric-blue"><Receipt size={20} /><span>Profit Wiradesa</span><strong>{formatRupiah(stats.totalWiradesaShare)}</strong></div>
-        <div className="metric metric-green"><TrendingUp size={20} /><span>Profit Kajen</span><strong>{formatRupiah(stats.totalKajenShare)}</strong></div>
+        <div className="metric metric-green"><TrendingUp size={20} /><span>Estimasi profit kotor</span><strong>{formatRupiah(stats.totalProfit)}</strong></div>
+        <div className="metric metric-blue"><Receipt size={20} /><span>Estimasi bagian Wiradesa</span><strong>{formatRupiah(stats.totalWiradesaShare)}</strong></div>
+        <div className="metric metric-green"><TrendingUp size={20} /><span>Estimasi bagian Kajen</span><strong>{formatRupiah(stats.totalKajenShare)}</strong></div>
         <div className="metric metric-blue"><Receipt size={20} /><span>Transaksi aktif</span><strong>{stats.totalTransaksi}</strong></div>
       </div>
 

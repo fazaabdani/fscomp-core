@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import { NavLinks } from "./NavLinks";
@@ -6,6 +7,8 @@ import { PageTransition } from "./PageTransition";
 import { ThemeDynamics } from "./ThemeDynamics";
 import "./globals.css";
 import "./ops-overrides.css";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata: Metadata = {
   title: "FS Comp Core",
@@ -17,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="id">
-      <body>
+      <body className={inter.variable}>
         <ThemeDynamics />
         <header className="topbar">
           <Link className="brand" href="/">

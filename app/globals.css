@@ -24,7 +24,7 @@ body {
     radial-gradient(circle at 90% 10%, rgba(40, 232, 154, 0.1), transparent 28%),
     linear-gradient(180deg, #08111f 0%, #0b1320 42%, #070b12 100%);
   color: var(--ink);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Inter, Arial, Helvetica, sans-serif;
 }
 
 a {
@@ -574,6 +574,68 @@ main {
 .dangerButton {
   color: #ffd2cf;
   border-color: rgba(255, 111, 97, 0.5);
+  background: rgba(255, 111, 97, 0.08);
+}
+
+.dangerButton:hover {
+  color: #fff;
+  border-color: var(--red);
+  background: rgba(255, 111, 97, 0.18);
+}
+
+.loadingSkeleton {
+  min-height: 88px;
+  overflow: hidden;
+  background: linear-gradient(100deg, rgba(24, 49, 82, 0.46) 30%, rgba(55, 163, 255, 0.16) 50%, rgba(24, 49, 82, 0.46) 70%);
+  background-size: 220% 100%;
+  animation: loadingSweep 1.4s ease-in-out infinite;
+}
+
+.loadingSkeletonHeader {
+  min-height: 140px;
+}
+
+.loadingSkeletonContent {
+  min-height: 360px;
+}
+
+.flashNotice {
+  position: fixed;
+  top: 88px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(430px, calc(100vw - 24px));
+  padding: 14px 16px;
+  border-radius: 10px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42);
+}
+
+.flashNotice button {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: currentColor;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+
+@keyframes loadingSweep {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.iconButton:focus-visible,
+.sortPill:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
 }
 
 .checkLine {
@@ -2337,6 +2399,62 @@ textarea {
   .cashierItemHeader,
   .cashierItemRow {
     min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: 18px 12px 44px;
+  }
+
+  .topbar {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .topbar nav {
+    width: 100%;
+    gap: 4px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+
+  .topbar nav a,
+  .topbar nav .navDropdown > button {
+    min-height: 34px;
+    padding: 7px 9px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .brandMark {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+  }
+
+  .statsGrid,
+  .salesStatsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .panel,
+  .heroPanel,
+  .heroBand,
+  .unitHero {
+    padding: 16px;
+  }
+
+  .buttonRow,
+  .buttonCluster {
+    align-items: stretch;
+  }
+
+  .buttonRow > *,
+  .buttonCluster > * {
+    justify-content: center;
   }
 }
 

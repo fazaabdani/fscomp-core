@@ -6,6 +6,8 @@ import { requireRole } from "@/lib/session";
 import { createSaleAction, restoreSaleAction, voidSaleAction } from "./actions";
 import { RestoreSaleButton } from "./RestoreSaleButton";
 import { VoidSaleButton } from "./VoidSaleButton";
+import { SaleUnitFields } from "./SaleUnitFields";
+import { FlashNotice } from "../FlashNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +24,6 @@ function salesHref(params: Record<string, string>) {
 export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string; restored?: string; sort?: string; q?: string; lokasi?: string; status?: string } }) {
   const currentUser = requireRole(["admin", "teknisi", "sales"]);
   const { readyUnits, sales, stats, salesReady, blockedByDailyQc } = await getSalesPageData();
-  const firstUnit = readyUnits[0];
   const sort = searchParams?.sort ?? "terbaru";
   const q = (searchParams?.q ?? "").trim().toLowerCase();
   const lokasi = searchParams?.lokasi ?? "semua";
@@ -55,6 +56,15 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
     if (sort === "batal") return Number(Boolean(b.voidedAt)) - Number(Boolean(a.voidedAt));
     return b.soldAt.localeCompare(a.soldAt);
   });
+  const flashMessage = searchParams?.saved
+    ? "Transaksi berhasil disimpan."
+    : searchParams?.voided
+      ? "Transaksi dibatalkan. Unit kembali ke stok siap jual."
+      : searchParams?.restored
+        ? "Transaksi aktif kembali dan unit ditandai terjual."
+        : searchParams?.error
+          ? `Transaksi gagal: ${searchParams.error}`
+          : "";
 
   return (
     <section className="pageStack">
@@ -126,27 +136,10 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
             <h2>Catat laptop terjual</h2>
           </div>
         </div>
-        {searchParams?.saved ? <div className="successBox">Transaksi berhasil disimpan.</div> : null}
-        {searchParams?.voided ? <div className="successBox">Transaksi dibatalkan. Unit sudah kembali ke stok siap jual.</div> : null}
-        {searchParams?.restored ? <div className="successBox">Pembatalan transaksi dibatalkan. Transaksi aktif lagi dan unit kembali ditandai terjual.</div> : null}
-        {searchParams?.error ? <div className="infoBox dangerInfo">Transaksi gagal: {searchParams.error}</div> : null}
+        <FlashNotice message={flashMessage} tone={searchParams?.error ? "error" : "success"} queryKeys={["saved", "voided", "restored", "error"]} />
 
         <div className="cashierMainGrid">
-          <label>
-            Unit dan lokasi toko nota
-            <select name="unitId" defaultValue={firstUnit?.id} required>
-              {readyUnits.map((unit) => (
-                <option value={unit.id} key={unit.id}>
-                  Unit {unit.nomorUnit} - {unit.model} - {unit.stockLocation} - {formatRupiah(unit.hargaJualRekomendasi)}
-                </option>
-              ))}
-            </select>
-            <small className="formHint">Lokasi nota otomatis mengikuti lokasi unit: Wiradesa memakai kop FS Comp, Kajen memakai kop FS.ID.</small>
-          </label>
-          <label>
-            Harga jual final
-            <input name="soldPrice" type="number" inputMode="numeric" min="0" step="1000" defaultValue={firstUnit?.hargaJualRekomendasi ?? 0} required />
-          </label>
+          <SaleUnitFields units={readyUnits} />
           <label>
             Metode bayar
             <select name="paymentMethod" defaultValue="Cash">

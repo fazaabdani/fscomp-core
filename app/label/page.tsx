@@ -3,6 +3,7 @@ import { formatRupiah } from "@/lib/api";
 import { statusTone } from "@/lib/constants";
 import { getUnitsForLabel } from "@/lib/label-data";
 import { PrintButton } from "./PrintButton";
+import Link from "next/link";
 
 function healthValue(value: unknown) {
   const numberValue = Number(value);
@@ -93,6 +94,23 @@ export default async function LabelPage({ searchParams }: { searchParams?: { uni
           </article>
         </div>
       </div>
+
+      <section className="panel">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Cetak berikutnya</p>
+            <h2>Pilih unit lain tanpa mencari ulang</h2>
+          </div>
+        </div>
+        <div className="buttonRow">
+          {units.filter((unit) => unit.id !== selected.id).slice(0, 10).map((unit) => (
+            <Link className="secondaryButton compactButton" href={`/label?unit=${unit.id}&mode=${mode}`} key={unit.id}>
+              Unit {unit.nomorUnit}
+            </Link>
+          ))}
+          {units.length <= 1 ? <span className="bodyText">Belum ada unit lain.</span> : null}
+        </div>
+      </section>
     </section>
   );
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { forbidden, hasIntegrationAccess } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 
 const paymentStatusLabel: Record<string, string> = {
@@ -10,7 +11,8 @@ const paymentStatusLabel: Record<string, string> = {
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!hasIntegrationAccess(request, "N8N_WEBHOOK_SECRET")) return forbidden();
   const publicUrl = process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id";
   const [units, batches] = await Promise.all([
     prisma.unit.findMany({
