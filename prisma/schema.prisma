@@ -116,6 +116,50 @@ enum PcBuildDraftStatus {
   CANCELLED
 }
 
+enum WaCustomerAiPolicy {
+  AUTO_SAFE
+  ADMIN_ONLY
+  VIP_ADMIN_ONLY
+  BLOCKED_AI
+}
+
+enum WaConversationStatus {
+  OPEN
+  PENDING_ADMIN
+  WAITING_ADMIN
+  CLOSED
+  DEAL
+  LOST
+  ARCHIVED
+}
+
+enum WaLeadScore {
+  COLD
+  WARM
+  HOT
+}
+
+enum WaRiskLevel {
+  SAFE
+  WATCH
+  RISK
+}
+
+enum WaMessageDirection {
+  INBOUND
+  AI_OUTBOUND
+  ADMIN_OUTBOUND
+  SYSTEM
+}
+
+enum WaAiEventStatus {
+  INFO
+  SKIPPED
+  QUEUED
+  SENT
+  FAILED
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -334,6 +378,107 @@ model PcBuildDraftItem {
   draft         PcBuildDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
 
   @@index([draftId])
+}
+
+model WaCustomer {
+  id               String             @id @default(cuid())
+  phone            String             @unique
+  name             String?
+  customerAiPolicy WaCustomerAiPolicy @default(AUTO_SAFE)
+  isKnownCustomer  Boolean            @default(false)
+  lastDealAt       DateTime?
+  notes            String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  conversations    WaConversation[]
+
+  @@index([customerAiPolicy])
+  @@index([isKnownCustomer, updatedAt])
+}
+
+model WaConversation {
+  id                    String               @id @default(cuid())
+  customerId            String
+  phone                 String
+  status                WaConversationStatus @default(OPEN)
+  leadScore             WaLeadScore          @default(COLD)
+  riskLevel             WaRiskLevel          @default(SAFE)
+  intent                String?
+  summary               String?
+  lastMessageAt         DateTime?
+  lastAdminResponseAt   DateTime?
+  lastAiResponseAt      DateTime?
+  aiTakeoverAllowed     Boolean              @default(true)
+  followupPassiveSentAt DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  customer              WaCustomer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  messages              WaMessage[]
+  events                WaAiEventLog[]
+  telegramNotifications WaTelegramNotificationLog[]
+
+  @@index([status, updatedAt])
+  @@index([phone, updatedAt])
+  @@index([leadScore, riskLevel])
+  @@index([customerId, updatedAt])
+}
+
+model WaMessage {
+  id             String             @id @default(cuid())
+  conversationId String
+  direction      WaMessageDirection
+  senderName     String?
+  body           String
+  rawPayload     Json?
+  createdAt      DateTime           @default(now())
+
+  conversation   WaConversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([direction, createdAt])
+}
+
+model WaAiSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WaAiEventLog {
+  id             String          @id @default(cuid())
+  conversationId String?
+  eventType      String
+  status         WaAiEventStatus @default(INFO)
+  reason         String?
+  payload        Json?
+  createdAt      DateTime        @default(now())
+
+  conversation   WaConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([status, createdAt])
+}
+
+model WaTelegramNotificationLog {
+  id             String          @id @default(cuid())
+  conversationId String?
+  eventType      String
+  dedupeKey      String?         @unique
+  sentAt         DateTime?
+  status         WaAiEventStatus @default(QUEUED)
+  error          String?
+  createdAt      DateTime        @default(now())
+
+  conversation   WaConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([status, createdAt])
 }
 
 model UnitAuditLog {

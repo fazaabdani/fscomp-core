@@ -704,6 +704,19 @@ input:not([type]) {
   gap: 8px;
 }
 
+.inlineCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.inlineCheck input {
+  width: auto;
+}
+
 .panelSubsection {
   display: grid;
   gap: 12px;

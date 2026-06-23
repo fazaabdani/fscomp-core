@@ -11,7 +11,8 @@
     "db:migrate": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "security:generate": "node scripts/generate-security-env.mjs",
-    "predeploy:check": "node scripts/predeploy-check.mjs"
+    "predeploy:check": "node scripts/predeploy-check.mjs",
+    "test:wa-ai": "node scripts/test-wa-ai-policy.mjs"
   },
   "dependencies": {
     "@prisma/client": "^5.16.1",
