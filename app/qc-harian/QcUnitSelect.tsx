@@ -1,12 +1,10 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 type QcUnit = { id: string; nomorUnit: string; model: string };
 
 export function QcUnitSelect({ units, selectedUnitId }: { units: QcUnit[]; selectedUnitId?: string }) {
-  const pathname = usePathname();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   function selectUnit(unitId: string) {
@@ -14,7 +12,7 @@ export function QcUnitSelect({ units, selectedUnitId }: { units: QcUnit[]; selec
     params.set("unit", unitId);
     params.delete("saved");
     params.delete("error");
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    window.location.assign(`/qc-harian?${params.toString()}`);
   }
 
   return (
