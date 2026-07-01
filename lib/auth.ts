@@ -19,7 +19,7 @@ export function canEditDailyQc(user: User) {
 }
 
 export function canChangeDailyQcStockLocation(user: User) {
-  return user.role === "admin" || user.role === "sales" || user.role === "magang";
+  return user.role === "admin" || user.role === "teknisi" || user.role === "sales" || user.role === "magang";
 }
 
 export function canEditInitialQc(user: User) {
