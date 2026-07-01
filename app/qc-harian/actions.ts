@@ -34,7 +34,7 @@ function computeDailyStatus({
   batteryHealth: number;
   checks: boolean[];
 }): DailyStatus {
-  if (batteryHealth < 70 || ssdHealth < 80) return "TIDAK_LOLOS";
+  if (batteryHealth < 70 || ssdHealth < 70) return "TIDAK_LOLOS";
   if (checks.some((item) => !item)) return "TIDAK_LOLOS";
   return "LOLOS";
 }
@@ -201,7 +201,7 @@ export async function createDailyQcAction(formData: FormData) {
         layar: !screenCritical,
         keyboard: checked(formData, "keyboard"),
         keyboardBacklight,
-        ssd: ssdHealth >= 80,
+        ssd: ssdHealth >= 70,
         battery: batteryHealth >= 70,
         port: checked(formData, "usb"),
         usb: checked(formData, "usb"),
