@@ -18,6 +18,10 @@ export function canEditDailyQc(user: User) {
   return user.role === "admin" || user.role === "teknisi" || user.role === "magang";
 }
 
+export function canChangeDailyQcStockLocation(user: User) {
+  return user.role === "admin" || user.role === "sales" || user.role === "magang";
+}
+
 export function canEditInitialQc(user: User) {
   return user.role === "admin" || user.role === "teknisi";
 }

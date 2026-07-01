@@ -1,6 +1,7 @@
 import { Bluetooth, Camera, CheckCircle2, Keyboard, Mic, Usb, Volume2, Wifi } from "lucide-react";
 import Link from "next/link";
 import { getQcHarianPageData } from "@/lib/db-data";
+import { canChangeDailyQcStockLocation } from "@/lib/auth";
 import { requireRole } from "@/lib/session";
 import { createDailyQcAction } from "./actions";
 import { QcUnitSelect } from "./QcUnitSelect";
@@ -77,7 +78,7 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
               </select>
             </label>
           </div>
-          <StockLocationField location={selectedUnit?.stockLocation ?? "WIRADESA"} canChange={currentUser.role === "admin"} />
+          <StockLocationField location={selectedUnit?.stockLocation ?? "WIRADESA"} canChange={canChangeDailyQcStockLocation(currentUser)} />
           <div className="checkGrid">
             {checklist.map((item) => {
               const Icon = item.icon;
