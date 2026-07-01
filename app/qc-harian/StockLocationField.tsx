@@ -17,7 +17,7 @@ export function StockLocationField({ location, canChange }: { location: StockLoc
         Lokasi stok
         <input value={locationLabel(location)} readOnly />
         <input name="stockLocation" type="hidden" value={location} />
-        <small className="formHint">Perubahan lokasi hanya dapat dilakukan admin.</small>
+        <small className="formHint">Akun ini tidak memiliki akses untuk memindahkan lokasi stok.</small>
       </label>
     );
   }

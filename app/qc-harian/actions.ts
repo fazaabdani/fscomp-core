@@ -4,6 +4,7 @@ import { DailyStatus, Role, SaleLocation } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { canChangeDailyQcStockLocation } from "@/lib/auth";
 import { requireRole } from "@/lib/session";
 import { windowsVersionReminder } from "@/lib/windows-recommendation";
 import { entityId, formValues, percentage, z } from "@/lib/form-validation";
@@ -120,7 +121,7 @@ export async function createDailyQcAction(formData: FormData) {
   const officeStatus = text(formData, "officeStatus") || "Tidak dicek";
   const partitionCount = numberValue(formData, "partitionCount", 1);
   const requestedLocation: SaleLocation = text(formData, "stockLocation") === "KAJEN" ? "KAJEN" : "WIRADESA";
-  const stockLocation = currentUser.role === "admin" ? requestedLocation : unit.stockLocation;
+  const stockLocation = canChangeDailyQcStockLocation(currentUser) ? requestedLocation : unit.stockLocation;
   const locationChanged = stockLocation !== unit.stockLocation;
   const bodyBroken = text(formData, "bodyBroken") === "Ya";
   const paintCondition = text(formData, "paintCondition") || "Normal";
