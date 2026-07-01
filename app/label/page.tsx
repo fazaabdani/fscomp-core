@@ -95,7 +95,7 @@ export default async function LabelPage({ searchParams }: { searchParams?: { uni
         </div>
       </div>
 
-      <section className="panel">
+      <section className="panel printHidden">
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Cetak berikutnya</p>
