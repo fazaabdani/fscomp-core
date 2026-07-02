@@ -162,6 +162,14 @@ export async function getUnitForDetail(id: string) {
       batteryHealth: unit.batteryHealth ?? 0,
       ssdHealth: unit.ssdHealth ?? 0,
       statusObservasi: unit.statusObservasi.replaceAll("_", " "),
+      updatedAt: unit.updatedAt.toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }),
       tanggalMasuk: unit.tanggalMasuk.toISOString().slice(0, 10),
       tempo: unit.tempo?.toISOString().slice(0, 10) ?? "-",
       batch: { nomorBatch: unit.batch.nomorBatch },

@@ -1373,6 +1373,34 @@ textarea {
   object-fit: contain;
 }
 
+.publicUnitUpdated {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.publicUnitUpdated svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--cyan);
+}
+
+.publicRelatedProducts .catalogPublicCard h3 {
+  margin: 0;
+}
+
+.publicRelatedProducts .secondaryButton {
+  width: 100%;
+}
+
+.publicUnitMobileBar {
+  display: none;
+}
+
 .catalogCardTop {
   display: flex;
   align-items: center;
@@ -2391,6 +2419,32 @@ textarea {
   .unitRow .statusPill {
     grid-column: 2;
     justify-self: start;
+  }
+
+  .publicUnitPage {
+    padding-bottom: calc(74px + env(safe-area-inset-bottom));
+  }
+
+  .publicUnitMobileBar {
+    position: fixed;
+    z-index: 20;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(55, 163, 255, 0.34);
+    background: rgba(5, 14, 27, 0.96);
+    box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(18px);
+  }
+
+  .publicUnitMobileBar .primaryButton,
+  .publicUnitMobileBar .secondaryButton {
+    min-height: 46px;
+    white-space: nowrap;
   }
 }
 

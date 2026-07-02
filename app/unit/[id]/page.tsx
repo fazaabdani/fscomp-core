@@ -3,9 +3,11 @@ import Link from "next/link";
 import { ArrowLeft, CalendarClock, Cpu, HardDrive, MessageCircle, QrCode, ShieldCheck } from "lucide-react";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
+import { getRelatedCatalogUnits } from "@/lib/catalog-page-data";
 import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 import { getCurrentUser } from "@/lib/session";
+import { ShareUnitButton } from "./ShareUnitButton";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +27,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
 
   const currentUser = getCurrentUser();
   const isInternalUser = Boolean(currentUser);
+  const relatedUnits = isInternalUser ? [] : await getRelatedCatalogUnits(unit.id);
   const dailyHistory = unit.dailyHistory;
   const qcAwal = unit.qcAwal;
   const visibleHardware = qcAwal
@@ -32,10 +35,11 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
     : [];
   const latestDaily = dailyHistory[0];
   const publicWindows = latestDaily?.windowsVersion ?? qcAwal?.software.Windows ?? "-";
+  const publicWaLink = waLink(unit);
 
   if (!isInternalUser) {
     return (
-      <section className="pageStack">
+      <section className="pageStack publicUnitPage">
         <Link className="backLink" href="/katalog">
           <ArrowLeft size={16} /> Kembali ke Katalog Lengkap
         </Link>
@@ -48,7 +52,8 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
           </div>
           <div className="unitHeroActions">
             <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
-            <a className="primaryButton" href={waLink(unit)} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Unit</a>
+            <ShareUnitButton model={unit.model} />
+            <a className="primaryButton" href={publicWaLink} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Unit</a>
           </div>
         </div>
 
@@ -79,6 +84,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
             <div className="kv"><span>Touchscreen</span><strong>{unit.isTouchscreen ? "Ya" : "Tidak"}</strong></div>
             <div className="kv"><span>Lokasi stok</span><strong>{unit.stockLocation}</strong></div>
             <div className="kv"><span>Harga jual</span><strong>{formatRupiah(unit.hargaJualRekomendasi)}</strong></div>
+            <p className="publicUnitUpdated"><CalendarClock size={15} /> Stok &amp; harga diperbarui {unit.updatedAt} WIB</p>
           </aside>
         </div>
 
@@ -92,6 +98,41 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
           </div>
           <p className="bodyText">Detail teknis seperti health SSD, health baterai, seri SSD, dan catatan internal disimpan di sistem FS Comp. Untuk kondisi spesifik unit, silakan tanyakan langsung ke admin sebelum transaksi.</p>
         </section>
+
+        {relatedUnits.length > 0 ? (
+          <section className="panel publicRelatedProducts">
+            <div className="panelHeader">
+              <div>
+                <p className="eyebrow">Pilihan lainnya</p>
+                <h2>Produk serupa yang masih tersedia</h2>
+              </div>
+            </div>
+            <div className="catalogPublicGrid">
+              {relatedUnits.map((relatedUnit) => (
+                <article className="catalogPublicCard" key={relatedUnit.id}>
+                  <CatalogPhoto url={relatedUnit.catalogImageUrl} className="catalogImage" alt={`Foto ${relatedUnit.model}`} />
+                  <div className="catalogCardTop">
+                    <span className="unitNumber">{relatedUnit.nomorUnit}</span>
+                    <span className="statusPill green">{relatedUnit.stockLocation}</span>
+                  </div>
+                  <h3>{relatedUnit.model}</h3>
+                  <p>{relatedUnit.processor}</p>
+                  <div className="miniMetrics">
+                    <span>{relatedUnit.ram}</span>
+                    <span>{relatedUnit.ssd}</span>
+                  </div>
+                  <strong className="catalogPrice">{formatRupiah(relatedUnit.hargaJualRekomendasi)}</strong>
+                  <Link className="secondaryButton" href={`/unit/${relatedUnit.id}`}>Lihat Detail</Link>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <div className="publicUnitMobileBar printHidden" aria-label="Aksi produk">
+          <Link className="secondaryButton" href="/katalog"><ArrowLeft size={17} /> Katalog</Link>
+          <a className="primaryButton" href={publicWaLink} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya via WhatsApp</a>
+        </div>
       </section>
     );
   }
