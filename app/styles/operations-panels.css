@@ -178,6 +178,19 @@
   border-top: 1px solid rgba(247, 251, 255, 0.14);
 }
 
+.licenseCardQr {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 5px;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.licenseCardQr svg {
+  display: block;
+}
+
 .paymentPage .paymentRows {
   gap: 4px;
 }
@@ -521,23 +534,95 @@
 
   .licenseCardPage {
     display: block !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
   .licenseCard {
+    box-sizing: border-box !important;
     width: 148mm !important;
     height: 94mm !important;
-    padding: 6mm !important;
-    gap: 3mm !important;
+    margin: 0 auto !important;
+    padding: 5mm !important;
+    gap: 2.2mm !important;
+    overflow: hidden !important;
     box-shadow: none !important;
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
 
   .licenseCard h2 {
-    font-size: 22pt !important;
+    margin: 1.2mm 0 0.6mm !important;
+    font-size: 16pt !important;
+    line-height: 1.05 !important;
+  }
+
+  .licenseCardTop {
+    gap: 3mm !important;
+  }
+
+  .licenseCardBrand,
+  .licenseCardGrid span,
+  .licenseCardKeyBox span {
+    font-size: 6pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .licenseCard p,
+  .licenseCard small,
+  .licenseCardFooter span {
+    margin: 0 !important;
+    font-size: 6.5pt !important;
+    line-height: 1.15 !important;
+  }
+
+  .licenseCardBadge {
+    min-width: 25mm !important;
+    padding: 2mm 3mm !important;
+    font-size: 7pt !important;
+  }
+
+  .licenseCardKeyBox {
+    padding: 2.5mm !important;
   }
 
   .licenseCardKeyBox strong {
-    font-size: 16pt !important;
+    margin-top: 1.2mm !important;
+    font-size: 11pt !important;
+    line-height: 1.05 !important;
+  }
+
+  .licenseCardGrid {
+    gap: 1.5mm !important;
+  }
+
+  .licenseCardGrid div {
+    min-height: 0 !important;
+    padding: 2mm !important;
+  }
+
+  .licenseCardGrid strong,
+  .licenseCardFooter strong {
+    font-size: 7.5pt !important;
+    line-height: 1.12 !important;
+  }
+
+  .licenseCardFooter {
+    gap: 3mm !important;
+    margin-top: auto !important;
+    padding-top: 1.5mm !important;
+  }
+
+  .licenseCardQr {
+    padding: 1mm !important;
+    border-radius: 1mm !important;
+  }
+
+  .licenseCardQr svg {
+    width: 14mm !important;
+    height: 14mm !important;
   }
 }
