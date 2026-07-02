@@ -82,7 +82,9 @@ export default async function LicenseCardPage({ params }: { params: { id: string
             <strong>FS Comp</strong>
             <span>Laptop second berkualitas, QC jelas, garansi tertulis.</span>
           </div>
-          <QRCodeSVG value={cardUrl} size={58} fgColor="#0f2f6b" />
+          <div className="licenseCardQr">
+            <QRCodeSVG value={cardUrl} size={58} fgColor="#0f2f6b" />
+          </div>
         </footer>
       </article>
     </section>
