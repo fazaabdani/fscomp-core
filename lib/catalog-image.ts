@@ -14,14 +14,15 @@ export function displayCatalogImageUrl(url?: string | null) {
   return url;
 }
 
-export function catalogImageCandidates(url?: string | null) {
+export function catalogImageCandidates(url?: string | null, requestedWidth = 1200) {
   if (!url) return [];
   const driveId = getGoogleDriveFileId(url);
   if (!driveId) return [url];
+  const width = Math.min(1600, Math.max(320, Math.round(requestedWidth)));
 
   return [
-    `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`,
-    `https://lh3.googleusercontent.com/d/${driveId}=w1200`,
+    `https://drive.google.com/thumbnail?id=${driveId}&sz=w${width}`,
+    `https://lh3.googleusercontent.com/d/${driveId}=w${width}`,
     `https://drive.google.com/uc?export=view&id=${driveId}`,
     url
   ];
