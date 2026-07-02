@@ -74,3 +74,80 @@ export async function getCatalogPageData() {
     };
   }
 }
+
+export async function getRelatedCatalogUnits(unitId: string) {
+  try {
+    const current = await prisma.unit.findUnique({
+      where: { id: unitId },
+      select: {
+        id: true,
+        model: true,
+        processor: true,
+        ram: true,
+        stockLocation: true,
+        hargaJualRekomendasi: true
+      }
+    });
+
+    if (!current) return [];
+
+    const candidates = await prisma.unit.findMany({
+      where: {
+        id: { not: unitId },
+        soldAt: null,
+        statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }
+      },
+      include: {
+        qcHarian: {
+          orderBy: { tanggal: "desc" },
+          take: 1,
+          select: { masihLolos: true }
+        }
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 24
+    });
+
+    const currentBrand = current.model.trim().split(/\s+/)[0]?.toUpperCase() ?? "";
+
+    return candidates
+      .filter((unit) => Boolean(unit.qcHarian[0] && unit.qcHarian[0].masihLolos !== "TIDAK_LOLOS"))
+      .map((unit) => {
+        const brand = unit.model.trim().split(/\s+/)[0]?.toUpperCase() ?? "";
+        const score =
+          (brand === currentBrand ? 4 : 0) +
+          (unit.processor === current.processor ? 3 : 0) +
+          (unit.ram === current.ram ? 1 : 0) +
+          (unit.stockLocation === current.stockLocation ? 1 : 0);
+
+        return {
+          id: unit.id,
+          nomorUnit: displayUnitNumber(unit.nomorUnit),
+          model: unit.model,
+          processor: unit.processor,
+          ram: unit.ram,
+          ssd: unit.ssd,
+          catalogImageUrl: unit.catalogImageUrl ?? "",
+          stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
+          hargaJualRekomendasi: unit.hargaJualRekomendasi,
+          score,
+          priceDistance: Math.abs(unit.hargaJualRekomendasi - current.hargaJualRekomendasi)
+        };
+      })
+      .sort((a, b) => b.score - a.score || a.priceDistance - b.priceDistance)
+      .slice(0, 3)
+      .map((unit) => ({
+        id: unit.id,
+        nomorUnit: unit.nomorUnit,
+        model: unit.model,
+        processor: unit.processor,
+        ram: unit.ram,
+        ssd: unit.ssd,
+        catalogImageUrl: unit.catalogImageUrl,
+        stockLocation: unit.stockLocation,
+        hargaJualRekomendasi: unit.hargaJualRekomendasi
+      }));
+  } catch {
+    return [];
+  }
+}
