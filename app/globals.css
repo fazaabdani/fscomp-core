@@ -1401,6 +1401,117 @@ textarea {
   display: none;
 }
 
+.archiveStatsGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.archiveStatsGrid .metric strong {
+  font-size: clamp(15px, 1.6vw, 22px);
+  overflow-wrap: anywhere;
+}
+
+.archiveFilter {
+  display: grid;
+  gap: 16px;
+}
+
+.archiveFilter label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.archiveFilterGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.archiveTableScroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.archiveTable {
+  min-width: 1120px;
+}
+
+.archiveTableHeader,
+.archiveTableRow {
+  display: grid;
+  grid-template-columns: 150px minmax(240px, 1.5fr) 135px 125px 125px 120px 125px 90px;
+  gap: 12px;
+  align-items: center;
+}
+
+.archiveTableHeader {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(30, 79, 132, 0.2);
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.archiveTableRow {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(8, 20, 36, 0.62);
+}
+
+.archiveTableRow:last-child {
+  border-bottom: 0;
+}
+
+.archiveTableRow > div {
+  min-width: 0;
+}
+
+.archiveTableRow strong,
+.archiveTableRow small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.archiveTableRow small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.archiveTableRow .statusPill {
+  width: max-content;
+  margin-top: 6px;
+}
+
+.archiveProfit {
+  color: var(--green) !important;
+}
+
+.archiveLoss {
+  color: var(--red) !important;
+}
+
+.archivePagination {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.archivePagination > :last-child {
+  justify-self: end;
+}
+
 .catalogCardTop {
   display: flex;
   align-items: center;
@@ -2446,6 +2557,57 @@ textarea {
     min-height: 46px;
     white-space: nowrap;
   }
+
+  .archiveStatsGrid,
+  .archiveFilterGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .archiveTableScroll {
+    overflow: visible;
+    border: 0;
+  }
+
+  .archiveTable {
+    display: grid;
+    min-width: 0;
+    gap: 12px;
+  }
+
+  .archiveTableHeader {
+    display: none;
+  }
+
+  .archiveTableRow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .archiveTableRow > div {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    column-gap: 10px;
+  }
+
+  .archiveTableRow > div::before {
+    content: attr(data-label);
+    grid-row: 1 / span 8;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .archivePagination {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .archivePagination > span:nth-child(2) {
+    display: none;
+  }
 }
 
 @media (min-width: 821px) and (max-width: 1120px) {
@@ -2505,6 +2667,10 @@ textarea {
   .statsGrid,
   .salesStatsGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .archiveFilterGrid {
+    grid-template-columns: 1fr;
   }
 
   .panel,
