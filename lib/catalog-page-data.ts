@@ -53,6 +53,12 @@ export async function getCatalogPageData() {
           hargaJualRekomendasi: unit.hargaJualRekomendasi,
           catalogImageUrl: unit.catalogImageUrl ?? "",
           stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
+          latestQcAt: latestDaily?.tanggal.toLocaleDateString("id-ID", {
+            timeZone: "Asia/Jakarta",
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+          }) ?? "-",
           ssdHealth: latestDaily?.ssdHealth ?? unit.ssdHealth ?? 0,
           batteryHealth: latestDaily?.batteryHealth ?? unit.batteryHealth ?? 0,
           windowsVersion: latestDaily?.windowsVersion ?? "-",

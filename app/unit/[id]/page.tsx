@@ -21,7 +21,20 @@ function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: 
   return `https://wa.me/62816660056?text=${encodeURIComponent(text)}`;
 }
 
-export default async function UnitDetailPage({ params }: { params: { id: string } }) {
+function catalogReturnPath(value?: string | string[]) {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return "/katalog";
+
+  try {
+    const parsed = new URL(raw, "https://core.fscomp.id");
+    if (parsed.origin !== "https://core.fscomp.id" || parsed.pathname !== "/katalog") return "/katalog";
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return "/katalog";
+  }
+}
+
+export default async function UnitDetailPage({ params, searchParams }: { params: { id: string }; searchParams?: { from?: string | string[] } }) {
   const unit = await getUnitForDetail(params.id);
   if (!unit) notFound();
 
@@ -36,11 +49,12 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
   const latestDaily = dailyHistory[0];
   const publicWindows = latestDaily?.windowsVersion ?? qcAwal?.software.Windows ?? "-";
   const publicWaLink = waLink(unit);
+  const catalogReturnHref = catalogReturnPath(searchParams?.from);
 
   if (!isInternalUser) {
     return (
       <section className="pageStack publicUnitPage">
-        <Link className="backLink" href="/katalog">
+        <Link className="backLink" href={catalogReturnHref}>
           <ArrowLeft size={16} /> Kembali ke Katalog Lengkap
         </Link>
 
@@ -64,6 +78,9 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
               className="publicUnitPhoto"
               placeholderClassName="publicUnitPhoto placeholderPhoto"
               alt={`Foto ${unit.model}`}
+              priority
+              zoomable
+              imageWidth={1600}
             />
           </section>
 
@@ -110,7 +127,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
             <div className="catalogPublicGrid">
               {relatedUnits.map((relatedUnit) => (
                 <article className="catalogPublicCard" key={relatedUnit.id}>
-                  <CatalogPhoto url={relatedUnit.catalogImageUrl} className="catalogImage" alt={`Foto ${relatedUnit.model}`} />
+                  <CatalogPhoto url={relatedUnit.catalogImageUrl} className="catalogImage" alt={`Foto ${relatedUnit.model}`} imageWidth={720} />
                   <div className="catalogCardTop">
                     <span className="unitNumber">{relatedUnit.nomorUnit}</span>
                     <span className="statusPill green">{relatedUnit.stockLocation}</span>
@@ -122,7 +139,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
                     <span>{relatedUnit.ssd}</span>
                   </div>
                   <strong className="catalogPrice">{formatRupiah(relatedUnit.hargaJualRekomendasi)}</strong>
-                  <Link className="secondaryButton" href={`/unit/${relatedUnit.id}`}>Lihat Detail</Link>
+                  <Link className="secondaryButton" href={{ pathname: `/unit/${relatedUnit.id}`, query: { from: catalogReturnHref } }}>Lihat Detail</Link>
                 </article>
               ))}
             </div>
@@ -130,7 +147,7 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
         ) : null}
 
         <div className="publicUnitMobileBar printHidden" aria-label="Aksi produk">
-          <Link className="secondaryButton" href="/katalog"><ArrowLeft size={17} /> Katalog</Link>
+          <Link className="secondaryButton" href={catalogReturnHref}><ArrowLeft size={17} /> Katalog</Link>
           <a className="primaryButton" href={publicWaLink} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya via WhatsApp</a>
         </div>
       </section>
@@ -166,6 +183,9 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
           className="publicUnitPhoto"
           placeholderClassName="publicUnitPhoto placeholderPhoto"
           alt={`Foto ${unit.model}`}
+          priority
+          zoomable
+          imageWidth={1600}
         />
       </section>
 
