@@ -36,6 +36,10 @@ export default async function UnitDetailPage({ params }: { params: { id: string 
   if (!isInternalUser) {
     return (
       <section className="pageStack">
+        <Link className="backLink" href="/katalog">
+          <ArrowLeft size={16} /> Kembali ke Katalog Lengkap
+        </Link>
+
         <div className="unitHero">
           <div>
             <p className="eyebrow">Katalog FS Comp</p>
