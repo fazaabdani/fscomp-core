@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { licenseDisplayName } from "@/lib/licenses";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
-import { dateInput, formValues, nonNegativeInteger, requiredText, z } from "@/lib/form-validation";
+import { dateInput, entityId, formValues, nonNegativeInteger, optionalText, requiredText, z } from "@/lib/form-validation";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -88,4 +88,24 @@ export async function createLicenseRecordAction(formData: FormData) {
 
   revalidatePath("/licenses");
   redirect("/licenses?success=created");
+}
+
+export async function updateLicenseNotesAction(licenseId: string, formData: FormData) {
+  requireRole(["admin", "sales"]);
+  const validation = z.object({ notes: optionalText(2000) }).safeParse(formValues(formData));
+  if (!entityId.safeParse(licenseId).success || !validation.success) {
+    redirect(`/licenses/${licenseId}/edit?error=invalid-input`);
+  }
+
+  const existing = await prisma.licenseRecord.findUnique({ where: { id: licenseId }, select: { id: true } });
+  if (!existing) redirect("/licenses?error=not-found");
+
+  await prisma.licenseRecord.update({
+    where: { id: licenseId },
+    data: { notes: text(formData, "notes") || null }
+  });
+
+  revalidatePath("/licenses");
+  revalidatePath(`/licenses/${licenseId}/card`);
+  redirect("/licenses?success=updated");
 }

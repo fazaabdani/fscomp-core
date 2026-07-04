@@ -54,13 +54,13 @@ export default async function PublicReceiptPage({ params }: { params: { id: stri
           </div>
         </div>
 
-        <section className="receiptUnit">
+        {sale.unit ? <section className="receiptUnit">
           <Receipt size={20} />
           <div>
             <strong>Unit {sale.unit.nomorUnit} - {sale.unit.model}</strong>
             <span>{sale.unit.processor} / {sale.unit.ram} / {sale.unit.ssd}</span>
           </div>
-        </section>
+        </section> : <section className="receiptUnit"><Receipt size={20} /><div><strong>Transaksi lisensi / software</strong><span>Tidak tertaut ke unit laptop</span></div></section>}
 
         <div className="receiptTable">
           <div className="receiptTableHead">

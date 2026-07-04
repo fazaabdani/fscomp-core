@@ -76,8 +76,8 @@ export async function getSalesPageData() {
       sales: sales.map((sale) => ({
         id: sale.id,
         unitId: sale.unitId,
-        nomorUnit: displayUnitNumber(sale.unit.nomorUnit),
-        model: sale.unit.model,
+        nomorUnit: sale.unit ? displayUnitNumber(sale.unit.nomorUnit) : "-",
+        model: sale.unit?.model ?? "Lisensi / software",
         invoiceNumber: sale.invoiceNumber,
         location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
         soldPrice: sale.soldPrice,

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BadgeCheck, CreditCard, FileDown, KeyRound, PlusCircle } from "lucide-react";
+import { BadgeCheck, CreditCard, FileDown, KeyRound, Pencil, PlusCircle } from "lucide-react";
 import type { LicenseDurationType, LicenseStatus, LicenseType } from "@prisma/client";
 import { formatDateInput, formatDateWib } from "@/lib/inventory";
 import { licenseDurationLabel, licenseStatusLabel, licenseStatusTone, licenseTypeLabel, maskProductKey } from "@/lib/licenses";
@@ -48,6 +48,8 @@ export default async function LicensesPage({ searchParams }: { searchParams?: { 
         ? "Data lisensi belum valid. Periksa versi, tanggal, dan harga."
       : searchParams?.success === "created"
         ? "Lisensi berhasil direkap."
+        : searchParams?.success === "updated"
+          ? "Catatan lisensi berhasil diperbarui."
         : "";
 
   return (
@@ -180,6 +182,7 @@ export default async function LicensesPage({ searchParams }: { searchParams?: { 
                     </td>
                     <td>
                       <Link className="secondaryButton compactButton" href={`/licenses/${license.id}/card`}><FileDown size={15} /> Kartu/PDF</Link>
+                      <Link className="secondaryButton compactButton" href={`/licenses/${license.id}/edit`}><Pencil size={15} /> Catatan</Link>
                     </td>
                   </tr>
                 ))}
