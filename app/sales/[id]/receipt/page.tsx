@@ -62,12 +62,12 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
         {currentUser.role === "admin" && !sale.voidedAt ? (
           <form action={voidSaleAction.bind(null, sale.id)} className="printHidden">
             <input type="hidden" name="voidReason" value="Transaksi batal dari nota" />
-            <VoidSaleButton saleLabel={`${sale.invoiceNumber} / Unit ${sale.unit.nomorUnit} - ${sale.unit.model}`} />
+            <VoidSaleButton saleLabel={`${sale.invoiceNumber} / ${sale.unit ? `Unit ${sale.unit.nomorUnit} - ${sale.unit.model}` : "Lisensi / software"}`} />
           </form>
         ) : null}
         {currentUser.role === "admin" && sale.voidedAt ? (
           <form action={restoreSaleAction.bind(null, sale.id)} className="printHidden">
-            <RestoreSaleButton saleLabel={`${sale.invoiceNumber} / Unit ${sale.unit.nomorUnit} - ${sale.unit.model}`} />
+            <RestoreSaleButton saleLabel={`${sale.invoiceNumber} / ${sale.unit ? `Unit ${sale.unit.nomorUnit} - ${sale.unit.model}` : "Lisensi / software"}`} />
           </form>
         ) : null}
       </div>
@@ -114,13 +114,13 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
           </div>
         </div>
 
-        <section className="receiptUnit">
+        {sale.unit ? <section className="receiptUnit">
           <Receipt size={20} />
           <div>
             <strong>Unit {sale.unit.nomorUnit} - {sale.unit.model}</strong>
             <span>{sale.unit.processor} / {sale.unit.ram} / {sale.unit.ssd}</span>
           </div>
-        </section>
+        </section> : <section className="receiptUnit"><Receipt size={20} /><div><strong>Transaksi lisensi / software</strong><span>Tidak tertaut ke unit laptop</span></div></section>}
 
         <div className="receiptTable">
           <div className="receiptTableHead">

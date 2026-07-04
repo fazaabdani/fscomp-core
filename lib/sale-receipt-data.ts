@@ -49,13 +49,13 @@ export async function getSaleReceipt(id: string) {
       voidedAt: sale.voidedAt?.toISOString().slice(0, 10) ?? "",
       voidReason: sale.voidReason ?? "",
       notes: sale.notes ?? "-",
-      unit: {
+      unit: sale.unit ? {
         nomorUnit: sale.unit.nomorUnit,
         model: sale.unit.model,
         processor: sale.unit.processor,
         ram: sale.unit.ram,
         ssd: sale.unit.ssd
-      },
+      } : null,
       items: sale.items.map((item) => ({
         id: item.id,
         name: item.name,

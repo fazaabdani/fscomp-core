@@ -135,6 +135,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
             <p className="eyebrow">Kasir</p>
             <h2>Catat laptop terjual</h2>
           </div>
+          <Link className="secondaryButton" href="/sales/non-laptop">Kasir Non-Laptop</Link>
         </div>
         <FlashNotice message={flashMessage} tone={searchParams?.error ? "error" : "success"} queryKeys={["saved", "voided", "restored", "error"]} />
 
@@ -268,8 +269,8 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               Catatan
               <textarea name="notes" placeholder="Contoh: DP, transfer BCA, garansi, aksesoris tambahan." />
             </label>
-            <button className="primaryButton" type="submit" disabled={readyUnits.length === 0}>Simpan Penjualan</button>
-            {readyUnits.length === 0 ? <div className="emptyState">Belum ada unit siap jual. Pastikan QC harian terakhir sudah lolos.</div> : null}
+            <button className="primaryButton" type="submit">Simpan Penjualan</button>
+            {readyUnits.length === 0 ? <div className="emptyState">Belum ada unit siap jual. Transaksi lisensi/software tanpa laptop tetap dapat dicatat.</div> : null}
           </div>
         </div>
       </form>

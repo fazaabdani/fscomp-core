@@ -586,7 +586,7 @@ model QcHarian {
 
 model Sale {
   id            String       @id @default(cuid())
-  unitId        String
+  unitId        String?
   invoiceNumber String       @unique
   location      SaleLocation
   soldPrice     Int
@@ -607,7 +607,7 @@ model Sale {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-  unit          Unit         @relation(fields: [unitId], references: [id])
+  unit          Unit?        @relation(fields: [unitId], references: [id])
   items         SaleItem[]
   licenseRecords LicenseRecord[]
 }
