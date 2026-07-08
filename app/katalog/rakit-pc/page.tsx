@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Cpu } from "lucide-react";
 import { getPublicPcBuilderData } from "@/lib/pc-builder";
@@ -5,6 +6,21 @@ import { PcBuilder } from "./PcBuilder";
 import "./pc-builder.css";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Rakit PC Custom Pekalongan | FS Comp",
+  description: "Rakit PC sesuai budget dan kebutuhan di Pekalongan. Cek kompatibilitas komponen otomatis, estimasi harga & daya, QC ketat, garansi rakitan 1 tahun.",
+  keywords: ["rakit pc pekalongan", "rakit komputer pekalongan", "PC custom pekalongan", "FS Comp"],
+  alternates: { canonical: "/katalog/rakit-pc" },
+  openGraph: {
+    title: "Rakit PC Custom Pekalongan | FS Comp",
+    description: "Rakit PC sesuai budget dan kebutuhan di Pekalongan. Cek kompatibilitas otomatis, QC ketat, garansi rakitan 1 tahun.",
+    url: "/katalog/rakit-pc",
+    siteName: "FS Comp",
+    locale: "id_ID",
+    type: "website"
+  }
+};
 function param(value?: string | string[]) { return Array.isArray(value) ? value[0] : value; }
 function errorMessage(value?:string|string[]){const error=param(value);if(error==="phone")return"Nomor WhatsApp wajib diisi dengan 9–15 digit.";if(error==="rate-limit")return"Terlalu banyak draft dari nomor ini. Coba lagi setelah 15 menit atau gunakan WhatsApp.";if(error==="compatibility")return"Konfigurasi tidak kompatibel. Periksa kembali komponen yang dipilih.";return error?"Draft tidak dapat disimpan karena data, komponen, atau stok berubah. Silakan periksa kembali.":"";}
 
