@@ -42,7 +42,7 @@ const STORE_LOCATIONS = [
     alternateName: "FS Media Comp Wiradesa",
     telephone: "+62816660056",
     priceRange: "Rp",
-    url: "https://core.fscomp.id/katalog",
+    url: "https://fscomp.id",
     address: {
       "@type": "PostalAddress",
       streetAddress: "Jl. Wiradesa No.1 RT 22 RW 05, Desa Wiradesa",
@@ -58,7 +58,7 @@ const STORE_LOCATIONS = [
     alternateName: "FS Comp Kajen",
     telephone: "+6285182661773",
     priceRange: "Rp",
-    url: "https://core.fscomp.id/katalog",
+    url: "https://fscomp.id",
     address: {
       "@type": "PostalAddress",
       streetAddress: "Jalan Diponegoro No. 204B (Utara Rumah Dinas Wakil Bupati)",

@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   return {
     title,
     description,
-    alternates: { canonical: `/unit/${unit.id}` },
+    robots: { index: false, follow: false },
     openGraph: { title, description, url: `/unit/${unit.id}`, siteName: "FS Comp", locale: "id_ID", type: "website" }
   };
 }
