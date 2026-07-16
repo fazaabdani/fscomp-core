@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, ChevronLeft, ChevronRight, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, PackageCheck, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { CheckCircle2, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, PackageCheck, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { CopyWaButton } from "@/app/CopyWaButton";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
@@ -8,7 +8,6 @@ import { CatalogFilterShell } from "./CatalogFilterShell";
 import { KatalogDynamics } from "./KatalogDynamics";
 
 export const dynamic = "force-dynamic";
-const CATALOG_PAGE_SIZE = 25;
 
 function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: number }) {
   const text = [
@@ -168,7 +167,7 @@ function activeFilterCount(filters: CatalogFilters) {
   ].filter(Boolean).length;
 }
 
-function catalogHref(filters: CatalogFilters, page: number, overrides: Partial<CatalogFilters> = {}) {
+function catalogHref(filters: CatalogFilters, overrides: Partial<CatalogFilters> = {}) {
   const next = { ...filters, ...overrides };
   const query = new URLSearchParams();
   if (next.q) query.set("q", next.q);
@@ -180,7 +179,6 @@ function catalogHref(filters: CatalogFilters, page: number, overrides: Partial<C
   if (next.windows) query.set("windows", next.windows);
   if (next.harga !== "semua") query.set("harga", next.harga);
   if (next.view !== "grid") query.set("view", next.view);
-  if (page > 1) query.set("page", String(page));
   const text = query.toString();
   return `/katalog${text ? `?${text}` : ""}#produk-ready`;
 }
@@ -554,33 +552,6 @@ function CatalogPageStyles() {
         line-height: 1.55;
       }
 
-      .catalogPagination {
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        align-items: center;
-        gap: 12px;
-        padding: 14px;
-        border: 1px solid rgba(55, 163, 255, 0.34);
-        border-radius: 10px;
-        background: rgba(8, 20, 36, 0.88);
-      }
-
-      .catalogPagination > div {
-        display: grid;
-        gap: 2px;
-        color: #f8fbff;
-        text-align: center;
-      }
-
-      .catalogPagination > div span {
-        color: #9ec1df;
-        font-size: 11px;
-      }
-
-      .catalogPagination > :last-child {
-        justify-self: end;
-      }
-
       @media (max-width: 820px) {
         html,
         body {
@@ -777,20 +748,6 @@ function CatalogPageStyles() {
           min-height: 0;
         }
 
-        .catalogPagination {
-          grid-template-columns: 1fr 1fr;
-        }
-
-        .catalogPagination > div {
-          grid-column: 1 / -1;
-          grid-row: 1;
-        }
-
-        .catalogPagination > .secondaryButton,
-        .catalogPagination > .primaryButton {
-          grid-row: 2;
-          width: 100%;
-        }
       }
 
       @media (min-width: 821px) and (max-width: 1280px) {
@@ -826,14 +783,9 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
   };
   const allRawUnits = [...wiradesaUnits, ...kajenUnits];
   const visibleUnits = sortUnits(filterUnits(allRawUnits, filters), filters.sort);
-  const totalPages = Math.max(1, Math.ceil(visibleUnits.length / CATALOG_PAGE_SIZE));
-  const requestedPage = Math.max(1, Number.parseInt(singleParam(searchParams?.page), 10) || 1);
-  const currentPage = Math.min(requestedPage, totalPages);
-  const pageStart = (currentPage - 1) * CATALOG_PAGE_SIZE;
-  const pageUnits = visibleUnits.slice(pageStart, pageStart + CATALOG_PAGE_SIZE);
-  const visibleWiradesa = filters.lokasi === "kajen" ? [] : pageUnits.filter((unit) => unit.stockLocation === "Wiradesa");
-  const visibleKajen = filters.lokasi === "wiradesa" ? [] : pageUnits.filter((unit) => unit.stockLocation === "Kajen");
-  const returnTo = catalogHref(filters, currentPage);
+  const visibleWiradesa = filters.lokasi === "kajen" ? [] : visibleUnits.filter((unit) => unit.stockLocation === "Wiradesa");
+  const visibleKajen = filters.lokasi === "wiradesa" ? [] : visibleUnits.filter((unit) => unit.stockLocation === "Kajen");
+  const returnTo = catalogHref(filters);
   const filterCount = activeFilterCount(filters);
   const total = wiradesaUnits.length + kajenUnits.length;
   const brandOptions = uniqueSorted(allRawUnits.map((unit) => brandOf(unit.model)));
@@ -993,16 +945,16 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
       <div className="catalogResultBar catalogReveal revealDelay1">
         <div className="catalogResultCount">
           <strong>{visibleUnits.length}</strong>
-          <span>dari {total} unit ready / tampil {visibleUnits.length === 0 ? 0 : pageStart + 1}-{Math.min(pageStart + CATALOG_PAGE_SIZE, visibleUnits.length)}</span>
+          <span>dari {total} unit ready ditampilkan dalam satu halaman</span>
         </div>
         <div className="catalogShareBox">
           <CopyWaButton text={catalogShareText(visibleUnits, filters, returnTo)} disabled={visibleUnits.length === 0} label="Copy list WA" />
           <small>Filter: {activeFilterText(filters)} | Urutan: {sortLabel(filters.sort)}</small>
         </div>
         <nav className="catalogViewSwitch" aria-label="Pilihan tampilan katalog">
-          <Link className={filters.view === "grid" ? "active" : ""} href={catalogHref(filters, 1, { view: "grid" })} title="Grid nyaman"><LayoutGrid size={16} /> Grid</Link>
-          <Link className={filters.view === "compact" ? "active" : ""} href={catalogHref(filters, 1, { view: "compact" })} title="Grid ringkas"><Grid2X2 size={16} /> Ringkas</Link>
-          <Link className={filters.view === "list" ? "active" : ""} href={catalogHref(filters, 1, { view: "list" })} title="Daftar"><List size={16} /> Daftar</Link>
+          <Link className={filters.view === "grid" ? "active" : ""} href={catalogHref(filters, { view: "grid" })} title="Grid nyaman"><LayoutGrid size={16} /> Grid</Link>
+          <Link className={filters.view === "compact" ? "active" : ""} href={catalogHref(filters, { view: "compact" })} title="Grid ringkas"><Grid2X2 size={16} /> Ringkas</Link>
+          <Link className={filters.view === "list" ? "active" : ""} href={catalogHref(filters, { view: "list" })} title="Daftar"><List size={16} /> Daftar</Link>
         </nav>
       </div>
 
@@ -1019,13 +971,6 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
       ) : null}
       {visibleWiradesa.length > 0 ? <CatalogSection title="Stok Wiradesa" subtitle="Lokasi utama" units={visibleWiradesa} returnTo={returnTo} view={filters.view} /> : null}
       {visibleKajen.length > 0 ? <CatalogSection title="Stok Kajen" subtitle="Lokasi secondary" units={visibleKajen} returnTo={returnTo} view={filters.view} /> : null}
-      {visibleUnits.length > 0 && totalPages > 1 ? (
-        <nav className="catalogPagination" aria-label="Halaman katalog">
-          {currentPage > 1 ? <Link className="secondaryButton" href={catalogHref(filters, currentPage - 1)}><ChevronLeft size={17} /> Sebelumnya</Link> : <span />}
-          <div><strong>Halaman {currentPage}</strong><span>dari {totalPages} / maksimal {CATALOG_PAGE_SIZE} produk</span></div>
-          {currentPage < totalPages ? <Link className="primaryButton" href={catalogHref(filters, currentPage + 1)}>Produk Berikutnya <ChevronRight size={17} /></Link> : <span />}
-        </nav>
-      ) : null}
     </section>
   );
 }
