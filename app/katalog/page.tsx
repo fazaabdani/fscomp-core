@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, ChevronLeft, ChevronRight, MapPin, MessageCircle, PackageCheck, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { CheckCircle2, ChevronLeft, ChevronRight, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, PackageCheck, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { CopyWaButton } from "@/app/CopyWaButton";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
@@ -45,6 +45,8 @@ type CatalogFilters = {
   ram: string;
   storage: string;
   windows: string;
+  harga: string;
+  view: string;
 };
 
 function singleParam(value?: string | string[]) {
@@ -105,6 +107,9 @@ function filterUnits(units: CatalogUnit[], filters: CatalogFilters) {
     if (filters.ram && ramLabel(unit.ram) !== filters.ram) return false;
     if (filters.storage && storageLabel(unit.ssd) !== filters.storage) return false;
     if (filters.windows && unit.windowsVersion !== filters.windows) return false;
+    if (filters.harga === "maks-3" && unit.hargaJualRekomendasi > 3_000_000) return false;
+    if (filters.harga === "3-5" && (unit.hargaJualRekomendasi <= 3_000_000 || unit.hargaJualRekomendasi > 5_000_000)) return false;
+    if (filters.harga === "diatas-5" && unit.hargaJualRekomendasi <= 5_000_000) return false;
     return true;
   });
 }
@@ -134,13 +139,19 @@ function sortLabel(sort: string) {
 }
 
 function activeFilterText(filters: CatalogFilters) {
+  const priceLabels: Record<string, string> = {
+    "maks-3": "harga sampai Rp3 juta",
+    "3-5": "harga Rp3-5 juta",
+    "diatas-5": "harga di atas Rp5 juta"
+  };
   const parts = [
     filters.q ? `cari "${filters.q}"` : "",
     filters.lokasi !== "semua" ? `lokasi ${filters.lokasi}` : "",
     filters.merek ? `merek ${filters.merek}` : "",
     filters.ram ? `RAM ${filters.ram}` : "",
     filters.storage ? `SSD ${filters.storage}` : "",
-    filters.windows ? filters.windows : ""
+    filters.windows ? filters.windows : "",
+    priceLabels[filters.harga] ?? ""
   ].filter(Boolean);
   return parts.length ? parts.join(", ") : "semua unit ready";
 }
@@ -152,19 +163,23 @@ function activeFilterCount(filters: CatalogFilters) {
     filters.merek,
     filters.ram,
     filters.storage,
-    filters.windows
+    filters.windows,
+    filters.harga !== "semua" ? filters.harga : ""
   ].filter(Boolean).length;
 }
 
-function catalogHref(filters: CatalogFilters, page: number) {
+function catalogHref(filters: CatalogFilters, page: number, overrides: Partial<CatalogFilters> = {}) {
+  const next = { ...filters, ...overrides };
   const query = new URLSearchParams();
-  if (filters.q) query.set("q", filters.q);
-  if (filters.sort !== "unit") query.set("sort", filters.sort);
-  if (filters.lokasi !== "semua") query.set("lokasi", filters.lokasi);
-  if (filters.merek) query.set("merek", filters.merek);
-  if (filters.ram) query.set("ram", filters.ram);
-  if (filters.storage) query.set("storage", filters.storage);
-  if (filters.windows) query.set("windows", filters.windows);
+  if (next.q) query.set("q", next.q);
+  if (next.sort !== "unit") query.set("sort", next.sort);
+  if (next.lokasi !== "semua") query.set("lokasi", next.lokasi);
+  if (next.merek) query.set("merek", next.merek);
+  if (next.ram) query.set("ram", next.ram);
+  if (next.storage) query.set("storage", next.storage);
+  if (next.windows) query.set("windows", next.windows);
+  if (next.harga !== "semua") query.set("harga", next.harga);
+  if (next.view !== "grid") query.set("view", next.view);
   if (page > 1) query.set("page", String(page));
   const text = query.toString();
   return `/katalog${text ? `?${text}` : ""}#produk-ready`;
@@ -195,12 +210,14 @@ function CatalogSection({
   title,
   subtitle,
   units,
-  returnTo
+  returnTo,
+  view
 }: {
   title: string;
   subtitle: string;
   units: CatalogUnit[];
   returnTo: string;
+  view: string;
 }) {
   return (
     <section className="panel catalogPublicSection">
@@ -211,7 +228,7 @@ function CatalogSection({
         </div>
         <MapPin size={22} />
       </div>
-      <div className="catalogPublicGrid">
+      <div className={`catalogPublicGrid catalogView-${view}`}>
         {units.map((unit, index) => (
           <article className="catalogPublicCard catalogReveal" key={unit.id}>
             <span className="catalogCardShine" aria-hidden="true" />
@@ -387,6 +404,86 @@ function CatalogPageStyles() {
         grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
       }
 
+      .catalogView-compact {
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      }
+
+      .catalogView-compact .catalogPublicCard {
+        gap: 8px;
+        padding: 12px;
+      }
+
+      .catalogView-compact .catalogImage {
+        aspect-ratio: 4 / 3;
+      }
+
+      .catalogView-compact .catalogTrustRow {
+        display: none;
+      }
+
+      .catalogView-list {
+        grid-template-columns: 1fr;
+      }
+
+      .catalogView-list .catalogPublicCard {
+        grid-template-columns: minmax(190px, 250px) minmax(0, 1fr) auto;
+        grid-template-rows: repeat(6, auto);
+        column-gap: 18px;
+        align-items: start;
+      }
+
+      .catalogView-list .catalogCardShine {
+        display: none;
+      }
+
+      .catalogView-list .catalogImage {
+        grid-column: 1;
+        grid-row: 1 / -1;
+        height: 100%;
+        min-height: 210px;
+      }
+
+      .catalogView-list .catalogCardTop,
+      .catalogView-list .catalogPublicCard > div:not(.catalogCardActions):not(.catalogCardTop),
+      .catalogView-list .catalogPublicCard > p,
+      .catalogView-list .catalogPrice {
+        grid-column: 2;
+      }
+
+      .catalogView-list .catalogCardActions {
+        grid-column: 3;
+        grid-row: 1 / -1;
+        width: 155px;
+        flex-direction: column;
+        align-self: center;
+      }
+
+      .catalogViewSwitch {
+        display: inline-flex;
+        gap: 4px;
+        padding: 4px;
+        border: 1px solid rgba(55, 163, 255, 0.28);
+        border-radius: 8px;
+        background: rgba(3, 13, 26, 0.72);
+      }
+
+      .catalogViewSwitch a {
+        display: inline-flex;
+        min-height: 38px;
+        align-items: center;
+        gap: 6px;
+        padding: 0 10px;
+        border-radius: 6px;
+        color: #9ec1df;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .catalogViewSwitch a.active {
+        background: rgba(34, 211, 238, 0.15);
+        color: #67e8f9;
+      }
+
       .catalogPublicCard {
         align-content: start;
         gap: 11px;
@@ -485,6 +582,11 @@ function CatalogPageStyles() {
       }
 
       @media (max-width: 820px) {
+        html,
+        body {
+          overflow-x: clip;
+        }
+
         .catalogFilterShell {
           position: sticky;
           z-index: 8;
@@ -625,6 +727,48 @@ function CatalogPageStyles() {
           grid-template-columns: 1fr;
         }
 
+        .catalogView-list .catalogPublicCard {
+          display: grid;
+          grid-template-columns: 104px minmax(0, 1fr);
+          grid-template-rows: auto;
+          column-gap: 11px;
+        }
+
+        .catalogView-list .catalogImage {
+          grid-column: 1;
+          grid-row: 1 / span 3;
+          min-height: 0;
+          height: 104px;
+        }
+
+        .catalogView-list .catalogCardTop,
+        .catalogView-list .catalogPublicCard > div:not(.catalogCardActions):not(.catalogCardTop),
+        .catalogView-list .catalogPublicCard > p,
+        .catalogView-list .catalogPrice,
+        .catalogView-list .catalogCardActions {
+          grid-column: 2;
+        }
+
+        .catalogView-list .catalogSpecList,
+        .catalogView-list .catalogTrustRow {
+          display: none;
+        }
+
+        .catalogView-list .catalogCardActions {
+          grid-row: auto;
+          width: 100%;
+          flex-direction: row;
+        }
+
+        .catalogViewSwitch {
+          width: 100%;
+        }
+
+        .catalogViewSwitch a {
+          flex: 1;
+          justify-content: center;
+        }
+
         .catalogPublicCard {
           padding: 13px;
         }
@@ -676,7 +820,9 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
     merek: singleParam(searchParams?.merek),
     ram: singleParam(searchParams?.ram),
     storage: singleParam(searchParams?.storage),
-    windows: singleParam(searchParams?.windows)
+    windows: singleParam(searchParams?.windows),
+    harga: ["maks-3", "3-5", "diatas-5"].includes(singleParam(searchParams?.harga)) ? singleParam(searchParams?.harga) : "semua",
+    view: ["compact", "list"].includes(singleParam(searchParams?.view)) ? singleParam(searchParams?.view) : "grid"
   };
   const allRawUnits = [...wiradesaUnits, ...kajenUnits];
   const visibleUnits = sortUnits(filterUnits(allRawUnits, filters), filters.sort);
@@ -810,6 +956,15 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           </select>
         </label>
         <label>
+          Harga
+          <select name="harga" defaultValue={filters.harga}>
+            <option value="semua">Semua harga</option>
+            <option value="maks-3">Sampai Rp3 juta</option>
+            <option value="3-5">Rp3-5 juta</option>
+            <option value="diatas-5">Di atas Rp5 juta</option>
+          </select>
+        </label>
+        <label>
           Urutkan
           <select name="sort" defaultValue={filters.sort}>
             <option value="unit">Nomor unit</option>
@@ -818,6 +973,14 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
             <option value="ram-terbesar">RAM terbesar</option>
             <option value="ssd-terbesar">SSD terbesar</option>
             <option value="nama">Nama/model</option>
+          </select>
+        </label>
+        <label>
+          Tampilan
+          <select name="view" defaultValue={filters.view}>
+            <option value="grid">Grid nyaman</option>
+            <option value="compact">Grid ringkas</option>
+            <option value="list">Daftar</option>
           </select>
         </label>
         <div className="catalogFilterActions">
@@ -836,6 +999,11 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           <CopyWaButton text={catalogShareText(visibleUnits, filters, returnTo)} disabled={visibleUnits.length === 0} label="Copy list WA" />
           <small>Filter: {activeFilterText(filters)} | Urutan: {sortLabel(filters.sort)}</small>
         </div>
+        <nav className="catalogViewSwitch" aria-label="Pilihan tampilan katalog">
+          <Link className={filters.view === "grid" ? "active" : ""} href={catalogHref(filters, 1, { view: "grid" })} title="Grid nyaman"><LayoutGrid size={16} /> Grid</Link>
+          <Link className={filters.view === "compact" ? "active" : ""} href={catalogHref(filters, 1, { view: "compact" })} title="Grid ringkas"><Grid2X2 size={16} /> Ringkas</Link>
+          <Link className={filters.view === "list" ? "active" : ""} href={catalogHref(filters, 1, { view: "list" })} title="Daftar"><List size={16} /> Daftar</Link>
+        </nav>
       </div>
 
       {visibleUnits.length === 0 ? (
@@ -849,8 +1017,8 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           </div>
         </div>
       ) : null}
-      {visibleWiradesa.length > 0 ? <CatalogSection title="Stok Wiradesa" subtitle="Lokasi utama" units={visibleWiradesa} returnTo={returnTo} /> : null}
-      {visibleKajen.length > 0 ? <CatalogSection title="Stok Kajen" subtitle="Lokasi secondary" units={visibleKajen} returnTo={returnTo} /> : null}
+      {visibleWiradesa.length > 0 ? <CatalogSection title="Stok Wiradesa" subtitle="Lokasi utama" units={visibleWiradesa} returnTo={returnTo} view={filters.view} /> : null}
+      {visibleKajen.length > 0 ? <CatalogSection title="Stok Kajen" subtitle="Lokasi secondary" units={visibleKajen} returnTo={returnTo} view={filters.view} /> : null}
       {visibleUnits.length > 0 && totalPages > 1 ? (
         <nav className="catalogPagination" aria-label="Halaman katalog">
           {currentPage > 1 ? <Link className="secondaryButton" href={catalogHref(filters, currentPage - 1)}><ChevronLeft size={17} /> Sebelumnya</Link> : <span />}
