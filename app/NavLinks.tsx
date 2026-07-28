@@ -24,7 +24,7 @@ function groupActive(pathname: string, links: NavLink[]) {
   return links.some((link) => link.show && isActive(pathname, link.href));
 }
 
-function NavDropdown({ label, links, pathname }: { label: string; links: NavLink[]; pathname: string }) {
+function NavDropdown({ label, links, pathname, menuClassName = "" }: { label: string; links: NavLink[]; pathname: string; menuClassName?: string }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const visibleLinks = links.filter((link) => link.show);
@@ -51,7 +51,7 @@ function NavDropdown({ label, links, pathname }: { label: string; links: NavLink
       >
         {label}
       </button>
-      <div className={`navDropdownMenu ${open ? "open" : ""}`} role="menu">
+      <div className={`navDropdownMenu ${menuClassName} ${open ? "open" : ""}`} role="menu">
         {visibleLinks.map((link) => (
           <Link className={isActive(pathname, link.href) ? "activeNav" : ""} href={link.href} key={link.href} onClick={() => setOpen(false)}>
             {link.label}
@@ -107,7 +107,7 @@ export function NavLinks({ currentUser }: { currentUser: NavUser | null }) {
           {link.label}
         </Link>
       ))}
-      <NavDropdown label="Operasional" links={operationLinks} pathname={pathname} />
+      <NavDropdown label="Operasional" links={operationLinks} pathname={pathname} menuClassName="navDropdownMenuWide" />
       {links.slice(6).filter((link) => link.show).map((link) => (
         <Link className={isActive(pathname, link.href) ? "activeNav" : ""} href={link.href} key={link.href}>
           {link.label}

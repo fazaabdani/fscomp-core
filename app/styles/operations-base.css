@@ -52,6 +52,11 @@
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
+.navDropdownMenuWide {
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  min-width: 420px;
+}
+
 .navDropdownMenu::before {
   content: "";
   position: absolute;
