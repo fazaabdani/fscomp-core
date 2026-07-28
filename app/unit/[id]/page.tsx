@@ -82,6 +82,15 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
               zoomable
               imageWidth={1600}
             />
+            {unit.gallery.length > 1 ? (
+              <div className="mediaGrid">
+                {unit.gallery.map((url) => (
+                  <div className="mediaThumb" key={url}>
+                    <img src={url} alt={`Foto ${unit.model}`} loading="lazy" />
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </section>
 
           <aside className="panel">
@@ -187,6 +196,15 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
           zoomable
           imageWidth={1600}
         />
+        {unit.gallery.length > 1 ? (
+          <div className="mediaGrid">
+            {unit.gallery.map((url) => (
+              <div className="mediaThumb" key={url}>
+                <img src={url} alt={`Foto ${unit.model}`} loading="lazy" />
+              </div>
+            ))}
+          </div>
+        ) : null}
       </section>
 
       <div className="contentGrid">

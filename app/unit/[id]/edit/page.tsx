@@ -3,12 +3,14 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { chargerTypes } from "@/lib/charger-options";
 import { getUnitForEdit } from "@/lib/db-data";
+import { getUnitPhotoGallery } from "@/lib/media-data";
 import { requireRole } from "@/lib/session";
+import { MediaPicker } from "../../MediaPicker";
 import { updateUnitAction } from "./actions";
 
 export default async function EditUnitPage({ params, searchParams }: { params: { id: string }; searchParams?: { error?: string } }) {
   requireRole(["admin"]);
-  const unit = await getUnitForEdit(params.id);
+  const [unit, gallery] = await Promise.all([getUnitForEdit(params.id), getUnitPhotoGallery(params.id)]);
   if (!unit) notFound();
 
   const action = updateUnitAction.bind(null, unit.id);
@@ -89,7 +91,10 @@ export default async function EditUnitPage({ params, searchParams }: { params: {
         </label>
         <label>Link foto katalog
           <input name="catalogImageUrl" defaultValue={unit.catalogImageUrl} placeholder="Link Google Drive / link foto langsung" />
-          <small>Opsional. Bisa diisi setelah unit difoto dan siap dipajang di katalog.</small>
+          <small>Opsional. Bisa pakai link, atau pilih dari galeri di bawah — boleh dua-duanya.</small>
+        </label>
+        <label>Galeri foto
+          <MediaPicker fieldName="unitPhotoAssetIds" initial={gallery.map((photo) => ({ id: photo.assetId, url: photo.url }))} />
         </label>
         <label>Catatan admin unit
           <textarea

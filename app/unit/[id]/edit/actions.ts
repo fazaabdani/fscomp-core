@@ -3,6 +3,7 @@
 import { SaleLocation, UnitStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { resolveUnitPhotos } from "@/lib/media-data";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { entityId, formValues, percentage, requiredText, rupiahInput, z } from "@/lib/form-validation";
@@ -112,11 +113,21 @@ export async function updateUnitAction(unitId: string, formData: FormData) {
     }))
     .filter((change) => String(change.before ?? "") !== String(change.after ?? ""));
 
+  const photoAssetIds = await resolveUnitPhotos(formData.getAll("unitPhotoAssetIds").map(String));
+
   await prisma.$transaction([
     prisma.unit.update({
       where: { id: unitId },
       data: updateData
     }),
+    prisma.unitPhoto.deleteMany({ where: { unitId } }),
+    ...(photoAssetIds.length > 0
+      ? [
+          prisma.unitPhoto.createMany({
+            data: photoAssetIds.map((assetId, order) => ({ unitId, assetId, order }))
+          })
+        ]
+      : []),
     ...(changes.length > 0
       ? [
           prisma.unitAuditLog.create({

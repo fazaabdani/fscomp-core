@@ -3,6 +3,7 @@ import { ArrowLeft, Laptop } from "lucide-react";
 import { chargerTypes } from "@/lib/charger-options";
 import { getBatchesForPage } from "@/lib/db-data";
 import { requireRole } from "@/lib/session";
+import { MediaPicker } from "../MediaPicker";
 import { createUnitWithInitialQcAction } from "./actions";
 
 export default async function NewUnitPage({ searchParams }: { searchParams?: { batch?: string; error?: string } }) {
@@ -96,6 +97,10 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
         </div>
         <label>Link foto katalog
           <input name="catalogImageUrl" placeholder="Opsional, bisa diisi nanti setelah unit difoto" />
+          <small>Bisa pakai link, atau pilih dari galeri foto di bawah — boleh dua-duanya.</small>
+        </label>
+        <label>Galeri foto
+          <MediaPicker fieldName="unitPhotoAssetIds" />
         </label>
 
         <div className="infoBox compactInfo">

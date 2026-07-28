@@ -3,6 +3,7 @@ import { CheckCircle2, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, Package
 import { CopyWaButton } from "@/app/CopyWaButton";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
+import { brandOf } from "@/lib/catalog-image";
 import { getCatalogPageData } from "@/lib/catalog-page-data";
 import { CatalogFilterShell } from "./CatalogFilterShell";
 import { KatalogDynamics } from "./KatalogDynamics";
@@ -50,18 +51,6 @@ type CatalogFilters = {
 
 function singleParam(value?: string | string[]) {
   return Array.isArray(value) ? value[0] ?? "" : value ?? "";
-}
-
-function brandOf(model: string) {
-  const normalized = model.trim().toUpperCase();
-  if (normalized.startsWith("LENOVO")) return "Lenovo";
-  if (normalized.startsWith("HP")) return "HP";
-  if (normalized.startsWith("DELL")) return "Dell";
-  if (normalized.startsWith("ASUS")) return "Asus";
-  if (normalized.startsWith("ACER")) return "Acer";
-  if (normalized.startsWith("TOSHIBA")) return "Toshiba";
-  if (normalized.startsWith("ADVAN")) return "Advan";
-  return model.trim().split(/\s+/)[0] || "Lainnya";
 }
 
 function capacityNumber(value: string) {

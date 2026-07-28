@@ -28,6 +28,18 @@ export function catalogImageCandidates(url?: string | null, requestedWidth = 120
   ];
 }
 
+export function brandOf(model: string) {
+  const normalized = model.trim().toUpperCase();
+  if (normalized.startsWith("LENOVO")) return "Lenovo";
+  if (normalized.startsWith("HP")) return "HP";
+  if (normalized.startsWith("DELL")) return "Dell";
+  if (normalized.startsWith("ASUS")) return "Asus";
+  if (normalized.startsWith("ACER")) return "Acer";
+  if (normalized.startsWith("TOSHIBA")) return "Toshiba";
+  if (normalized.startsWith("ADVAN")) return "Advan";
+  return model.trim().split(/\s+/)[0] || "Lainnya";
+}
+
 export const genericCatalogImageCandidates = [
   "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1000&q=80",
   "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1000&q=80",

@@ -1,3 +1,4 @@
+import { resolvePrimaryImageUrl } from "./media-data";
 import { prisma } from "./prisma";
 import { displayUnitNumber } from "./unit-number";
 
@@ -21,7 +22,8 @@ export async function getCatalogPageData() {
             screenCondition: true,
             officeStatus: true
           }
-        }
+        },
+        unitPhotos: { orderBy: { order: "asc" }, take: 1, include: { asset: { select: { fileName: true } } } }
       },
       orderBy: [
         { stockLocation: "desc" },
@@ -51,7 +53,7 @@ export async function getCatalogPageData() {
           lcdResolution: unit.lcdResolution ?? "-",
           isTouchscreen: unit.isTouchscreen,
           hargaJualRekomendasi: unit.hargaJualRekomendasi,
-          catalogImageUrl: unit.catalogImageUrl ?? "",
+          catalogImageUrl: resolvePrimaryImageUrl(unit.unitPhotos, unit.catalogImageUrl),
           stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
           latestQcAt: latestDaily?.tanggal.toLocaleDateString("id-ID", {
             timeZone: "Asia/Jakarta",
@@ -108,7 +110,8 @@ export async function getRelatedCatalogUnits(unitId: string) {
           orderBy: { tanggal: "desc" },
           take: 1,
           select: { masihLolos: true }
-        }
+        },
+        unitPhotos: { orderBy: { order: "asc" }, take: 1, include: { asset: { select: { fileName: true } } } }
       },
       orderBy: { updatedAt: "desc" },
       take: 24
@@ -133,7 +136,7 @@ export async function getRelatedCatalogUnits(unitId: string) {
           processor: unit.processor,
           ram: unit.ram,
           ssd: unit.ssd,
-          catalogImageUrl: unit.catalogImageUrl ?? "",
+          catalogImageUrl: resolvePrimaryImageUrl(unit.unitPhotos, unit.catalogImageUrl),
           stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
           hargaJualRekomendasi: unit.hargaJualRekomendasi,
           score,

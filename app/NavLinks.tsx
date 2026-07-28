@@ -77,6 +77,7 @@ export function NavLinks({ currentUser }: { currentUser: NavUser | null }) {
   ];
   const operationLinks = [
     { href: "/inventory", label: "Inventaris", show: true },
+    { href: "/media", label: "Media Foto Produk", show: currentUser.role === "admin" || currentUser.role === "teknisi" },
     { href: "/sales/non-laptop", label: "Kasir Non-Laptop", show: !isMagang },
     { href: "/sales/archive", label: "Arsip Penjualan", show: currentUser.role === "admin" },
     { href: "/rakit-pc", label: "Rakit PC", show: canSeeLicense },

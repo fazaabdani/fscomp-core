@@ -4,6 +4,7 @@ import { SaleLocation, UnitStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { batches as demoBatches } from "@/lib/api";
+import { resolveUnitPhotos } from "@/lib/media-data";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { unitNumberWithBatchDate } from "@/lib/unit-number";
@@ -103,6 +104,8 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
     text(formData, "qcFlowStatus") ? `Status alur: ${text(formData, "qcFlowStatus").replaceAll("_", " ")}` : ""
   ].filter(Boolean).join("\n");
 
+  const photoAssetIds = await resolveUnitPhotos(formData.getAll("unitPhotoAssetIds").map(String));
+
   const unit = await prisma.unit.create({
     data: {
       nomorUnit,
@@ -126,7 +129,10 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
       ssdHealth: null,
       statusObservasi: status || "RECHECK",
       tanggalMasuk: batch.tanggalMasuk,
-      tempo: batch.tanggalTempo
+      tempo: batch.tanggalTempo,
+      unitPhotos: {
+        create: photoAssetIds.map((assetId, order) => ({ assetId, order }))
+      }
     }
   });
 

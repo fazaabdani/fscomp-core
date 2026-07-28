@@ -1,5 +1,6 @@
 import { batches as demoBatches, units as demoUnits, type BatchPSI } from "./api";
 import { chargerTypes } from "./charger-options";
+import { resolvePrimaryImageUrl } from "./media-data";
 import { prisma } from "./prisma";
 import { displayUnitNumber } from "./unit-number";
 
@@ -18,7 +19,11 @@ function chargerCounts(value: unknown) {
 export async function getBatchesForManagementPage() {
   try {
     const dbBatches = await prisma.batchPSI.findMany({
-      include: { units: true },
+      include: {
+        units: {
+          include: { unitPhotos: { orderBy: { order: "asc" }, take: 1, include: { asset: { select: { fileName: true } } } } }
+        }
+      },
       orderBy: { tanggalMasuk: "desc" }
     });
 
@@ -53,7 +58,7 @@ export async function getBatchesForManagementPage() {
         chargerType: unit.chargerType ?? "",
         hargaModal: unit.hargaModal,
         statusObservasi: unit.statusObservasi.replaceAll("_", " "),
-        catalogImageUrl: unit.catalogImageUrl ?? "",
+        catalogImageUrl: resolvePrimaryImageUrl(unit.unitPhotos, unit.catalogImageUrl),
         soldAt: unit.soldAt?.toISOString().slice(0, 10) ?? ""
       }))
     }));

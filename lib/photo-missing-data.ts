@@ -7,7 +7,8 @@ export async function getUnitsMissingPhotos() {
       where: {
         soldAt: null,
         statusObservasi: { not: "RETUR_DISTRIBUTOR" },
-        OR: [{ catalogImageUrl: null }, { catalogImageUrl: "" }]
+        OR: [{ catalogImageUrl: null }, { catalogImageUrl: "" }],
+        unitPhotos: { none: {} }
       },
       select: {
         id: true,

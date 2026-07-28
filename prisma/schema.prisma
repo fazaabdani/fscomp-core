@@ -176,6 +176,7 @@ model User {
   attendance Attendance[]
   inventoryItems InventoryItem[]
   licenseRecords LicenseRecord[]
+  mediaAssets MediaAsset[]
 }
 
 model Attendance {
@@ -251,8 +252,56 @@ model Unit {
   auditLogs   UnitAuditLog[]
   inventoryItems InventoryItem[]
   licenseRecords LicenseRecord[]
+  unitPhotos  UnitPhoto[]
 
   @@unique([batchId, nomorUnit])
+}
+
+model MediaFolder {
+  id        String   @id @default(cuid())
+  name      String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent   MediaFolder?  @relation("MediaFolderChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children MediaFolder[] @relation("MediaFolderChildren")
+  assets   MediaAsset[]
+
+  @@index([parentId])
+}
+
+model MediaAsset {
+  id           String   @id @default(cuid())
+  folderId     String?
+  fileName     String
+  originalName String
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  uploadedById String?
+  createdAt    DateTime @default(now())
+
+  folder     MediaFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  uploadedBy User?        @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  unitPhotos UnitPhoto[]
+
+  @@index([folderId])
+}
+
+model UnitPhoto {
+  id        String   @id @default(cuid())
+  unitId    String
+  assetId   String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  unit  Unit       @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  asset MediaAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, assetId])
+  @@index([unitId, order])
 }
 
 model InventoryItem {
