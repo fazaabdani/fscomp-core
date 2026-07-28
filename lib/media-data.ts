@@ -4,11 +4,11 @@ export const MEDIA_UPLOAD_DIR = "public/uploads/media";
 export const MEDIA_THUMB_DIR = "public/uploads/media/thumb";
 
 export function mediaAssetUrl(fileName: string) {
-  return `/uploads/media/${fileName}`;
+  return `/api/media/file/${fileName}`;
 }
 
 export function mediaThumbUrl(fileName: string) {
-  return `/uploads/media/thumb/${fileName}`;
+  return `/api/media/file/thumb/${fileName}`;
 }
 
 export async function getFolderTree() {
