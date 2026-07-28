@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function UnitGallery({
   photos,
@@ -20,6 +20,25 @@ export function UnitGallery({
   const [expanded, setExpanded] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const didSwipeRef = useRef(false);
+  const photoCount = photos.length;
+
+  useEffect(() => {
+    if (!expanded) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleKeydown(event: KeyboardEvent) {
+      if (event.key === "Escape") setExpanded(false);
+      if (photoCount > 1 && event.key === "ArrowLeft") setActiveIndex((current) => (current - 1 + photoCount) % photoCount);
+      if (photoCount > 1 && event.key === "ArrowRight") setActiveIndex((current) => (current + 1) % photoCount);
+    }
+
+    window.addEventListener("keydown", handleKeydown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeydown);
+    };
+  }, [expanded, photoCount]);
 
   if (photos.length === 0) {
     return (
