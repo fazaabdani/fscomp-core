@@ -817,6 +817,24 @@ function CatalogPageStyles() {
           min-height: 50px;
         }
 
+        .catalogPublicCard.catalogReveal {
+          transition: none;
+          opacity: 1;
+          transform: none;
+        }
+
+        .catalogPublicCard .catalogCardShine {
+          display: none;
+        }
+
+        .catalogPublicCard:hover {
+          transform: none;
+        }
+
+        .catalogPublicCard:hover .catalogImage,
+        .catalogPublicCard:hover .catalogImagePlaceholder {
+          transform: none;
+        }
       }
 
       @media (min-width: 821px) and (max-width: 1280px) {

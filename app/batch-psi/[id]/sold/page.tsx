@@ -29,13 +29,9 @@ export default async function BatchSoldUnitsPage({ params }: { params: { id: str
           <span>Unit terjual</span>
           <strong>{summary.totalTerjual}{summary.totalUnitMasuk ? ` / ${summary.totalUnitMasuk}` : ""}</strong>
         </div>
-        <div>
+        <div className="netTransfer">
           <span>Total omzet</span>
           <strong>{formatRupiah(summary.totalOmzet)}</strong>
-        </div>
-        <div className="netTransfer">
-          <span>Total profit</span>
-          <strong>{formatRupiah(summary.totalProfit)}</strong>
         </div>
       </section>
 
@@ -54,7 +50,7 @@ export default async function BatchSoldUnitsPage({ params }: { params: { id: str
                 <strong>{unit.model}</strong>
                 <small>{unit.processor} / {unit.ram} / {unit.ssd}</small>
                 <small>Pembeli: {unit.buyerName} ({unit.buyerPhone}) / Lokasi: {unit.location}</small>
-                <small>Terjual: {unit.soldAt} / Profit: {formatRupiah(unit.grossProfit)}</small>
+                <small>Terjual: {unit.soldAt}</small>
               </div>
               <div className="listStack">
                 <b>{formatRupiah(unit.soldPrice)}</b>
