@@ -3,6 +3,7 @@ import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
 import { getSalesPageData } from "@/lib/sales-page-data";
 import { requireRole } from "@/lib/session";
+import { SubmitButton } from "../SubmitButton";
 import { createSaleAction, restoreSaleAction, voidSaleAction } from "./actions";
 import { RestoreSaleButton } from "./RestoreSaleButton";
 import { VoidSaleButton } from "./VoidSaleButton";
@@ -269,7 +270,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               Catatan
               <textarea name="notes" placeholder="Contoh: DP, transfer BCA, garansi, aksesoris tambahan." />
             </label>
-            <button className="primaryButton" type="submit">Simpan Penjualan</button>
+            <SubmitButton pendingLabel="Menyimpan transaksi...">Simpan Penjualan</SubmitButton>
             {readyUnits.length === 0 ? <div className="emptyState">Belum ada unit siap jual. Transaksi lisensi/software tanpa laptop tetap dapat dicatat.</div> : null}
           </div>
         </div>

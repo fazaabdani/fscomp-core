@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Boxes, Receipt } from "lucide-react";
 import { requireRole } from "@/lib/session";
+import { SubmitButton } from "../../SubmitButton";
 import { createSaleAction } from "../actions";
 import { FlashNotice } from "../../FlashNotice";
 
@@ -94,7 +95,7 @@ export default function NonLaptopCashierPage({ searchParams }: { searchParams?: 
             <label>Periode<select name="warrantySoftwareUnit" defaultValue="bulan"><option value="minggu">Minggu</option><option value="bulan">Bulan</option></select></label>
           </div>
           <label>Catatan<textarea name="notes" placeholder="Detail barang, layanan, garansi, atau informasi aktivasi." /></label>
-          <button className="primaryButton" type="submit"><Receipt size={16} /> Simpan dan Buat Nota</button>
+          <SubmitButton icon={<Receipt size={16} />} pendingLabel="Menyimpan transaksi...">Simpan dan Buat Nota</SubmitButton>
         </div>
       </div>
     </form>

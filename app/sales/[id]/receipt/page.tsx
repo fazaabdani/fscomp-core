@@ -12,7 +12,7 @@ import { PrintReceiptButton } from "./PrintReceiptButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function SaleReceiptPage({ params }: { params: { id: string } }) {
+export default async function SaleReceiptPage({ params, searchParams }: { params: { id: string }; searchParams?: { duplicate?: string } }) {
   const currentUser = requireRole(["admin", "teknisi", "sales"]);
   const sale = await getSaleReceipt(params.id);
   if (!sale) notFound();
@@ -49,6 +49,9 @@ export default async function SaleReceiptPage({ params }: { params: { id: string
 
   return (
     <section className="pageStack receiptPage">
+      {searchParams?.duplicate ? (
+        <div className="infoBox printHidden">Unit ini sudah tercatat terjual sebelumnya (nota di bawah) — submit yang barusan tidak dibuat sebagai transaksi baru, biar tidak tercatat dobel.</div>
+      ) : null}
       <div className="sectionTitle printHidden">
         <div>
           <Link className="backLink" href="/sales"><ArrowLeft size={16} /> Kembali ke kasir</Link>

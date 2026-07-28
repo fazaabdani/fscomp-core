@@ -246,6 +246,16 @@ export async function createSaleAction(formData: FormData) {
   if (!standalone && !unit) {
     redirect(`${errorPath}?error=unit-tidak-ditemukan`);
   }
+
+  if (unit) {
+    const existingActiveSale = await prisma.sale.findFirst({
+      where: { unitId: unit.id, voidedAt: null },
+      select: { id: true }
+    });
+    if (existingActiveSale) {
+      redirect(`/sales/${existingActiveSale.id}/receipt?duplicate=1`);
+    }
+  }
   const requestedLocation = text(formData, "location");
   const location: SaleLocation = unit?.stockLocation ?? (requestedLocation === "KAJEN" ? "KAJEN" : "WIRADESA");
 
