@@ -2082,6 +2082,11 @@ textarea {
   width: fit-content;
 }
 
+.mediaPickerUploadButton.isDisabled {
+  pointer-events: none;
+  opacity: 0.65;
+}
+
 .mediaThumbSelectable {
   padding: 0;
   border: 2px solid var(--line);
@@ -2091,6 +2096,16 @@ textarea {
 .mediaThumbSelectable.isSelected {
   border-color: rgba(34, 211, 238, 0.82);
   box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.3);
+}
+
+.spinIcon {
+  animation: spinIcon 0.8s linear infinite;
+}
+
+@keyframes spinIcon {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .paymentRow {

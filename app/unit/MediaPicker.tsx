@@ -1,6 +1,6 @@
 "use client";
 
-import { Images, Trash2, Upload, X } from "lucide-react";
+import { Images, Loader2, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type MediaAssetItem = { id: string; url: string; thumbUrl: string; originalName: string };
@@ -121,8 +121,8 @@ export function MediaPicker({
                   ))}
                 </div>
 
-                <label className="secondaryButton mediaPickerUploadButton">
-                  <Upload size={16} /> {uploading ? "Mengupload..." : "Upload Foto Baru ke Folder Ini"}
+                <label className={`secondaryButton mediaPickerUploadButton ${uploading ? "isDisabled" : ""}`}>
+                  {uploading ? <Loader2 size={16} className="spinIcon" /> : <Upload size={16} />} {uploading ? "Mengupload..." : "Upload Foto Baru ke Folder Ini"}
                   <input type="file" accept="image/*" multiple hidden disabled={uploading} onChange={handleUpload} />
                 </label>
 

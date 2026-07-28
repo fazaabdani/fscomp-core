@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FolderPlus, Image as ImageIcon, RefreshCcw, Trash2, Upload } from "lucide-react";
 import { FlashNotice } from "@/app/FlashNotice";
+import { SubmitButton } from "@/app/SubmitButton";
 import { getFolderContents } from "@/lib/media-data";
 import { requireRole } from "@/lib/session";
 import { createFolderAction, deleteAssetAction, deleteFolderAction, migrateGoogleDrivePhotosAction, renameFolderAction, uploadMediaAction } from "./actions";
@@ -84,7 +85,7 @@ export default async function MediaLibraryPage({
                 <small>{folder.folderCount} subfolder / {folder.assetCount} foto</small>
               </Link>
               <form action={deleteFolderAction.bind(null, folder.id)}>
-                <button className="iconButton" type="submit" aria-label={`Hapus folder ${folder.name}`}><Trash2 size={15} /></button>
+                <SubmitButton className="iconButton" icon={<Trash2 size={15} />} iconSize={15} ariaLabel={`Hapus folder ${folder.name}`} />
               </form>
             </div>
           ))}
@@ -92,12 +93,12 @@ export default async function MediaLibraryPage({
         <form className="buttonRow" action={createFolderAction}>
           <input type="hidden" name="parentId" value={currentFolderId ?? ""} />
           <input name="name" placeholder="Nama folder baru (mis. Lenovo, ThinkPad T480)" required />
-          <button className="secondaryButton" type="submit"><FolderPlus size={16} /> Buat Folder</button>
+          <SubmitButton className="secondaryButton" icon={<FolderPlus size={16} />} pendingLabel="Membuat...">Buat Folder</SubmitButton>
         </form>
         {currentFolderId ? (
           <form className="buttonRow" action={renameFolderAction.bind(null, currentFolderId)}>
             <input name="name" placeholder="Ganti nama folder ini" defaultValue={data.folder?.name} required />
-            <button className="secondaryButton" type="submit">Simpan Nama</button>
+            <SubmitButton className="secondaryButton" pendingLabel="Menyimpan...">Simpan Nama</SubmitButton>
           </form>
         ) : null}
       </section>
@@ -113,7 +114,7 @@ export default async function MediaLibraryPage({
         <form className="buttonRow" action={uploadMediaAction} encType="multipart/form-data">
           <input type="hidden" name="folderId" value={currentFolderId ?? ""} />
           <input type="file" name="files" accept="image/*" multiple required />
-          <button className="primaryButton" type="submit"><Upload size={16} /> Upload</button>
+          <SubmitButton icon={<Upload size={16} />} pendingLabel="Mengupload...">Upload</SubmitButton>
         </form>
 
         <div className="mediaGrid">
@@ -123,7 +124,7 @@ export default async function MediaLibraryPage({
               <img src={asset.thumbUrl} alt={asset.originalName} loading="lazy" />
               <form action={deleteAssetAction.bind(null, asset.id)}>
                 <input type="hidden" name="folderId" value={currentFolderId ?? ""} />
-                <button className="iconButton" type="submit" aria-label={`Hapus ${asset.originalName}`}><Trash2 size={14} /></button>
+                <SubmitButton className="iconButton" icon={<Trash2 size={14} />} iconSize={14} ariaLabel={`Hapus ${asset.originalName}`} />
               </form>
             </div>
           ))}
@@ -140,7 +141,7 @@ export default async function MediaLibraryPage({
         </div>
         <p className="bodyText">Proses unit yang masih pakai link foto Google Drive, diunduh dan disimpan ke library ini (folder otomatis dibuat per merek/seri). Diproses bertahap, klik tombolnya lagi kalau masih ada sisa.</p>
         <form action={migrateGoogleDrivePhotosAction}>
-          <button className="secondaryButton" type="submit"><RefreshCcw size={16} /> Migrasi Foto dari Google Drive</button>
+          <SubmitButton className="secondaryButton" icon={<RefreshCcw size={16} />} pendingLabel="Memigrasi foto...">Migrasi Foto dari Google Drive</SubmitButton>
         </form>
       </section>
     </section>
