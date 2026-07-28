@@ -271,7 +271,8 @@ function CatalogPageStyles() {
     <style dangerouslySetInnerHTML={{ __html: `
       .catalogFilterMobileButton,
       .catalogFilterBackdrop,
-      .catalogFilterDrawerHeader {
+      .catalogFilterDrawerHeader,
+      .catalogMobileSearchBar {
         display: none;
       }
 
@@ -559,9 +560,51 @@ function CatalogPageStyles() {
         }
 
         .catalogFilterShell {
+          display: grid;
+          gap: 8px;
           position: sticky;
           z-index: 8;
           top: 8px;
+        }
+
+        .catalogMobileSearchBar {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          min-height: 48px;
+          padding: 0 14px;
+          border: 1px solid rgba(34, 211, 238, 0.44);
+          border-radius: 9px;
+          background: rgba(5, 14, 27, 0.96);
+          color: #9ec1df;
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+        }
+
+        .catalogMobileSearchBar input {
+          flex: 1;
+          min-width: 0;
+          height: 40px;
+          border: 0;
+          background: transparent;
+          color: #eef8ff;
+          font-size: 15px;
+          outline: none;
+        }
+
+        .catalogMobileSearchBar button {
+          display: grid;
+          width: 40px;
+          height: 40px;
+          flex-shrink: 0;
+          place-items: center;
+          border: 0;
+          border-radius: 8px;
+          background: rgba(34, 211, 238, 0.16);
+          color: #67e8f9;
+        }
+
+        .catalogFilterPanel .catalogSearchField {
+          display: none;
         }
 
         .catalogFilterMobileButton {
@@ -576,7 +619,6 @@ function CatalogPageStyles() {
           background: rgba(5, 14, 27, 0.96);
           color: #eef8ff;
           box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
-          backdrop-filter: blur(18px);
         }
 
         .catalogFilterMobileButton span {
@@ -692,10 +734,12 @@ function CatalogPageStyles() {
         .catalogFilterActions .primaryButton,
         .catalogFilterActions .secondaryButton {
           flex: 1;
+          min-height: 46px;
         }
 
         .catalogPublicGrid {
           grid-template-columns: 1fr;
+          gap: 14px;
         }
 
         .catalogView-list .catalogPublicCard {
@@ -741,11 +785,36 @@ function CatalogPageStyles() {
         }
 
         .catalogPublicCard {
-          padding: 13px;
+          padding: 14px;
+          gap: 10px;
         }
 
         .catalogPublicCard h3 {
           min-height: 0;
+          font-size: 17px;
+        }
+
+        .catalogPublicCard p {
+          font-size: 14px;
+        }
+
+        .miniMetrics span,
+        .catalogSpecList span {
+          font-size: 13px;
+        }
+
+        .catalogTrustRow span {
+          min-height: 30px;
+          font-size: 11px;
+        }
+
+        .catalogCardActions .primaryButton,
+        .catalogCardActions .secondaryButton {
+          min-height: 46px;
+        }
+
+        .catalogFilterMobileButton {
+          min-height: 50px;
         }
 
       }
@@ -865,7 +934,22 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
         <h2>Pilih laptop sesuai kebutuhan panjenengan</h2>
       </div>
 
-      <CatalogFilterShell activeCount={filterCount}>
+      <CatalogFilterShell
+        activeCount={filterCount}
+        mobileSearch={
+          <form className="catalogMobileSearchBar" action="/katalog#produk-ready" role="search">
+            <Search size={17} />
+            <input type="search" name="q" defaultValue={filters.q} placeholder="Cari unit, model, processor, spek" aria-label="Cari produk" />
+            {filters.sort !== "unit" ? <input type="hidden" name="sort" value={filters.sort} /> : null}
+            {filters.lokasi !== "semua" ? <input type="hidden" name="lokasi" value={filters.lokasi} /> : null}
+            {filters.merek ? <input type="hidden" name="merek" value={filters.merek} /> : null}
+            {filters.ram ? <input type="hidden" name="ram" value={filters.ram} /> : null}
+            {filters.storage ? <input type="hidden" name="storage" value={filters.storage} /> : null}
+            {filters.windows ? <input type="hidden" name="windows" value={filters.windows} /> : null}
+            <button type="submit" aria-label="Cari produk"><Search size={16} /></button>
+          </form>
+        }
+      >
         <form className="catalogFilterPanel catalogReveal revealDelay1" action="/katalog#produk-ready">
         <label className="catalogSearchField">
           <span><Search size={17} /> Cari unit, model, processor, spek</span>

@@ -193,6 +193,7 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                   <Link className="secondaryButton" href={`/unit/new?batch=${batch.id}`}>Tambah Unit</Link>
                   <Link className="secondaryButton" href={`/batch-psi/${batch.id}/history`}>Histori QC</Link>
                   <Link className="secondaryButton" href={`/batch-psi/${batch.id}/payment`}>Rekap Pembayaran</Link>
+                  <Link className="secondaryButton" href={`/batch-psi/${batch.id}/sold`}>Unit Terjual</Link>
                   <a className="secondaryButton" href={`/api/batch-psi/${batch.id}/export`}>Export Spek CSV</a>
                   {canDeleteBatch && currentUser ? (
                     <form action={deleteBatchAction.bind(null, batch.id)}>

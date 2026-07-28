@@ -3,7 +3,7 @@
 import { SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
-export function CatalogFilterShell({ activeCount, children }: { activeCount: number; children: ReactNode }) {
+export function CatalogFilterShell({ activeCount, mobileSearch, children }: { activeCount: number; mobileSearch?: ReactNode; children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -24,6 +24,7 @@ export function CatalogFilterShell({ activeCount, children }: { activeCount: num
 
   return (
     <div className={`catalogFilterShell ${open ? "isOpen" : ""}`}>
+      {mobileSearch}
       <button className="catalogFilterMobileButton" type="button" onClick={() => setOpen(true)} aria-expanded={open}>
         <SlidersHorizontal size={18} />
         <span>Filter &amp; Urutkan</span>
