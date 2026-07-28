@@ -946,6 +946,8 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
             {filters.ram ? <input type="hidden" name="ram" value={filters.ram} /> : null}
             {filters.storage ? <input type="hidden" name="storage" value={filters.storage} /> : null}
             {filters.windows ? <input type="hidden" name="windows" value={filters.windows} /> : null}
+            {filters.harga !== "semua" ? <input type="hidden" name="harga" value={filters.harga} /> : null}
+            {filters.view !== "grid" ? <input type="hidden" name="view" value={filters.view} /> : null}
             <button type="submit" aria-label="Cari produk"><Search size={16} /></button>
           </form>
         }
