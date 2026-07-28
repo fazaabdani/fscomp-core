@@ -93,9 +93,9 @@ export default async function EditUnitPage({ params, searchParams }: { params: {
           <input name="catalogImageUrl" defaultValue={unit.catalogImageUrl} placeholder="Link Google Drive / link foto langsung" />
           <small>Opsional. Bisa pakai link, atau pilih dari galeri di bawah — boleh dua-duanya.</small>
         </label>
-        <label>Galeri foto
+        <div className="formFieldGroup">Galeri foto
           <MediaPicker fieldName="unitPhotoAssetIds" initial={gallery.map((photo) => ({ id: photo.assetId, url: photo.url }))} />
-        </label>
+        </div>
         <label>Catatan admin unit
           <textarea
             name="entryNotes"

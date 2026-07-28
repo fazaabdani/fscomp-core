@@ -699,7 +699,8 @@ input:not([type]) {
   gap: 14px;
 }
 
-.formGrid label {
+.formGrid label,
+.formGrid .formFieldGroup {
   display: grid;
   gap: 8px;
 }

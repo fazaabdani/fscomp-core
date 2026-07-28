@@ -88,9 +88,9 @@ export async function getUnitPhotoGallery(unitId: string) {
   }
 }
 
-export function resolvePrimaryImageUrl(unitPhotos: { asset: { fileName: string } }[] | undefined, catalogImageUrl: string | null) {
+export function resolvePrimaryImageUrl(unitPhotos: { asset: { fileName: string } }[] | undefined, catalogImageUrl: string | null, preferThumb = false) {
   const first = unitPhotos?.[0];
-  if (first) return mediaAssetUrl(first.asset.fileName);
+  if (first) return preferThumb ? mediaThumbUrl(first.asset.fileName) : mediaAssetUrl(first.asset.fileName);
   return catalogImageUrl ?? "";
 }
 

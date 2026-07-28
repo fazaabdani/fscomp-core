@@ -53,7 +53,7 @@ export async function getCatalogPageData() {
           lcdResolution: unit.lcdResolution ?? "-",
           isTouchscreen: unit.isTouchscreen,
           hargaJualRekomendasi: unit.hargaJualRekomendasi,
-          catalogImageUrl: resolvePrimaryImageUrl(unit.unitPhotos, unit.catalogImageUrl),
+          catalogImageUrl: resolvePrimaryImageUrl(unit.unitPhotos, unit.catalogImageUrl, true),
           stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
           latestQcAt: latestDaily?.tanggal.toLocaleDateString("id-ID", {
             timeZone: "Asia/Jakarta",
@@ -136,7 +136,7 @@ export async function getRelatedCatalogUnits(unitId: string) {
           processor: unit.processor,
           ram: unit.ram,
           ssd: unit.ssd,
-          catalogImageUrl: resolvePrimaryImageUrl(unit.unitPhotos, unit.catalogImageUrl),
+          catalogImageUrl: resolvePrimaryImageUrl(unit.unitPhotos, unit.catalogImageUrl, true),
           stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
           hargaJualRekomendasi: unit.hargaJualRekomendasi,
           score,

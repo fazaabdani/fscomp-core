@@ -99,9 +99,9 @@ export default async function NewUnitPage({ searchParams }: { searchParams?: { b
           <input name="catalogImageUrl" placeholder="Opsional, bisa diisi nanti setelah unit difoto" />
           <small>Bisa pakai link, atau pilih dari galeri foto di bawah — boleh dua-duanya.</small>
         </label>
-        <label>Galeri foto
+        <div className="formFieldGroup">Galeri foto
           <MediaPicker fieldName="unitPhotoAssetIds" />
-        </label>
+        </div>
 
         <div className="infoBox compactInfo">
           Sistem otomatis menambah kode tanggal batch di belakang nomor unit, contoh 29 menjadi 29-020626. Lokasi stok, SSD health, battery health, dan keputusan siap jual diisi di QC harian.

@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export function UnitGallery({
   photos,
@@ -19,6 +19,7 @@ export function UnitGallery({
   const [activeIndex, setActiveIndex] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const didSwipeRef = useRef(false);
 
   if (photos.length === 0) {
     return (
@@ -35,13 +36,25 @@ export function UnitGallery({
 
   function handleTouchStart(event: React.TouchEvent) {
     setTouchStartX(event.touches[0].clientX);
+    didSwipeRef.current = false;
   }
 
   function handleTouchEnd(event: React.TouchEvent) {
     if (touchStartX === null) return;
     const deltaX = event.changedTouches[0].clientX - touchStartX;
-    if (Math.abs(deltaX) > 40) goTo(activeIndex + (deltaX < 0 ? 1 : -1));
+    if (Math.abs(deltaX) > 40) {
+      goTo(activeIndex + (deltaX < 0 ? 1 : -1));
+      didSwipeRef.current = true;
+    }
     setTouchStartX(null);
+  }
+
+  function handleZoomTriggerClick() {
+    if (didSwipeRef.current) {
+      didSwipeRef.current = false;
+      return;
+    }
+    setExpanded(true);
   }
 
   return (
@@ -49,7 +62,7 @@ export function UnitGallery({
       <button
         type="button"
         className="catalogPhotoZoomTrigger"
-        onClick={() => setExpanded(true)}
+        onClick={handleZoomTriggerClick}
         aria-label={`Perbesar ${alt}`}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
