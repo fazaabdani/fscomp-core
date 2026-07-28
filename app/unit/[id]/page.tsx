@@ -8,6 +8,7 @@ import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 import { getCurrentUser } from "@/lib/session";
 import { ShareUnitButton } from "./ShareUnitButton";
+import { UnitGallery } from "../UnitGallery";
 
 export const dynamic = "force-dynamic";
 
@@ -73,24 +74,19 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
 
         <div className="contentGrid">
           <section className="panel wide">
-            <CatalogPhoto
-              url={unit.catalogImageUrl}
-              className="publicUnitPhoto"
-              placeholderClassName="publicUnitPhoto placeholderPhoto"
-              alt={`Foto ${unit.model}`}
-              priority
-              zoomable
-              imageWidth={1600}
-            />
-            {unit.gallery.length > 1 ? (
-              <div className="mediaGrid">
-                {unit.gallery.map((url) => (
-                  <div className="mediaThumb" key={url}>
-                    <img src={url} alt={`Foto ${unit.model}`} loading="lazy" />
-                  </div>
-                ))}
-              </div>
-            ) : null}
+            {unit.gallery.length > 0 ? (
+              <UnitGallery photos={unit.gallery} alt={`Foto ${unit.model}`} className="publicUnitPhoto" placeholderClassName="publicUnitPhoto placeholderPhoto" priority />
+            ) : (
+              <CatalogPhoto
+                url={unit.catalogImageUrl}
+                className="publicUnitPhoto"
+                placeholderClassName="publicUnitPhoto placeholderPhoto"
+                alt={`Foto ${unit.model}`}
+                priority
+                zoomable
+                imageWidth={1600}
+              />
+            )}
           </section>
 
           <aside className="panel">
@@ -187,24 +183,19 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
           </div>
           {isInternalUser ? <Link className="secondaryButton" href={`/unit/${unit.id}/edit`}>Edit Foto</Link> : null}
         </div>
-        <CatalogPhoto
-          url={unit.catalogImageUrl}
-          className="publicUnitPhoto"
-          placeholderClassName="publicUnitPhoto placeholderPhoto"
-          alt={`Foto ${unit.model}`}
-          priority
-          zoomable
-          imageWidth={1600}
-        />
-        {unit.gallery.length > 1 ? (
-          <div className="mediaGrid">
-            {unit.gallery.map((url) => (
-              <div className="mediaThumb" key={url}>
-                <img src={url} alt={`Foto ${unit.model}`} loading="lazy" />
-              </div>
-            ))}
-          </div>
-        ) : null}
+        {unit.gallery.length > 0 ? (
+          <UnitGallery photos={unit.gallery} alt={`Foto ${unit.model}`} className="publicUnitPhoto" placeholderClassName="publicUnitPhoto placeholderPhoto" priority />
+        ) : (
+          <CatalogPhoto
+            url={unit.catalogImageUrl}
+            className="publicUnitPhoto"
+            placeholderClassName="publicUnitPhoto placeholderPhoto"
+            alt={`Foto ${unit.model}`}
+            priority
+            zoomable
+            imageWidth={1600}
+          />
+        )}
       </section>
 
       <div className="contentGrid">

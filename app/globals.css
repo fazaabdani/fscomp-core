@@ -1449,6 +1449,29 @@ textarea {
   cursor: default;
 }
 
+.catalogPhotoLightbox .lightboxNav {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(8, 22, 39, 0.72);
+  color: #ffffff;
+  transform: translateY(-50%);
+}
+
+.catalogPhotoLightbox .lightboxNavPrev {
+  left: 14px;
+}
+
+.catalogPhotoLightbox .lightboxNavNext {
+  right: 14px;
+}
+
 @keyframes catalogImageLoading {
   from { background-position: 100% 0; }
   to { background-position: -100% 0; }
