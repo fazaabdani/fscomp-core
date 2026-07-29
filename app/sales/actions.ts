@@ -422,7 +422,13 @@ export async function voidSaleAction(saleId: string, formData: FormData) {
     });
 
     if (sale.unitId) {
-      await tx.unit.update({ where: { id: sale.unitId }, data: { soldAt: null } });
+      const otherActiveSale = await tx.sale.findFirst({
+        where: { unitId: sale.unitId, voidedAt: null, NOT: { id: saleId } },
+        select: { id: true }
+      });
+      if (!otherActiveSale) {
+        await tx.unit.update({ where: { id: sale.unitId }, data: { soldAt: null } });
+      }
     }
   });
 
