@@ -107,11 +107,13 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
       <div className="batchManagement">
         {batches.map((batch) => {
           const soldUnits = batch.units.filter((unit) => unit.soldAt);
+          const returnedUnits = batch.units.filter((unit) => !unit.soldAt && unit.statusObservasi === "RETUR DISTRIBUTOR");
           const matchesBatch = q
             ? [batch.nomorBatch, batch.supplier, batch.tanggalMasuk, batch.tanggalTempo, batch.statusPembayaran, batch.catatan].some((value) => includesText(value, q))
             : true;
           const filteredUnits = batch.units.filter((unit) => {
             if (unit.soldAt) return false;
+            if (unit.statusObservasi === "RETUR DISTRIBUTOR" && statusFilter !== "RETUR DISTRIBUTOR") return false;
             if (statusFilter !== "semua" && unit.statusObservasi !== statusFilter) return false;
             if (!q || matchesBatch) return true;
             return [unit.nomorUnit, unit.model, unit.processor, unit.ram, unit.ssd, unit.chargerType, unit.statusObservasi].some((value) => includesText(value, q));
@@ -139,6 +141,9 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                 <span><ReceiptText size={16} /> Charger datang {batch.jumlahChargerDatang ?? 0}</span>
                 <span><ReceiptText size={16} /> Modal {formatRupiah(totalModal)}</span>
                 {soldUnits.length > 0 ? <span><ReceiptText size={16} /> {soldUnits.length} unit terjual disembunyikan</span> : null}
+                {returnedUnits.length > 0 && statusFilter !== "RETUR DISTRIBUTOR" ? (
+                  <Link href="/batch-psi?status=RETUR+DISTRIBUTOR"><ReceiptText size={16} /> {returnedUnits.length} unit retur disembunyikan</Link>
+                ) : null}
               </div>
               {chargerSummary.length > 0 ? (
                 <div className="chargerSummary">
