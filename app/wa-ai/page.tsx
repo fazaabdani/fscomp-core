@@ -3,8 +3,15 @@ import type { WaConversationStatus, WaCustomerAiPolicy, WaLeadScore, WaRiskLevel
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { formatDateWib } from "@/lib/inventory";
+import { defaultWaAiPersonaPrompt } from "@/lib/wa-ai-catalog-reply";
+import { waChannelIds, waChannelLabels, type WaChannelId } from "@/lib/wa-ai-channels";
 import { FlashNotice } from "../FlashNotice";
-import { updateWaConversationAction, updateWaCustomerPolicyAction } from "./actions";
+import {
+  updateWaAiChannelsAction,
+  updateWaAiPersonaAction,
+  updateWaConversationAction,
+  updateWaCustomerPolicyAction
+} from "./actions";
 
 const statusLabels: Record<WaConversationStatus, string> = {
   OPEN: "Open",
@@ -79,7 +86,21 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
           ? "Status percakapan berhasil diperbarui."
           : searchParams?.success === "policy-updated"
             ? "Policy pelanggan berhasil diperbarui."
-            : "";
+            : searchParams?.success === "persona-updated"
+              ? "Gaya bicara AI berhasil disimpan."
+              : searchParams?.success === "channels-updated"
+                ? "Nomor WA aktif berhasil diperbarui."
+                : "";
+
+  const personaSetting = settings.find((setting) => setting.key === "ai_sales_persona_prompt");
+  const currentPersona = typeof personaSetting?.value === "string" ? personaSetting.value : defaultWaAiPersonaPrompt;
+
+  const channelsSetting = settings.find((setting) => setting.key === "active_wa_channels");
+  const activeChannels = new Set(
+    Array.isArray(channelsSetting?.value)
+      ? channelsSetting.value.filter((value): value is WaChannelId => (waChannelIds as string[]).includes(value as string))
+      : ["PERSONAL"]
+  );
 
   return (
     <section className="pageStack">
@@ -190,9 +211,54 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
       <section className="panel">
         <div className="panelHeader">
           <div>
+            <p className="eyebrow">Kontrol AI</p>
+            <h2>Gaya bicara &amp; nomor WA aktif</h2>
+            <p>Atur sendiri tanpa perlu redeploy. Aturan wajib (dilarang mengarang harga/stok/garansi) tetap terkunci di kode, tidak ikut berubah dari sini.</p>
+          </div>
+          <Bot size={22} />
+        </div>
+
+        <form action={updateWaAiPersonaAction} className="formGrid panelSubsection">
+          <label htmlFor="persona">Persona AI Sales</label>
+          <textarea
+            id="persona"
+            name="persona"
+            defaultValue={currentPersona}
+            rows={5}
+            maxLength={4000}
+          />
+          <div className="buttonRow noMargin">
+            <button className="secondaryButton compactButton" type="submit">Simpan persona</button>
+          </div>
+        </form>
+
+        <form action={updateWaAiChannelsAction} className="formGrid panelSubsection">
+          <span>Nomor WA yang aktif untuk AI</span>
+          <div className="buttonRow noMargin">
+            {waChannelIds.map((channel) => (
+              <label className="inlineCheck" key={channel}>
+                <input
+                  name="channels"
+                  type="checkbox"
+                  value={channel}
+                  defaultChecked={activeChannels.has(channel)}
+                />
+                {waChannelLabels[channel]}
+              </label>
+            ))}
+          </div>
+          <div className="buttonRow noMargin">
+            <button className="secondaryButton compactButton" type="submit">Simpan nomor aktif</button>
+          </div>
+        </form>
+      </section>
+
+      <section className="panel">
+        <div className="panelHeader">
+          <div>
             <p className="eyebrow">Setting</p>
-            <h2>Default runtime AI</h2>
-            <p>Nilai ini berasal dari seed migration. Editor setting dibuat di tahap berikutnya.</p>
+            <h2>Semua runtime setting (mentah)</h2>
+            <p>Dua key di atas ({"ai_sales_persona_prompt"}, {"active_wa_channels"}) sudah punya editor sendiri. Sisanya masih dari seed migration.</p>
           </div>
           <Bot size={22} />
         </div>

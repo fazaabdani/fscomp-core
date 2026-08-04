@@ -20,6 +20,17 @@ export function hasStaffAccess(roles: Array<"admin" | "teknisi" | "sales" | "mag
   return Boolean(user && roles.includes(user.role));
 }
 
+/**
+ * Fonnte tidak mendukung header custom di webhook masuk, jadi verifikasinya lewat
+ * query param secret yang kita sendiri tempel di URL webhook yang didaftarkan ke Fonnte.
+ */
+export function hasFonnteWebhookAccess(request: Request) {
+  const configuredSecret = process.env.FONNTE_WEBHOOK_SECRET;
+  if (!configuredSecret || configuredSecret.length < 24) return false;
+  const providedSecret = new URL(request.url).searchParams.get("key") ?? "";
+  return Boolean(providedSecret && secureEqual(providedSecret, configuredSecret));
+}
+
 export function forbidden() {
   return new Response("Forbidden", { status: 403 });
 }
