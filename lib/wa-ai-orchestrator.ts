@@ -9,7 +9,7 @@ import {
   normalizeWaIntent,
   normalizeWaPhone
 } from "./wa-ai-incoming";
-import { decideWaAiPolicy } from "./wa-ai-policy";
+import { decideWaAiPolicy, detectWaGreetingCorrection } from "./wa-ai-policy";
 import {
   waAiAdminRequiredMessage,
   waAiBookingBridgeMessage,
@@ -60,6 +60,7 @@ async function responseDraft(input: {
   outsideOperationalHours: boolean;
   allowSafeCatalog: boolean;
   recentMessages: WaAiCatalogReplyMessage[];
+  preferredGreeting?: string | null;
 }) {
   if (input.outsideOperationalHours && input.action === "AUTO_REPLY") return waAiOutsideHoursMessage();
   if (input.reason === "general_service_inquiry") return waAiGeneralServiceBridgeMessage();
@@ -67,7 +68,10 @@ async function responseDraft(input: {
   if (input.reason === "catalog_error") return waAiCatalogErrorMessage();
 
   if (input.action === "AUTO_REPLY" && input.allowSafeCatalog) {
-    const generated = await generateWaAiCatalogReply({ messages: input.recentMessages });
+    const generated = await generateWaAiCatalogReply({
+      messages: input.recentMessages,
+      preferredGreeting: input.preferredGreeting
+    });
     if (generated) return generated.reply;
     return waAiCatalogErrorMessage();
   }
@@ -80,6 +84,7 @@ function telegramEventType(input: { action: string; reason: string; riskLevel: s
   if (input.riskLevel === "RISK") return "RISK";
   if (input.reason === "hot_lead") return "HOT_SERIOUS";
   if (input.reason === "general_service_inquiry") return "GENERAL_SERVICE";
+  if (input.reason === "troubleshooting_inquiry") return "TROUBLESHOOTING";
   if (input.intent === "ADMIN_REQUEST") return "ADMIN_REQUEST";
   if (input.action === "BRIDGE_AND_HANDOVER" || input.action === "HANDOVER_ADMIN") return "WAITING_ADMIN";
   return "NONE";
@@ -130,7 +135,7 @@ export async function processWaIncomingMessage(input: WaIncomingInput): Promise<
   const rawPayload = (input.raw === undefined || input.raw === null ? input : input.raw) as Prisma.InputJsonValue;
 
   const result = await prisma.$transaction(async (tx) => {
-    const customer = await tx.waCustomer.upsert({
+    let customer = await tx.waCustomer.upsert({
       where: { phone },
       create: {
         phone,
@@ -141,6 +146,14 @@ export async function processWaIncomingMessage(input: WaIncomingInput): Promise<
         ...(input.customerName ? { name: input.customerName } : {})
       }
     });
+
+    const greetingCorrection = detectWaGreetingCorrection(input.message);
+    if (greetingCorrection && greetingCorrection !== customer.preferredGreeting) {
+      customer = await tx.waCustomer.update({
+        where: { id: customer.id },
+        data: { preferredGreeting: greetingCorrection }
+      });
+    }
 
     const openConversation = await tx.waConversation.findFirst({
       where: {
@@ -289,7 +302,8 @@ export async function processWaIncomingMessage(input: WaIncomingInput): Promise<
     reason: result.decision.reason,
     outsideOperationalHours: result.decision.outsideOperationalHours,
     allowSafeCatalog: result.decision.allowSafeCatalog,
-    recentMessages: result.recentMessages
+    recentMessages: result.recentMessages,
+    preferredGreeting: result.customer.preferredGreeting
   });
 
   if (draftReply) {

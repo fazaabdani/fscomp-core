@@ -36,6 +36,7 @@ export function normalizeWaIntent(value: string | null | undefined, message: str
     "ADDRESS",
     "HOURS",
     "GENERAL_SERVICE",
+    "TROUBLESHOOTING",
     "STOCK_SIMPLE",
     "HOT_LEAD",
     "PAYMENT",

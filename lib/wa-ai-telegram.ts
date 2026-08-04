@@ -18,7 +18,8 @@ const telegramAllowedEvents = new Set([
   "AI_ERROR",
   "ADMIN_REQUEST",
   "WAITING_ADMIN",
-  "GENERAL_SERVICE"
+  "GENERAL_SERVICE",
+  "TROUBLESHOOTING"
 ]);
 
 export function shouldSendWaAiTelegram(eventType: string) {
