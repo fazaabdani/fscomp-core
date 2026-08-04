@@ -38,7 +38,7 @@ export type WaIncomingInput = {
 };
 
 export type WaIncomingResult =
-  | { ok: true; skipped: true; reason: "channel_inactive" | "rate_limited" }
+  | { ok: true; skipped: true; reason: "ai_disabled" | "channel_inactive" | "rate_limited" }
   | {
       ok: true;
       skipped: false;
@@ -86,11 +86,26 @@ function telegramEventType(input: { action: string; reason: string; riskLevel: s
 }
 
 /**
+ * Setting ini sudah di-seed sejak migration awal (Tahap 1-6, Codex) tapi belum pernah
+ * benar-benar dibaca kode mana pun sampai sekarang — jadi walau tabelnya sudah ada,
+ * dia belum berfungsi jadi kill switch. Default true kalau row-nya somehow tidak ada.
+ */
+async function isWaAiEnabled(): Promise<boolean> {
+  const setting = await prisma.waAiSetting.findUnique({ where: { key: "ai_enabled" } });
+  if (!setting) return true;
+  return setting.value !== false;
+}
+
+/**
  * Titik masuk tunggal untuk memproses satu pesan WA masuk, dipakai oleh endpoint n8n
  * (app/api/integrations/n8n/wa-incoming) maupun endpoint langsung Fonnte (app/api/wa/webhook)
  * supaya policy engine, rate limit, dan generate balasan AI tidak dobel logic di dua tempat.
  */
 export async function processWaIncomingMessage(input: WaIncomingInput): Promise<WaIncomingResult> {
+  if (!(await isWaAiEnabled())) {
+    return { ok: true, skipped: true, reason: "ai_disabled" };
+  }
+
   if (!(await isWaChannelActive(input.channel))) {
     return { ok: true, skipped: true, reason: "channel_inactive" };
   }

@@ -25,6 +25,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "INVALID_PAYLOAD" }, { status: 400 });
   }
 
+  if (parsed.isGroupMessage) {
+    return NextResponse.json({ ok: true, skipped: true, reason: "group_message" });
+  }
+
   const channel = resolveWaChannelFromDevice(parsed.device);
 
   const result = await processWaIncomingMessage({

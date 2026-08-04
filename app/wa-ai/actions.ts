@@ -172,3 +172,32 @@ export async function updateWaAiChannelsAction(formData: FormData) {
   revalidatePath("/wa-ai");
   redirect("/wa-ai?success=channels-updated");
 }
+
+export async function updateWaAiEnabledAction(formData: FormData) {
+  const currentUser = requireRole(["admin", "sales"]);
+  const nextEnabled = boolFromForm(formData.get("aiEnabled"));
+
+  const previous = await prisma.waAiSetting.findUnique({ where: { key: "ai_enabled" } });
+
+  await prisma.$transaction([
+    prisma.waAiSetting.upsert({
+      where: { key: "ai_enabled" },
+      update: { value: nextEnabled },
+      create: { key: "ai_enabled", value: nextEnabled }
+    }),
+    prisma.waAiEventLog.create({
+      data: {
+        eventType: "ADMIN_AI_ENABLED_UPDATE",
+        status: "INFO",
+        reason: `updated_by_${currentUser.username}`,
+        payload: {
+          previousValue: previous?.value ?? null,
+          nextValue: nextEnabled
+        }
+      }
+    })
+  ]);
+
+  revalidatePath("/wa-ai");
+  redirect(`/wa-ai?success=${nextEnabled ? "ai-enabled" : "ai-disabled"}`);
+}
