@@ -5,14 +5,26 @@ import { requireRole } from "@/lib/session";
 import { formatDateWib } from "@/lib/inventory";
 import { defaultWaAiPersonaPrompt } from "@/lib/wa-ai-catalog-reply";
 import { waChannelIds, waChannelLabels, type WaChannelId } from "@/lib/wa-ai-channels";
+import { defaultWaFollowUpHours, isConversationDueForFollowUp, type WaFollowUpMode } from "@/lib/wa-ai-followup";
 import { FlashNotice } from "../FlashNotice";
 import {
+  releaseWaConversationToAiAction,
+  sendManualFollowUpAction,
+  takeoverWaConversationAction,
   updateWaAiChannelsAction,
   updateWaAiEnabledAction,
   updateWaAiPersonaAction,
   updateWaConversationAction,
-  updateWaCustomerPolicyAction
+  updateWaCustomerPolicyAction,
+  updateWaFollowUpSettingsAction
 } from "./actions";
+
+const followUpModes: WaFollowUpMode[] = ["OFF", "SEMI", "AUTO"];
+const followUpModeLabels: Record<WaFollowUpMode, string> = {
+  OFF: "Mati",
+  SEMI: "Semi (admin klik kirim)",
+  AUTO: "Full otomatis"
+};
 
 const statusLabels: Record<WaConversationStatus, string> = {
   OPEN: "Open",
@@ -95,7 +107,19 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
                   ? "AI diaktifkan kembali."
                   : searchParams?.success === "ai-disabled"
                     ? "AI dimatikan — semua pesan masuk tidak diproses sampai dinyalakan lagi."
-                    : "";
+                    : searchParams?.success === "conversation-taken-over"
+                      ? "Percakapan diambil alih — AI berhenti membalas otomatis untuk pelanggan ini."
+                      : searchParams?.success === "conversation-released"
+                        ? "Percakapan dikembalikan ke AI."
+                        : searchParams?.success === "followup-settings-updated"
+                          ? "Pengaturan follow-up berhasil disimpan."
+                          : searchParams?.success === "followup-sent"
+                            ? "Follow-up berhasil dikirim."
+                            : searchParams?.success === "followup-send-failed"
+                              ? "Follow-up dibuat tapi gagal terkirim ke Fonnte — cek koneksi/token."
+                              : searchParams?.error === "followup-failed"
+                                ? "Gagal membuat pesan follow-up (cek OPENAI_API_KEY/OPENAI_MODEL)."
+                                : "";
 
   const aiEnabledSetting = settings.find((setting) => setting.key === "ai_enabled");
   const isAiEnabled = aiEnabledSetting ? aiEnabledSetting.value !== false : true;
@@ -109,6 +133,18 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
       ? channelsSetting.value.filter((value): value is WaChannelId => (waChannelIds as string[]).includes(value as string))
       : ["PERSONAL"]
   );
+
+  const followUpModeSetting = settings.find((setting) => setting.key === "follow_up_mode");
+  const followUpMode: WaFollowUpMode =
+    followUpModeSetting?.value === "AUTO" || followUpModeSetting?.value === "SEMI" ? followUpModeSetting.value : "OFF";
+
+  const followUpHoursSetting = settings.find((setting) => setting.key === "follow_up_hours");
+  const followUpHoursValue = (followUpHoursSetting?.value ?? {}) as Partial<typeof defaultWaFollowUpHours>;
+  const followUpHours = {
+    hot: typeof followUpHoursValue.hot === "number" ? followUpHoursValue.hot : defaultWaFollowUpHours.hot,
+    warm: typeof followUpHoursValue.warm === "number" ? followUpHoursValue.warm : defaultWaFollowUpHours.warm,
+    cold: typeof followUpHoursValue.cold === "number" ? followUpHoursValue.cold : defaultWaFollowUpHours.cold
+  };
 
   return (
     <section className="pageStack waAiPage">
@@ -185,6 +221,36 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
           </form>
         </div>
 
+        <form action={updateWaFollowUpSettingsAction} className="formGrid panelSubsection">
+          <span>Follow-up otomatis untuk pelanggan yang belum balas</span>
+          <div className="buttonRow noMargin">
+            <select key={followUpMode} name="mode" defaultValue={followUpMode} aria-label="Mode follow-up">
+              {followUpModes.map((mode) => <option value={mode} key={mode}>{followUpModeLabels[mode]}</option>)}
+            </select>
+          </div>
+          <div className="buttonRow noMargin">
+            <label className="inlineCheck">
+              HOT
+              <input key={followUpHours.hot} name="hoursHot" type="number" min={0} max={240} defaultValue={followUpHours.hot} style={{ width: "64px" }} />
+              jam
+            </label>
+            <label className="inlineCheck">
+              WARM
+              <input key={followUpHours.warm} name="hoursWarm" type="number" min={0} max={240} defaultValue={followUpHours.warm} style={{ width: "64px" }} />
+              jam
+            </label>
+            <label className="inlineCheck">
+              COLD
+              <input key={followUpHours.cold} name="hoursCold" type="number" min={0} max={240} defaultValue={followUpHours.cold} style={{ width: "64px" }} />
+              jam
+            </label>
+          </div>
+          <p className="waAiHint">Berapa jam pelanggan diam sebelum dianggap perlu di-follow-up, beda-beda per lead score. Tombol &quot;Kirim Follow-up&quot; manual di tabel bawah selalu aktif apa pun mode-nya.</p>
+          <div className="buttonRow noMargin">
+            <button className="secondaryButton compactButton" type="submit">Simpan pengaturan follow-up</button>
+          </div>
+        </form>
+
         <details className="waAiRawSettings">
           <summary>Lihat semua setting mentah</summary>
           {settings.length === 0 ? (
@@ -240,6 +306,14 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
                   const latestMessage = conversation.messages[0];
                   const latestEvent = conversation.events[0];
                   const latestTelegram = conversation.telegramNotifications[0];
+                  const needsFollowUp = isConversationDueForFollowUp({
+                    status: conversation.status,
+                    leadScore: conversation.leadScore,
+                    lastMessageAt: conversation.lastMessageAt,
+                    lastMessageDirection: latestMessage?.direction ?? null,
+                    followupPassiveSentAt: conversation.followupPassiveSentAt,
+                    hours: followUpHours
+                  });
                   return (
                     <tr key={conversation.id}>
                       <td>
@@ -267,8 +341,22 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
                       <td>
                         <small>{formatDateWib(conversation.updatedAt)}</small><br />
                         {conversation.lastAdminResponseAt ? <small>Admin: {formatDateWib(conversation.lastAdminResponseAt)}</small> : <small>Admin belum respons</small>}
+                        {needsFollowUp ? <><br /><span className="statusPill yellow">Perlu Follow-up</span></> : null}
                       </td>
                       <td>
+                        <div className="buttonRow noMargin">
+                          <form action={takeoverWaConversationAction.bind(null, conversation.id)}>
+                            <button className="secondaryButton compactButton" type="submit">Ambil Alih</button>
+                          </form>
+                          <form action={releaseWaConversationToAiAction.bind(null, conversation.id)}>
+                            <button className="secondaryButton compactButton" type="submit">Kembalikan ke AI</button>
+                          </form>
+                        </div>
+                        <div className="buttonRow noMargin">
+                          <form action={sendManualFollowUpAction.bind(null, conversation.id)}>
+                            <button className="secondaryButton compactButton" type="submit">Kirim Follow-up</button>
+                          </form>
+                        </div>
                         <form action={updateWaConversationAction.bind(null, conversation.id)} className="buttonRow noMargin">
                           <select name="status" defaultValue={conversation.status} aria-label="Status percakapan">
                             {statuses.map((status) => <option value={status} key={status}>{statusLabels[status]}</option>)}
