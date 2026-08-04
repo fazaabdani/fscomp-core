@@ -236,7 +236,7 @@ main {
   justify-content: flex-end;
 }
 
-.statsGrid,
+.statGrid,
 .batchGrid,
 .catalogGrid,
 .reminderGrid {
@@ -244,8 +244,8 @@ main {
   gap: 14px;
 }
 
-.statsGrid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.statGrid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .statCard {
@@ -2668,6 +2668,25 @@ body:has(.waAiPage) {
 
 .waAiRawSettings .tableScroll {
   margin-top: 10px;
+}
+
+.waAiIconBadge {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--band);
+  border: 1px solid var(--line);
+  color: var(--blue);
+}
+
+.waAiPersonaTextarea {
+  font-family: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  resize: vertical;
 }
 
 @media (max-width: 860px) {

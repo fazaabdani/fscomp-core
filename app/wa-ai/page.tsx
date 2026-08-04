@@ -118,7 +118,7 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
           <h1>Sales admin dan handover pelanggan</h1>
           <p className="bodyText">Pantau percakapan yang masuk, dan atur gaya bicara/nomor aktif AI langsung dari sini.</p>
         </div>
-        <Bot size={32} />
+        <span className="waAiIconBadge"><Bot size={18} /></span>
       </div>
 
       <section className="statGrid">
@@ -153,8 +153,9 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
               id="persona"
               name="persona"
               defaultValue={currentPersona}
-              rows={10}
-              maxLength={8000}
+              rows={16}
+              maxLength={20000}
+              className="waAiPersonaTextarea"
             />
             <p className="waAiHint">Aturan wajib (dilarang mengarang harga/stok/garansi) tetap terkunci di kode, tidak ikut berubah dari sini.</p>
             <div className="buttonRow noMargin">
@@ -215,7 +216,7 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
             <h2>Percakapan terbaru</h2>
             <p>Prioritaskan status waiting admin, HOT, dan risk.</p>
           </div>
-          <MessageCircle size={22} />
+          <span className="waAiIconBadge"><MessageCircle size={18} /></span>
         </div>
 
         {conversations.length === 0 ? (
