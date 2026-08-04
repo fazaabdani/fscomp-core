@@ -25,7 +25,7 @@ export function waAiAdminRequiredMessage() {
 }
 
 export function waAiGeneralServiceBridgeMessage() {
-  return "Baik nggih, untuk servis kami cekkan ulang terlebih dahulu ya supaya datanya pasti. Mohon ditunggu sebentar, admin akan bantu langsung.";
+  return "Bisa kak, kami terima servis/reparasi laptop & PC. Untuk cek kondisi unit dan estimasi biaya, admin kami bantu langsung ya, mohon ditunggu sebentar.";
 }
 
 export function formatWaLocation(location: SaleLocation | string) {
