@@ -247,3 +247,20 @@ Ditambah setelah tes langsung ke nomor WA pribadi Faza (yang juga dipakai chat s
 
 - **Kill switch `ai_enabled`.** Row ini sebenarnya sudah ada di database sejak migration Tahap 1 (`202606230001_wa_ai_sales_admin`), tapi tidak ada kode mana pun yang membacanya — jadi walau row-nya ada, dia tidak pernah berfungsi jadi saklar. Sekarang `processWaIncomingMessage()` di `lib/wa-ai-orchestrator.ts` mengecek ini paling pertama sebelum apa pun lain (sebelum channel gate, sebelum rate limit). Kalau `false`, semua pesan masuk diabaikan total (`{ skipped: true, reason: "ai_disabled" }`), dari channel mana pun. Togglenya ada di panel paling atas dashboard `/wa-ai` — dipisah dari panel "Kontrol AI" yang lain supaya jadi tombol darurat yang gampang ditemukan.
 - **Pesan grup diabaikan otomatis.** Fonnte menandai pesan dari grup lewat field `member` (isi nama/ID anggota grup yang kirim — dokumentasi resmi: hanya terisi untuk pesan grup, kosong untuk chat pribadi). `parseFonnteInboundWebhook()` di `lib/fonnte-client.ts` mendeteksi ini (`isGroupMessage`), dan `app/api/wa/webhook/route.ts` langsung membalas `{ skipped: true, reason: "group_message" }` **sebelum menyentuh database sama sekali** — tidak ada `WaCustomer`/`WaConversation` yang dibuat untuk grup. Ini penting karena nomor WA yang dipakai testing sekarang adalah nomor pribadi Faza yang juga aktif di banyak grup WhatsApp lain.
+
+## Tahap 10: Admin Takeover dan Follow-up Otomatis
+
+**Admin takeover.** `decideWaAiPolicy()` sejak awal sudah punya logic "kalau `lastAdminResponseAt` terisi dan `aiTakeoverAllowed` false, serahkan ke admin" — tapi field `lastAdminResponseAt` tidak pernah ditulis kode mana pun, jadi logic itu tidak pernah nyala. Sekarang ada dua tombol di tiap baris tabel `/wa-ai`:
+
+- **Ambil Alih** (`takeoverWaConversationAction`) — set `status: WAITING_ADMIN`, `aiTakeoverAllowed: false`, `lastAdminResponseAt: now()`. AI langsung berhenti membalas percakapan itu.
+- **Kembalikan ke AI** (`releaseWaConversationToAiAction`) — kebalikannya: `status: OPEN`, `aiTakeoverAllowed: true`, `lastAdminResponseAt: null`.
+
+Dropdown status + checkbox manual yang lama tetap ada untuk kontrol lebih detail.
+
+**Follow-up otomatis.** Sama seperti `ai_enabled` dan `lastAdminResponseAt`, field `WaConversation.followupPassiveSentAt` dan setting `followupPassive` sudah ada sejak migration Tahap 1 tapi tidak pernah dipakai. Sekarang:
+
+- `lib/wa-ai-followup.ts` — `isConversationDueForFollowUp()` (murni logic, dites manual: HOT/WARM/COLD pakai ambang jam beda-beda dari setting `follow_up_hours`, hanya untuk percakapan `OPEN`/`PENDING_ADMIN` yang belum pernah di-follow-up dan pesan terakhirnya dari kita — bukan pelanggan yang lagi nunggu dibalas), dan `generateWaAiFollowUpMessage()` (AI generate pesan follow-up natural, pakai persona yang sama, bukan template kaku).
+- Setting `follow_up_mode`: `OFF` (default) / `SEMI` / `AUTO`, diatur dari dashboard `/wa-ai`, plus 3 input jam (HOT/WARM/COLD) — migration `202608040002_wa_ai_followup_settings`.
+- **SEMI**: baris yang layak di-follow-up dapat pill "Perlu Follow-up" di tabel, admin klik tombol "Kirim Follow-up" manual per baris (tombol ini **selalu ada apa pun mode-nya**, bukan cuma pas SEMI).
+- **AUTO**: `POST /api/wa/follow-up-sweep` (auth `CORE_INTEGRATION_TOKEN`, sama seperti endpoint n8n-facing lain) — perlu dipanggil berkala dari luar (Coolify Scheduled Task atau n8n Schedule Trigger yang cuma hit URL ini, tanpa logic apa pun di n8n-nya, sama prinsip Tahap 8). Endpoint ini no-op kalau mode bukan `AUTO`. Belum ada scheduler yang benar-benar terpasang — itu langkah setup terpisah setelah PR ini di-deploy.
+- Follow-up yang terkirim (manual maupun otomatis) menandai `followupPassiveSentAt` supaya tidak dobel-follow-up percakapan yang sama.
