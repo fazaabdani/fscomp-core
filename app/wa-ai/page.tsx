@@ -7,6 +7,8 @@ import { defaultWaAiPersonaPrompt } from "@/lib/wa-ai-catalog-reply";
 import { waChannelIds, waChannelLabels, type WaChannelId } from "@/lib/wa-ai-channels";
 import { FlashNotice } from "../FlashNotice";
 import {
+  releaseWaConversationToAiAction,
+  takeoverWaConversationAction,
   updateWaAiChannelsAction,
   updateWaAiEnabledAction,
   updateWaAiPersonaAction,
@@ -95,7 +97,11 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
                   ? "AI diaktifkan kembali."
                   : searchParams?.success === "ai-disabled"
                     ? "AI dimatikan — semua pesan masuk tidak diproses sampai dinyalakan lagi."
-                    : "";
+                    : searchParams?.success === "conversation-taken-over"
+                      ? "Percakapan diambil alih — AI berhenti membalas otomatis untuk pelanggan ini."
+                      : searchParams?.success === "conversation-released"
+                        ? "Percakapan dikembalikan ke AI."
+                        : "";
 
   const aiEnabledSetting = settings.find((setting) => setting.key === "ai_enabled");
   const isAiEnabled = aiEnabledSetting ? aiEnabledSetting.value !== false : true;
@@ -269,6 +275,14 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
                         {conversation.lastAdminResponseAt ? <small>Admin: {formatDateWib(conversation.lastAdminResponseAt)}</small> : <small>Admin belum respons</small>}
                       </td>
                       <td>
+                        <div className="buttonRow noMargin">
+                          <form action={takeoverWaConversationAction.bind(null, conversation.id)}>
+                            <button className="secondaryButton compactButton" type="submit">Ambil Alih</button>
+                          </form>
+                          <form action={releaseWaConversationToAiAction.bind(null, conversation.id)}>
+                            <button className="secondaryButton compactButton" type="submit">Kembalikan ke AI</button>
+                          </form>
+                        </div>
                         <form action={updateWaConversationAction.bind(null, conversation.id)} className="buttonRow noMargin">
                           <select name="status" defaultValue={conversation.status} aria-label="Status percakapan">
                             {statuses.map((status) => <option value={status} key={status}>{statusLabels[status]}</option>)}

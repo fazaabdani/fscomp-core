@@ -66,6 +66,84 @@ export async function updateWaConversationAction(conversationId: string, formDat
   redirect("/wa-ai?success=conversation-updated");
 }
 
+/**
+ * "lastAdminResponseAt" sudah dibaca oleh policy engine (decideWaAiPolicy) sejak awal, tapi
+ * tidak ada kode yang pernah mengisinya — jadi walau field-nya ada, AI tidak pernah benar-benar
+ * berhenti otomatis saat admin menangani sendiri. Dua action ini yang mengisi/mengosongkannya.
+ */
+export async function takeoverWaConversationAction(conversationId: string) {
+  const currentUser = requireRole(["admin", "sales"]);
+  if (!entityId.safeParse(conversationId).success) redirect("/wa-ai?error=invalid-input");
+
+  const conversation = await prisma.waConversation.findUnique({
+    where: { id: conversationId },
+    select: { id: true, status: true, aiTakeoverAllowed: true }
+  });
+
+  if (!conversation) redirect("/wa-ai?error=not-found");
+
+  await prisma.$transaction([
+    prisma.waConversation.update({
+      where: { id: conversationId },
+      data: {
+        status: "WAITING_ADMIN",
+        aiTakeoverAllowed: false,
+        lastAdminResponseAt: new Date()
+      }
+    }),
+    prisma.waAiEventLog.create({
+      data: {
+        conversationId,
+        eventType: "ADMIN_TAKEOVER",
+        status: "INFO",
+        reason: `taken_over_by_${currentUser.username}`,
+        payload: {
+          previousStatus: conversation.status,
+          previousAiTakeoverAllowed: conversation.aiTakeoverAllowed
+        }
+      }
+    })
+  ]);
+
+  revalidatePath("/wa-ai");
+  redirect("/wa-ai?success=conversation-taken-over");
+}
+
+export async function releaseWaConversationToAiAction(conversationId: string) {
+  const currentUser = requireRole(["admin", "sales"]);
+  if (!entityId.safeParse(conversationId).success) redirect("/wa-ai?error=invalid-input");
+
+  const conversation = await prisma.waConversation.findUnique({
+    where: { id: conversationId },
+    select: { id: true, status: true }
+  });
+
+  if (!conversation) redirect("/wa-ai?error=not-found");
+
+  await prisma.$transaction([
+    prisma.waConversation.update({
+      where: { id: conversationId },
+      data: {
+        status: "OPEN",
+        aiTakeoverAllowed: true,
+        lastAdminResponseAt: null
+      }
+    }),
+    prisma.waAiEventLog.create({
+      data: {
+        conversationId,
+        eventType: "ADMIN_RELEASE_TO_AI",
+        status: "INFO",
+        reason: `released_by_${currentUser.username}`,
+        payload: { previousStatus: conversation.status }
+      }
+    })
+  ]);
+
+  revalidatePath("/wa-ai");
+  redirect("/wa-ai?success=conversation-released");
+}
+
 export async function updateWaCustomerPolicyAction(customerId: string, formData: FormData) {
   const currentUser = requireRole(["admin", "sales"]);
   const validation = z.object({
