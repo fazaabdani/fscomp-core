@@ -65,7 +65,6 @@ const safeIntents = new Set<WaAiIntent>([
   "CATALOG",
   "ADDRESS",
   "HOURS",
-  "GENERAL_SERVICE",
   "STOCK_SIMPLE"
 ]);
 
@@ -185,6 +184,17 @@ export function decideWaAiPolicy(input: WaAiPolicyInput): WaAiPolicyDecision {
     };
   }
 
+  if (input.customerPolicy === "AUTO_SAFE" && input.intent === "GENERAL_SERVICE") {
+    return {
+      action: "AUTO_REPLY",
+      nextStatus: "PENDING_ADMIN",
+      notifyAdmin: true,
+      allowSafeCatalog: false,
+      outsideOperationalHours,
+      reason: outsideOperationalHours ? "safe_auto_reply_outside_hours" : "general_service_inquiry"
+    };
+  }
+
   if (input.customerPolicy === "AUTO_SAFE" && safeIntents.has(input.intent)) {
     return {
       action: "AUTO_REPLY",
@@ -211,7 +221,8 @@ export function inferWaAiIntent(message: string): WaAiIntent {
   if (/(admin|manusia|cs|orangnya|operator)/.test(text)) return "ADMIN_REQUEST";
   if (/(marah|kecewa|refund|balikin uang|uang kembali)/.test(text)) return "REFUND";
   if (/(komplain|rusak|bermasalah|tidak normal|mati|error)/.test(text)) return "COMPLAINT";
-  if (/(garansi|klaim|servis|service)/.test(text)) return "WARRANTY";
+  if (/(garansi|klaim)/.test(text)) return "WARRANTY";
+  if (/(servis|service|rakit pc|rakit komputer|reparasi|perbaikan)/.test(text)) return "GENERAL_SERVICE";
   if (/(rekening|transfer|dp|booking|bayar|pembayaran)/.test(text)) return "PAYMENT";
   if (/(nego|diskon|kurang|net|pasnya)/.test(text)) return "NEGOTIATION";
   if (/(jadi ambil|mau ambil|deal|fix|langsung ambil)/.test(text)) return "HOT_LEAD";

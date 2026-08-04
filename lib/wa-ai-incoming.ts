@@ -16,6 +16,7 @@ export const waIncomingPayloadSchema = z.object({
   intent: z.string().trim().max(80).optional().nullable(),
   leadScore: z.enum(["COLD", "WARM", "HOT"]).optional(),
   riskLevel: z.enum(["SAFE", "WATCH", "RISK"]).optional(),
+  channel: z.enum(["STORE", "PERSONAL"]).optional(),
   raw: z.unknown().optional()
 });
 

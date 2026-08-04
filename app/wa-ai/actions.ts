@@ -6,9 +6,11 @@ import { redirect } from "next/navigation";
 import { entityId, formValues, z } from "@/lib/form-validation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { waChannelIds, type WaChannelId } from "@/lib/wa-ai-channels";
 
 const conversationStatusSchema = z.enum(["OPEN", "PENDING_ADMIN", "WAITING_ADMIN", "CLOSED", "DEAL", "LOST", "ARCHIVED"]);
 const customerPolicySchema = z.enum(["AUTO_SAFE", "ADMIN_ONLY", "VIP_ADMIN_ONLY", "BLOCKED_AI"]);
+const personaSchema = z.string().trim().min(1).max(4000);
 
 function boolFromForm(value: FormDataEntryValue | null) {
   return value === "on" || value === "true" || value === "1";
@@ -106,4 +108,67 @@ export async function updateWaCustomerPolicyAction(customerId: string, formData:
 
   revalidatePath("/wa-ai");
   redirect("/wa-ai?success=policy-updated");
+}
+
+export async function updateWaAiPersonaAction(formData: FormData) {
+  const currentUser = requireRole(["admin", "sales"]);
+  const validation = personaSchema.safeParse(formValues(formData).persona);
+
+  if (!validation.success) {
+    redirect("/wa-ai?error=invalid-input");
+  }
+
+  const previous = await prisma.waAiSetting.findUnique({ where: { key: "ai_sales_persona_prompt" } });
+
+  await prisma.$transaction([
+    prisma.waAiSetting.upsert({
+      where: { key: "ai_sales_persona_prompt" },
+      update: { value: validation.data },
+      create: { key: "ai_sales_persona_prompt", value: validation.data }
+    }),
+    prisma.waAiEventLog.create({
+      data: {
+        eventType: "ADMIN_PERSONA_UPDATE",
+        status: "INFO",
+        reason: `updated_by_${currentUser.username}`,
+        payload: {
+          previousValue: previous?.value ?? null,
+          nextValue: validation.data
+        }
+      }
+    })
+  ]);
+
+  revalidatePath("/wa-ai");
+  redirect("/wa-ai?success=persona-updated");
+}
+
+export async function updateWaAiChannelsAction(formData: FormData) {
+  const currentUser = requireRole(["admin", "sales"]);
+  const selected = formData.getAll("channels").filter((value): value is string => typeof value === "string");
+  const nextChannels = selected.filter((value): value is WaChannelId => (waChannelIds as string[]).includes(value));
+
+  const previous = await prisma.waAiSetting.findUnique({ where: { key: "active_wa_channels" } });
+
+  await prisma.$transaction([
+    prisma.waAiSetting.upsert({
+      where: { key: "active_wa_channels" },
+      update: { value: nextChannels },
+      create: { key: "active_wa_channels", value: nextChannels }
+    }),
+    prisma.waAiEventLog.create({
+      data: {
+        eventType: "ADMIN_CHANNELS_UPDATE",
+        status: "INFO",
+        reason: `updated_by_${currentUser.username}`,
+        payload: {
+          previousValue: previous?.value ?? null,
+          nextValue: nextChannels
+        }
+      }
+    })
+  ]);
+
+  revalidatePath("/wa-ai");
+  redirect("/wa-ai?success=channels-updated");
 }

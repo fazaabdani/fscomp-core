@@ -118,4 +118,21 @@ test("intent inference detects payment and complaint safely", () => {
   assert.equal(inferWaAiIntent("laptop rusak dan saya komplain"), "COMPLAINT");
 });
 
+test("plain service question is general service, not warranty claim", () => {
+  assert.equal(inferWaAiIntent("mau tanya servis ganti keyboard berapa ya"), "GENERAL_SERVICE");
+  assert.equal(inferWaAiIntent("mau klaim garansi laptop saya"), "WARRANTY");
+});
+
+test("general service inquiry auto replies but still notifies admin", () => {
+  const decision = decideWaAiPolicy({
+    ...baseInput,
+    intent: "GENERAL_SERVICE"
+  });
+  assert.equal(decision.action, "AUTO_REPLY");
+  assert.equal(decision.notifyAdmin, true);
+  assert.equal(decision.allowSafeCatalog, false);
+  assert.equal(decision.nextStatus, "PENDING_ADMIN");
+  assert.equal(decision.reason, "general_service_inquiry");
+});
+
 await rm(tempDir, { recursive: true, force: true });

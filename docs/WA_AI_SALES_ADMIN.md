@@ -116,6 +116,7 @@ Field opsional:
 - `intent`
 - `leadScore`
 - `riskLevel`
+- `channel` (`STORE` atau `PERSONAL` — lihat Tahap 7 §Multi-Channel)
 - `raw`
 
 ## Dashboard Read-Only Tahap 4
@@ -180,3 +181,62 @@ Hasil yang diharapkan:
 - HOT lead menghasilkan `decision.action = BRIDGE_AND_HANDOVER`.
 - Status conversation menjadi `WAITING_ADMIN`.
 - Dashboard `/wa-ai` menampilkan percakapan.
+
+## Balasan AI Tahap 7
+
+Sebelum tahap ini, `draftReply` kosong untuk kasus paling umum: pertanyaan produk biasa (`decision.action = AUTO_REPLY`, `allowSafeCatalog = true`). Tahap 7 mengisi bagian itu.
+
+File baru:
+
+- `lib/wa-ai-catalog-reply.ts`: `generateWaAiCatalogReply()`. Ambil sampai 30 unit ready (`getSafeWaCatalogUnits`), kirim ke OpenAI (`OPENAI_API_KEY`, `OPENAI_MODEL`) bersama histori 10 pesan terakhir, minta output terstruktur (`response_format: json_schema`) berupa `{ reply, recommendedUnitIds }`. `recommendedUnitIds` yang tidak ada di daftar unit yang dikirim otomatis dibuang (pagar anti-halusinasi). Kalau OpenAI gagal/timeout (15 detik) atau stok kosong, fallback ke pesan aman, bukan mengarang.
+- Prompt sistem punya dua lapis: aturan wajib (hardcoded, di `hardSafetyPreamble`, tidak bisa diubah dari UI) + persona gaya bicara (dari `WaAiSetting` key `ai_sales_persona_prompt`, bisa diedit admin di `/wa-ai`, default di `defaultWaAiPersonaPrompt`).
+
+Intent `GENERAL_SERVICE` (servis umum, rakit PC — bukan klaim garansi) sekarang punya jalur sendiri di `decideWaAiPolicy()`: `AUTO_REPLY` tapi `notifyAdmin: true` dan `nextStatus: PENDING_ADMIN`, balasannya template tetap (`waAiGeneralServiceBridgeMessage()`, "kami cekkan ulang dulu") karena belum ada database riwayat servis untuk dibaca AI. Sebelumnya kata "servis"/"service" salah ke-match ke `WARRANTY` di `inferWaAiIntent()` — sudah diperbaiki, sekarang hanya "garansi"/"klaim" yang masuk `WARRANTY`.
+
+## Multi-Channel WA Tahap 7
+
+Fonnte bisa terhubung ke lebih dari satu nomor WA (toko, pribadi). Supaya bisa diatur tanpa redeploy:
+
+- Nomor & token tetap di environment variable (`WA_CHANNEL_STORE_NUMBER`, `WA_CHANNEL_PERSONAL_NUMBER`, token Fonnte tetap ikut pola `N8N_SALES_WA.md`/`N8N_DAILY_QC_WA.md`).
+- Channel mana yang aktif diatur dari `/wa-ai` (checkbox), disimpan di `WaAiSetting` key `active_wa_channels` (array, default `["PERSONAL"]` — sesuai kondisi Fonnte saat ini yang baru tersambung ke WA pribadi).
+- Payload `wa-incoming` menerima field opsional `channel` (`STORE`/`PERSONAL`). Kalau diisi dan channel itu tidak aktif, request langsung dijawab `{ ok: true, skipped: true, reason: "channel_inactive" }` tanpa menyentuh database. Kalau field ini tidak dikirim sama sekali (mis. test lama), gate ini dilewati — tidak memblokir apa pun, demi kompatibilitas mundur.
+- `lib/wa-ai-channels.ts` isinya registry channel + `isWaChannelActive()`.
+
+## Setting Tambahan Tahap 7
+
+Migration `202608040001_wa_ai_reply_settings` menambah dua row `WaAiSetting` (idempotent, `ON CONFLICT DO NOTHING` supaya tidak menimpa value yang sudah diubah admin):
+
+- `ai_sales_persona_prompt`
+- `active_wa_channels`
+
+## Editor Setting Tahap 7
+
+Dashboard `/wa-ai` sekarang punya form untuk dua setting di atas (sebelumnya read-only). Perubahan tercatat di `WaAiEventLog` (`ADMIN_PERSONA_UPDATE`, `ADMIN_CHANNELS_UPDATE`), mengikuti pola audit yang sama dengan `ADMIN_CONVERSATION_UPDATE`/`ADMIN_CUSTOMER_POLICY_UPDATE` yang sudah ada.
+
+## Tahap 8: Fonnte Langsung ke Core (Tanpa n8n)
+
+Keputusan (2026-08-04): endpoint `wa-incoming` di atas awalnya didesain dipanggil n8n. Setelah dipertimbangkan ulang, jalur masuk-keluar pesan WA dipindah **langsung** Fonnte ↔ Core, tanpa n8n di tengah — n8n punya titik gagal sendiri (kalau container n8n down, WA AI ikut mati) padahal cuma jadi pipa. Policy engine, AI reply, dan seluruh logic di `lib/wa-ai-*.ts` **tidak berubah sama sekali** — yang berubah cuma jalur masuk/keluarnya pesan.
+
+Supaya logic tidak dobel antara jalur lama (n8n) dan jalur baru (langsung), transaksi inti dipindah ke satu fungsi bersama:
+
+- `lib/wa-ai-orchestrator.ts` — `processWaIncomingMessage()`. Isinya persis logic yang sebelumnya ada di dalam `wa-incoming/route.ts`: upsert customer/conversation, simpan pesan, jalankan policy, generate balasan, log event, antre Telegram. Ditambah **rate limit baru**: maksimal 10 pesan masuk per menit per nomor (dihitung dari tabel `WaMessage` yang sudah ada, bukan tabel/Redis baru) — kalau kelewat, request dijawab `{ skipped: true, reason: "rate_limited" }` tanpa diproses AI sama sekali.
+- `app/api/integrations/n8n/wa-incoming/route.ts` sekarang cuma pembungkus tipis: validasi payload + panggil `processWaIncomingMessage()`. Tetap ada dan tetap berfungsi persis seperti sebelumnya (dipakai untuk test manual via curl, lihat §Test Tahap 6) — tidak dihapus, cuma tidak lagi dipakai untuk trafik produksi.
+
+Endpoint baru:
+
+- `POST /api/wa/webhook` — dipanggil langsung oleh Fonnte. Field payload Fonnte sudah dicek ke [dokumentasi resmi](https://docs.fonnte.com/webhook-reply-message/), bukan ditebak: `sender` (nomor), `message` (teks), `name` (nama pengirim), `device` (device penerima). Field `device` **belum tahu nilai aslinya** sampai ada webhook asli yang masuk — `resolveWaChannelFromDevice()` di `lib/fonnte-client.ts` akan mengembalikan `null` (tidak dikenali, tidak diblokir) sampai `WA_CHANNEL_STORE_DEVICE`/`WA_CHANNEL_PERSONAL_DEVICE` diisi dengan nilai asli yang dilihat dari payload pertama yang masuk.
+- Verifikasi: Fonnte **tidak** mengirim header/signature apa pun untuk webhook masuk (sudah dicek ke dokumentasi resmi kategori webhook, tidak disebutkan sama sekali) — jadi verifikasinya pakai query param secret: daftarkan URL webhook di Fonnte sebagai `https://core.fscomp.id/api/wa/webhook?key=<FONNTE_WEBHOOK_SECRET>`. Dicek lewat `hasFonnteWebhookAccess()` di `lib/api-auth.ts`.
+- Kirim balasan: `sendFonnteMessage()` di `lib/fonnte-client.ts`, `POST https://api.fonnte.com/send`, body `application/x-www-form-urlencoded` (**bukan JSON** — API Fonnte pakai form fields, sudah dicek ke dokumentasi resmi), header `Authorization: <FONNTE_TOKEN>`.
+
+Env baru:
+
+```env
+FONNTE_TOKEN=...
+FONNTE_WEBHOOK_SECRET=...
+WA_CHANNEL_STORE_DEVICE=...
+WA_CHANNEL_PERSONAL_DEVICE=...
+```
+
+Yang **tidak** ikut dipindah: notifikasi Telegram ke admin tetap lewat `app/api/integrations/n8n/wa-telegram-queue` yang di-poll n8n seperti sebelumnya — keputusan ini cuma soal jalur pesan WA customer, bukan jalur notifikasi admin. n8n masih dipakai untuk itu, dan untuk 2 workflow lama (laporan penjualan, reminder QC) yang tidak disentuh sama sekali.
+
+Sebelum live: pasang webhook URL di dashboard Fonnte, kirim 1 pesan test, buka `WaMessage.rawPayload` di Prisma Studio untuk lihat nilai asli field `device`, baru isi `WA_CHANNEL_*_DEVICE` yang benar.

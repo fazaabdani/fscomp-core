@@ -24,6 +24,10 @@ export function waAiAdminRequiredMessage() {
   return "Siap nggih, untuk bagian ini saya teruskan ke admin agar dibantu langsung dan datanya aman.";
 }
 
+export function waAiGeneralServiceBridgeMessage() {
+  return "Baik nggih, untuk servis kami cekkan ulang terlebih dahulu ya supaya datanya pasti. Mohon ditunggu sebentar, admin akan bantu langsung.";
+}
+
 export function formatWaLocation(location: SaleLocation | string) {
   return location === "KAJEN" ? "Kajen" : "Wiradesa";
 }
