@@ -3493,6 +3493,49 @@ body:has(.waAiPage) {
   resize: vertical;
 }
 
+.waAiPage .dataTable td {
+  padding: 10px 12px;
+  vertical-align: top;
+}
+
+.waAiPage .dataTable th {
+  padding: 8px 12px;
+}
+
+.waAiActionsCell {
+  min-width: 190px;
+}
+
+.waAiPrimaryActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.waAiPrimaryActions form:last-child {
+  grid-column: 1 / -1;
+}
+
+.waAiPrimaryActions button {
+  width: 100%;
+}
+
+.waAiRowAdvanced {
+  margin-top: 8px;
+  border-top: 1px dashed var(--line);
+  padding-top: 8px;
+}
+
+.waAiRowAdvanced summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.waAiRowAdvanced form {
+  margin-top: 8px;
+}
+
 @media (max-width: 860px) {
   .waAiControlGrid {
     grid-template-columns: minmax(0, 1fr);

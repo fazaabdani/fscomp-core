@@ -43,6 +43,23 @@ const policyLabels: Record<WaCustomerAiPolicy, string> = {
   BLOCKED_AI: "AI diblokir"
 };
 
+const intentLabels: Record<string, string> = {
+  GREETING: "Sapaan",
+  CATALOG: "Tanya katalog",
+  ADDRESS: "Tanya alamat",
+  HOURS: "Tanya jam buka",
+  GENERAL_SERVICE: "Tanya servis",
+  STOCK_SIMPLE: "Tanya stok",
+  HOT_LEAD: "Mau ambil/deal",
+  PAYMENT: "Bahas pembayaran",
+  NEGOTIATION: "Nego harga",
+  COMPLAINT: "Komplain",
+  WARRANTY: "Klaim garansi",
+  REFUND: "Minta refund",
+  ADMIN_REQUEST: "Minta admin",
+  UNKNOWN: "Belum jelas arahnya"
+};
+
 const statuses: WaConversationStatus[] = ["OPEN", "PENDING_ADMIN", "WAITING_ADMIN", "CLOSED", "DEAL", "LOST", "ARCHIVED"];
 const policies: WaCustomerAiPolicy[] = ["AUTO_SAFE", "ADMIN_ONLY", "VIP_ADMIN_ONLY", "BLOCKED_AI"];
 
@@ -323,7 +340,7 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
                       </td>
                       <td>
                         <span className={`statusPill ${statusTone(conversation.status)}`}>{statusLabels[conversation.status]}</span><br />
-                        <small>{conversation.intent || "Intent belum ada"}</small>
+                        <small>{conversation.intent ? intentLabels[conversation.intent] ?? conversation.intent : "Belum ada pesan"}</small>
                       </td>
                       <td>
                         <span className={`statusPill ${leadTone(conversation.leadScore, conversation.riskLevel)}`}>{conversation.leadScore} / {conversation.riskLevel}</span><br />
@@ -343,36 +360,38 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
                         {conversation.lastAdminResponseAt ? <small>Admin: {formatDateWib(conversation.lastAdminResponseAt)}</small> : <small>Admin belum respons</small>}
                         {needsFollowUp ? <><br /><span className="statusPill yellow">Perlu Follow-up</span></> : null}
                       </td>
-                      <td>
-                        <div className="buttonRow noMargin">
+                      <td className="waAiActionsCell">
+                        <div className="waAiPrimaryActions">
                           <form action={takeoverWaConversationAction.bind(null, conversation.id)}>
                             <button className="secondaryButton compactButton" type="submit">Ambil Alih</button>
                           </form>
                           <form action={releaseWaConversationToAiAction.bind(null, conversation.id)}>
                             <button className="secondaryButton compactButton" type="submit">Kembalikan ke AI</button>
                           </form>
-                        </div>
-                        <div className="buttonRow noMargin">
                           <form action={sendManualFollowUpAction.bind(null, conversation.id)}>
                             <button className="secondaryButton compactButton" type="submit">Kirim Follow-up</button>
                           </form>
                         </div>
-                        <form action={updateWaConversationAction.bind(null, conversation.id)} className="buttonRow noMargin">
-                          <select name="status" defaultValue={conversation.status} aria-label="Status percakapan">
-                            {statuses.map((status) => <option value={status} key={status}>{statusLabels[status]}</option>)}
-                          </select>
-                          <label className="inlineCheck">
-                            <input name="aiTakeoverAllowed" type="checkbox" defaultChecked={conversation.aiTakeoverAllowed} />
-                            AI takeover
-                          </label>
-                          <button className="secondaryButton compactButton" type="submit">Simpan</button>
-                        </form>
-                        <form action={updateWaCustomerPolicyAction.bind(null, conversation.customer.id)} className="buttonRow noMargin">
-                          <select name="customerAiPolicy" defaultValue={conversation.customer.customerAiPolicy} aria-label="Policy AI pelanggan">
-                            {policies.map((policy) => <option value={policy} key={policy}>{policyLabels[policy]}</option>)}
-                          </select>
-                          <button className="secondaryButton compactButton" type="submit">Policy</button>
-                        </form>
+
+                        <details className="waAiRowAdvanced">
+                          <summary>Kontrol lanjutan</summary>
+                          <form action={updateWaConversationAction.bind(null, conversation.id)} className="buttonRow noMargin">
+                            <select name="status" defaultValue={conversation.status} aria-label="Status percakapan">
+                              {statuses.map((status) => <option value={status} key={status}>{statusLabels[status]}</option>)}
+                            </select>
+                            <label className="inlineCheck">
+                              <input name="aiTakeoverAllowed" type="checkbox" defaultChecked={conversation.aiTakeoverAllowed} />
+                              AI takeover
+                            </label>
+                            <button className="secondaryButton compactButton" type="submit">Simpan</button>
+                          </form>
+                          <form action={updateWaCustomerPolicyAction.bind(null, conversation.customer.id)} className="buttonRow noMargin">
+                            <select name="customerAiPolicy" defaultValue={conversation.customer.customerAiPolicy} aria-label="Policy AI pelanggan">
+                              {policies.map((policy) => <option value={policy} key={policy}>{policyLabels[policy]}</option>)}
+                            </select>
+                            <button className="secondaryButton compactButton" type="submit">Policy</button>
+                          </form>
+                        </details>
                       </td>
                     </tr>
                   );
