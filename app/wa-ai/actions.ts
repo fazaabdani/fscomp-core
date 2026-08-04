@@ -10,7 +10,7 @@ import { waChannelIds, type WaChannelId } from "@/lib/wa-ai-channels";
 
 const conversationStatusSchema = z.enum(["OPEN", "PENDING_ADMIN", "WAITING_ADMIN", "CLOSED", "DEAL", "LOST", "ARCHIVED"]);
 const customerPolicySchema = z.enum(["AUTO_SAFE", "ADMIN_ONLY", "VIP_ADMIN_ONLY", "BLOCKED_AI"]);
-const personaSchema = z.string().trim().min(1).max(4000);
+const personaSchema = z.string().trim().min(1).max(8000);
 
 function boolFromForm(value: FormDataEntryValue | null) {
   return value === "on" || value === "true" || value === "1";

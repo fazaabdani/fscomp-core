@@ -153,8 +153,8 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
               id="persona"
               name="persona"
               defaultValue={currentPersona}
-              rows={6}
-              maxLength={4000}
+              rows={10}
+              maxLength={8000}
             />
             <p className="waAiHint">Aturan wajib (dilarang mengarang harga/stok/garansi) tetap terkunci di kode, tidak ikut berubah dari sini.</p>
             <div className="buttonRow noMargin">
