@@ -111,12 +111,12 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
   );
 
   return (
-    <section className="pageStack">
+    <section className="pageStack waAiPage">
       <div className="sectionTitle">
         <div>
           <p className="eyebrow">AI WhatsApp</p>
           <h1>Sales admin dan handover pelanggan</h1>
-          <p className="bodyText">Pantau percakapan yang masuk dari n8n. Tahap ini masih read-only: AI belum mengirim WA otomatis dari Core.</p>
+          <p className="bodyText">Pantau percakapan yang masuk, dan atur gaya bicara/nomor aktif AI langsung dari sini.</p>
         </div>
         <Bot size={32} />
       </div>
@@ -129,6 +129,84 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
       </section>
 
       <FlashNotice message={message} tone={searchParams?.error ? "error" : "success"} queryKeys={["error", "success"]} />
+
+      <section className="panel waAiControlPanel">
+        <div className="waAiKillSwitchRow">
+          <div className="waAiKillSwitchLabel">
+            <span className={`statusPill ${isAiEnabled ? "green" : "red"}`}>{isAiEnabled ? "AI ON" : "AI OFF"}</span>
+            <span>Matikan kalau mau berhenti total sementara — semua pesan diabaikan, dari channel mana pun.</span>
+          </div>
+          <form action={updateWaAiEnabledAction} className="buttonRow noMargin">
+            <label className="inlineCheck">
+              <input key={String(isAiEnabled)} name="aiEnabled" type="checkbox" defaultChecked={isAiEnabled} />
+              AI aktif
+            </label>
+            <button className="secondaryButton compactButton" type="submit">Simpan</button>
+          </form>
+        </div>
+
+        <div className="waAiControlGrid">
+          <form action={updateWaAiPersonaAction} className="formGrid panelSubsection">
+            <label htmlFor="persona">Persona AI Sales</label>
+            <textarea
+              key={currentPersona}
+              id="persona"
+              name="persona"
+              defaultValue={currentPersona}
+              rows={6}
+              maxLength={4000}
+            />
+            <p className="waAiHint">Aturan wajib (dilarang mengarang harga/stok/garansi) tetap terkunci di kode, tidak ikut berubah dari sini.</p>
+            <div className="buttonRow noMargin">
+              <button className="secondaryButton compactButton" type="submit">Simpan persona</button>
+            </div>
+          </form>
+
+          <form action={updateWaAiChannelsAction} className="formGrid panelSubsection">
+            <span>Nomor WA yang aktif untuk AI</span>
+            <div className="buttonRow noMargin">
+              {waChannelIds.map((channel) => (
+                <label className="inlineCheck" key={channel}>
+                  <input
+                    key={`${channel}-${activeChannels.has(channel)}`}
+                    name="channels"
+                    type="checkbox"
+                    value={channel}
+                    defaultChecked={activeChannels.has(channel)}
+                  />
+                  {waChannelLabels[channel]}
+                </label>
+              ))}
+            </div>
+            <div className="buttonRow noMargin">
+              <button className="secondaryButton compactButton" type="submit">Simpan nomor aktif</button>
+            </div>
+          </form>
+        </div>
+
+        <details className="waAiRawSettings">
+          <summary>Lihat semua setting mentah</summary>
+          {settings.length === 0 ? (
+            <div className="emptyState">Setting belum tersedia.</div>
+          ) : (
+            <div className="tableScroll">
+              <table className="dataTable">
+                <thead>
+                  <tr><th>Key</th><th>Value</th></tr>
+                </thead>
+                <tbody>
+                  {settings.map((setting) => (
+                    <tr key={setting.id}>
+                      <td><strong>{setting.key}</strong></td>
+                      <td><small>{JSON.stringify(setting.value)}</small></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </details>
+      </section>
 
       <section className="panel">
         <div className="panelHeader">
@@ -210,105 +288,6 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
                     </tr>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      <section className="panel">
-        <div className="panelHeader">
-          <div>
-            <p className="eyebrow">Kill Switch</p>
-            <h2>AI {isAiEnabled ? "Aktif" : "Mati"}</h2>
-            <p>Matikan ini kalau mau berhenti total sementara — semua pesan masuk (dari channel mana pun) langsung diabaikan tanpa diproses, tidak perlu hapus webhook di Fonnte.</p>
-          </div>
-          <span className={`statusPill ${isAiEnabled ? "green" : "red"}`}>{isAiEnabled ? "ON" : "OFF"}</span>
-        </div>
-
-        <form action={updateWaAiEnabledAction} className="buttonRow noMargin">
-          <label className="inlineCheck">
-            <input key={String(isAiEnabled)} name="aiEnabled" type="checkbox" defaultChecked={isAiEnabled} />
-            AI aktif menjawab pesan masuk
-          </label>
-          <button className="secondaryButton compactButton" type="submit">Simpan</button>
-        </form>
-      </section>
-
-      <section className="panel">
-        <div className="panelHeader">
-          <div>
-            <p className="eyebrow">Kontrol AI</p>
-            <h2>Gaya bicara &amp; nomor WA aktif</h2>
-            <p>Atur sendiri tanpa perlu redeploy. Aturan wajib (dilarang mengarang harga/stok/garansi) tetap terkunci di kode, tidak ikut berubah dari sini.</p>
-          </div>
-          <Bot size={22} />
-        </div>
-
-        <form action={updateWaAiPersonaAction} className="formGrid panelSubsection">
-          <label htmlFor="persona">Persona AI Sales</label>
-          <textarea
-            key={currentPersona}
-            id="persona"
-            name="persona"
-            defaultValue={currentPersona}
-            rows={5}
-            maxLength={4000}
-          />
-          <div className="buttonRow noMargin">
-            <button className="secondaryButton compactButton" type="submit">Simpan persona</button>
-          </div>
-        </form>
-
-        <form action={updateWaAiChannelsAction} className="formGrid panelSubsection">
-          <span>Nomor WA yang aktif untuk AI</span>
-          <div className="buttonRow noMargin">
-            {waChannelIds.map((channel) => (
-              <label className="inlineCheck" key={channel}>
-                <input
-                  key={`${channel}-${activeChannels.has(channel)}`}
-                  name="channels"
-                  type="checkbox"
-                  value={channel}
-                  defaultChecked={activeChannels.has(channel)}
-                />
-                {waChannelLabels[channel]}
-              </label>
-            ))}
-          </div>
-          <div className="buttonRow noMargin">
-            <button className="secondaryButton compactButton" type="submit">Simpan nomor aktif</button>
-          </div>
-        </form>
-      </section>
-
-      <section className="panel">
-        <div className="panelHeader">
-          <div>
-            <p className="eyebrow">Setting</p>
-            <h2>Semua runtime setting (mentah)</h2>
-            <p>Dua key di atas ({"ai_sales_persona_prompt"}, {"active_wa_channels"}) sudah punya editor sendiri. Sisanya masih dari seed migration.</p>
-          </div>
-          <Bot size={22} />
-        </div>
-        {settings.length === 0 ? (
-          <div className="emptyState">Setting belum tersedia. Jalankan migration WA AI terlebih dahulu.</div>
-        ) : (
-          <div className="tableScroll">
-            <table className="dataTable">
-              <thead>
-                <tr>
-                  <th>Key</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                {settings.map((setting) => (
-                  <tr key={setting.id}>
-                    <td><strong>{setting.key}</strong></td>
-                    <td><small>{JSON.stringify(setting.value)}</small></td>
-                  </tr>
-                ))}
               </tbody>
             </table>
           </div>
