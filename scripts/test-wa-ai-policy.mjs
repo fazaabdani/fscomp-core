@@ -36,7 +36,8 @@ const {
   decideWaAiPolicy,
   inferWaAiIntent,
   isWithinOperationalHours,
-  defaultStoreOperationalHours
+  defaultStoreOperationalHours,
+  detectWaGreetingCorrection
 } = policyModule;
 
 const baseInput = {
@@ -131,8 +132,23 @@ test("general service inquiry auto replies but still notifies admin", () => {
   assert.equal(decision.action, "AUTO_REPLY");
   assert.equal(decision.notifyAdmin, true);
   assert.equal(decision.allowSafeCatalog, false);
-  assert.equal(decision.nextStatus, "PENDING_ADMIN");
+  assert.equal(decision.nextStatus, "OPEN");
   assert.equal(decision.reason, "general_service_inquiry");
+});
+
+test("general service inquiry does not lock the conversation to admin for later messages", () => {
+  const decision = decideWaAiPolicy({
+    ...baseInput,
+    status: "OPEN",
+    intent: "GENERAL_SERVICE"
+  });
+  const followUp = decideWaAiPolicy({
+    ...baseInput,
+    status: decision.nextStatus,
+    intent: "CATALOG"
+  });
+  assert.equal(followUp.action, "AUTO_REPLY");
+  assert.equal(followUp.allowSafeCatalog, true);
 });
 
 test("unrecognized message auto replies instead of getting stuck on admin", () => {
@@ -152,6 +168,36 @@ test("greeting/address/hours also get a real catalog-grounded reply, not silence
     assert.equal(decision.action, "AUTO_REPLY", `${intent} should auto reply`);
     assert.equal(decision.allowSafeCatalog, true, `${intent} should allow safe catalog`);
   }
+});
+
+test("generic problem symptoms are troubleshooting, not an immediate complaint handover", () => {
+  assert.equal(inferWaAiIntent("laptop saya kadang mati sendiri kenapa ya"), "TROUBLESHOOTING");
+  assert.equal(inferWaAiIntent("kok laptopnya lemot terus"), "TROUBLESHOOTING");
+  assert.equal(inferWaAiIntent("layarnya suka nge-hang"), "TROUBLESHOOTING");
+});
+
+test("explicit complaint wording still goes straight to admin", () => {
+  assert.equal(inferWaAiIntent("saya mau komplain nih"), "COMPLAINT");
+  assert.equal(inferWaAiIntent("ini keluhan saya soal unitnya"), "COMPLAINT");
+});
+
+test("troubleshooting inquiry gets a real AI answer and does not lock the conversation", () => {
+  const decision = decideWaAiPolicy({
+    ...baseInput,
+    intent: "TROUBLESHOOTING"
+  });
+  assert.equal(decision.action, "AUTO_REPLY");
+  assert.equal(decision.allowSafeCatalog, true);
+  assert.equal(decision.notifyAdmin, true);
+  assert.equal(decision.nextStatus, "OPEN");
+  assert.equal(decision.reason, "troubleshooting_inquiry");
+});
+
+test("greeting correction only fires on an explicit 'bukan mas/mbak' pattern", () => {
+  assert.equal(detectWaGreetingCorrection("Saya Mba Mba bukan Mas"), "Mbak");
+  assert.equal(detectWaGreetingCorrection("saya mas nya bukan mbak"), "Mas");
+  assert.equal(detectWaGreetingCorrection("adik saya cowok kok"), null);
+  assert.equal(detectWaGreetingCorrection("oke siap kak"), null);
 });
 
 await rm(tempDir, { recursive: true, force: true });

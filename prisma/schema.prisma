@@ -430,17 +430,18 @@ model PcBuildDraftItem {
 }
 
 model WaCustomer {
-  id               String             @id @default(cuid())
-  phone            String             @unique
-  name             String?
-  customerAiPolicy WaCustomerAiPolicy @default(AUTO_SAFE)
-  isKnownCustomer  Boolean            @default(false)
-  lastDealAt       DateTime?
-  notes            String?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                String             @id @default(cuid())
+  phone             String             @unique
+  name              String?
+  customerAiPolicy  WaCustomerAiPolicy @default(AUTO_SAFE)
+  isKnownCustomer   Boolean            @default(false)
+  lastDealAt        DateTime?
+  notes             String?
+  preferredGreeting String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
-  conversations    WaConversation[]
+  conversations     WaConversation[]
 
   @@index([customerAiPolicy])
   @@index([isKnownCustomer, updatedAt])

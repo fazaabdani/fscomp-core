@@ -14,8 +14,16 @@ const hardSafetyPreamble = [
   "2. Dilarang mengarang status stok, garansi, diskon, atau harga di luar yang tercantum di STOK_TERSEDIA.",
   "3. Jangan pernah menjanjikan unit pasti tersedia — selalu sampaikan bahwa stok fisik akan dicek ulang admin sebelum deal.",
   "4. Balas selalu dalam Bahasa Indonesia.",
-  "5. Field recommendedUnitIds pada output HARUS berisi id yang benar-benar ada di STOK_TERSEDIA (boleh kosong kalau tidak merekomendasikan unit tertentu, misalnya saat masih menanyakan kebutuhan customer)."
+  "5. Field recommendedUnitIds pada output HARUS berisi id yang benar-benar ada di STOK_TERSEDIA (boleh kosong kalau tidak merekomendasikan unit tertentu, misalnya saat masih menanyakan kebutuhan customer).",
+  "6. Kalau customer menyebutkan gejala/keluhan teknis pada unit (misalnya rusak, error, lemot, mati sendiri, nge-hang), boleh kasih insight kemungkinan penyebab secara umum, tapi WAJIB tutup dengan mengarahkan bawa unit ke toko (Kajen/Wiradesa) untuk pengecekan fisik memastikan penyebab pastinya — jangan pernah mendiagnosis pasti atau menjanjikan hasil servis/garansi tanpa cek langsung."
 ].join("\n");
+
+function buildGreetingInstruction(preferredGreeting?: string | null) {
+  if (preferredGreeting) {
+    return `Panggil customer ini konsisten dengan sebutan "${preferredGreeting}" sepanjang percakapan — ini sudah pernah dikonfirmasi/dikoreksi customer sendiri sebelumnya, jangan diubah-ubah.`;
+  }
+  return 'Sapaan customer ini belum diketahui. Gunakan sapaan netral "Kak" saja — JANGAN menebak "Mas" atau "Mbak".';
+}
 
 const responseJsonSchema = {
   name: "wa_ai_catalog_reply",
@@ -79,6 +87,7 @@ function buildUserContent(units: WaAiCatalogUnit[], messages: WaAiCatalogReplyMe
 export async function generateWaAiCatalogReply(input: {
   messages: WaAiCatalogReplyMessage[];
   publicUrl?: string;
+  preferredGreeting?: string | null;
 }): Promise<WaAiCatalogReplyResult | null> {
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_MODEL;
@@ -96,7 +105,8 @@ export async function generateWaAiCatalogReply(input: {
   }
 
   const persona = await getWaAiPersonaPrompt();
-  const systemPrompt = `${hardSafetyPreamble}\n\nGAYA BICARA (boleh diatur admin toko):\n${persona}`;
+  const greetingInstruction = buildGreetingInstruction(input.preferredGreeting);
+  const systemPrompt = `${hardSafetyPreamble}\n\nSAPAAN:\n${greetingInstruction}\n\nGAYA BICARA (boleh diatur admin toko):\n${persona}`;
   const userContent = buildUserContent(catalog.units, input.messages);
 
   const controller = new AbortController();

@@ -11,6 +11,7 @@ export type WaAiIntent =
   | "ADDRESS"
   | "HOURS"
   | "GENERAL_SERVICE"
+  | "TROUBLESHOOTING"
   | "STOCK_SIMPLE"
   | "HOT_LEAD"
   | "PAYMENT"
@@ -197,11 +198,28 @@ export function decideWaAiPolicy(input: WaAiPolicyInput): WaAiPolicyDecision {
   if (input.customerPolicy === "AUTO_SAFE" && input.intent === "GENERAL_SERVICE") {
     return {
       action: "AUTO_REPLY",
-      nextStatus: "PENDING_ADMIN",
+      nextStatus: "OPEN",
       notifyAdmin: true,
       allowSafeCatalog: false,
       outsideOperationalHours,
       reason: outsideOperationalHours ? "safe_auto_reply_outside_hours" : "general_service_inquiry"
+    };
+  }
+
+  /**
+   * "TROUBLESHOOTING" (gejala teknis umum: rusak/error/lemot/nge-hang, dst) sengaja dipisah dari
+   * "COMPLAINT" (komplain/keluhan eksplisit). Beda dengan GENERAL_SERVICE, di sini allowSafeCatalog
+   * true supaya AI benar-benar kasih jawaban (analisa awal + arahkan bawa ke toko), bukan template
+   * tetap - lihat hardSafetyPreamble di wa-ai-catalog-reply.ts untuk aturan "wajib arahkan ke toko"-nya.
+   */
+  if (input.customerPolicy === "AUTO_SAFE" && input.intent === "TROUBLESHOOTING") {
+    return {
+      action: "AUTO_REPLY",
+      nextStatus: "OPEN",
+      notifyAdmin: true,
+      allowSafeCatalog: true,
+      outsideOperationalHours,
+      reason: outsideOperationalHours ? "safe_auto_reply_outside_hours" : "troubleshooting_inquiry"
     };
   }
 
@@ -230,9 +248,10 @@ export function inferWaAiIntent(message: string): WaAiIntent {
   const text = message.toLowerCase();
   if (/(admin|manusia|cs|orangnya|operator)/.test(text)) return "ADMIN_REQUEST";
   if (/(marah|kecewa|refund|balikin uang|uang kembali)/.test(text)) return "REFUND";
-  if (/(komplain|rusak|bermasalah|tidak normal|mati|error)/.test(text)) return "COMPLAINT";
+  if (/(komplain|keluhan)/.test(text)) return "COMPLAINT";
   if (/(garansi|klaim)/.test(text)) return "WARRANTY";
   if (/(servis|service|rakit pc|rakit komputer|reparasi|perbaikan)/.test(text)) return "GENERAL_SERVICE";
+  if (/(rusak|bermasalah|tidak normal|mati|error|lemot|lag|nge-?hang|ngadat)/.test(text)) return "TROUBLESHOOTING";
   if (/(rekening|transfer|dp|booking|bayar|pembayaran)/.test(text)) return "PAYMENT";
   if (/(nego|diskon|kurang|net|pasnya)/.test(text)) return "NEGOTIATION";
   if (/(jadi ambil|mau ambil|deal|fix|langsung ambil)/.test(text)) return "HOT_LEAD";
@@ -242,4 +261,19 @@ export function inferWaAiIntent(message: string): WaAiIntent {
   if (/(jam buka|buka jam|tutup jam|hari ini buka)/.test(text)) return "HOURS";
   if (/(halo|hai|assalam|pagi|siang|sore|malam)/.test(text)) return "GREETING";
   return "UNKNOWN";
+}
+
+/**
+ * Ditemukan dari tes langsung: customer bilang "Saya Mba Mba bukan Mas" untuk koreksi sapaan AI.
+ * Sengaja dibuat sempit - cuma nyala kalau ada pola eksplisit "bukan mas"/"bukan mbak", bukan
+ * sekadar kata "mas"/"mbak" muncul di kalimat (mis. ngomongin orang lain) - supaya tidak salah
+ * simpan preferensi dari kalimat yang tidak benar-benar koreksi.
+ */
+export function detectWaGreetingCorrection(message: string): "Mas" | "Mbak" | null {
+  const text = message.toLowerCase();
+  const negatedMas = /\bbukan\s+mas\b/.test(text);
+  const negatedMbak = /\bbukan\s+mbak?\b/.test(text);
+  if (negatedMas && !negatedMbak) return "Mbak";
+  if (negatedMbak && !negatedMas) return "Mas";
+  return null;
 }
