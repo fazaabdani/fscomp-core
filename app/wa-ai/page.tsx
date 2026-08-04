@@ -228,7 +228,7 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
 
         <form action={updateWaAiEnabledAction} className="buttonRow noMargin">
           <label className="inlineCheck">
-            <input name="aiEnabled" type="checkbox" defaultChecked={isAiEnabled} />
+            <input key={String(isAiEnabled)} name="aiEnabled" type="checkbox" defaultChecked={isAiEnabled} />
             AI aktif menjawab pesan masuk
           </label>
           <button className="secondaryButton compactButton" type="submit">Simpan</button>
@@ -248,6 +248,7 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
         <form action={updateWaAiPersonaAction} className="formGrid panelSubsection">
           <label htmlFor="persona">Persona AI Sales</label>
           <textarea
+            key={currentPersona}
             id="persona"
             name="persona"
             defaultValue={currentPersona}
@@ -265,6 +266,7 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
             {waChannelIds.map((channel) => (
               <label className="inlineCheck" key={channel}>
                 <input
+                  key={`${channel}-${activeChannels.has(channel)}`}
                   name="channels"
                   type="checkbox"
                   value={channel}
