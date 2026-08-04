@@ -135,4 +135,23 @@ test("general service inquiry auto replies but still notifies admin", () => {
   assert.equal(decision.reason, "general_service_inquiry");
 });
 
+test("unrecognized message auto replies instead of getting stuck on admin", () => {
+  const decision = decideWaAiPolicy({
+    ...baseInput,
+    intent: "UNKNOWN"
+  });
+  assert.equal(decision.action, "AUTO_REPLY");
+  assert.equal(decision.allowSafeCatalog, true);
+  assert.equal(decision.nextStatus, "OPEN");
+  assert.equal(decision.notifyAdmin, false);
+});
+
+test("greeting/address/hours also get a real catalog-grounded reply, not silence", () => {
+  for (const intent of ["GREETING", "ADDRESS", "HOURS"]) {
+    const decision = decideWaAiPolicy({ ...baseInput, intent });
+    assert.equal(decision.action, "AUTO_REPLY", `${intent} should auto reply`);
+    assert.equal(decision.allowSafeCatalog, true, `${intent} should allow safe catalog`);
+  }
+});
+
 await rm(tempDir, { recursive: true, force: true });

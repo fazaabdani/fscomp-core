@@ -60,12 +60,22 @@ const adminRequiredIntents = new Set<WaAiIntent>([
   "ADMIN_REQUEST"
 ]);
 
+/**
+ * "UNKNOWN" masuk sini juga (bukan cuma default fallback jauh di bawah) karena semua intent
+ * yang benar-benar berisiko (komplain, refund, garansi, pembayaran, nego, minta admin) sudah
+ * lebih dulu ditangkap cabang adminRequiredIntents/RISK di atas. Begitu sampai ke sini, "tidak
+ * cocok kata kunci mana pun" itu jauh lebih sering berarti "obrolan biasa/lanjutan yang keyword
+ * list-nya belum lengkap" (mis. "saya mba mba bukan mas") ketimbang sesuatu yang genuinely
+ * berbahaya — jadi dianggap aman untuk AI coba jawab (dia sendiri sudah diinstruksikan nanya
+ * balik kalau memang tidak paham), bukan langsung serah-admin permanen.
+ */
 const safeIntents = new Set<WaAiIntent>([
   "GREETING",
   "CATALOG",
   "ADDRESS",
   "HOURS",
-  "STOCK_SIMPLE"
+  "STOCK_SIMPLE",
+  "UNKNOWN"
 ]);
 
 export const defaultStoreOperationalHours: StoreOperationalHours = {
@@ -200,7 +210,7 @@ export function decideWaAiPolicy(input: WaAiPolicyInput): WaAiPolicyDecision {
       action: "AUTO_REPLY",
       nextStatus: "OPEN",
       notifyAdmin: false,
-      allowSafeCatalog: input.intent === "CATALOG" || input.intent === "STOCK_SIMPLE",
+      allowSafeCatalog: true,
       outsideOperationalHours,
       reason: outsideOperationalHours ? "safe_auto_reply_outside_hours" : "safe_auto_reply"
     };
