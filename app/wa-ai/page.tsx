@@ -8,6 +8,7 @@ import { waChannelIds, waChannelLabels, type WaChannelId } from "@/lib/wa-ai-cha
 import { FlashNotice } from "../FlashNotice";
 import {
   updateWaAiChannelsAction,
+  updateWaAiEnabledAction,
   updateWaAiPersonaAction,
   updateWaConversationAction,
   updateWaCustomerPolicyAction
@@ -90,7 +91,14 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
               ? "Gaya bicara AI berhasil disimpan."
               : searchParams?.success === "channels-updated"
                 ? "Nomor WA aktif berhasil diperbarui."
-                : "";
+                : searchParams?.success === "ai-enabled"
+                  ? "AI diaktifkan kembali."
+                  : searchParams?.success === "ai-disabled"
+                    ? "AI dimatikan — semua pesan masuk tidak diproses sampai dinyalakan lagi."
+                    : "";
+
+  const aiEnabledSetting = settings.find((setting) => setting.key === "ai_enabled");
+  const isAiEnabled = aiEnabledSetting ? aiEnabledSetting.value !== false : true;
 
   const personaSetting = settings.find((setting) => setting.key === "ai_sales_persona_prompt");
   const currentPersona = typeof personaSetting?.value === "string" ? personaSetting.value : defaultWaAiPersonaPrompt;
@@ -206,6 +214,25 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
             </table>
           </div>
         )}
+      </section>
+
+      <section className="panel">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Kill Switch</p>
+            <h2>AI {isAiEnabled ? "Aktif" : "Mati"}</h2>
+            <p>Matikan ini kalau mau berhenti total sementara — semua pesan masuk (dari channel mana pun) langsung diabaikan tanpa diproses, tidak perlu hapus webhook di Fonnte.</p>
+          </div>
+          <span className={`statusPill ${isAiEnabled ? "green" : "red"}`}>{isAiEnabled ? "ON" : "OFF"}</span>
+        </div>
+
+        <form action={updateWaAiEnabledAction} className="buttonRow noMargin">
+          <label className="inlineCheck">
+            <input name="aiEnabled" type="checkbox" defaultChecked={isAiEnabled} />
+            AI aktif menjawab pesan masuk
+          </label>
+          <button className="secondaryButton compactButton" type="submit">Simpan</button>
+        </form>
       </section>
 
       <section className="panel">

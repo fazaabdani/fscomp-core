@@ -6,6 +6,7 @@ export type FonnteInboundPayload = {
   text?: unknown;
   name?: unknown;
   device?: unknown;
+  member?: unknown;
 };
 
 export type NormalizedFonnteMessage = {
@@ -13,12 +14,17 @@ export type NormalizedFonnteMessage = {
   message: string;
   customerName: string | null;
   device: string | null;
+  isGroupMessage: boolean;
 };
 
 /**
  * Field resmi dari dokumentasi Fonnte (docs.fonnte.com/webhook-reply-message):
- * sender, message, name, device, timestamp. Bukan "device_id" — sudah dicek langsung
- * ke dokumentasi, bukan ditebak.
+ * sender, message, name, device, member, timestamp. Bukan "device_id" — sudah dicek
+ * langsung ke dokumentasi, bukan ditebak.
+ *
+ * "member" cuma terisi kalau pesan berasal dari grup (siapa anggota yang kirim) —
+ * itu jadi penanda resmi untuk membedakan chat pribadi vs grup, dipakai untuk
+ * menolak balas otomatis di grup.
  */
 export function parseFonnteInboundWebhook(body: unknown): NormalizedFonnteMessage | null {
   if (!body || typeof body !== "object") return null;
@@ -38,7 +44,8 @@ export function parseFonnteInboundWebhook(body: unknown): NormalizedFonnteMessag
     phone,
     message,
     customerName: typeof payload.name === "string" && payload.name.trim() ? payload.name.trim() : null,
-    device: typeof payload.device === "string" && payload.device.trim() ? payload.device.trim() : null
+    device: typeof payload.device === "string" && payload.device.trim() ? payload.device.trim() : null,
+    isGroupMessage: typeof payload.member === "string" && payload.member.trim().length > 0
   };
 }
 

@@ -240,3 +240,10 @@ WA_CHANNEL_PERSONAL_DEVICE=...
 Yang **tidak** ikut dipindah: notifikasi Telegram ke admin tetap lewat `app/api/integrations/n8n/wa-telegram-queue` yang di-poll n8n seperti sebelumnya — keputusan ini cuma soal jalur pesan WA customer, bukan jalur notifikasi admin. n8n masih dipakai untuk itu, dan untuk 2 workflow lama (laporan penjualan, reminder QC) yang tidak disentuh sama sekali.
 
 Sebelum live: pasang webhook URL di dashboard Fonnte, kirim 1 pesan test, buka `WaMessage.rawPayload` di Prisma Studio untuk lihat nilai asli field `device`, baru isi `WA_CHANNEL_*_DEVICE` yang benar.
+
+## Tahap 9: Kill Switch dan Filter Grup
+
+Ditambah setelah tes langsung ke nomor WA pribadi Faza (yang juga dipakai chat sehari-hari, termasuk ikut banyak grup):
+
+- **Kill switch `ai_enabled`.** Row ini sebenarnya sudah ada di database sejak migration Tahap 1 (`202606230001_wa_ai_sales_admin`), tapi tidak ada kode mana pun yang membacanya — jadi walau row-nya ada, dia tidak pernah berfungsi jadi saklar. Sekarang `processWaIncomingMessage()` di `lib/wa-ai-orchestrator.ts` mengecek ini paling pertama sebelum apa pun lain (sebelum channel gate, sebelum rate limit). Kalau `false`, semua pesan masuk diabaikan total (`{ skipped: true, reason: "ai_disabled" }`), dari channel mana pun. Togglenya ada di panel paling atas dashboard `/wa-ai` — dipisah dari panel "Kontrol AI" yang lain supaya jadi tombol darurat yang gampang ditemukan.
+- **Pesan grup diabaikan otomatis.** Fonnte menandai pesan dari grup lewat field `member` (isi nama/ID anggota grup yang kirim — dokumentasi resmi: hanya terisi untuk pesan grup, kosong untuk chat pribadi). `parseFonnteInboundWebhook()` di `lib/fonnte-client.ts` mendeteksi ini (`isGroupMessage`), dan `app/api/wa/webhook/route.ts` langsung membalas `{ skipped: true, reason: "group_message" }` **sebelum menyentuh database sama sekali** — tidak ada `WaCustomer`/`WaConversation` yang dibuat untuk grup. Ini penting karena nomor WA yang dipakai testing sekarang adalah nomor pribadi Faza yang juga aktif di banyak grup WhatsApp lain.
