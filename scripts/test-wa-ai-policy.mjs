@@ -131,8 +131,23 @@ test("general service inquiry auto replies but still notifies admin", () => {
   assert.equal(decision.action, "AUTO_REPLY");
   assert.equal(decision.notifyAdmin, true);
   assert.equal(decision.allowSafeCatalog, false);
-  assert.equal(decision.nextStatus, "PENDING_ADMIN");
+  assert.equal(decision.nextStatus, "OPEN");
   assert.equal(decision.reason, "general_service_inquiry");
+});
+
+test("general service inquiry does not lock the conversation to admin for later messages", () => {
+  const decision = decideWaAiPolicy({
+    ...baseInput,
+    status: "OPEN",
+    intent: "GENERAL_SERVICE"
+  });
+  const followUp = decideWaAiPolicy({
+    ...baseInput,
+    status: decision.nextStatus,
+    intent: "CATALOG"
+  });
+  assert.equal(followUp.action, "AUTO_REPLY");
+  assert.equal(followUp.allowSafeCatalog, true);
 });
 
 test("unrecognized message auto replies instead of getting stuck on admin", () => {

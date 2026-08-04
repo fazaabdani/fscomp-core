@@ -197,7 +197,7 @@ export function decideWaAiPolicy(input: WaAiPolicyInput): WaAiPolicyDecision {
   if (input.customerPolicy === "AUTO_SAFE" && input.intent === "GENERAL_SERVICE") {
     return {
       action: "AUTO_REPLY",
-      nextStatus: "PENDING_ADMIN",
+      nextStatus: "OPEN",
       notifyAdmin: true,
       allowSafeCatalog: false,
       outsideOperationalHours,

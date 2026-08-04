@@ -275,3 +275,11 @@ Perbaikan di `lib/wa-ai-policy.ts`:
 - `allowSafeCatalog` untuk seluruh cabang `safeIntents` (termasuk `GREETING`/`ADDRESS`/`HOURS` yang sebelumnya `false`) diubah jadi selalu `true`. Ketemu sekalian: sebelum ini, sapaan polos seperti "halo" saja tidak dapat balasan sama sekali (`responseDraft()` jatuh ke `return ""` karena tidak ada cabang yang cocok) — bukan cuma `UNKNOWN` yang bermasalah.
 
 Kalau AI-nya sekarang menjawab pertanyaan yang tidak dikenali dengan minta klarifikasi (bukan diam/serah-admin), itu sesuai desain — instruksi persona sudah menyuruh AI nanya balik kalau memang tidak paham maksud customer, bukan mengarang jawaban.
+
+## Tahap 12: Bug — Pertanyaan Servis Juga Bikin AI Macet Permanen (Kasus yang Sama, Jalur Beda)
+
+Ditemukan dari tes langsung 2026-08-04: customer tanya "Kalo servis bisa?", lalu lanjut tanya "Kalo laptop 5jtan yg rekomend apa" dua kali, "Masa ga ada yang cocok buat saya", dan "Tolong bantu jawab yang bener" — semuanya dijawab template generik `waAiAdminRequiredMessage()` ("Siap nggih, untuk bagian ini saya teruskan ke admin...") walau pertanyaan-pertanyaan itu jelas soal katalog, bukan servis.
+
+Akar masalahnya persis pola Tahap 11, tapi lewat jalur `GENERAL_SERVICE` (bukan `UNKNOWN`): cabang `decideWaAiPolicy()` untuk `GENERAL_SERVICE` men-set `nextStatus: "PENDING_ADMIN"` walau `action`-nya `AUTO_REPLY` (bukan handover sungguhan). Begitu status jadi `PENDING_ADMIN`, cabang paling atas `decideWaAiPolicy()` mengunci semua pesan berikutnya ke `HANDOVER_ADMIN`, apa pun topiknya — sama seperti bug Tahap 11.
+
+Perbaikan: `GENERAL_SERVICE` tetap `notifyAdmin: true` (admin tetap diberi tahu ada lead servis, lewat Telegram queue seperti biasa), tapi `nextStatus` dikembalikan ke `"OPEN"` supaya percakapan tidak macet — customer bebas lanjut tanya hal lain (katalog, stok, dst.) dan dijawab normal oleh AI setelah pertanyaan servis dijawab. Dibuat bareng dengan perbaikan isi balasan servis jadi langsung "Bisa" (lihat §Balasan AI Tahap 7 di atas, `waAiGeneralServiceBridgeMessage()`), dan test baru `general service inquiry does not lock the conversation to admin for later messages` di `scripts/test-wa-ai-policy.mjs`.
