@@ -12,6 +12,8 @@ export type WaAiCatalogUnit = {
   price: number;
   location: string;
   detailUrl: string;
+  batteryHealth: number | null;
+  ssdHealth: number | null;
 };
 
 export type WaAiCatalogResult =
@@ -73,7 +75,9 @@ export async function getSafeWaCatalogUnits(input: {
         ssd: unit.ssd,
         price: unit.hargaJualRekomendasi,
         location: formatWaLocation(unit.stockLocation),
-        detailUrl: `${publicUrl}/unit/${unit.id}`
+        detailUrl: `${publicUrl}/unit/${unit.id}`,
+        batteryHealth: unit.batteryHealth,
+        ssdHealth: unit.ssdHealth
       }));
 
     return { ok: true, units };
