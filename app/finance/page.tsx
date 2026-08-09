@@ -63,13 +63,13 @@ export default async function FinancePage({ searchParams }: { searchParams?: { f
         </div>
       </form>
 
-      <div className="statsGrid">
-        <div className="metric metric-cyan"><Banknote size={20} /><span>Omzet</span><strong>{formatRupiah(stats.totalOmzet)}</strong></div>
+      <div className="financeStatsGrid">
+        <div className="metric metric-cyan metric-highlight"><Banknote size={20} /><span>Omzet</span><strong>{formatRupiah(stats.totalOmzet)}</strong></div>
+        <div className="metric metric-green metric-highlight"><TrendingUp size={20} /><span>Estimasi profit kotor</span><strong>{formatRupiah(stats.totalProfit)}</strong></div>
         <div className="metric metric-blue"><Receipt size={20} /><span>Total modal</span><strong>{formatRupiah(stats.totalModal)}</strong></div>
-        <div className="metric metric-green"><TrendingUp size={20} /><span>Estimasi profit kotor</span><strong>{formatRupiah(stats.totalProfit)}</strong></div>
+        <div className="metric metric-blue"><Receipt size={20} /><span>Transaksi aktif</span><strong>{stats.totalTransaksi}</strong></div>
         <div className="metric metric-blue"><Receipt size={20} /><span>Estimasi bagian Wiradesa</span><strong>{formatRupiah(stats.totalWiradesaShare)}</strong></div>
         <div className="metric metric-green"><TrendingUp size={20} /><span>Estimasi bagian Kajen</span><strong>{formatRupiah(stats.totalKajenShare)}</strong></div>
-        <div className="metric metric-blue"><Receipt size={20} /><span>Transaksi aktif</span><strong>{stats.totalTransaksi}</strong></div>
       </div>
 
       <section className="panel">
