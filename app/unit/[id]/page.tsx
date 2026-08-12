@@ -171,6 +171,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
         </div>
         <div className="unitHeroActions">
           <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
+          {isInternalUser ? <ShareUnitButton model={unit.model} /> : null}
           {isInternalUser ? <Link className="primaryButton" href={`/label?unit=${unit.id}`}><QrCode size={17} /> Generate Label</Link> : null}
         </div>
       </div>
