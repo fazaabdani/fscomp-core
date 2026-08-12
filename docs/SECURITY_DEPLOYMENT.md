@@ -22,3 +22,5 @@ Gunakan token berbeda untuk setiap variabel. `SESSION_SECRET` tidak boleh digant
 Endpoint n8n menerima token melalui header `x-api-key` atau `Authorization: Bearer <token>`. Backup otomatis menerima `x-backup-token`, `x-api-key`, atau bearer token. Token tidak lagi diterima lewat query string agar tidak masuk log URL.
 
 Password lama yang masih plaintext akan diverifikasi satu kali saat login berhasil lalu langsung diubah ke bcrypt. Setelah deploy, semua pengguna harus login ulang karena cookie JSON lama sengaja tidak diterima. Password default yang pernah masuk Git harus tetap diganti dari menu User karena riwayat Git tidak dapat dianggap rahasia.
+
+`OPENAI_API_KEY` dan `OPENAI_MODEL` (sudah ada untuk fitur AI WhatsApp) sekarang dipakai bersama oleh Asisten AI internal di `/asisten-ai` (menu Operasional, role admin/teknisi/sales). Tidak ada env var baru untuk fitur ini - kalau dua variabel itu belum terisi di Coolify, halaman asisten akan menampilkan pesan "belum aktif" alih-alih error.

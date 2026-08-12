@@ -82,7 +82,8 @@ export function NavLinks({ currentUser }: { currentUser: NavUser | null }) {
     { href: "/sales/archive", label: "Arsip Penjualan", show: currentUser.role === "admin" },
     { href: "/rakit-pc", label: "Rakit PC", show: canSeeLicense },
     { href: "/licenses", label: "Lisensi", show: canSeeLicense },
-    { href: "/wa-ai", label: "AI WhatsApp", show: canSeeLicense }
+    { href: "/wa-ai", label: "AI WhatsApp", show: canSeeLicense },
+    { href: "/asisten-ai", label: "Asisten AI", show: !isMagang }
   ];
   const links = [
     { href: "/", label: "Dashboard", show: !isMagang },

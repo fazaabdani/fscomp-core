@@ -2147,6 +2147,77 @@ textarea {
   }
 }
 
+.assistantChatPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.assistantChatList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 55vh;
+  min-height: 220px;
+  overflow-y: auto;
+  padding: 4px 2px;
+}
+
+.assistantSuggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.assistantBubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(8, 18, 32, 0.78);
+}
+
+.assistantBubble strong {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.assistantBubble p {
+  margin: 0;
+  white-space: pre-wrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.assistantBubble.user {
+  align-self: flex-end;
+  background: rgba(34, 211, 238, 0.12);
+  border-color: rgba(34, 211, 238, 0.32);
+}
+
+.assistantBubble.assistant {
+  align-self: flex-start;
+}
+
+.assistantBubble.assistantLoading p {
+  color: var(--muted);
+}
+
+.assistantInputRow {
+  display: flex;
+  gap: 8px;
+}
+
+.assistantInputRow input {
+  flex: 1;
+}
+
 .paymentRow {
   display: grid;
   grid-template-columns: 90px minmax(0, 1fr) auto;
