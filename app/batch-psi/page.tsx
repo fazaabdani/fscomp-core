@@ -1,7 +1,7 @@
 import { CalendarDays, FileClock, Plus, ReceiptText, Search } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
-import { canEditBatch, canEditUnit } from "@/lib/auth";
+import { canEditBatch, canEditUnit, canViewPrice } from "@/lib/auth";
 import { getBatchesForManagementPage } from "@/lib/batch-page-data";
 import { chargerTypes } from "@/lib/charger-options";
 import { getCurrentUser } from "@/lib/session";
@@ -28,6 +28,7 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
   const canManageBatch = currentUser ? canEditBatch(currentUser) : false;
   const canManageUnit = currentUser ? canEditUnit(currentUser) : false;
   const canDeleteBatch = currentUser?.role === "admin";
+  const canSeePrice = currentUser ? canViewPrice(currentUser) : false;
   const batches = await getBatchesForManagementPage();
   const activeSort = searchParams?.sort ?? "unit";
   const q = (searchParams?.q ?? "").trim().toLowerCase();
@@ -141,7 +142,7 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                 <span><FileClock size={16} /> Tempo {batch.tanggalTempo}</span>
                 <span><ReceiptText size={16} /> Laptop datang {batch.jumlahLaptopDatang ?? batch.units.length}</span>
                 <span><ReceiptText size={16} /> Charger datang {batch.jumlahChargerDatang ?? 0}</span>
-                <span><ReceiptText size={16} /> Modal {formatRupiah(totalModal)}</span>
+                {canSeePrice ? <span><ReceiptText size={16} /> Modal {formatRupiah(totalModal)}</span> : null}
                 {soldUnits.length > 0 ? <span><ReceiptText size={16} /> {soldUnits.length} unit terjual disembunyikan</span> : null}
                 {returnedUnits.length > 0 && statusFilter !== "RETUR DISTRIBUTOR" ? (
                   <Link href="/batch-psi?status=RETUR+DISTRIBUTOR"><ReceiptText size={16} /> {returnedUnits.length} unit retur disembunyikan</Link>
@@ -163,7 +164,7 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                     model: unit.model,
                     statusObservasi: unit.statusObservasi,
                     catalogImageUrl: unit.catalogImageUrl,
-                    hargaModal: unit.hargaModal,
+                    hargaModal: canSeePrice ? unit.hargaModal : 0,
                     content: (
                   <div className={`unitRow ${isReady ? "readyUnitRow" : ""} ${hasPhoto ? "photoUnitRow" : ""}`} key={unit.id}>
                     <span className="unitNumber">{unit.nomorUnit}</span>

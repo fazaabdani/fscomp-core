@@ -3,6 +3,7 @@ import { Boxes, ClipboardList, Edit3, PackagePlus, ShieldCheck } from "lucide-re
 import type { InventoryItemStatus, WarrantyDurationUnit } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { formatDateInput, formatDateWib, inventoryStatusLabel, inventoryStatusTone, warrantyInfo, warrantyUnitLabel } from "@/lib/inventory";
+import { canViewPrice } from "@/lib/auth";
 import { requireRole } from "@/lib/session";
 import { formatRupiah } from "@/lib/api";
 import { createInventoryItemAction } from "./actions";
@@ -21,6 +22,7 @@ function categoryLabel(category: string) {
 export default async function InventoryPage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
   const currentUser = requireRole(["admin", "teknisi", "sales"]);
   const canEditInventory = currentUser.role === "admin" || currentUser.role === "sales";
+  const canSeePrice = canViewPrice(currentUser);
 
   const [items, units] = await Promise.all([
     prisma.inventoryItem.findMany({
@@ -196,7 +198,7 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
                       </td>
                       <td>
                         <span className={`statusPill ${inventoryStatusTone(item.status)}`}>{inventoryStatusLabel(item.status)}</span><br />
-                        <small>{formatRupiah(item.costPrice)}</small>
+                        {canSeePrice ? <small>{formatRupiah(item.costPrice)}</small> : null}
                       </td>
                       <td>
                         {item.unit ? <><strong>Unit {item.unit.nomorUnit}</strong><br /><small>{item.unit.model}</small></> : <small>Belum ditautkan unit</small>}
