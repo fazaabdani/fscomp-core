@@ -12,7 +12,30 @@ export async function getPublicPcBuilderData() {
       prisma.pcComponent.findMany({
         where: { active: true, OR: [{ inventoryItemId: null }, { inventoryItem: { status: "STOCK" } }] },
         orderBy: [{ category: "asc" }, { sortOrder: "asc" }, { salePrice: "asc" }],
-        include: { inventoryItem: { select: { id: true, status: true, serialNumber: true } } }
+        select: {
+          id: true,
+          category: true,
+          name: true,
+          brand: true,
+          specification: true,
+          salePrice: true,
+          inventoryItemId: true,
+          socket: true,
+          supportedSockets: true,
+          memoryType: true,
+          formFactor: true,
+          supportedFormFactors: true,
+          storageInterface: true,
+          supportedStorageInterfaces: true,
+          powerDraw: true,
+          psuCapacity: true,
+          gpuLengthMm: true,
+          maxGpuLengthMm: true,
+          coolerHeightMm: true,
+          maxCoolerHeightMm: true,
+          radiatorSizeMm: true,
+          supportedRadiatorSizes: true
+        }
       }),
       prisma.pcBuildPreset.findMany({
         where: { active: true }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }],

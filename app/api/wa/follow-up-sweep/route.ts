@@ -28,7 +28,8 @@ export async function POST(request: Request) {
   const candidates = await prisma.waConversation.findMany({
     where: {
       status: { in: ["OPEN", "PENDING_ADMIN"] },
-      followupPassiveSentAt: null
+      followupPassiveSentAt: null,
+      customer: { customerAiPolicy: "AUTO_SAFE" }
     },
     include: {
       customer: true,
@@ -57,13 +58,17 @@ export async function POST(request: Request) {
     });
     if (!message) continue;
 
+    // Claim atomically right before sending so a concurrent sweep run can't send a duplicate
+    // follow-up for the same conversation (TOCTOU window between read and send).
+    const claimed = await prisma.waConversation.updateMany({
+      where: { id: conversation.id, followupPassiveSentAt: null },
+      data: { followupPassiveSentAt: new Date() }
+    });
+    if (claimed.count === 0) continue;
+
     const sent = await sendFonnteMessage({ target: conversation.phone, message });
 
     await prisma.$transaction([
-      prisma.waConversation.update({
-        where: { id: conversation.id },
-        data: { followupPassiveSentAt: new Date() }
-      }),
       prisma.waMessage.create({
         data: { conversationId: conversation.id, direction: "AI_OUTBOUND", body: message }
       }),

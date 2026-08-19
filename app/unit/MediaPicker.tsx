@@ -17,7 +17,7 @@ export function MediaPicker({
   initial = []
 }: {
   fieldName: string;
-  initial?: { id: string; url: string }[];
+  initial?: { id: string; url: string; thumbUrl: string }[];
 }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(initial);
@@ -39,7 +39,7 @@ export function MediaPicker({
     setSelected((current) =>
       current.some((item) => item.id === asset.id)
         ? current.filter((item) => item.id !== asset.id)
-        : [...current, { id: asset.id, url: asset.url }]
+        : [...current, { id: asset.id, url: asset.url, thumbUrl: asset.thumbUrl }]
     );
   }
 
@@ -59,7 +59,7 @@ export function MediaPicker({
       const response = await fetch("/api/media/upload", { method: "POST", body: formData });
       const json = await response.json();
       if (response.ok && json.assets) {
-        setSelected((current) => [...current, ...json.assets.map((asset: MediaAssetItem) => ({ id: asset.id, url: asset.url }))]);
+        setSelected((current) => [...current, ...json.assets.map((asset: MediaAssetItem) => ({ id: asset.id, url: asset.url, thumbUrl: asset.thumbUrl }))]);
         setData((current) => (current ? { ...current, assets: [...json.assets, ...current.assets] } : current));
       }
     } finally {
@@ -77,7 +77,7 @@ export function MediaPicker({
       <div className="mediaPickerPreview">
         {selected.map((photo) => (
           <div className="mediaThumb" key={photo.id}>
-            <img src={photo.url} alt="Foto terpilih" />
+            <img src={photo.thumbUrl} alt="Foto terpilih" />
             <button type="button" className="iconButton" onClick={() => removeSelected(photo.id)} aria-label="Hapus foto dari pilihan">
               <Trash2 size={14} />
             </button>

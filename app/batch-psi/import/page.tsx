@@ -20,7 +20,11 @@ export default function ImportBatchPage({ searchParams }: { searchParams?: { err
         </div>
       </div>
 
-      {searchParams?.error ? <div className="infoBox dangerInfo">Import gagal. Pastikan batch, tanggal, dan tabel sudah diisi.</div> : null}
+      {searchParams?.error === "nomor-unit-bentrok" ? (
+        <div className="infoBox dangerInfo">Import gagal, nomor unit yang dihasilkan bentrok dengan unit yang sudah ada. Coba import ulang.</div>
+      ) : searchParams?.error ? (
+        <div className="infoBox dangerInfo">Import gagal. Pastikan batch, tanggal, dan tabel sudah diisi.</div>
+      ) : null}
 
       <form className="panel formGrid" action={importSpreadsheetBatchAction}>
         <div className="panelHeader">

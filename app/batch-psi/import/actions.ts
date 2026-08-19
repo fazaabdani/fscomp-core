@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -118,49 +119,64 @@ export async function importSpreadsheetBatchAction(formData: FormData) {
     }
   });
 
-  const existingCount = await prisma.unit.count({ where: { batchId: batch.id } });
-  let running = existingCount + 1;
+  const existingUnits = await prisma.unit.findMany({ where: { batchId: batch.id }, select: { nomorUnit: true } });
+  const existingNumbers = existingUnits.map((existingUnit) => {
+    const match = existingUnit.nomorUnit.match(/-(\d+)$/);
+    return match ? Number(match[1]) : 0;
+  });
+  let running = (existingNumbers.length > 0 ? Math.max(...existingNumbers) : 0) + 1;
   const batchToken = cleanBatchToken(nomorBatch);
+  let importedCount = 0;
 
-  for (const row of rows) {
-    for (let item = 0; item < row.qty; item += 1) {
-      const nomorUnit = `${batchToken}-${String(running).padStart(3, "0")}`;
-      running += 1;
+  try {
+    await prisma.$transaction(async (tx) => {
+      for (const row of rows) {
+        for (let item = 0; item < row.qty; item += 1) {
+          const nomorUnit = `${batchToken}-${String(running).padStart(3, "0")}`;
+          running += 1;
 
-      const unit = await prisma.unit.create({
-        data: {
-          nomorUnit,
-          batchId: batch.id,
-          supplier,
-          model: `${row.merk} ${row.seri}`.trim(),
-          processor: row.processor,
-          ram: row.ram,
-          ssd: row.ssd,
-          lcdSize: row.layar,
-          lcdResolution: inferResolution(row.layar),
-          isTouchscreen: inferTouchscreen(row.layar),
-          hargaModal: 0,
-          hargaJualRekomendasi: 0,
-          statusObservasi: "RECHECK",
-          tanggalMasuk: new Date(tanggalMasuk),
-          tempo: new Date(tanggalTempo)
-        }
-      });
+          const unit = await tx.unit.create({
+            data: {
+              nomorUnit,
+              batchId: batch.id,
+              supplier,
+              model: `${row.merk} ${row.seri}`.trim(),
+              processor: row.processor,
+              ram: row.ram,
+              ssd: row.ssd,
+              lcdSize: row.layar,
+              lcdResolution: inferResolution(row.layar),
+              isTouchscreen: inferTouchscreen(row.layar),
+              hargaModal: 0,
+              hargaJualRekomendasi: 0,
+              statusObservasi: "RECHECK",
+              tanggalMasuk: new Date(tanggalMasuk),
+              tempo: new Date(tanggalTempo)
+            }
+          });
+          importedCount += 1;
 
-      if (row.problem) {
-        await prisma.aiLog.create({
-          data: {
-            unitId: unit.id,
-            rekomendasi: `Problem awal dari spreadsheet PSI: ${row.problem}`,
-            source: "spreadsheet-import"
+          if (row.problem) {
+            await tx.aiLog.create({
+              data: {
+                unitId: unit.id,
+                rekomendasi: `Problem awal dari spreadsheet PSI: ${row.problem}`,
+                source: "spreadsheet-import"
+              }
+            });
           }
-        });
+        }
       }
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      redirect("/batch-psi/import?error=nomor-unit-bentrok");
     }
+    throw error;
   }
 
   revalidatePath("/batch-psi");
   revalidatePath("/qc-harian");
   revalidatePath("/");
-  redirect(`/batch-psi?imported=${rows.length}`);
+  redirect(`/batch-psi?imported=${importedCount}`);
 }

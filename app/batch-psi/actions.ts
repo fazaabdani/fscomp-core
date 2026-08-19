@@ -55,6 +55,10 @@ export async function createBatchAction(formData: FormData) {
     redirect("/batch-psi/new?error=required");
   }
 
+  if (tanggalTempo < tanggalMasuk) {
+    redirect("/batch-psi/new?error=tempo-sebelum-masuk");
+  }
+
   await prisma.batchPSI.create({
     data: {
       nomorBatch,
@@ -89,6 +93,10 @@ export async function updateBatchAction(batchId: string, formData: FormData) {
     formData.has("jumlahLaptopDatang") ||
     formData.has("jumlahChargerDatang") ||
     chargerTypes.some((chargerType) => formData.has(chargerFieldName(chargerType)));
+
+  if (tanggalTempo < tanggalMasuk) {
+    redirect(`/batch-psi/${batchId}/edit?error=tempo-sebelum-masuk`);
+  }
 
   await prisma.batchPSI.update({
     where: { id: batchId },
@@ -171,7 +179,7 @@ export async function deleteBatchAction(batchId: string, formData: FormData) {
 }
 
 export async function deleteUnitFromBatchAction(unitId: string) {
-  requireRole(["admin", "teknisi"]);
+  requireRole(["admin"]);
   if (!entityId.safeParse(unitId).success) redirect("/batch-psi?error=invalid-input");
 
   const unit = await prisma.unit.findUnique({
@@ -219,7 +227,7 @@ export async function deleteUnitFromBatchAction(unitId: string) {
 }
 
 export async function markUnitReturnedAction(unitId: string) {
-  requireRole(["admin", "teknisi"]);
+  requireRole(["admin"]);
   if (!entityId.safeParse(unitId).success) redirect("/batch-psi?error=invalid-input");
 
   const unit = await prisma.unit.findUnique({

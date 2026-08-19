@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { chargerTypes } from "./charger-options";
-import { mediaAssetUrl } from "./media-data";
+import { mediaAssetUrl, mediaThumbUrl } from "./media-data";
 import { prisma } from "./prisma";
 import { isQcFresh } from "./qc-due";
 import { displayUnitNumber } from "./unit-number";
@@ -143,7 +143,10 @@ export async function getUnitForDetail(id: string) {
 
     if (!unit) return null;
 
-    const gallery = unit.unitPhotos.map((photo) => mediaAssetUrl(photo.asset.fileName));
+    const gallery = unit.unitPhotos.map((photo) => ({
+      url: mediaAssetUrl(photo.asset.fileName),
+      thumbUrl: mediaThumbUrl(photo.asset.fileName)
+    }));
 
     return {
       id: unit.id,
@@ -162,7 +165,7 @@ export async function getUnitForDetail(id: string) {
       hargaModal: unit.hargaModal,
       hargaJualRekomendasi: unit.hargaJualRekomendasi,
       stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
-      catalogImageUrl: gallery[0] ?? unit.catalogImageUrl ?? "",
+      catalogImageUrl: gallery[0]?.url ?? unit.catalogImageUrl ?? "",
       gallery,
       batteryHealth: unit.batteryHealth ?? 0,
       ssdHealth: unit.ssdHealth ?? 0,

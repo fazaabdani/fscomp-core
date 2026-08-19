@@ -94,7 +94,7 @@ export default async function EditUnitPage({ params, searchParams }: { params: {
           <small>Opsional. Bisa pakai link, atau pilih dari galeri di bawah — boleh dua-duanya.</small>
         </label>
         <div className="formFieldGroup">Galeri foto
-          <MediaPicker fieldName="unitPhotoAssetIds" initial={gallery.map((photo) => ({ id: photo.assetId, url: photo.url }))} />
+          <MediaPicker fieldName="unitPhotoAssetIds" initial={gallery.map((photo) => ({ id: photo.assetId, url: photo.url, thumbUrl: photo.thumbUrl }))} />
         </div>
         <label>Catatan admin unit
           <textarea

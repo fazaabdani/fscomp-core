@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
+import { csvCell } from "@/lib/csv";
+import { jakartaDateKey } from "@/lib/inventory";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
-
-function csvCell(value: unknown) {
-  const text = String(value ?? "");
-  return `"${text.replaceAll('"', '""')}"`;
-}
 
 function saleProfitSplit(location: string, grossProfit: number) {
   if (location !== "KAJEN") {
@@ -61,7 +58,7 @@ export async function GET(request: Request) {
   const rows = sales.map((sale) => {
     const split = saleProfitSplit(sale.location, sale.grossProfit);
     return [
-      sale.soldAt.toISOString().slice(0, 10),
+      jakartaDateKey(sale.soldAt),
       sale.invoiceNumber,
       sale.location,
       sale.unit?.nomorUnit ?? "-",

@@ -42,7 +42,7 @@ function statusValue(value: string): InventoryItemStatus {
 }
 
 export async function createInventoryItemAction(formData: FormData) {
-  const user = requireRole(["admin", "teknisi", "sales", "magang"]);
+  const user = requireRole(["admin", "teknisi", "sales"]);
   if (!inventoryFormSchema.safeParse(formValues(formData)).success) redirect("/inventory?error=invalid-input");
 
   const category = text(formData, "category") || "LAINNYA";

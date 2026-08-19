@@ -16,11 +16,16 @@ export async function POST(request: Request) {
   }
 
   const assets = [];
+  let failed = 0;
   for (const file of files) {
     if (!file.type.startsWith("image/")) continue;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    assets.push(await createMediaAsset(buffer, folderId, file.name || "foto.webp"));
+    try {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      assets.push(await createMediaAsset(buffer, folderId, file.name || "foto.webp"));
+    } catch {
+      failed += 1;
+    }
   }
 
-  return NextResponse.json({ assets });
+  return NextResponse.json({ assets, failed });
 }

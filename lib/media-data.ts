@@ -81,6 +81,7 @@ export async function getUnitPhotoGallery(unitId: string) {
       id: photo.id,
       assetId: photo.assetId,
       url: mediaAssetUrl(photo.asset.fileName),
+      thumbUrl: mediaThumbUrl(photo.asset.fileName),
       alt: photo.asset.originalName
     }));
   } catch {

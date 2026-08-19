@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronRight, CircleAlert, MessageCircle, RotateCcw, Trash2, X } from "lucide-react";
 import { formatRupiah } from "@/lib/api";
 import { candidateCompatibility, getPcCompatibilityIssues, pcPowerLoad, type PcCompatibilityComponent } from "@/lib/pc-compatibility";
@@ -27,12 +27,13 @@ export function PcBuilder({components,presets,draftCode}:{components:Component[]
   const badIssues=issues.filter(issue=>issue.level==="bad"), missing=requiredCategories.filter(category=>!chosen(category));
   const progress=Math.round(selectedComponents.length/categories.length*100);
 
+  useEffect(()=>{if(!pickerCategory)return;function onKeydown(event:KeyboardEvent){if(event.key==="Escape")setPickerCategory(null);}window.addEventListener("keydown",onKeydown);return()=>window.removeEventListener("keydown",onKeydown);},[pickerCategory]);
   function applyPreset(preset:Preset){const next:Record<string,string>={};preset.items.forEach(({componentId})=>{const item=components.find(component=>component.id===componentId);if(item)next[item.category]=item.id;});setSelected(next);setPresetName(preset.name);setMode("custom");}
   function pick(item:Component){if(candidateCompatibility(selectedComponents,item).some(issue=>issue.level==="bad"))return;setSelected(current=>({...current,[item.category]:item.id}));setPickerCategory(null);}
   function remove(category:string){setSelected(current=>{const next={...current};delete next[category];return next;});setPresetName("");}
   const pickerItems=useMemo(()=>{if(!pickerCategory)return[];let items=components.filter(item=>item.category===pickerCategory).map(item=>({item,issues:candidateCompatibility(selectedComponents,item)}));if(onlyCompatible)items=items.filter(entry=>!entry.issues.some(issue=>issue.level==="bad"));if(sort==="asc")items.sort((a,b)=>a.item.salePrice-b.item.salePrice);if(sort==="desc")items.sort((a,b)=>b.item.salePrice-a.item.salePrice);return items;},[components,pickerCategory,selectedComponents,onlyCompatible,sort]);
   const checks=[
-    {label:"Soket CPU & Motherboard",keys:["socket"],idle:"Pilih CPU & motherboard"},
+    {label:"Soket CPU & Motherboard",keys:["socket","cooler-socket"],idle:"Pilih CPU & motherboard"},
     {label:"Tipe memori",keys:["memory","cpu-memory"],idle:"Pilih RAM & motherboard"},
     {label:"Casing & dimensi",keys:["case-form","gpu-length","cooler-height","radiator"],idle:"Pilih casing dan komponen"},
     {label:"Kapasitas daya PSU",keys:["psu"],idle:"Pilih PSU"}

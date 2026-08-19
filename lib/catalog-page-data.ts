@@ -1,43 +1,58 @@
 import { resolvePrimaryImageUrl } from "./media-data";
 import { prisma } from "./prisma";
+import { isQcFresh } from "./qc-due";
 import { displayUnitNumber } from "./unit-number";
+
+const CATALOG_UNIT_INCLUDE = {
+  qcHarian: {
+    orderBy: { tanggal: "desc" as const },
+    take: 1,
+    select: {
+      tanggal: true,
+      masihLolos: true,
+      windowsVersion: true,
+      ssdHealth: true,
+      batteryHealth: true,
+      screenCondition: true,
+      officeStatus: true
+    }
+  },
+  unitPhotos: { orderBy: { order: "asc" as const }, take: 1, include: { asset: { select: { fileName: true } } } }
+};
 
 export async function getCatalogPageData() {
   try {
-    const candidates = await prisma.unit.findMany({
-      where: {
-        soldAt: null,
-        statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }
-      },
-      include: {
-        qcHarian: {
-          orderBy: { tanggal: "desc" },
-          take: 1,
-          select: {
-            tanggal: true,
-            masihLolos: true,
-            windowsVersion: true,
-            ssdHealth: true,
-            batteryHealth: true,
-            screenCondition: true,
-            officeStatus: true
-          }
+    const [wiradesaCandidates, kajenCandidates] = await Promise.all([
+      prisma.unit.findMany({
+        where: {
+          soldAt: null,
+          statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] },
+          stockLocation: "WIRADESA"
         },
-        unitPhotos: { orderBy: { order: "asc" }, take: 1, include: { asset: { select: { fileName: true } } } }
-      },
-      orderBy: [
-        { stockLocation: "desc" },
-        { createdAt: "desc" }
-      ],
-      take: 120
-    });
+        include: CATALOG_UNIT_INCLUDE,
+        orderBy: { createdAt: "desc" },
+        take: 120
+      }),
+      prisma.unit.findMany({
+        where: {
+          soldAt: null,
+          statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] },
+          stockLocation: "KAJEN"
+        },
+        include: CATALOG_UNIT_INCLUDE,
+        orderBy: { createdAt: "desc" },
+        take: 120
+      })
+    ]);
+    const candidates = [...wiradesaCandidates, ...kajenCandidates];
 
     const units = candidates
       .filter((unit) => {
         const latestDaily = unit.qcHarian[0];
         return Boolean(
           latestDaily &&
-          latestDaily.masihLolos !== "TIDAK_LOLOS"
+          latestDaily.masihLolos !== "TIDAK_LOLOS" &&
+          isQcFresh(latestDaily.tanggal)
         );
       })
       .map((unit) => {
@@ -109,7 +124,7 @@ export async function getRelatedCatalogUnits(unitId: string) {
         qcHarian: {
           orderBy: { tanggal: "desc" },
           take: 1,
-          select: { masihLolos: true }
+          select: { masihLolos: true, tanggal: true }
         },
         unitPhotos: { orderBy: { order: "asc" }, take: 1, include: { asset: { select: { fileName: true } } } }
       },
@@ -120,7 +135,7 @@ export async function getRelatedCatalogUnits(unitId: string) {
     const currentBrand = current.model.trim().split(/\s+/)[0]?.toUpperCase() ?? "";
 
     return candidates
-      .filter((unit) => Boolean(unit.qcHarian[0] && unit.qcHarian[0].masihLolos !== "TIDAK_LOLOS"))
+      .filter((unit) => Boolean(unit.qcHarian[0] && unit.qcHarian[0].masihLolos !== "TIDAK_LOLOS" && isQcFresh(unit.qcHarian[0].tanggal)))
       .map((unit) => {
         const brand = unit.model.trim().split(/\s+/)[0]?.toUpperCase() ?? "";
         const score =

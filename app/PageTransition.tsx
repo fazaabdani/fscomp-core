@@ -17,12 +17,10 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
             @keyframes pageEnter {
               from {
                 opacity: 0;
-                transform: translateY(8px);
               }
 
               to {
                 opacity: 1;
-                transform: translateY(0);
               }
             }
 

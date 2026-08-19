@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
@@ -65,19 +66,26 @@ export async function checkInAction(formData: FormData) {
     redirect("/attendance?error=already-in");
   }
 
-  await prisma.attendance.create({
-    data: {
-      userId: dbUser.id,
-      tanggal: now,
-      checkInAt: now,
-      status: "HADIR",
-      note: requiredString(formData, "note") || null,
-      photoDataUrl,
-      latitude,
-      longitude,
-      accuracy
+  try {
+    await prisma.attendance.create({
+      data: {
+        userId: dbUser.id,
+        tanggal: now,
+        checkInAt: now,
+        status: "HADIR",
+        note: requiredString(formData, "note") || null,
+        photoDataUrl,
+        latitude,
+        longitude,
+        accuracy
+      }
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      redirect("/attendance?error=already-in");
     }
-  });
+    throw error;
+  }
 
   redirect("/attendance?success=check-in");
 }

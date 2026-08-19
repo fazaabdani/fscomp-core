@@ -13,6 +13,15 @@ export function formatDateWib(date: Date) {
   }).format(date);
 }
 
+export function jakartaDateKey(date: Date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(date);
+}
+
 export function addWarrantyDuration(date: Date, amount: number, unit: WarrantyDurationUnit) {
   const warrantyUntil = new Date(date);
   const safeAmount = Math.max(0, amount);
@@ -64,10 +73,8 @@ export function warrantyInfo(input: {
   }
 
   const until = addWarrantyDuration(input.purchaseDate, input.warrantyDuration, input.warrantyDurationUnit);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const compareUntil = new Date(until);
-  compareUntil.setHours(0, 0, 0, 0);
+  const today = new Date(`${jakartaDateKey(new Date())}T00:00:00+07:00`);
+  const compareUntil = new Date(`${jakartaDateKey(until)}T00:00:00+07:00`);
   const daysLeft = Math.ceil((compareUntil.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
 
   if (daysLeft < 0) {

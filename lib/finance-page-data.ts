@@ -1,3 +1,4 @@
+import { jakartaDateKey } from "./inventory";
 import { prisma } from "./prisma";
 import { displayUnitNumber } from "./unit-number";
 
@@ -57,7 +58,7 @@ export async function getFinancePageData(filters: FinanceFilters = {}) {
         return {
           id: sale.id,
           invoiceNumber: sale.invoiceNumber,
-          soldAt: sale.soldAt.toISOString().slice(0, 10),
+          soldAt: jakartaDateKey(sale.soldAt),
           location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
           unitNomor: sale.unit ? displayUnitNumber(sale.unit.nomorUnit) : "-",
           model: sale.unit?.model ?? "Lisensi / software",

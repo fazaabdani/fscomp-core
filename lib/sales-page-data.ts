@@ -1,5 +1,7 @@
 import type { Prisma } from "@prisma/client";
+import { jakartaDateKey } from "./inventory";
 import { prisma } from "./prisma";
+import { isQcFresh } from "./qc-due";
 import { displayUnitNumber } from "./unit-number";
 
 function saleProfitSplit(location: string, grossProfit: number) {
@@ -28,7 +30,7 @@ export async function getSalesPageData() {
         qcHarian: {
           orderBy: { tanggal: "desc" },
           take: 1,
-          select: { masihLolos: true }
+          select: { masihLolos: true, tanggal: true }
         }
       },
       orderBy: { createdAt: "desc" },
@@ -37,7 +39,7 @@ export async function getSalesPageData() {
 
     const readyUnits = readyCandidates.filter((unit) => {
       const latestDaily = unit.qcHarian[0];
-      return Boolean(latestDaily && latestDaily.masihLolos !== "TIDAK_LOLOS");
+      return Boolean(latestDaily && latestDaily.masihLolos !== "TIDAK_LOLOS" && isQcFresh(latestDaily.tanggal));
     });
 
     let sales: Array<Prisma.SaleGetPayload<{ include: { unit: true; items: true } }>> = [];
@@ -86,8 +88,8 @@ export async function getSalesPageData() {
         paymentMethod: sale.paymentMethod,
         buyerName: sale.buyerName ?? "-",
         itemCount: sale.items.reduce((sum, item) => sum + item.qty, 0),
-        soldAt: sale.soldAt.toISOString().slice(0, 10),
-        voidedAt: sale.voidedAt?.toISOString().slice(0, 10) ?? "",
+        soldAt: jakartaDateKey(sale.soldAt),
+        voidedAt: sale.voidedAt ? jakartaDateKey(sale.voidedAt) : "",
         voidReason: sale.voidReason ?? "",
         notes: sale.notes ?? ""
       })),

@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { isQcFresh } from "./qc-due";
 import { displayUnitNumber } from "./unit-number";
 import { formatWaLocation } from "./wa-ai-responses";
 
@@ -34,26 +35,31 @@ export async function getSafeWaCatalogUnits(input: {
     const limit = Math.min(Math.max(input.limit ?? 8, 1), 20);
     const query = normalizeSearch(input.query ?? "");
 
-    const candidates = await prisma.unit.findMany({
-      where: {
-        soldAt: null,
-        statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }
-      },
-      include: {
-        qcHarian: {
-          orderBy: { tanggal: "desc" },
-          take: 1,
-          select: { masihLolos: true }
-        }
-      },
-      orderBy: [{ stockLocation: "desc" }, { createdAt: "desc" }],
-      take: 120
-    });
+    const qcHarianSelect = {
+      orderBy: { tanggal: "desc" as const },
+      take: 1,
+      select: { masihLolos: true, tanggal: true }
+    };
+    const [wiradesaCandidates, kajenCandidates] = await Promise.all([
+      prisma.unit.findMany({
+        where: { soldAt: null, statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }, stockLocation: "WIRADESA" },
+        include: { qcHarian: qcHarianSelect },
+        orderBy: { createdAt: "desc" },
+        take: 120
+      }),
+      prisma.unit.findMany({
+        where: { soldAt: null, statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }, stockLocation: "KAJEN" },
+        include: { qcHarian: qcHarianSelect },
+        orderBy: { createdAt: "desc" },
+        take: 120
+      })
+    ]);
+    const candidates = [...wiradesaCandidates, ...kajenCandidates];
 
     const units = candidates
       .filter((unit) => {
         const latestDaily = unit.qcHarian[0];
-        if (!latestDaily || latestDaily.masihLolos === "TIDAK_LOLOS") return false;
+        if (!latestDaily || latestDaily.masihLolos === "TIDAK_LOLOS" || !isQcFresh(latestDaily.tanggal)) return false;
         if (!query) return true;
         const haystack = [
           unit.nomorUnit,

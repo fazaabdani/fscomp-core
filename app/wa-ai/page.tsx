@@ -235,6 +235,11 @@ export default async function WaAiPage({ searchParams }: { searchParams?: { erro
             <div className="buttonRow noMargin">
               <button className="secondaryButton compactButton" type="submit">Simpan nomor aktif</button>
             </div>
+            {!process.env.WA_CHANNEL_STORE_DEVICE || !process.env.WA_CHANNEL_PERSONAL_DEVICE ? (
+              <div className="infoBox dangerInfo">
+                Peringatan: <code>WA_CHANNEL_STORE_DEVICE</code>/<code>WA_CHANNEL_PERSONAL_DEVICE</code> belum diisi di server. Selama belum diisi, toggle nomor aktif di atas <strong>tidak benar-benar memblokir</strong> pesan masuk lewat webhook Fonnte langsung (semua nomor tetap diproses).
+              </div>
+            ) : null}
           </form>
         </div>
 

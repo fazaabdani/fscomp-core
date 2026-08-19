@@ -50,6 +50,7 @@ function buildResolutionItems({
   officeStatus,
   trackpoint,
   karetBawah,
+  bluetooth,
   paintCondition
 }: {
   processor: string;
@@ -61,6 +62,7 @@ function buildResolutionItems({
   officeStatus: string;
   trackpoint: boolean;
   karetBawah: boolean;
+  bluetooth: boolean;
   paintCondition: string;
 }) {
   return [
@@ -72,6 +74,7 @@ function buildResolutionItems({
     officeStatus === "Belum install" ? `Office ${officeStatus}` : "",
     !trackpoint ? "Trackpoint perlu dicek" : "",
     !karetBawah ? "Karet bawah tidak lengkap" : "",
+    !bluetooth ? "Bluetooth perlu dicek" : "",
     paintCondition === "Repaint parah" || paintCondition === "Kelupas" ? `Kondisi cat ${paintCondition}` : ""
   ].filter(Boolean);
 }
@@ -138,6 +141,7 @@ export async function createDailyQcAction(formData: FormData) {
     officeStatus,
     trackpoint: checked(formData, "trackpoint"),
     karetBawah: checked(formData, "karetBawah"),
+    bluetooth: checked(formData, "bluetooth"),
     paintCondition
   });
   const dailyChecks = [

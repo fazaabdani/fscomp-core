@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAiAssistantRateLimited } from "@/lib/ai-assistant-rate-limit";
 import { assistantToolSchemas, executeAssistantTool } from "@/lib/ai-assistant-tools";
 import { getCurrentUser } from "@/lib/session";
 
@@ -23,6 +24,10 @@ export async function POST(request: Request) {
   const user = getCurrentUser();
   if (!user || !ALLOWED_ROLES.includes(user.role as (typeof ALLOWED_ROLES)[number])) {
     return NextResponse.json({ error: "Tidak punya akses ke asisten ini." }, { status: 403 });
+  }
+
+  if (isAiAssistantRateLimited(user.username)) {
+    return NextResponse.json({ error: "Terlalu banyak pertanyaan dalam waktu singkat, coba lagi beberapa menit lagi." }, { status: 429 });
   }
 
   const apiKey = process.env.OPENAI_API_KEY;

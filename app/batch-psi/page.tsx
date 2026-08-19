@@ -23,7 +23,7 @@ function includesText(value: unknown, q: string) {
   return String(value ?? "").toLowerCase().includes(q);
 }
 
-export default async function BatchPsiPage({ searchParams }: { searchParams?: { error?: string; deleted?: string; returned?: string; sort?: string; q?: string; status?: string } }) {
+export default async function BatchPsiPage({ searchParams }: { searchParams?: { error?: string; deleted?: string; returned?: string; imported?: string; sort?: string; q?: string; status?: string } }) {
   const currentUser = getCurrentUser();
   const canManageBatch = currentUser ? canEditBatch(currentUser) : false;
   const canManageUnit = currentUser ? canEditUnit(currentUser) : false;
@@ -38,7 +38,9 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
       ? "Batch berhasil dihapus."
       : searchParams?.returned === "unit"
         ? "Unit ditandai retur distributor dan tidak dihitung sebagai unit dibayar."
-        : searchParams?.error === "unit-sold"
+        : searchParams?.imported
+          ? `${searchParams.imported} unit berhasil diimport dari spreadsheet.`
+          : searchParams?.error === "unit-sold"
           ? "Unit sudah terjual, jadi tidak bisa dihapus dari batch."
           : searchParams?.error === "unit-sale-history"
             ? "Unit punya riwayat transaksi/nota dan tidak bisa dihapus."
@@ -73,7 +75,7 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
         )}
       </div>
 
-      <FlashNotice message={flashMessage} tone={searchParams?.error ? "error" : "success"} queryKeys={["error", "deleted", "returned"]} />
+      <FlashNotice message={flashMessage} tone={searchParams?.error ? "error" : "success"} queryKeys={["error", "deleted", "returned", "imported"]} />
 
       <form className="panel formGrid" action="/batch-psi">
         <div className="panelHeader">
@@ -202,7 +204,7 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                   <a className="secondaryButton" href={`/api/batch-psi/${batch.id}/export`}>Export Spek CSV</a>
                   {canDeleteBatch && currentUser ? (
                     <form action={deleteBatchAction.bind(null, batch.id)}>
-                      <DeleteBatchButton batchLabel={batch.nomorBatch} currentUsername={currentUser.username} unitCount={batchUnits.length} />
+                      <DeleteBatchButton batchLabel={batch.nomorBatch} currentUsername={currentUser.username} unitCount={batch.units.length} />
                     </form>
                   ) : null}
                 </div>

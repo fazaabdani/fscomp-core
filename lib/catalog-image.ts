@@ -28,6 +28,30 @@ export function catalogImageCandidates(url?: string | null, requestedWidth = 120
   ];
 }
 
+const PRIVATE_HOSTNAME_PATTERNS = [
+  /^localhost$/i,
+  /^0\.0\.0\.0$/,
+  /^127\./,
+  /^10\./,
+  /^169\.254\./,
+  /^192\.168\./,
+  /^172\.(1[6-9]|2\d|3[0-1])\./,
+  /^\[?::1\]?$/,
+  /^\[?fc[0-9a-f]{2}:/i,
+  /^\[?fe80:/i
+];
+
+export function isSafeExternalImageUrl(url: string) {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== "https:") return false;
+  return !PRIVATE_HOSTNAME_PATTERNS.some((pattern) => pattern.test(parsed.hostname));
+}
+
 export function brandOf(model: string) {
   const normalized = model.trim().toUpperCase();
   if (normalized.startsWith("LENOVO")) return "Lenovo";

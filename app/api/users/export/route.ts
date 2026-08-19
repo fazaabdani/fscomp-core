@@ -1,11 +1,7 @@
+import { csvCell } from "@/lib/csv";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { roleFromDb } from "@/lib/user-store";
-
-function csvCell(value: string | null | undefined) {
-  const text = value ?? "";
-  return `"${text.replaceAll('"', '""')}"`;
-}
 
 export async function GET() {
   const currentUser = getCurrentUser();

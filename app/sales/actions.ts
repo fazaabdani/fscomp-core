@@ -1,12 +1,13 @@
 "use server";
 
-import type { LicenseDurationType, LicenseType, SaleLocation } from "@prisma/client";
+import { Prisma, type LicenseDurationType, type LicenseType, type SaleLocation } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { entityId, formValues, nonNegativeInteger, optionalText, requiredText, z } from "@/lib/form-validation";
 import { inferLicenseType, inferLicenseVersion, licenseDisplayName } from "@/lib/licenses";
+import { isQcFresh } from "@/lib/qc-due";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -20,7 +21,8 @@ function numberValue(formData: FormData, key: string) {
 function numberArray(formData: FormData, key: string) {
   return formData.getAll(key).map((value) => {
     const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : 0;
+    if (!Number.isFinite(parsed)) return 0;
+    return Math.min(Math.max(parsed, 0), 1_000_000_000);
   });
 }
 
@@ -239,7 +241,7 @@ export async function createSaleAction(formData: FormData) {
       qcHarian: {
         orderBy: { tanggal: "desc" },
         take: 1,
-        select: { masihLolos: true, windowsVersion: true }
+        select: { masihLolos: true, windowsVersion: true, tanggal: true }
       }
     }
   }) : null;
@@ -266,6 +268,10 @@ export async function createSaleAction(formData: FormData) {
 
   if (latestDailyQc && latestDailyQc.masihLolos === "TIDAK_LOLOS") {
     redirect(`${errorPath}?error=qc-harian-belum-lolos`);
+  }
+
+  if (latestDailyQc && !isQcFresh(latestDailyQc.tanggal)) {
+    redirect(`${errorPath}?error=qc-harian-kadaluarsa`);
   }
 
   const items = [
@@ -305,7 +311,7 @@ export async function createSaleAction(formData: FormData) {
           invoiceNumber: invoice,
           location,
           soldPrice: subtotal,
-          costPrice: totalCost,
+          costPrice: totalCost + bundleHandlingCost,
           subtotal,
           dpAmount,
           grossProfit,
@@ -378,7 +384,14 @@ export async function createSaleAction(formData: FormData) {
         });
       }
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002" && unit) {
+      const activeSale = await prisma.sale.findFirst({
+        where: { unitId: unit.id, voidedAt: null },
+        select: { id: true }
+      });
+      if (activeSale) redirect(`/sales/${activeSale.id}/receipt?duplicate=1`);
+    }
     redirect(`${errorPath}?error=tabel-penjualan-belum-migrasi`);
   }
 
@@ -465,19 +478,26 @@ export async function restoreSaleAction(saleId: string) {
     redirect("/sales?error=unit-sudah-terjual-lagi");
   }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.sale.update({
-      where: { id: saleId },
-      data: {
-        voidedAt: null,
-        voidReason: null
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.sale.update({
+        where: { id: saleId },
+        data: {
+          voidedAt: null,
+          voidReason: null
+        }
+      });
+
+      if (sale.unitId) {
+        await tx.unit.update({ where: { id: sale.unitId }, data: { soldAt: sale.soldAt } });
       }
     });
-
-    if (sale.unitId) {
-      await tx.unit.update({ where: { id: sale.unitId }, data: { soldAt: sale.soldAt } });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      redirect("/sales?error=unit-sudah-terjual-lagi");
     }
-  });
+    throw error;
+  }
 
   revalidatePath("/sales");
   revalidatePath("/");

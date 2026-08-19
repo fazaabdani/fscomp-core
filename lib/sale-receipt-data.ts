@@ -1,3 +1,4 @@
+import { jakartaDateKey } from "./inventory";
 import { prisma } from "./prisma";
 
 const storeByLocation = {
@@ -32,7 +33,7 @@ export async function getSaleReceipt(id: string) {
     return {
       id: sale.id,
       invoiceNumber: sale.invoiceNumber,
-      soldAt: sale.soldAt.toISOString().slice(0, 10),
+      soldAt: jakartaDateKey(sale.soldAt),
       location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
       store: storeByLocation[sale.location],
       paymentMethod: sale.paymentMethod,
@@ -46,7 +47,7 @@ export async function getSaleReceipt(id: string) {
       remainingPayment: Math.max(0, sale.subtotal - sale.dpAmount),
       costPrice: sale.costPrice,
       grossProfit: sale.grossProfit,
-      voidedAt: sale.voidedAt?.toISOString().slice(0, 10) ?? "",
+      voidedAt: sale.voidedAt ? jakartaDateKey(sale.voidedAt) : "",
       voidReason: sale.voidReason ?? "",
       notes: sale.notes ?? "-",
       unit: sale.unit ? {

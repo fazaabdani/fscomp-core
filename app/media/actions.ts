@@ -4,7 +4,7 @@ import { unlink } from "node:fs/promises";
 import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { brandOf, catalogImageCandidates } from "@/lib/catalog-image";
+import { brandOf, catalogImageCandidates, isSafeExternalImageUrl } from "@/lib/catalog-image";
 import { entityId, requiredText } from "@/lib/form-validation";
 import { MEDIA_THUMB_DIR, MEDIA_UPLOAD_DIR } from "@/lib/media-data";
 import { createMediaAsset, findOrCreateFolder } from "@/lib/media-upload";
@@ -57,16 +57,29 @@ export async function deleteFolderAction(folderId: string) {
 
   const folder = await prisma.mediaFolder.findUnique({
     where: { id: folderId },
-    select: { parentId: true, _count: { select: { children: true, assets: true } } }
+    select: { parentId: true }
   });
 
   if (!folder) mediaRedirect(null, { error: "folder-not-found" });
 
-  if (folder._count.children > 0 || folder._count.assets > 0) {
-    mediaRedirect(folder.parentId, { error: "folder-not-empty" });
+  try {
+    await prisma.$transaction(async (tx) => {
+      const counts = await tx.mediaFolder.findUnique({
+        where: { id: folderId },
+        select: { _count: { select: { children: true, assets: true } } }
+      });
+      if (!counts || counts._count.children > 0 || counts._count.assets > 0) {
+        throw new Error("folder-not-empty");
+      }
+      await tx.mediaFolder.delete({ where: { id: folderId } });
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "folder-not-empty") {
+      mediaRedirect(folder.parentId, { error: "folder-not-empty" });
+    }
+    throw error;
   }
 
-  await prisma.mediaFolder.delete({ where: { id: folderId } });
   revalidatePath("/media");
   mediaRedirect(folder.parentId, { success: "folder-deleted" });
 }
@@ -81,15 +94,20 @@ export async function uploadMediaAction(formData: FormData) {
   }
 
   let uploaded = 0;
+  let failed = 0;
   for (const file of files) {
     if (!file.type.startsWith("image/")) continue;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await createMediaAsset(buffer, folderId, file.name || "foto.webp");
-    uploaded += 1;
+    try {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      await createMediaAsset(buffer, folderId, file.name || "foto.webp");
+      uploaded += 1;
+    } catch {
+      failed += 1;
+    }
   }
 
   revalidatePath("/media");
-  mediaRedirect(folderId, { success: "uploaded", count: String(uploaded) });
+  mediaRedirect(folderId, { success: "uploaded", count: String(uploaded), ...(failed > 0 ? { failed: String(failed) } : {}) });
 }
 
 export async function deleteAssetAction(assetId: string, formData: FormData) {
@@ -134,6 +152,7 @@ export async function migrateGoogleDrivePhotosAction() {
       let buffer: Buffer | null = null;
 
       for (const candidateUrl of candidates) {
+        if (!isSafeExternalImageUrl(candidateUrl)) continue;
         try {
           const response = await fetch(candidateUrl, { signal: AbortSignal.timeout(15000) });
           const contentType = response.headers.get("content-type") ?? "";
@@ -154,7 +173,17 @@ export async function migrateGoogleDrivePhotosAction() {
       const brandFolder = await findOrCreateFolder(brandOf(unit.model), null);
       const modelFolder = await findOrCreateFolder(unit.model, brandFolder.id);
       const asset = await createMediaAsset(buffer, modelFolder.id, `${unit.nomorUnit}.webp`);
-      await prisma.unitPhoto.create({ data: { unitId: unit.id, assetId: asset.id, order: 0 } });
+      try {
+        await prisma.unitPhoto.create({ data: { unitId: unit.id, assetId: asset.id, order: 0 } });
+      } catch (linkError) {
+        const orphanFileName = `${asset.id}.webp`;
+        await prisma.mediaAsset.delete({ where: { id: asset.id } }).catch(() => {});
+        await Promise.all([
+          unlink(path.join(process.cwd(), MEDIA_UPLOAD_DIR, orphanFileName)).catch(() => {}),
+          unlink(path.join(process.cwd(), MEDIA_THUMB_DIR, orphanFileName)).catch(() => {})
+        ]);
+        throw linkError;
+      }
 
       migrated += 1;
     } catch {

@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSessionToken, getSessionCookieName } from "@/lib/session";
 import { SESSION_DURATION_SECONDS } from "@/lib/session-token";
@@ -8,6 +8,7 @@ import { getLoginUser } from "@/lib/user-store";
 import { formValues, requiredText, z } from "@/lib/form-validation";
 import type { User } from "@/lib/auth";
 import { clearFailedLogins, isLoginRateLimited, recordFailedLogin } from "@/lib/login-rate-limit";
+import { clientIp } from "@/lib/request-ip";
 
 export async function loginAction(formData: FormData) {
   if (!z.object({ username: requiredText(80), password: requiredText(200) }).safeParse(formValues(formData)).success) {
@@ -15,8 +16,7 @@ export async function loginAction(formData: FormData) {
   }
   const username = String(formData.get("username") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const forwardedFor = headers().get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  const rateLimitKey = `${forwardedFor}:${username}`;
+  const rateLimitKey = `${clientIp()}:${username}`;
   if (isLoginRateLimited(rateLimitKey)) redirect("/login?error=rate-limit");
   let user: User | null = null;
 

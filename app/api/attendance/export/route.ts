@@ -1,10 +1,6 @@
+import { csvCell } from "@/lib/csv";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
-
-function csvCell(value: string | number | null | undefined) {
-  const text = value == null ? "" : String(value);
-  return `"${text.replaceAll('"', '""')}"`;
-}
 
 function formatDateTimeWib(date?: Date | null) {
   if (!date) return "";

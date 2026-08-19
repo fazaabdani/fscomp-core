@@ -3,6 +3,8 @@
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+type GalleryPhoto = { url: string; thumbUrl: string };
+
 export function UnitGallery({
   photos,
   alt,
@@ -10,7 +12,7 @@ export function UnitGallery({
   placeholderClassName = "catalogImagePlaceholder",
   priority = false
 }: {
-  photos: string[];
+  photos: GalleryPhoto[];
   alt: string;
   className: string;
   placeholderClassName?: string;
@@ -86,21 +88,21 @@ export function UnitGallery({
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <img className={className} src={photos[activeIndex]} alt={alt} loading={priority ? "eager" : "lazy"} decoding="async" />
+        <img className={className} src={photos[activeIndex].url} alt={alt} loading={priority ? "eager" : "lazy"} decoding="async" />
         <span><Maximize2 size={17} /> Perbesar foto</span>
       </button>
 
       {photos.length > 1 ? (
         <div className="mediaGrid">
-          {photos.map((url, index) => (
+          {photos.map((photo, index) => (
             <button
               type="button"
               className={`mediaThumb mediaThumbSelectable ${index === activeIndex ? "isSelected" : ""}`}
               onClick={() => goTo(index)}
-              key={url}
+              key={photo.url}
               aria-label={`Lihat foto ${index + 1}`}
             >
-              <img src={url} alt={`${alt} ${index + 1}`} loading="lazy" />
+              <img src={photo.thumbUrl} alt={`${alt} ${index + 1}`} loading="lazy" />
             </button>
           ))}
         </div>
@@ -120,7 +122,7 @@ export function UnitGallery({
             </>
           ) : null}
           <img
-            src={photos[activeIndex]}
+            src={photos[activeIndex].url}
             alt={alt}
             onClick={(event) => event.stopPropagation()}
             onTouchStart={handleTouchStart}
