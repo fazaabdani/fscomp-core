@@ -2651,6 +2651,448 @@ textarea {
   margin: 5mm;
 }
 
+/* ===== Nota (receipt document) ===== */
+.notaPageWrap {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.notaSheet {
+  --nota-cream: #fbf9f6;
+  --nota-sidebar: #f2f4f8;
+  --nota-navy: #0a1831;
+  --nota-blue: #1646b8;
+  --nota-gold: #b8974f;
+  --nota-muted: #64748b;
+  --nota-line: rgba(10, 24, 49, 0.12);
+  position: relative;
+  display: grid;
+  grid-template-columns: 250px 6px 1fr;
+  overflow: hidden;
+  background: var(--nota-cream);
+  color: var(--nota-navy);
+  border-radius: 12px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+}
+
+.notaDivider {
+  background: var(--nota-navy);
+}
+
+.notaSidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 30px 26px;
+  background: var(--nota-sidebar);
+  border-right: 3px solid var(--nota-gold);
+}
+
+.notaLogo {
+  display: block;
+  width: 100%;
+  max-width: 190px;
+  margin-bottom: 14px;
+}
+
+.notaGoldRule {
+  display: block;
+  width: 46px;
+  height: 3px;
+  margin-bottom: 14px;
+  background: var(--nota-gold);
+  border-radius: 2px;
+}
+
+.notaTagline {
+  margin: 0 0 20px;
+  color: var(--nota-navy);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.notaBranch {
+  margin: 0 0 10px;
+  color: var(--nota-navy);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.notaAddress {
+  margin: 0 0 18px;
+  color: var(--nota-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.notaContactRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.notaContactRow strong {
+  min-width: 34px;
+  color: var(--nota-navy);
+}
+
+.notaContactRow span {
+  color: var(--nota-muted);
+}
+
+.notaBankBlock {
+  display: grid;
+  gap: 6px;
+}
+
+.notaBankRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.notaBankRow strong {
+  color: var(--nota-navy);
+  font-weight: 800;
+}
+
+.notaBankRow span {
+  color: var(--nota-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.notaBankNote {
+  margin: 2px 0 0;
+  color: var(--nota-muted);
+  font-size: 10px;
+}
+
+.notaThanks {
+  margin: 0;
+  color: var(--nota-blue);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.notaEyebrow {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.notaEyebrow span {
+  color: var(--nota-blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.notaEyebrow i {
+  display: block;
+  width: 30px;
+  height: 2px;
+  background: var(--nota-gold);
+  border-radius: 2px;
+}
+
+.notaMain {
+  position: relative;
+  padding: 34px 40px 30px;
+}
+
+.notaMainHeader {
+  margin-bottom: 18px;
+}
+
+.notaInvoiceNumber {
+  margin: 0;
+  color: var(--nota-navy);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.notaQr {
+  position: absolute;
+  top: 34px;
+  right: 40px;
+}
+
+.notaMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding: 16px 0;
+  border-top: 1px solid var(--nota-line);
+  border-bottom: 1px solid var(--nota-line);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.notaMetaRow em {
+  width: 1px;
+  height: 16px;
+  background: var(--nota-line);
+  font-style: normal;
+}
+
+.notaMetaRow span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notaInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--nota-line);
+}
+
+.notaInfoGrid strong {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 14px;
+}
+
+.notaInfoGrid small {
+  display: block;
+  color: var(--nota-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.notaUnitBanner {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  background: #edf2ff;
+  border-left: 4px solid var(--nota-navy);
+  border-radius: 6px;
+}
+
+.notaUnitBanner strong {
+  font-size: 14px;
+}
+
+.notaUnitBanner span {
+  color: var(--nota-muted);
+  font-size: 12px;
+}
+
+.notaTable {
+  overflow: hidden;
+  margin-bottom: 22px;
+  border-radius: 6px;
+}
+
+.notaTableHead,
+.notaTableRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 60px 130px 130px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+.notaTableHead {
+  background: var(--nota-navy);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.notaTableHead span:not(:first-child),
+.notaTableRow span:not(:first-child) {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.notaTableRow {
+  border-bottom: 1px solid var(--nota-line);
+  font-size: 13px;
+}
+
+.notaTableRow:nth-child(even) {
+  background: rgba(10, 24, 49, 0.02);
+}
+
+.notaTableRow strong {
+  display: block;
+  font-size: 13px;
+}
+
+.notaTableRow small {
+  display: block;
+  margin-top: 2px;
+  color: var(--nota-muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.notaFooterRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: start;
+  gap: 24px;
+}
+
+.notaTermsBlock p {
+  margin: 0 0 8px;
+  color: var(--nota-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.notaExtraNote {
+  color: var(--nota-navy) !important;
+  font-weight: 700;
+}
+
+.notaTotalBox {
+  display: grid;
+  gap: 6px;
+  padding: 18px 20px;
+  background: var(--nota-navy);
+  border-left: 4px solid var(--nota-gold);
+  border-radius: 6px;
+  color: white;
+}
+
+.notaTotalBox span {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.notaTotalBox strong {
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.notaTotalBox em {
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.notaSignRow {
+  display: grid;
+  grid-template-columns: repeat(2, 150px);
+  justify-content: end;
+  gap: 40px;
+  margin-top: 46px;
+}
+
+.notaSignBlock {
+  padding-top: 8px;
+  border-top: 1px solid var(--nota-line);
+  text-align: center;
+}
+
+.notaSignBlock span {
+  color: var(--nota-muted);
+  font-size: 11px;
+}
+
+.notaVoidStamp {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%) rotate(-4deg);
+  padding: 8px 20px;
+  border: 2px solid #dc2626;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #dc2626;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 760px) {
+  .notaSheet {
+    grid-template-columns: 1fr;
+  }
+
+  .notaDivider {
+    height: 4px;
+  }
+
+  .notaSidebar {
+    border-right: 0;
+    border-bottom: 3px solid var(--nota-gold);
+  }
+
+  .notaMain {
+    padding: 26px 20px 24px;
+  }
+
+  .notaQr {
+    top: 26px;
+    right: 20px;
+    transform: scale(0.66);
+    transform-origin: top right;
+  }
+
+  .notaInvoiceNumber {
+    max-width: 78%;
+    font-size: 22px;
+    word-break: break-all;
+  }
+
+  .notaInfoGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .notaTableHead,
+  .notaTableRow {
+    grid-template-columns: minmax(0, 1fr) 34px 84px 84px;
+    gap: 6px;
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .notaFooterRow {
+    grid-template-columns: 1fr;
+  }
+
+  .notaSignRow {
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 28px;
+  }
+}
+
+@media print {
+  .notaPageWrap {
+    max-width: none;
+    margin: 0;
+    page: receipt;
+  }
+
+  .notaSheet {
+    width: 200mm;
+    min-height: 155mm;
+    box-shadow: none;
+    border-radius: 0;
+  }
+}
+
 .emptyState {
   padding: 16px;
   border: 1px dashed rgba(145, 164, 189, 0.34);

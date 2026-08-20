@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MapPin, MessageCircle, Receipt } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
-import { formatRupiah } from "@/lib/api";
+import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ReceiptDocument } from "@/app/ReceiptDocument";
 import { getSaleReceipt } from "@/lib/sale-receipt-data";
 import { requireRole } from "@/lib/session";
 import { restoreSaleAction, voidSaleAction } from "../../actions";
@@ -48,7 +47,7 @@ export default async function SaleReceiptPage({ params, searchParams }: { params
     : `https://wa.me/?text=${encodeURIComponent(waText)}`;
 
   return (
-    <section className="pageStack receiptPage">
+    <section className="pageStack notaPageWrap">
       {searchParams?.duplicate ? (
         <div className="infoBox printHidden">Unit ini sudah tercatat terjual sebelumnya (nota di bawah) — submit yang barusan tidak dibuat sebagai transaksi baru, biar tidak tercatat dobel.</div>
       ) : null}
@@ -75,95 +74,7 @@ export default async function SaleReceiptPage({ params, searchParams }: { params
         ) : null}
       </div>
 
-      <article className="receiptPaper">
-        {sale.voidedAt ? <div className="receiptVoidStamp">TRANSAKSI DIBATALKAN</div> : null}
-        <header className="receiptTop">
-          <div>
-            <span className="receiptLogo">FS</span>
-            <h2>{sale.store.name}</h2>
-            <p>{sale.store.tagline}</p>
-            <small>{sale.store.branch}</small>
-            <small>{sale.store.address}</small>
-            <small>HP/WA toko: {sale.store.phone}</small>
-          </div>
-          <div className="receiptMeta">
-            <div className="receiptMetaText">
-              <strong>{sale.invoiceNumber}</strong>
-              <span>{sale.soldAt}</span>
-              <span><MapPin size={14} /> {sale.location}</span>
-            </div>
-            <QRCodeSVG value={publicReceiptUrl} size={42} />
-          </div>
-        </header>
-
-        <div className="receiptInfoGrid">
-          <div>
-            <span>Pembeli</span>
-            <strong>{sale.buyerName}</strong>
-            <small>{sale.buyerPhone}</small>
-            <small>{sale.buyerAddress}</small>
-          </div>
-          <div>
-            <span>Pembayaran</span>
-            <strong>{sale.paymentMethod}</strong>
-            {sale.dpAmount > 0 ? <small>DP masuk {formatRupiah(sale.dpAmount)}</small> : null}
-            {sale.remainingPayment > 0 ? <small>Sisa {formatRupiah(sale.remainingPayment)}</small> : <small>Lunas</small>}
-            <small>{sale.notes}</small>
-          </div>
-          <div>
-            <span>Garansi</span>
-            <strong>Software {sale.warrantySoftware}</strong>
-            <small>Hardware {sale.warrantyHardware}</small>
-          </div>
-        </div>
-
-        {sale.unit ? <section className="receiptUnit">
-          <Receipt size={20} />
-          <div>
-            <strong>Unit {sale.unit.nomorUnit} - {sale.unit.model}</strong>
-            <span>{sale.unit.processor} / {sale.unit.ram} / {sale.unit.ssd}</span>
-          </div>
-        </section> : <section className="receiptUnit"><Receipt size={20} /><div><strong>Transaksi lisensi / software</strong><span>Tidak tertaut ke unit laptop</span></div></section>}
-
-        <div className="receiptTable">
-          <div className="receiptTableHead">
-            <span>Item</span>
-            <span>Qty</span>
-            <span>Harga</span>
-            <span>Total</span>
-          </div>
-          {sale.items.map((item) => (
-            <div className="receiptLine" key={item.id}>
-              <span>
-                <strong>{item.name}</strong>
-                <small>{item.category}</small>
-              </span>
-              <span>{item.qty}</span>
-              <span>{formatRupiah(item.unitPrice)}</span>
-              <span>{formatRupiah(item.lineTotal)}</span>
-            </div>
-          ))}
-        </div>
-
-        <footer className="receiptFooter">
-          <div className="receiptTerms">
-            <strong>Ketentuan garansi</strong>
-            <p>Garansi software {sale.warrantySoftware} dan hardware {sale.warrantyHardware} berlaku sesuai hasil QC dan pemakaian normal. Data pribadi pembeli disarankan dibackup mandiri.</p>
-          </div>
-          <div className="receiptTotals">
-            <span>Total</span>
-            <strong>{formatRupiah(sale.subtotal)}</strong>
-            {sale.dpAmount > 0 ? <small>DP {formatRupiah(sale.dpAmount)}</small> : null}
-            {sale.remainingPayment > 0 ? <small>Sisa {formatRupiah(sale.remainingPayment)}</small> : <small>Lunas</small>}
-          </div>
-        </footer>
-
-        <div className="receiptBankNote">
-          <strong>Rekening Transaksi FS Comp</strong>
-          <span>BCA 251-029-8724 / Mandiri 139-00-1590821-7 / BRI 0325-01-017004-53-8 a.n. Faza Abdani Auni Robbi</span>
-          <span>Dana / OVO / GoPay: 0816692428</span>
-        </div>
-      </article>
+      <ReceiptDocument sale={sale} publicReceiptUrl={publicReceiptUrl} />
     </section>
   );
 }
