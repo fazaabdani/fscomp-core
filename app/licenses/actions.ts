@@ -39,7 +39,7 @@ function statusValue(value: string): LicenseStatus {
 }
 
 export async function createLicenseRecordAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "sales"]);
+  const currentUser = await requireRole(["admin", "sales"]);
   const validation = z.object({
     version: requiredText(100),
     purchaseDate: dateInput,
@@ -91,7 +91,7 @@ export async function createLicenseRecordAction(formData: FormData) {
 }
 
 export async function updateLicenseNotesAction(licenseId: string, formData: FormData) {
-  requireRole(["admin", "sales"]);
+  await requireRole(["admin", "sales"]);
   const validation = z.object({ notes: optionalText(2000) }).safeParse(formValues(formData));
   if (!entityId.safeParse(licenseId).success || !validation.success) {
     redirect(`/licenses/${licenseId}/edit?error=invalid-input`);

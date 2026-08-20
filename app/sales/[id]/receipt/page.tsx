@@ -12,7 +12,7 @@ import { PrintReceiptButton } from "./PrintReceiptButton";
 export const dynamic = "force-dynamic";
 
 export default async function SaleReceiptPage({ params, searchParams }: { params: { id: string }; searchParams?: { duplicate?: string } }) {
-  const currentUser = requireRole(["admin", "teknisi", "sales"]);
+  const currentUser = await requireRole(["admin", "teknisi", "sales"]);
   const sale = await getSaleReceipt(params.id);
   if (!sale) notFound();
 

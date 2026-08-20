@@ -20,7 +20,7 @@ function boolFromForm(value: FormDataEntryValue | null) {
 }
 
 export async function updateWaConversationAction(conversationId: string, formData: FormData) {
-  const currentUser = requireRole(["admin", "sales"]);
+  const currentUser = await requireRole(["admin", "sales"]);
   const validation = z.object({
     status: conversationStatusSchema,
     aiTakeoverAllowed: z.string().optional()
@@ -75,7 +75,7 @@ export async function updateWaConversationAction(conversationId: string, formDat
  * berhenti otomatis saat admin menangani sendiri. Dua action ini yang mengisi/mengosongkannya.
  */
 export async function takeoverWaConversationAction(conversationId: string) {
-  const currentUser = requireRole(["admin", "sales"]);
+  const currentUser = await requireRole(["admin", "sales"]);
   if (!entityId.safeParse(conversationId).success) redirect("/wa-ai?error=invalid-input");
 
   const conversation = await prisma.waConversation.findUnique({
@@ -113,7 +113,7 @@ export async function takeoverWaConversationAction(conversationId: string) {
 }
 
 export async function releaseWaConversationToAiAction(conversationId: string) {
-  const currentUser = requireRole(["admin", "sales"]);
+  const currentUser = await requireRole(["admin", "sales"]);
   if (!entityId.safeParse(conversationId).success) redirect("/wa-ai?error=invalid-input");
 
   const conversation = await prisma.waConversation.findUnique({
@@ -148,7 +148,7 @@ export async function releaseWaConversationToAiAction(conversationId: string) {
 }
 
 export async function updateWaCustomerPolicyAction(customerId: string, formData: FormData) {
-  const currentUser = requireRole(["admin", "sales"]);
+  const currentUser = await requireRole(["admin", "sales"]);
   const validation = z.object({
     customerAiPolicy: customerPolicySchema
   }).safeParse(formValues(formData));
@@ -192,7 +192,7 @@ export async function updateWaCustomerPolicyAction(customerId: string, formData:
 }
 
 export async function updateWaAiPersonaAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "sales"]);
+  const currentUser = await requireRole(["admin", "sales"]);
   const validation = personaSchema.safeParse(formValues(formData).persona);
 
   if (!validation.success) {
@@ -225,7 +225,7 @@ export async function updateWaAiPersonaAction(formData: FormData) {
 }
 
 export async function updateWaAiChannelsAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "sales"]);
+  const currentUser = await requireRole(["admin", "sales"]);
   const selected = formData.getAll("channels").filter((value): value is string => typeof value === "string");
   const nextChannels = selected.filter((value): value is WaChannelId => (waChannelIds as string[]).includes(value));
 
@@ -255,7 +255,7 @@ export async function updateWaAiChannelsAction(formData: FormData) {
 }
 
 export async function updateWaAiEnabledAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "sales"]);
+  const currentUser = await requireRole(["admin", "sales"]);
   const nextEnabled = boolFromForm(formData.get("aiEnabled"));
 
   const previous = await prisma.waAiSetting.findUnique({ where: { key: "ai_enabled" } });
@@ -284,7 +284,7 @@ export async function updateWaAiEnabledAction(formData: FormData) {
 }
 
 export async function updateWaFollowUpSettingsAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "sales"]);
+  const currentUser = await requireRole(["admin", "sales"]);
   const validation = z.object({
     mode: followUpModeSchema,
     hoursHot: z.coerce.number().min(0).max(240),
@@ -330,7 +330,7 @@ export async function updateWaFollowUpSettingsAction(formData: FormData) {
  * follow-up kapan saja tanpa nunggu jadwal otomatis.
  */
 export async function sendManualFollowUpAction(conversationId: string) {
-  const currentUser = requireRole(["admin", "sales"]);
+  const currentUser = await requireRole(["admin", "sales"]);
   if (!entityId.safeParse(conversationId).success) redirect("/wa-ai?error=invalid-input");
 
   const conversation = await prisma.waConversation.findUnique({

@@ -5,7 +5,7 @@ import { getFolderContents } from "@/lib/media-data";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  if (!hasStaffAccess(["admin", "teknisi"])) return forbidden();
+  if (!(await hasStaffAccess(["admin", "teknisi"]))) return forbidden();
 
   const { searchParams } = new URL(request.url);
   const folderId = searchParams.get("folder") || null;

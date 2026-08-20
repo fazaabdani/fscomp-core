@@ -26,7 +26,7 @@ function rupiahValue(formData: FormData, key: string, fallback = 0) {
 }
 
 export async function updateUnitAction(unitId: string, formData: FormData) {
-  const currentUser = requireRole(["admin"]);
+  const currentUser = await requireRole(["admin"]);
   const validation = z.object({
     nomorUnit: requiredText(100),
     model: requiredText(200),

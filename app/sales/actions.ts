@@ -194,7 +194,7 @@ async function notifySaleToN8n(payload: {
 }
 
 export async function createSaleAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "teknisi", "sales"]);
+  const currentUser = await requireRole(["admin", "teknisi", "sales"]);
   const standalone = text(formData, "saleMode") === "STANDALONE";
   const errorPath = standalone ? "/sales/non-laptop" : "/sales";
 
@@ -416,7 +416,7 @@ export async function createSaleAction(formData: FormData) {
 }
 
 export async function voidSaleAction(saleId: string, formData: FormData) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   if (!entityId.safeParse(saleId).success) redirect("/sales?error=invalid-input");
   const reason = text(formData, "voidReason") || "Transaksi dibatalkan";
 
@@ -453,7 +453,7 @@ export async function voidSaleAction(saleId: string, formData: FormData) {
 }
 
 export async function restoreSaleAction(saleId: string) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   if (!entityId.safeParse(saleId).success) redirect("/sales?error=invalid-input");
 
   const sale = await prisma.sale.findUnique({ where: { id: saleId } });

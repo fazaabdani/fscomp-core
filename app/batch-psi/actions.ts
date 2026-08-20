@@ -41,7 +41,7 @@ function chargerCountsFromForm(formData: FormData) {
 }
 
 export async function createBatchAction(formData: FormData) {
-  requireRole(["admin", "teknisi"]);
+  await requireRole(["admin", "teknisi"]);
   if (!batchFormSchema.safeParse(formValues(formData)).success) redirect("/batch-psi/new?error=invalid-input");
 
   const nomorBatch = text(formData, "nomorBatch");
@@ -78,7 +78,7 @@ export async function createBatchAction(formData: FormData) {
 }
 
 export async function updateBatchAction(batchId: string, formData: FormData) {
-  requireRole(["admin", "teknisi"]);
+  await requireRole(["admin", "teknisi"]);
   if (!entityId.safeParse(batchId).success || !batchFormSchema.safeParse(formValues(formData)).success) {
     redirect(`/batch-psi/${batchId}/edit?error=invalid-input`);
   }
@@ -122,7 +122,7 @@ export async function updateBatchAction(batchId: string, formData: FormData) {
 }
 
 export async function deleteBatchAction(batchId: string, formData: FormData) {
-  const currentUser = requireRole(["admin"]);
+  const currentUser = await requireRole(["admin"]);
   if (!entityId.safeParse(batchId).success) redirect("/batch-psi?error=invalid-input");
   const confirmUsername = text(formData, "confirmUsername");
 
@@ -179,7 +179,7 @@ export async function deleteBatchAction(batchId: string, formData: FormData) {
 }
 
 export async function deleteUnitFromBatchAction(unitId: string) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   if (!entityId.safeParse(unitId).success) redirect("/batch-psi?error=invalid-input");
 
   const unit = await prisma.unit.findUnique({
@@ -227,7 +227,7 @@ export async function deleteUnitFromBatchAction(unitId: string) {
 }
 
 export async function markUnitReturnedAction(unitId: string) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   if (!entityId.safeParse(unitId).success) redirect("/batch-psi?error=invalid-input");
 
   const unit = await prisma.unit.findUnique({

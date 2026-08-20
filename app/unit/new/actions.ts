@@ -3,7 +3,6 @@
 import { SaleLocation, UnitStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { batches as demoBatches } from "@/lib/api";
 import { resolveUnitPhotos } from "@/lib/media-data";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
@@ -28,7 +27,7 @@ function qcStatusFromFlow(value: string): UnitStatus {
 }
 
 export async function createUnitWithInitialQcAction(formData: FormData) {
-  requireRole(["admin", "teknisi"]);
+  await requireRole(["admin", "teknisi"]);
   const validation = z.object({
     batchId: entityId,
     nomorUnit: requiredText(100),
@@ -55,24 +54,7 @@ export async function createUnitWithInitialQcAction(formData: FormData) {
     redirect(`/unit/new?batch=${batchId}&error=required`);
   }
 
-  let batch = await prisma.batchPSI.findUnique({ where: { id: batchId } });
-  if (!batch) {
-    const demoBatch = demoBatches.find((item) => item.id === batchId);
-    if (demoBatch) {
-      batch = await prisma.batchPSI.create({
-        data: {
-          id: demoBatch.id,
-          nomorBatch: demoBatch.nomorBatch,
-          supplier: demoBatch.supplier,
-          tanggalMasuk: new Date(demoBatch.tanggalMasuk),
-          tanggalTempo: new Date(demoBatch.tanggalTempo),
-          statusPembayaran: "BELUM_JATUH_TEMPO",
-          catatan: demoBatch.catatan
-        }
-      });
-    }
-  }
-
+  const batch = await prisma.batchPSI.findUnique({ where: { id: batchId } });
   if (!batch) {
     redirect("/batch-psi?error=batch-not-found");
   }

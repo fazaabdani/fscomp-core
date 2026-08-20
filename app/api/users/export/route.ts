@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/session";
 import { roleFromDb } from "@/lib/user-store";
 
 export async function GET() {
-  const currentUser = getCurrentUser();
+  const currentUser = await getCurrentUser();
   if (currentUser?.role !== "admin") {
     return new Response("Forbidden", { status: 403 });
   }

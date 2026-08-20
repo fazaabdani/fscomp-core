@@ -18,7 +18,7 @@ function archiveHref(filters: SalesArchiveFilters, page: number) {
 }
 
 export default async function SalesArchivePage({ searchParams }: { searchParams?: SalesArchiveFilters }) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   const filters: SalesArchiveFilters = {
     ...searchParams,
     status: searchParams?.status ?? "active"

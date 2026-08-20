@@ -20,7 +20,7 @@ function parseDateParam(value: string | null, endOfDay = false) {
 }
 
 export async function GET(request: Request) {
-  const currentUser = getCurrentUser();
+  const currentUser = await getCurrentUser();
   if (currentUser?.role !== "admin") {
     return new Response("Forbidden", { status: 403 });
   }

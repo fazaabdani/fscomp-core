@@ -7,7 +7,7 @@ import { requireRole } from "@/lib/session";
 import { PrintPaymentButton } from "./PrintPaymentButton";
 
 export default async function BatchPaymentPage({ params }: { params: { id: string } }) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   const summary = await getBatchPaymentSummary(params.id);
   if (!summary) notFound();
 

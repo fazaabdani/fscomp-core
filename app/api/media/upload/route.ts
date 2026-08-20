@@ -5,7 +5,7 @@ import { createMediaAsset } from "@/lib/media-upload";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  if (!hasStaffAccess(["admin", "teknisi"])) return forbidden();
+  if (!(await hasStaffAccess(["admin", "teknisi"]))) return forbidden();
 
   const formData = await request.formData();
   const folderId = String(formData.get("folderId") ?? "").trim() || null;

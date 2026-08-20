@@ -31,7 +31,7 @@ function AdminTabs({view,componentCount,presetCount,draftCount}:{view:AdminView;
 }
 
 export default async function PcBuilderAdminPage({searchParams}:{searchParams?:Record<string,string|undefined>}) {
-  requireRole(["admin","sales"]);
+  await requireRole(["admin","sales"]);
   const view=activeView(searchParams?.view);
   const [components,presets,drafts,inventory]=await Promise.all([
     prisma.pcComponent.findMany({orderBy:[{active:"desc"},{category:"asc"},{name:"asc"}],include:{inventoryItem:{select:{serialNumber:true,status:true}}}}),

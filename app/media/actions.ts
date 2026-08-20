@@ -27,7 +27,7 @@ function mediaRedirect(folderId: string | null, params: Record<string, string>):
 }
 
 export async function createFolderAction(formData: FormData) {
-  requireRole([...MEDIA_ROLES]);
+  await requireRole([...MEDIA_ROLES]);
   const parentId = text(formData, "parentId") || null;
   const name = text(formData, "name");
   if (!requiredText(120).safeParse(name).success) {
@@ -40,7 +40,7 @@ export async function createFolderAction(formData: FormData) {
 }
 
 export async function renameFolderAction(folderId: string, formData: FormData) {
-  requireRole([...MEDIA_ROLES]);
+  await requireRole([...MEDIA_ROLES]);
   const name = text(formData, "name");
   if (!entityId.safeParse(folderId).success || !requiredText(120).safeParse(name).success) {
     mediaRedirect(folderId, { error: "invalid-input" });
@@ -52,7 +52,7 @@ export async function renameFolderAction(folderId: string, formData: FormData) {
 }
 
 export async function deleteFolderAction(folderId: string) {
-  requireRole([...MEDIA_ROLES]);
+  await requireRole([...MEDIA_ROLES]);
   if (!entityId.safeParse(folderId).success) mediaRedirect(null, { error: "invalid-input" });
 
   const folder = await prisma.mediaFolder.findUnique({
@@ -85,7 +85,7 @@ export async function deleteFolderAction(folderId: string) {
 }
 
 export async function uploadMediaAction(formData: FormData) {
-  requireRole([...MEDIA_ROLES]);
+  await requireRole([...MEDIA_ROLES]);
   const folderId = text(formData, "folderId") || null;
   const files = formData.getAll("files").filter((item): item is File => item instanceof File && item.size > 0);
 
@@ -111,7 +111,7 @@ export async function uploadMediaAction(formData: FormData) {
 }
 
 export async function deleteAssetAction(assetId: string, formData: FormData) {
-  requireRole([...MEDIA_ROLES]);
+  await requireRole([...MEDIA_ROLES]);
   const folderId = text(formData, "folderId") || null;
   if (!entityId.safeParse(assetId).success) mediaRedirect(folderId, { error: "invalid-input" });
 
@@ -130,7 +130,7 @@ export async function deleteAssetAction(assetId: string, formData: FormData) {
 }
 
 export async function migrateGoogleDrivePhotosAction() {
-  requireRole([...MEDIA_ROLES]);
+  await requireRole([...MEDIA_ROLES]);
 
   const units = await prisma.unit.findMany({
     where: {

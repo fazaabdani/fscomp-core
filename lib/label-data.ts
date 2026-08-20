@@ -1,4 +1,3 @@
-import { units as demoUnits } from "./api";
 import { prisma } from "./prisma";
 import { displayUnitNumber } from "./unit-number";
 
@@ -32,8 +31,6 @@ export async function getUnitsForLabel() {
       },
       orderBy: { createdAt: "desc" }
     });
-
-    if (dbUnits.length === 0) return demoUnits;
 
     return dbUnits.map((unit) => {
       const latestDaily = unit.qcHarian[0];
@@ -129,6 +126,6 @@ export async function getUnitsForLabel() {
       };
     });
   } catch {
-    return demoUnits;
+    return [];
   }
 }

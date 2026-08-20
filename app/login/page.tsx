@@ -3,8 +3,8 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import { loginAction, logoutAction } from "./actions";
 
-export default function LoginPage({ searchParams }: { searchParams?: { error?: string } }) {
-  const currentUser = getCurrentUser();
+export default async function LoginPage({ searchParams }: { searchParams?: { error?: string } }) {
+  const currentUser = await getCurrentUser();
 
   return (
     <section className="pageStack narrowPage loginShell">

@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     leadScore: payload.leadScore,
     riskLevel: payload.riskLevel,
     channel: payload.channel,
+    messageId: payload.messageId,
     raw: payload.raw
   });
 

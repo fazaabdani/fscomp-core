@@ -109,7 +109,7 @@ async function isLastActiveAdmin(userId: string) {
 }
 
 export async function createUserAction(formData: FormData) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   const validation = userFormSchema.extend({ password: z.string().min(8).max(200) }).safeParse(formValues(formData));
   if (!validation.success) redirect("/users?error=invalid-input");
 
@@ -151,7 +151,7 @@ export async function createUserAction(formData: FormData) {
 }
 
 export async function importUsersCsvAction(formData: FormData) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
 
   const file = formData.get("csvFile");
   if (!isUploadedTextFile(file) || file.size === 0 || file.size > 5_000_000) {
@@ -228,7 +228,7 @@ export async function importUsersCsvAction(formData: FormData) {
 }
 
 export async function updateUserAction(userId: string, formData: FormData) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   if (!entityId.safeParse(userId).success || !userFormSchema.safeParse(formValues(formData)).success) {
     redirect(`/users/${userId}/edit?error=invalid-input`);
   }
@@ -292,7 +292,7 @@ export async function updateUserAction(userId: string, formData: FormData) {
 }
 
 export async function deactivateUserAction(userId: string) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   if (!entityId.safeParse(userId).success) redirect("/users?error=invalid-input");
 
   if (await isLastActiveAdmin(userId)) {
@@ -309,7 +309,7 @@ export async function deactivateUserAction(userId: string) {
 }
 
 export async function activateUserAction(userId: string) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   if (!entityId.safeParse(userId).success) redirect("/users?error=invalid-input");
 
   const user = await prisma.user.findUnique({

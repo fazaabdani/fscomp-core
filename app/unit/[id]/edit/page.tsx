@@ -9,7 +9,7 @@ import { MediaPicker } from "../../MediaPicker";
 import { updateUnitAction } from "./actions";
 
 export default async function EditUnitPage({ params, searchParams }: { params: { id: string }; searchParams?: { error?: string } }) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   const [unit, gallery] = await Promise.all([getUnitForEdit(params.id), getUnitPhotoGallery(params.id)]);
   if (!unit) notFound();
 

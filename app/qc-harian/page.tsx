@@ -22,7 +22,7 @@ const checklist = [
 ];
 
 export default async function QcHarianPage({ searchParams }: { searchParams?: { saved?: string; error?: string; unit?: string } }) {
-  const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
+  const currentUser = await requireRole(["admin", "teknisi", "sales", "magang"]);
   const { units, dailyQcs } = await getQcHarianPageData();
   const selectedUnit = units.find((unit) => unit.id === searchParams?.unit) ?? units[0];
 

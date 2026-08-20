@@ -27,7 +27,7 @@ export default async function MediaLibraryPage({
 }: {
   searchParams?: { folder?: string; error?: string; success?: string; count?: string; migrated?: string; remaining?: string; failedUnits?: string };
 }) {
-  requireRole(["admin", "teknisi"]);
+  await requireRole(["admin", "teknisi"]);
   const currentFolderId = searchParams?.folder || null;
   const data = await getFolderContents(currentFolderId);
 

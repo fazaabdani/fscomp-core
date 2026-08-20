@@ -2,8 +2,8 @@ import { Bot } from "lucide-react";
 import { requireRole } from "@/lib/session";
 import { AssistantChat } from "./AssistantChat";
 
-export default function AsistenAiPage() {
-  const currentUser = requireRole(["admin", "teknisi", "sales"]);
+export default async function AsistenAiPage() {
+  const currentUser = await requireRole(["admin", "teknisi", "sales"]);
 
   return (
     <section className="pageStack">

@@ -4,8 +4,8 @@ import { chargerFieldName, chargerTypes } from "@/lib/charger-options";
 import { requireRole } from "@/lib/session";
 import { createBatchAction } from "../actions";
 
-export default function NewBatchPage({ searchParams }: { searchParams?: { error?: string } }) {
-  requireRole(["admin", "teknisi"]);
+export default async function NewBatchPage({ searchParams }: { searchParams?: { error?: string } }) {
+  await requireRole(["admin", "teknisi"]);
 
   return (
     <section className="pageStack narrowPage">

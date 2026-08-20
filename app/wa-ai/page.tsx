@@ -77,7 +77,7 @@ function leadTone(lead: WaLeadScore, risk: WaRiskLevel) {
 }
 
 export default async function WaAiPage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
-  requireRole(["admin", "sales"]);
+  await requireRole(["admin", "sales"]);
 
   const [conversations, settings, totalCustomers, waitingAdmin, hotLead, riskCount, queuedTelegram] = await Promise.all([
     prisma.waConversation.findMany({

@@ -7,7 +7,7 @@ import { roleFromDb } from "@/lib/user-store";
 import { updateUserAction } from "../../actions";
 
 export default async function EditUserPage({ params, searchParams }: { params: { id: string }; searchParams?: { error?: string } }) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   const user = await prisma.user.findUnique({ where: { id: params.id } });
   if (!user) notFound();
 

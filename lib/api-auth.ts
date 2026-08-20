@@ -15,8 +15,8 @@ export function hasIntegrationAccess(request: Request, secretName: "CORE_INTEGRA
   return Boolean(requestToken && secureEqual(requestToken, configuredToken));
 }
 
-export function hasStaffAccess(roles: Array<"admin" | "teknisi" | "sales" | "magang">) {
-  const user = getCurrentUser();
+export async function hasStaffAccess(roles: Array<"admin" | "teknisi" | "sales" | "magang">) {
+  const user = await getCurrentUser();
   return Boolean(user && roles.includes(user.role));
 }
 

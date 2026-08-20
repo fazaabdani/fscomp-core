@@ -30,8 +30,8 @@ const localShares = [
   }
 ];
 
-export default function QcToolsPage() {
-  requireRole(["admin", "teknisi", "sales", "magang"]);
+export default async function QcToolsPage() {
+  await requireRole(["admin", "teknisi", "sales", "magang"]);
 
   return (
     <section className="pageStack">

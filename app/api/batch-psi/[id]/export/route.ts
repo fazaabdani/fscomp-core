@@ -8,7 +8,7 @@ function csvCell(value: unknown) {
 }
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
-  if (!hasStaffAccess(["admin", "teknisi"])) return forbidden();
+  if (!(await hasStaffAccess(["admin", "teknisi"]))) return forbidden();
   const batch = await prisma.batchPSI.findUnique({
     where: { id: params.id },
     include: { units: { orderBy: { nomorUnit: "asc" } } }

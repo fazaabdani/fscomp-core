@@ -8,7 +8,7 @@ import { requireRole } from "@/lib/session";
 export const dynamic = "force-dynamic";
 
 export default async function BatchSoldUnitsPage({ params }: { params: { id: string } }) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   const summary = await getBatchSoldUnits(params.id);
   if (!summary) notFound();
 

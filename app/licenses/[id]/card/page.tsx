@@ -11,7 +11,7 @@ import { PrintLicenseCardButton } from "./PrintLicenseCardButton";
 export const dynamic = "force-dynamic";
 
 export default async function LicenseCardPage({ params }: { params: { id: string } }) {
-  requireRole(["admin", "sales"]);
+  await requireRole(["admin", "sales"]);
   const license = await prisma.licenseRecord.findUnique({
     where: { id: params.id },
     include: {

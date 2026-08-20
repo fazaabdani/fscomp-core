@@ -20,7 +20,7 @@ function categoryLabel(category: string) {
 }
 
 export default async function InventoryPage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
-  const currentUser = requireRole(["admin", "teknisi", "sales"]);
+  const currentUser = await requireRole(["admin", "teknisi", "sales"]);
   const canEditInventory = currentUser.role === "admin" || currentUser.role === "sales";
   const canSeePrice = canViewPrice(currentUser);
 

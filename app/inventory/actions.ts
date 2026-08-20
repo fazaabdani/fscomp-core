@@ -42,7 +42,7 @@ function statusValue(value: string): InventoryItemStatus {
 }
 
 export async function createInventoryItemAction(formData: FormData) {
-  const user = requireRole(["admin", "teknisi", "sales"]);
+  const user = await requireRole(["admin", "teknisi", "sales"]);
   if (!inventoryFormSchema.safeParse(formValues(formData)).success) redirect("/inventory?error=invalid-input");
 
   const category = text(formData, "category") || "LAINNYA";
@@ -91,7 +91,7 @@ export async function createInventoryItemAction(formData: FormData) {
 }
 
 export async function updateInventoryItemAction(itemId: string, formData: FormData) {
-  requireRole(["admin", "sales"]);
+  await requireRole(["admin", "sales"]);
   if (!entityId.safeParse(itemId).success || !inventoryFormSchema.safeParse(formValues(formData)).success) {
     redirect(`/inventory/${itemId}/edit?error=invalid-input`);
   }

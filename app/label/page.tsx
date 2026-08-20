@@ -12,6 +12,19 @@ function healthValue(value: unknown) {
 
 export default async function LabelPage({ searchParams }: { searchParams?: { unit?: string; mode?: string } }) {
   const units = await getUnitsForLabel();
+  if (units.length === 0) {
+    return (
+      <section className="pageStack">
+        <div className="sectionTitle">
+          <div>
+            <p className="eyebrow">Label QR</p>
+            <h1>Cetak label unit 7x5cm</h1>
+          </div>
+        </div>
+        <div className="infoBox dangerInfo">Belum ada unit yang bisa dicetak labelnya, atau database sedang tidak bisa diakses. Coba muat ulang halaman ini sebentar lagi.</div>
+      </section>
+    );
+  }
   const selectedId = searchParams?.unit ?? units[0].id;
   const mode = searchParams?.mode === "qc" ? "qc" : "simple";
   const selected = units.find((unit) => unit.id === selectedId) ?? units[0];

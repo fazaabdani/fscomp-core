@@ -7,8 +7,8 @@ const sample = `MERK\tSERI\tPROSESSOR\tRAM\tSSD\tLAYAR\tQTY\tproblem
 LENOVO\tTHINKPAD X13 1 BACKLITE\tI7 GEN 10\tRAM 16GB\tSSD 256GB\t13,3 INCH FHD\t1\tFRAME LAYAR BUKA
 HP\tELITEBOOK 830 G7 2\tI5 GEN 10\tRAM 16GB\tSSD 256GB\t13,3 INCH FHD\t1\t`;
 
-export default function ImportBatchPage({ searchParams }: { searchParams?: { error?: string } }) {
-  requireRole(["admin", "teknisi"]);
+export default async function ImportBatchPage({ searchParams }: { searchParams?: { error?: string } }) {
+  await requireRole(["admin", "teknisi"]);
 
   return (
     <section className="pageStack">

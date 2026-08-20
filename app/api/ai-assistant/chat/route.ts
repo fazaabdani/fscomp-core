@@ -21,7 +21,7 @@ const systemPrompt = [
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 export async function POST(request: Request) {
-  const user = getCurrentUser();
+  const user = await getCurrentUser();
   if (!user || !ALLOWED_ROLES.includes(user.role as (typeof ALLOWED_ROLES)[number])) {
     return NextResponse.json({ error: "Tidak punya akses ke asisten ini." }, { status: 403 });
   }

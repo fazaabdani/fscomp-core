@@ -39,7 +39,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
   const unit = await getUnitForDetail(params.id);
   if (!unit) notFound();
 
-  const currentUser = getCurrentUser();
+  const currentUser = await getCurrentUser();
   const isInternalUser = Boolean(currentUser);
   const relatedUnits = isInternalUser ? [] : await getRelatedCatalogUnits(unit.id);
   const dailyHistory = unit.dailyHistory;

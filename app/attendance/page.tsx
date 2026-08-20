@@ -40,7 +40,7 @@ function exportUrl(from?: string, to?: string) {
 }
 
 export default async function AttendancePage({ searchParams }: { searchParams?: { error?: string; success?: string; from?: string; to?: string } }) {
-  const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
+  const currentUser = await requireRole(["admin", "teknisi", "sales", "magang"]);
   const dbUser = await getOrCreateDbUserForSession(currentUser);
   const todayStart = startOfToday();
   const todayEnd = endOfToday();

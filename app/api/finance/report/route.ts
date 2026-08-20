@@ -27,7 +27,7 @@ function dateFilter(from: string | null, to: string | null) {
 }
 
 export async function GET(request: Request) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   const { searchParams } = new URL(request.url);
   const from = searchParams.get("from");
   const to = searchParams.get("to");

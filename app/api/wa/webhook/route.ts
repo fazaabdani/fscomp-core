@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { forbidden, hasFonnteWebhookAccess } from "@/lib/api-auth";
 import { parseFonnteInboundWebhook, resolveWaChannelFromDevice, sendFonnteMessage } from "@/lib/fonnte-client";
+import { prisma } from "@/lib/prisma";
 import { processWaIncomingMessage } from "@/lib/wa-ai-orchestrator";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +41,16 @@ export async function POST(request: Request) {
   });
 
   if (result.ok && !result.skipped && result.draftReply) {
-    await sendFonnteMessage({ target: parsed.phone, message: result.draftReply });
+    const sent = await sendFonnteMessage({ target: parsed.phone, message: result.draftReply });
+    await prisma.waAiEventLog.create({
+      data: {
+        conversationId: result.conversationId,
+        eventType: "DIRECT_REPLY_SENT",
+        status: sent ? "SENT" : "FAILED",
+        reason: sent ? null : "fonnte_send_failed"
+      }
+    });
+    return NextResponse.json({ ...result, delivered: sent });
   }
 
   return NextResponse.json(result);

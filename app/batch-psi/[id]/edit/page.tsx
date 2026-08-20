@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/session";
 import { updateBatchAction } from "../../actions";
 
 export default async function EditBatchPage({ params, searchParams }: { params: { id: string }; searchParams?: { error?: string } }) {
-  requireRole(["admin", "teknisi"]);
+  await requireRole(["admin", "teknisi"]);
   const batch = await getBatchForEdit(params.id);
   if (!batch) notFound();
   const action = updateBatchAction.bind(null, batch.id);

@@ -7,7 +7,7 @@ import { MediaPicker } from "../MediaPicker";
 import { createUnitWithInitialQcAction } from "./actions";
 
 export default async function NewUnitPage({ searchParams }: { searchParams?: { batch?: string; error?: string } }) {
-  requireRole(["admin", "teknisi"]);
+  await requireRole(["admin", "teknisi"]);
   const batches = await getBatchesForPage();
   const errorMessage =
     searchParams?.error === "duplicate-unit"

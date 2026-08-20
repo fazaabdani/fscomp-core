@@ -12,7 +12,7 @@ import { AutoRefresh } from "./AutoRefresh";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const currentUser = getCurrentUser();
+  const currentUser = await getCurrentUser();
   if (currentUser?.role === "magang") redirect("/qc-harian");
 
   const [{ stats, problemUnits, aiLogs, connected }, dueDailyQc, missingPhotos, softwareResolution] = await Promise.all([

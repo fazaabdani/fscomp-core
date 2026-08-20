@@ -24,12 +24,12 @@ function includesText(value: unknown, q: string) {
 }
 
 export default async function BatchPsiPage({ searchParams }: { searchParams?: { error?: string; deleted?: string; returned?: string; imported?: string; sort?: string; q?: string; status?: string } }) {
-  const currentUser = getCurrentUser();
+  const currentUser = await getCurrentUser();
   const canManageBatch = currentUser ? canEditBatch(currentUser) : false;
   const canManageUnit = currentUser ? canEditUnit(currentUser) : false;
   const canDeleteBatch = currentUser?.role === "admin";
   const canSeePrice = currentUser ? canViewPrice(currentUser) : false;
-  const batches = await getBatchesForManagementPage();
+  const { connected, batches } = await getBatchesForManagementPage();
   const activeSort = searchParams?.sort ?? "unit";
   const q = (searchParams?.q ?? "").trim().toLowerCase();
   const statusFilter = searchParams?.status ?? "semua";
@@ -77,6 +77,10 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
       </div>
 
       <FlashNotice message={flashMessage} tone={searchParams?.error ? "error" : "success"} queryKeys={["error", "deleted", "returned", "imported"]} />
+
+      {!connected ? (
+        <div className="infoBox dangerInfo">Database belum tersambung. Data batch tidak bisa dimuat — coba muat ulang halaman ini sebentar lagi, atau hubungi admin teknis kalau berlanjut.</div>
+      ) : null}
 
       <form className="panel formGrid" action="/batch-psi">
         <div className="panelHeader">

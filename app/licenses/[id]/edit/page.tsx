@@ -7,7 +7,7 @@ import { maskProductKey } from "@/lib/licenses";
 import { updateLicenseNotesAction } from "../../actions";
 
 export default async function EditLicenseNotesPage({ params }: { params: { id: string } }) {
-  requireRole(["admin", "sales"]);
+  await requireRole(["admin", "sales"]);
   const license = await prisma.licenseRecord.findUnique({
     where: { id: params.id },
     include: { unit: { select: { nomorUnit: true, model: true } }, sale: { select: { invoiceNumber: true } } }

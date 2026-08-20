@@ -24,7 +24,7 @@ function todayJakartaDateString() {
 }
 
 export default async function FinancePage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   const from = searchParams?.from ?? "";
   const to = searchParams?.to ?? "";
   const { stats, sales } = await getFinancePageData({ from, to });

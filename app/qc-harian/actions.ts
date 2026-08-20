@@ -91,7 +91,7 @@ async function ensureChecker(name: string, role: "admin" | "teknisi" | "sales" |
 }
 
 export async function createDailyQcAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
+  const currentUser = await requireRole(["admin", "teknisi", "sales", "magang"]);
   const validation = z.object({
     unitId: entityId,
     ssdHealth: percentage,

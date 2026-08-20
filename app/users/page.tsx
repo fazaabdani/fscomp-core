@@ -13,7 +13,7 @@ function roleLabel(role: string) {
 }
 
 export default async function UsersPage({ searchParams }: { searchParams?: { error?: string; success?: string; count?: string } }) {
-  requireRole(["admin"]);
+  await requireRole(["admin"]);
   const users = await prisma.user.findMany({ orderBy: [{ active: "desc" }, { role: "asc" }, { name: "asc" }] });
 
   const message =

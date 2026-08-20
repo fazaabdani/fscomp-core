@@ -35,7 +35,7 @@ function endOfToday() {
 }
 
 export async function checkInAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
+  const currentUser = await requireRole(["admin", "teknisi", "sales", "magang"]);
   const validation = z.object({
     photoDataUrl: requiredText(8_000_000),
     latitude: z.coerce.number().min(-90).max(90),
@@ -91,7 +91,7 @@ export async function checkInAction(formData: FormData) {
 }
 
 export async function checkOutAction(formData: FormData) {
-  const currentUser = requireRole(["admin", "teknisi", "sales", "magang"]);
+  const currentUser = await requireRole(["admin", "teknisi", "sales", "magang"]);
   const dbUser = await getOrCreateDbUserForSession(currentUser);
 
   const open = await prisma.attendance.findFirst({

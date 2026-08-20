@@ -82,7 +82,7 @@ function cleanBatchToken(value: string) {
 }
 
 export async function importSpreadsheetBatchAction(formData: FormData) {
-  requireRole(["admin", "teknisi"]);
+  await requireRole(["admin", "teknisi"]);
   const validation = z.object({
     nomorBatch: requiredText(100),
     supplier: requiredText(160),

@@ -15,8 +15,8 @@ export const metadata: Metadata = {
   description: "Manajemen unit, batch, QC, label QR, dan AI reporting FS Comp."
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const currentUser = getCurrentUser();
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const currentUser = await getCurrentUser();
 
   return (
     <html lang="id">

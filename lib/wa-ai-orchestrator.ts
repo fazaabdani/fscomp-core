@@ -1,4 +1,4 @@
-import type { Prisma, WaLeadScore, WaRiskLevel } from "@prisma/client";
+import { Prisma, type WaLeadScore, type WaRiskLevel } from "@prisma/client";
 import { prisma } from "./prisma";
 import { isWaChannelActive, type WaChannelId } from "./wa-ai-channels";
 import { generateWaAiCatalogReply, type WaAiCatalogReplyMessage } from "./wa-ai-catalog-reply";
@@ -34,11 +34,12 @@ export type WaIncomingInput = {
   leadScore?: WaLeadScore;
   riskLevel?: WaRiskLevel;
   channel?: WaChannelId | null;
+  messageId?: string | null;
   raw?: unknown;
 };
 
 export type WaIncomingResult =
-  | { ok: true; skipped: true; reason: "ai_disabled" | "channel_inactive" | "rate_limited" }
+  | { ok: true; skipped: true; reason: "ai_disabled" | "channel_inactive" | "rate_limited" | "duplicate_message" }
   | {
       ok: true;
       skipped: false;
@@ -115,6 +116,11 @@ export async function processWaIncomingMessage(input: WaIncomingInput): Promise<
     return { ok: true, skipped: true, reason: "channel_inactive" };
   }
 
+  if (input.messageId) {
+    const existing = await prisma.waMessage.findUnique({ where: { providerMessageId: input.messageId } });
+    if (existing) return { ok: true, skipped: true, reason: "duplicate_message" };
+  }
+
   const phone = normalizeWaPhone(input.phone);
 
   const recentInboundCount = await prisma.waMessage.count({
@@ -134,7 +140,9 @@ export async function processWaIncomingMessage(input: WaIncomingInput): Promise<
   const riskLevel = inferRiskLevel(intent, input.riskLevel);
   const rawPayload = (input.raw === undefined || input.raw === null ? input : input.raw) as Prisma.InputJsonValue;
 
-  const result = await prisma.$transaction(async (tx) => {
+  let result;
+  try {
+    result = await prisma.$transaction(async (tx) => {
     let customer = await tx.waCustomer.upsert({
       where: { phone },
       create: {
@@ -191,7 +199,8 @@ export async function processWaIncomingMessage(input: WaIncomingInput): Promise<
         direction: "INBOUND",
         senderName: input.customerName || null,
         body: input.message,
-        rawPayload
+        rawPayload,
+        providerMessageId: input.messageId || null
       }
     });
 
@@ -295,7 +304,13 @@ export async function processWaIncomingMessage(input: WaIncomingInput): Promise<
       telegramText,
       recentMessages: recentMessages.slice().reverse()
     };
-  });
+    });
+  } catch (error) {
+    if (input.messageId && error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return { ok: true, skipped: true, reason: "duplicate_message" };
+    }
+    throw error;
+  }
 
   const draftReply = await responseDraft({
     action: result.decision.action,

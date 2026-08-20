@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  if (!hasStaffAccess(["admin", "teknisi"]) && !hasIntegrationAccess(request, "CORE_INTEGRATION_TOKEN")) return forbidden();
+  if (!(await hasStaffAccess(["admin", "teknisi"])) && !hasIntegrationAccess(request, "CORE_INTEGRATION_TOKEN")) return forbidden();
 
   const [totalUnits, problemUnits, nearDueBatches, recentOpenLogs, activeUnits] = await Promise.all([
     prisma.unit.count({ where: { soldAt: null } }),

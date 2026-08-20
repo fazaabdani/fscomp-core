@@ -23,7 +23,7 @@ function salesHref(params: Record<string, string>) {
 }
 
 export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string; restored?: string; sort?: string; q?: string; lokasi?: string; status?: string } }) {
-  const currentUser = requireRole(["admin", "teknisi", "sales"]);
+  const currentUser = await requireRole(["admin", "teknisi", "sales"]);
   const { readyUnits, sales, stats, salesReady, blockedByDailyQc } = await getSalesPageData();
   const sort = searchParams?.sort ?? "terbaru";
   const q = (searchParams?.q ?? "").trim().toLowerCase();

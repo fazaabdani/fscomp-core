@@ -20,7 +20,7 @@ function durationTypeLabel(type: LicenseDurationType) {
 }
 
 export default async function LicensesPage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
-  requireRole(["admin", "sales"]);
+  await requireRole(["admin", "sales"]);
 
   const [licenses, units] = await Promise.all([
     prisma.licenseRecord.findMany({

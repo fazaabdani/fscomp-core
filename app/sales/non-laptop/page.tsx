@@ -14,8 +14,8 @@ const itemRows = [
   { name: "", category: "LAINNYA" }
 ];
 
-export default function NonLaptopCashierPage({ searchParams }: { searchParams?: { error?: string } }) {
-  requireRole(["admin", "teknisi", "sales"]);
+export default async function NonLaptopCashierPage({ searchParams }: { searchParams?: { error?: string } }) {
+  await requireRole(["admin", "teknisi", "sales"]);
   const message = searchParams?.error === "item-wajib"
     ? "Isi minimal satu item dengan qty dan harga jual lebih dari nol."
     : searchParams?.error

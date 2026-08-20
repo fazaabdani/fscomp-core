@@ -23,7 +23,7 @@ export default async function EditInventoryItemPage({
   params: { id: string };
   searchParams?: { error?: string };
 }) {
-  requireRole(["admin", "sales"]);
+  await requireRole(["admin", "sales"]);
 
   const [item, units] = await Promise.all([
     prisma.inventoryItem.findUnique({ where: { id: params.id } }),
