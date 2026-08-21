@@ -367,7 +367,6 @@
 
 /* Extra compact print tuning for recurring paper output. */
 @media print {
-  .receiptPage,
   .labelLayout,
   .labelSheet,
   .licenseCardPage,
@@ -375,60 +374,6 @@
   .paymentPage {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
-  }
-
-  .receiptPaper {
-    width: 100% !important;
-    max-width: none !important;
-    min-height: 0 !important;
-    padding: 5mm !important;
-    gap: 2.4mm !important;
-  }
-
-  .receiptTop {
-    padding-bottom: 2mm !important;
-  }
-
-  .receiptTop h2 {
-    font-size: 13pt !important;
-  }
-
-  .receiptTop p,
-  .receiptTop small,
-  .receiptInfoGrid span,
-  .receiptInfoGrid small,
-  .receiptLine small,
-  .receiptUnit span,
-  .receiptTerms p {
-    font-size: 6.7pt !important;
-    line-height: 1.15 !important;
-  }
-
-  .receiptInfoGrid {
-    gap: 1.5mm !important;
-  }
-
-  .receiptInfoGrid div,
-  .receiptUnit,
-  .receiptTerms,
-  .receiptTotals {
-    padding: 2mm !important;
-  }
-
-  .receiptTableHead,
-  .receiptLine {
-    padding: 1.6mm 2mm !important;
-    font-size: 7.1pt !important;
-  }
-
-  .receiptFooter {
-    gap: 2mm !important;
-  }
-
-  .receiptBankNote {
-    margin-top: 0.8mm !important;
-    padding-top: 0.8mm !important;
-    font-size: 6.2pt !important;
   }
 
   .labelLayout {

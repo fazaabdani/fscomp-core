@@ -2378,194 +2378,6 @@ textarea {
   color: #9bd4ff;
 }
 
-.receiptPage {
-  max-width: 920px;
-  margin: 0 auto;
-}
-
-.receiptPaper {
-  position: relative;
-  padding: 28px;
-  border: 1px solid rgba(87, 156, 255, 0.32);
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(11, 24, 42, 0.96), rgba(8, 15, 26, 0.96));
-  box-shadow: var(--shadow);
-}
-
-.receiptVoidStamp {
-  position: absolute;
-  top: 22px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-3deg);
-  padding: 8px 18px;
-  border: 2px solid #ff6f61;
-  border-radius: 8px;
-  color: #ffb6af;
-  font-weight: 900;
-  letter-spacing: 0;
-  background: rgba(255, 111, 97, 0.12);
-}
-
-.receiptTop,
-.receiptFooter,
-.receiptInfoGrid,
-.receiptUnit,
-.receiptTableHead,
-.receiptLine {
-  display: grid;
-  gap: 14px;
-}
-
-.receiptTop {
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--line);
-}
-
-.receiptLogo {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #1268e8, #22d3ee);
-  color: white;
-  font-weight: 900;
-}
-
-.receiptTop h2 {
-  margin: 0;
-  font-size: 30px;
-}
-
-.receiptTop p,
-.receiptTerms p {
-  margin: 6px 0 0;
-  color: var(--muted);
-}
-
-.receiptTop small {
-  display: block;
-  margin-top: 4px;
-  color: var(--muted);
-}
-
-.receiptMeta {
-  display: grid;
-  justify-items: end;
-  gap: 6px;
-  color: var(--muted);
-}
-
-.receiptMeta strong {
-  color: var(--ink);
-  font-size: 18px;
-}
-
-.receiptMeta span:last-child {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.receiptInfoGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 18px 0;
-}
-
-.receiptInfoGrid div,
-.receiptUnit,
-.receiptTerms,
-.receiptTotals {
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(7, 17, 30, 0.72);
-}
-
-.receiptInfoGrid span,
-.receiptInfoGrid small,
-.receiptLine small,
-.receiptUnit span {
-  color: var(--muted);
-}
-
-.receiptInfoGrid strong,
-.receiptInfoGrid small,
-.receiptLine small,
-.receiptUnit span {
-  display: block;
-  margin-top: 4px;
-}
-
-.receiptUnit {
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  margin-bottom: 18px;
-}
-
-.receiptTable {
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-
-.receiptTableHead,
-.receiptLine {
-  grid-template-columns: minmax(0, 1fr) 64px 130px 130px;
-  align-items: center;
-  padding: 12px 14px;
-}
-
-.receiptTableHead {
-  background: rgba(55, 163, 255, 0.14);
-  color: #bfe5ff;
-  font-weight: 800;
-}
-
-.receiptLine {
-  border-top: 1px solid var(--line);
-}
-
-.receiptFooter {
-  grid-template-columns: minmax(0, 1fr) 220px;
-  align-items: stretch;
-  margin-top: 18px;
-}
-
-.receiptTotals {
-  display: grid;
-  place-items: center end;
-}
-
-.receiptTotals span {
-  color: var(--muted);
-}
-
-.receiptTotals strong {
-  color: #7cc7ff;
-  font-size: 26px;
-}
-
-.receiptBankNote {
-  display: grid;
-  gap: 3px;
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px dashed var(--line);
-  color: var(--muted);
-  font-size: 11px;
-  text-align: center;
-}
-
-.receiptBankNote strong {
-  color: #cfe7ff;
-  font-size: 11px;
-}
-
 @media print {
   .paymentPage {
     color: #111827;
@@ -2591,61 +2403,6 @@ textarea {
     color: #111827;
   }
 
-  .receiptPage {
-    max-width: none;
-    page: receipt;
-  }
-
-  .receiptPaper {
-    width: 200mm;
-    min-height: 155mm;
-    border: 0;
-    border-radius: 0;
-    background: white;
-    color: #111827;
-    padding: 0;
-  }
-
-  .receiptTop,
-  .receiptInfoGrid div,
-  .receiptUnit,
-  .receiptTerms,
-  .receiptTotals,
-  .receiptTable {
-    border-color: #cbd5e1;
-    background: white;
-  }
-
-  .receiptTop p,
-  .receiptTop small,
-  .receiptTerms p,
-  .receiptInfoGrid span,
-  .receiptInfoGrid small,
-  .receiptLine small,
-  .receiptUnit span,
-  .receiptMeta,
-  .receiptTotals span {
-    color: #475569;
-  }
-
-  .receiptTableHead {
-    background: #eaf4ff;
-    color: #0f2f6b;
-  }
-
-  .receiptTotals strong,
-  .receiptMeta strong {
-    color: #0f2f6b;
-  }
-
-  .receiptBankNote {
-    color: #64748b;
-    border-color: #cbd5e1;
-  }
-
-  .receiptBankNote strong {
-    color: #0f2f6b;
-  }
 }
 
 @page receipt {
@@ -2699,7 +2456,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  background: var(--nota-paper);
+  background-color: var(--nota-paper);
   color: var(--nota-navy);
   border: 2px solid var(--nota-navy);
   border-radius: 14px;
@@ -2832,7 +2589,7 @@ textarea {
   display: block;
   width: 30px;
   height: 2px;
-  background: var(--nota-gold);
+  background-color: var(--nota-gold);
   border-radius: 2px;
 }
 
@@ -2860,7 +2617,7 @@ textarea {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: #eef2ff;
+  background-color: #eef2ff;
   border: 1px solid var(--nota-line);
   border-radius: 8px;
 }
@@ -2871,7 +2628,7 @@ textarea {
   flex-shrink: 0;
   width: 34px;
   height: 34px;
-  background: white;
+  background-color: white;
   border: 1px solid var(--nota-line);
   border-radius: 8px;
   color: var(--nota-navy);
@@ -2906,17 +2663,12 @@ textarea {
 }
 
 .notaTableHead {
-  background: var(--nota-navy);
+  background-color: var(--nota-navy);
   color: white;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border-radius: 7px 7px 0 0;
-}
-
-.notaTableRow:last-child {
-  border-radius: 0 0 7px 7px;
 }
 
 .notaTableHead span:not(:first-child),
@@ -2931,7 +2683,7 @@ textarea {
 }
 
 .notaTableRow:nth-child(even) {
-  background: rgba(10, 24, 49, 0.02);
+  background-color: rgba(10, 24, 49, 0.02);
 }
 
 .notaTableRow strong {
@@ -2971,7 +2723,7 @@ textarea {
   display: grid;
   gap: 6px;
   padding: 16px 20px;
-  background: var(--nota-navy);
+  background-color: var(--nota-navy);
   border-top: 3px solid var(--nota-gold);
   border-radius: 0 0 6px 6px;
   color: white;
@@ -2999,7 +2751,7 @@ textarea {
 
 .notaBankRow {
   padding: 12px 16px;
-  background: #f8fafc;
+  background-color: #f8fafc;
   border: 1px solid var(--nota-line);
   border-radius: 8px;
 }
@@ -3085,7 +2837,7 @@ textarea {
   padding: 8px 20px;
   border: 2px solid #dc2626;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
+  background-color: rgba(255, 255, 255, 0.92);
   color: #dc2626;
   font-weight: 900;
   letter-spacing: 0.06em;
@@ -3557,12 +3309,7 @@ textarea {
   }
 
   .cashierItemRow,
-  .financeRow,
-  .receiptTop,
-  .receiptInfoGrid,
-  .receiptFooter,
-  .receiptTableHead,
-  .receiptLine {
+  .financeRow {
     grid-template-columns: 1fr;
   }
 
@@ -3912,7 +3659,6 @@ main,
 .statCard,
 .catalogItem,
 .batchCard,
-.receiptPaper,
 .paymentNote,
 .catalogHeroCopyPanel,
 .catalogHeroStatsPanel,
@@ -3979,11 +3725,6 @@ main,
 .paymentNote,
 .paymentRow,
 .unitRow,
-.receiptPaper,
-.receiptInfoGrid div,
-.receiptUnit,
-.receiptTerms,
-.receiptTotals,
 .downloadCard,
 .panelSubsection,
 .reminderGrid span,

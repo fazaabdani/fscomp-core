@@ -221,26 +221,6 @@
   line-height: 1.15;
 }
 
-.receiptMeta {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  gap: 12px;
-  text-align: right;
-}
-
-.receiptMetaText {
-  display: grid;
-  justify-items: end;
-  gap: 6px;
-}
-
-.receiptMetaText span:last-child {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .attendanceCapture {
   display: grid;
   gap: 10px;
@@ -265,11 +245,6 @@
   margin-bottom: 6px;
 }
 
-@page receipt {
-  size: A4 portrait;
-  margin: 8mm;
-}
-
 @media print {
   body,
   main,
@@ -279,125 +254,5 @@
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
-  }
-
-  .receiptPage {
-    max-width: none;
-    page: receipt;
-  }
-
-  .receiptPaper {
-    width: 186mm;
-    min-height: 0;
-    height: auto;
-    max-height: 132mm;
-    overflow: visible;
-    margin: 0 auto;
-    font-size: 8.6pt;
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .receiptTop {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
-    gap: 3mm;
-    padding-bottom: 2mm;
-  }
-
-  .receiptLogo {
-    width: 6mm;
-    height: 6mm;
-    margin-bottom: 0.8mm;
-    border-radius: 1mm;
-    font-size: 6pt;
-  }
-
-  .receiptTop h2 {
-    font-size: 15pt;
-    line-height: 1;
-  }
-
-  .receiptTop p,
-  .receiptTop small,
-  .receiptTerms p {
-    margin-top: 0.5mm;
-    line-height: 1.08;
-  }
-
-  .receiptMeta {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
-    gap: 1.6mm;
-    text-align: right;
-  }
-
-  .receiptMetaText {
-    gap: 0.6mm;
-  }
-
-  .receiptMeta strong {
-    font-size: 9pt;
-  }
-
-  .receiptMeta svg {
-    width: 12mm;
-    height: 12mm;
-    flex: 0 0 auto;
-  }
-
-  .receiptInfoGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.4mm;
-    margin: 2mm 0;
-  }
-
-  .receiptInfoGrid div,
-  .receiptUnit,
-  .receiptTerms,
-  .receiptTotals {
-    padding: 1.4mm 1.8mm;
-    border-radius: 1.2mm;
-  }
-
-  .receiptUnit {
-    gap: 2mm;
-    margin-bottom: 2mm;
-  }
-
-  .receiptUnit svg {
-    width: 12px;
-    height: 12px;
-  }
-
-  .receiptTableHead,
-  .receiptLine {
-    grid-template-columns: minmax(0, 1fr) 13mm 24mm 26mm;
-    padding: 1mm 1.8mm;
-    gap: 1.5mm;
-  }
-
-  .receiptLine small,
-  .receiptInfoGrid small,
-  .receiptUnit span {
-    margin-top: 0.3mm;
-  }
-
-  .receiptFooter {
-    grid-template-columns: minmax(0, 1fr) 34mm;
-    gap: 1.5mm;
-    margin-top: 1.6mm;
-  }
-
-  .receiptTotals strong {
-    font-size: 14pt;
-  }
-
-  .receiptBankNote {
-    gap: 0.5mm;
-    margin-top: 1.5mm;
-    padding-top: 1mm;
-    font-size: 6.4pt;
   }
 }
