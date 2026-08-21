@@ -130,6 +130,7 @@ main {
 
 .pageStack {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 22px;
 }
 
