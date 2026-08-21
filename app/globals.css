@@ -3147,6 +3147,16 @@ textarea {
     page: receipt;
   }
 
+  /* Chrome (and most browsers) skip background-color/background-image when
+     printing unless the user manually checks "background graphics" in the
+     print dialog -- without this, the navy table header and total box print
+     as plain white with no fill. Force it on regardless of that setting. */
+  .notaSheet,
+  .notaSheet * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   /* The nota prints onto fixed 210x165mm paper (see @page receipt above).
      This single-column layout is far more compact than the old sidebar
      design, but still needs a tighter print-only scale to comfortably fit
