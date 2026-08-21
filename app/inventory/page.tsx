@@ -19,19 +19,30 @@ function categoryLabel(category: string) {
   return category;
 }
 
+const INVENTORY_LIST_LIMIT = 300;
+
 export default async function InventoryPage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
   const currentUser = await requireRole(["admin", "teknisi", "sales"]);
   const canEditInventory = currentUser.role === "admin" || currentUser.role === "sales";
   const canSeePrice = canViewPrice(currentUser);
 
-  const [items, units] = await Promise.all([
+  // Stat card sengaja dihitung dari query terpisah yang ambil SEMUA baris (kolom minim, tanpa
+  // join) supaya angkanya tetap akurat walau daftar yang ditampilkan di bawah dibatasi
+  // INVENTORY_LIST_LIMIT baris terbaru -- kalau dihitung dari array yang sudah dipotong, barang
+  // lama yang STOCK/garansi mau habis bisa hilang diam-diam dari hitungan.
+  const [items, statsRows, totalCount, units] = await Promise.all([
     prisma.inventoryItem.findMany({
       include: {
         unit: { select: { nomorUnit: true, model: true } },
         createdBy: { select: { name: true } }
       },
-      orderBy: [{ arrivedAt: "desc" }, { createdAt: "desc" }]
+      orderBy: [{ arrivedAt: "desc" }, { createdAt: "desc" }],
+      take: INVENTORY_LIST_LIMIT
     }),
+    prisma.inventoryItem.findMany({
+      select: { status: true, purchaseDate: true, warrantyDuration: true, warrantyDurationUnit: true }
+    }),
+    prisma.inventoryItem.count(),
     prisma.unit.findMany({
       where: { soldAt: null },
       select: { id: true, nomorUnit: true, model: true },
@@ -39,10 +50,11 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
     })
   ]);
 
-  const activeWarrantyCount = items.filter((item) => warrantyInfo(item).tone === "green").length;
-  const expiringWarrantyCount = items.filter((item) => warrantyInfo(item).label === "Garansi mau habis").length;
-  const stockCount = items.filter((item) => item.status === "STOCK").length;
-  const problemCount = items.filter((item) => item.status === "DAMAGED" || item.status === "RETURNED").length;
+  const activeWarrantyCount = statsRows.filter((item) => warrantyInfo(item).tone === "green").length;
+  const expiringWarrantyCount = statsRows.filter((item) => warrantyInfo(item).label === "Garansi mau habis").length;
+  const stockCount = statsRows.filter((item) => item.status === "STOCK").length;
+  const problemCount = statsRows.filter((item) => item.status === "DAMAGED" || item.status === "RETURNED").length;
+  const isTruncated = totalCount > items.length;
 
   const message =
     searchParams?.error === "required"
@@ -67,6 +79,12 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
       </div>
 
       <FlashNotice message={message} tone={searchParams?.error ? "error" : "success"} queryKeys={["error", "success"]} />
+
+      {isTruncated ? (
+        <div className="infoBox">
+          Menampilkan {items.length} dari {totalCount} barang terbaru. Barang lebih lama tidak ditampilkan di daftar ini (angka di kartu statistik tetap menghitung semua barang).
+        </div>
+      ) : null}
 
       <section className="statGrid">
         <article className="statCard"><PackagePlus size={19} /><span>Stok barang</span><strong>{stockCount}</strong></article>

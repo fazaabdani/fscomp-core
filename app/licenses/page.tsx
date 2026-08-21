@@ -19,28 +19,33 @@ function durationTypeLabel(type: LicenseDurationType) {
   return "Lifetime";
 }
 
+const LICENSE_LIST_LIMIT = 300;
+
 export default async function LicensesPage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
   await requireRole(["admin", "sales"]);
 
-  const [licenses, units] = await Promise.all([
+  const [licenses, totalCount, lifetimeCount, sentCount, problemCount, units] = await Promise.all([
     prisma.licenseRecord.findMany({
       include: {
         unit: { select: { nomorUnit: true, model: true } },
         sale: { select: { invoiceNumber: true } },
         createdBy: { select: { name: true } }
       },
-      orderBy: [{ createdAt: "desc" }]
+      orderBy: [{ createdAt: "desc" }],
+      take: LICENSE_LIST_LIMIT
     }),
+    prisma.licenseRecord.count(),
+    prisma.licenseRecord.count({ where: { durationType: "LIFETIME" } }),
+    prisma.licenseRecord.count({ where: { status: "SENT" } }),
+    prisma.licenseRecord.count({ where: { status: { in: ["PROBLEM", "REPLACED"] } } }),
     prisma.unit.findMany({
       select: { id: true, nomorUnit: true, model: true },
       orderBy: [{ nomorUnit: "asc" }]
     })
   ]);
 
-  const lifetimeCount = licenses.filter((license) => license.durationType === "LIFETIME").length;
-  const yearlyCount = licenses.filter((license) => license.durationType !== "LIFETIME").length;
-  const sentCount = licenses.filter((license) => license.status === "SENT").length;
-  const problemCount = licenses.filter((license) => license.status === "PROBLEM" || license.status === "REPLACED").length;
+  const yearlyCount = totalCount - lifetimeCount;
+  const isTruncated = totalCount > licenses.length;
   const message =
     searchParams?.error === "required"
       ? "Versi lisensi dan tanggal pembelian wajib diisi."
@@ -64,6 +69,12 @@ export default async function LicensesPage({ searchParams }: { searchParams?: { 
       </div>
 
       <FlashNotice message={message} tone={searchParams?.error ? "error" : "success"} queryKeys={["error", "success"]} />
+
+      {isTruncated ? (
+        <div className="infoBox">
+          Menampilkan {licenses.length} dari {totalCount} lisensi terbaru. Lisensi lebih lama tidak ditampilkan di daftar ini (angka di kartu statistik tetap menghitung semua lisensi).
+        </div>
+      ) : null}
 
       <section className="statGrid">
         <article className="statCard"><BadgeCheck size={19} /><span>Lifetime</span><strong>{lifetimeCount}</strong></article>
