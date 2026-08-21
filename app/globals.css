@@ -2649,7 +2649,12 @@ textarea {
 }
 
 @page receipt {
-  size: A5 landscape;
+  /* Explicit width-then-height, not the "A5 landscape" keyword combo --
+     Chrome's support for combining a named page-size keyword with an
+     orientation keyword is unreliable and rendered this portrait instead
+     of landscape in testing. Two explicit lengths always mean width then
+     height, so this form is unambiguous. */
+  size: 210mm 148mm;
   margin: 5mm;
 }
 
