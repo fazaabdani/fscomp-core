@@ -2892,7 +2892,6 @@ textarea {
 }
 
 .notaTable {
-  overflow: hidden;
   border: 1px solid var(--nota-line);
   border-radius: 8px;
 }
@@ -2913,6 +2912,11 @@ textarea {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  border-radius: 7px 7px 0 0;
+}
+
+.notaTableRow:last-child {
+  border-radius: 0 0 7px 7px;
 }
 
 .notaTableHead span:not(:first-child),
