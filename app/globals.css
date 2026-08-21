@@ -2843,7 +2843,12 @@ textarea {
   letter-spacing: 0.06em;
 }
 
-@media (max-width: 760px) {
+/* "screen and" matters here, not just tidiness: A5 landscape's printable
+   width (200mm =~ 755.9px) is narrower than 760px, so a bare max-width query
+   also matches during print and silently stacks the nota into its mobile
+   phone layout on top of the print-only rules below -- confirmed live, see
+   commit message. */
+@media screen and (max-width: 760px) {
   .notaSheet {
     padding: 20px 18px;
   }
