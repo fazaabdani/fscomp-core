@@ -177,6 +177,7 @@ model User {
   inventoryItems InventoryItem[]
   licenseRecords LicenseRecord[]
   mediaAssets MediaAsset[]
+  saleEdits      Sale[]
 }
 
 model Attendance {
@@ -656,10 +657,13 @@ model Sale {
   voidedAt      DateTime?
   voidReason    String?
   notes         String?
+  lastEditedById String?
+  lastEditedAt  DateTime?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
   unit          Unit?        @relation(fields: [unitId], references: [id])
+  lastEditedBy  User?        @relation(fields: [lastEditedById], references: [id])
   items         SaleItem[]
   licenseRecords LicenseRecord[]
 }

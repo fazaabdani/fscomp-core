@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ArrowLeft, MessageCircle, Pencil } from "lucide-react";
 import { ReceiptDocument } from "@/app/ReceiptDocument";
 import { getSaleReceipt } from "@/lib/sale-receipt-data";
 import { requireRole } from "@/lib/session";
@@ -11,7 +11,7 @@ import { PrintReceiptButton } from "./PrintReceiptButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function SaleReceiptPage({ params, searchParams }: { params: { id: string }; searchParams?: { duplicate?: string } }) {
+export default async function SaleReceiptPage({ params, searchParams }: { params: { id: string }; searchParams?: { duplicate?: string; success?: string } }) {
   const currentUser = await requireRole(["admin", "teknisi", "sales"]);
   const sale = await getSaleReceipt(params.id);
   if (!sale) notFound();
@@ -51,6 +51,12 @@ export default async function SaleReceiptPage({ params, searchParams }: { params
       {searchParams?.duplicate ? (
         <div className="infoBox printHidden">Unit ini sudah tercatat terjual sebelumnya (nota di bawah) — submit yang barusan tidak dibuat sebagai transaksi baru, biar tidak tercatat dobel.</div>
       ) : null}
+      {searchParams?.success === "updated" ? (
+        <div className="infoBox printHidden">Nota berhasil diperbarui.</div>
+      ) : null}
+      {sale.lastEditedByName ? (
+        <div className="infoBox printHidden">Terakhir diedit oleh <strong>{sale.lastEditedByName}</strong> pada {sale.lastEditedAt}.</div>
+      ) : null}
       <div className="sectionTitle printHidden">
         <div>
           <Link className="backLink" href="/sales"><ArrowLeft size={16} /> Kembali ke kasir</Link>
@@ -60,6 +66,7 @@ export default async function SaleReceiptPage({ params, searchParams }: { params
         <div className="buttonCluster">
           <a className="secondaryButton" href={waHref} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Share WA</a>
           <PrintReceiptButton />
+          {!sale.voidedAt ? <Link className="secondaryButton" href={`/sales/${sale.id}/edit`}><Pencil size={16} /> Edit Nota</Link> : null}
         </div>
         {currentUser.role === "admin" && !sale.voidedAt ? (
           <form action={voidSaleAction.bind(null, sale.id)} className="printHidden">

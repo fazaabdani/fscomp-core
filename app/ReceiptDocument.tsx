@@ -88,7 +88,7 @@ export function ReceiptDocument({ sale, publicReceiptUrl }: { sale: SaleReceipt;
           </div>
         ) : (
           <div className="notaUnitBanner">
-            <strong>Transaksi lisensi / software</strong>
+            <strong>Transaksi non-laptop</strong>
             <span>Tidak tertaut ke unit laptop</span>
           </div>
         )}

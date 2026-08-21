@@ -62,7 +62,7 @@ export async function GET(request: Request) {
       sale.invoiceNumber,
       sale.location,
       sale.unit?.nomorUnit ?? "-",
-      sale.unit?.model ?? "Lisensi / software",
+      sale.unit?.model ?? "Non-laptop",
       sale.paymentMethod,
       sale.buyerName ?? "",
       sale.buyerPhone ?? "",

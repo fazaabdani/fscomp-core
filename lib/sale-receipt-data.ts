@@ -24,7 +24,8 @@ export async function getSaleReceipt(id: string) {
       where: { id },
       include: {
         unit: true,
-        items: { orderBy: { createdAt: "asc" } }
+        items: { orderBy: { createdAt: "asc" } },
+        lastEditedBy: { select: { name: true } }
       }
     });
 
@@ -50,6 +51,8 @@ export async function getSaleReceipt(id: string) {
       voidedAt: sale.voidedAt ? jakartaDateKey(sale.voidedAt) : "",
       voidReason: sale.voidReason ?? "",
       notes: sale.notes ?? "-",
+      lastEditedByName: sale.lastEditedBy?.name ?? "",
+      lastEditedAt: sale.lastEditedAt ? jakartaDateKey(sale.lastEditedAt) : "",
       unit: sale.unit ? {
         nomorUnit: sale.unit.nomorUnit,
         model: sale.unit.model,

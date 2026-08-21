@@ -218,8 +218,8 @@ export async function createSaleAction(formData: FormData) {
   const buyerPhone = text(formData, "buyerPhone");
   const buyerAddress = text(formData, "buyerAddress");
   const notes = text(formData, "notes");
-  const warrantySoftware = warrantyText(formData, "warrantySoftware", 3, "bulan");
-  const warrantyHardware = standalone ? "Tidak ada" : warrantyText(formData, "warrantyHardware", 3, "minggu");
+  const warrantySoftware = standalone ? "Tidak ada" : warrantyText(formData, "warrantySoftware", 3, "bulan");
+  const warrantyHardware = standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan") : warrantyText(formData, "warrantyHardware", 3, "minggu");
   const itemNames = textArray(formData, "itemName");
   const itemCategories = textArray(formData, "itemCategory");
   const itemQty = numberArray(formData, "itemQty");
@@ -417,7 +417,7 @@ export async function createSaleAction(formData: FormData) {
   await notifySaleToN8n({
     saleId,
     invoiceNumber: invoice,
-    unit: unit ? `Unit ${unit.nomorUnit} - ${unit.model}` : "Lisensi / software tanpa laptop",
+    unit: unit ? `Unit ${unit.nomorUnit} - ${unit.model}` : "Non-laptop tanpa unit",
     location,
     subtotal,
     grossProfit,
@@ -432,6 +432,59 @@ export async function createSaleAction(formData: FormData) {
   revalidatePath("/");
   if (unit) revalidatePath(`/unit/${unit.id}`);
   redirect(`/sales/${saleId}/receipt`);
+}
+
+export async function updateSaleAction(saleId: string, formData: FormData) {
+  const currentUser = await requireRole(["admin", "teknisi", "sales"]);
+  const errorPath = `/sales/${saleId}/edit`;
+  if (!entityId.safeParse(saleId).success) redirect(`${errorPath}?error=invalid-input`);
+
+  const sale = await prisma.sale.findUnique({ where: { id: saleId }, select: { id: true, unitId: true, subtotal: true, voidedAt: true } });
+  if (!sale) redirect("/sales?error=transaksi-tidak-ditemukan");
+  if (sale.voidedAt) redirect(`/sales/${saleId}/receipt?error=transaksi-dibatalkan`);
+
+  const validation = z.object({
+    paymentMethod: requiredText(40),
+    buyerName: optionalText(120),
+    buyerPhone: optionalText(30),
+    buyerAddress: optionalText(500),
+    notes: optionalText(1000)
+  }).safeParse(formValues(formData));
+  if (!validation.success) redirect(`${errorPath}?error=invalid-input`);
+
+  const standalone = !sale.unitId;
+  const paymentMethod = text(formData, "paymentMethod") || "Cash";
+  const buyerName = text(formData, "buyerName");
+  const buyerPhone = text(formData, "buyerPhone");
+  const buyerAddress = text(formData, "buyerAddress");
+  const notes = text(formData, "notes");
+  const dpAmount = Math.min(Math.max(0, numberValue(formData, "dpAmount")), sale.subtotal);
+  const warrantySoftware = standalone ? "Tidak ada" : warrantyText(formData, "warrantySoftware", 3, "bulan");
+  const warrantyHardware = standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan") : warrantyText(formData, "warrantyHardware", 3, "minggu");
+
+  const dbUser = await prisma.user.findFirst({ where: { username: currentUser.username }, select: { id: true } });
+
+  await prisma.sale.update({
+    where: { id: saleId },
+    data: {
+      paymentMethod,
+      buyerName: buyerName || null,
+      buyerPhone: buyerPhone || null,
+      buyerAddress: buyerAddress || null,
+      dpAmount,
+      warrantySoftware,
+      warrantyHardware,
+      notes: notes || null,
+      lastEditedById: dbUser?.id ?? null,
+      lastEditedAt: new Date()
+    }
+  });
+
+  revalidatePath(`/sales/${saleId}/receipt`);
+  revalidatePath(`/nota/${saleId}`);
+  revalidatePath("/sales");
+  revalidatePath("/sales/non-laptop");
+  redirect(`/sales/${saleId}/receipt?success=updated`);
 }
 
 export async function voidSaleAction(saleId: string, formData: FormData) {
