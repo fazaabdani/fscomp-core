@@ -225,6 +225,7 @@ export async function createSaleAction(formData: FormData) {
   const itemQty = numberArray(formData, "itemQty");
   const itemPrices = numberArray(formData, "itemPrice");
   const itemCosts = numberArray(formData, "itemCost");
+  const itemInventoryIds = textArray(formData, "itemInventoryId");
   const selectedLicenseType = licenseTypeValue(text(formData, "licenseType"));
   const licenseVersionInput = text(formData, "licenseVersion");
   const licenseDurationType = licenseDurationValue(text(formData, "licenseDurationType"));
@@ -280,15 +281,20 @@ export async function createSaleAction(formData: FormData) {
       category: "LAPTOP",
       qty: 1,
       unitPrice: soldPrice,
-      unitCost: unit.hargaModal
+      unitCost: unit.hargaModal,
+      inventoryItemId: null as string | null
     }] : []),
-    ...itemNames.map((name, index) => ({
-      name,
-      category: itemCategories[index] || "BONUS",
-      qty: Math.max(0, itemQty[index] || 0),
-      unitPrice: Math.max(0, itemPrices[index] || 0),
-      unitCost: Math.max(0, itemCosts[index] || 0)
-    }))
+    ...itemNames.map((name, index) => {
+      const inventoryItemId = itemInventoryIds[index] || null;
+      return {
+        name,
+        category: itemCategories[index] || "BONUS",
+        qty: inventoryItemId ? 1 : Math.max(0, itemQty[index] || 0),
+        unitPrice: Math.max(0, itemPrices[index] || 0),
+        unitCost: Math.max(0, itemCosts[index] || 0),
+        inventoryItemId
+      };
+    })
   ].filter((item) => item.name && item.qty > 0);
   const licenseItems = items.filter((item) => item.category !== "LAPTOP" && inferLicenseType(item.name, item.category));
 
@@ -335,9 +341,19 @@ export async function createSaleAction(formData: FormData) {
           unitPrice: item.unitPrice,
           unitCost: item.unitCost,
           lineTotal: item.qty * item.unitPrice,
-          lineCost: item.qty * item.unitCost
+          lineCost: item.qty * item.unitCost,
+          inventoryItemId: item.inventoryItemId
         }))
       });
+
+      for (const item of items) {
+        if (!item.inventoryItemId) continue;
+        const updated = await tx.inventoryItem.updateMany({
+          where: { id: item.inventoryItemId, status: "STOCK" },
+          data: { status: "SOLD", buyerName: buyerName || null, buyerPhone: buyerPhone || null }
+        });
+        if (updated.count === 0) throw new Error("inventaris-sudah-terjual");
+      }
 
       if (licenseItems.length > 0) {
         const dbUser = await tx.user.findFirst({
@@ -392,7 +408,10 @@ export async function createSaleAction(formData: FormData) {
       });
       if (activeSale) redirect(`/sales/${activeSale.id}/receipt?duplicate=1`);
     }
-    redirect(`${errorPath}?error=tabel-penjualan-belum-migrasi`);
+    if (error instanceof Error && error.message === "inventaris-sudah-terjual") {
+      redirect(`${errorPath}?error=inventaris-sudah-terjual`);
+    }
+    redirect(`${errorPath}?error=transaksi-gagal-coba-lagi`);
   }
 
   await notifySaleToN8n({

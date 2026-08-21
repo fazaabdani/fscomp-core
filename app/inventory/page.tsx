@@ -40,7 +40,7 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
   ]);
 
   const activeWarrantyCount = items.filter((item) => warrantyInfo(item).tone === "green").length;
-  const expiringWarrantyCount = items.filter((item) => warrantyInfo(item).tone === "yellow").length;
+  const expiringWarrantyCount = items.filter((item) => warrantyInfo(item).label === "Garansi mau habis").length;
   const stockCount = items.filter((item) => item.status === "STOCK").length;
   const problemCount = items.filter((item) => item.status === "DAMAGED" || item.status === "RETURNED").length;
 

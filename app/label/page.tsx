@@ -50,7 +50,7 @@ export default async function LabelPage({ searchParams }: { searchParams?: { uni
         </div>
       </div>
 
-      <div className="labelLayout">
+      <div className={mode === "qc" ? "labelLayout labelPageQc" : "labelLayout labelPageSimple"}>
         <form className="panel">
           <div className="panelHeader">
             <div>

@@ -331,6 +331,7 @@ model InventoryItem {
   unit                  Unit?                 @relation(fields: [unitId], references: [id])
   createdBy             User?                 @relation(fields: [createdById], references: [id])
   pcComponent           PcComponent?
+  saleItems             SaleItem[]
 
   @@index([category, status])
   @@index([supplier])
@@ -701,18 +702,22 @@ model LicenseRecord {
 }
 
 model SaleItem {
-  id          String   @id @default(cuid())
-  saleId      String
-  name        String
-  category    String
-  qty         Int      @default(1)
-  unitPrice   Int
-  unitCost    Int      @default(0)
-  lineTotal   Int
-  lineCost    Int      @default(0)
-  createdAt   DateTime @default(now())
+  id              String        @id @default(cuid())
+  saleId          String
+  name            String
+  category        String
+  qty             Int           @default(1)
+  unitPrice       Int
+  unitCost        Int           @default(0)
+  lineTotal       Int
+  lineCost        Int           @default(0)
+  inventoryItemId String?
+  createdAt       DateTime      @default(now())
 
-  sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  sale            Sale          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  inventoryItem   InventoryItem? @relation(fields: [inventoryItemId], references: [id])
+
+  @@index([inventoryItemId])
 }
 
 model AiLog {

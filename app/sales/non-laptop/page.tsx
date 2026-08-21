@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Boxes, Receipt } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { SubmitButton } from "../../SubmitButton";
 import { createSaleAction } from "../actions";
@@ -16,11 +17,18 @@ const itemRows = [
 
 export default async function NonLaptopCashierPage({ searchParams }: { searchParams?: { error?: string } }) {
   await requireRole(["admin", "teknisi", "sales"]);
+  const stockItems = await prisma.inventoryItem.findMany({
+    where: { status: "STOCK" },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, category: true, serialNumber: true }
+  });
   const message = searchParams?.error === "item-wajib"
     ? "Isi minimal satu item dengan qty dan harga jual lebih dari nol."
-    : searchParams?.error
-      ? `Transaksi gagal: ${searchParams.error}`
-      : "";
+    : searchParams?.error === "inventaris-sudah-terjual"
+      ? "Salah satu barang inventaris yang dipilih ternyata sudah terjual duluan. Periksa ulang pilihan barang."
+      : searchParams?.error
+        ? `Transaksi gagal: ${searchParams.error}`
+        : "";
 
   return <section className="pageStack">
     <div className="sectionTitle">
@@ -61,9 +69,17 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
 
       <div className="panelSubsection cashierItems">
         <div><p className="eyebrow">Daftar Item</p><h3>Barang atau layanan yang dijual</h3></div>
-        <div className="cashierItemHeader"><span>Item</span><span>Kategori</span><span>Qty</span><span>Jual/pcs</span><span>Modal/pcs</span></div>
+        <div className="cashierItemHeader"><span>Item</span><span>Stok inventaris</span><span>Kategori</span><span>Qty</span><span>Jual/pcs</span><span>Modal/pcs</span></div>
         {itemRows.map((item, index) => <div className="cashierItemRow" key={`${item.category}-${index}`}>
           <input name="itemName" defaultValue={item.name} placeholder="Nama barang/layanan" />
+          <select name="itemInventoryId" defaultValue="" aria-label={`Tautkan ke barang inventaris untuk item ${index + 1}`}>
+            <option value="">Tidak terhubung inventaris</option>
+            {stockItems.map((stockItem) => (
+              <option value={stockItem.id} key={stockItem.id}>
+                {stockItem.name}{stockItem.serialNumber ? ` (${stockItem.serialNumber})` : ""}
+              </option>
+            ))}
+          </select>
           <select name="itemCategory" defaultValue={item.category} aria-label={`Kategori item ${index + 1}`}>
             <option value="LISENSI">Lisensi</option><option value="SOFTWARE">Software</option><option value="AKSESORI">Aksesori</option>
             <option value="SPAREPART">Sparepart</option><option value="JASA">Jasa</option><option value="LAINNYA">Lainnya</option>
@@ -72,7 +88,7 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
           <input name="itemPrice" type="number" inputMode="numeric" min="0" step="1000" defaultValue={0} aria-label={`Harga jual item ${index + 1}`} />
           <input name="itemCost" type="number" inputMode="numeric" min="0" step="1000" defaultValue={0} aria-label={`Modal item ${index + 1}`} />
         </div>)}
-        <small className="formHint">Item dengan qty 0 tidak ikut nota. Untuk transaksi lisensi, isi jenis dan detail aktivasi di bagian bawah.</small>
+        <small className="formHint">Item dengan qty 0 tidak ikut nota. Kalau ditautkan ke barang inventaris, qty otomatis dianggap 1 dan barang itu ditandai terjual. Untuk transaksi lisensi, isi jenis dan detail aktivasi di bagian bawah.</small>
       </div>
 
       <div className="cashierBottomGrid">

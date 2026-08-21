@@ -2312,9 +2312,9 @@ textarea {
 .cashierItemHeader,
 .cashierItemRow {
   display: grid;
-  grid-template-columns: minmax(128px, 1fr) 82px 50px 88px 88px;
+  grid-template-columns: minmax(128px, 1fr) minmax(140px, 180px) 82px 50px 88px 88px;
   gap: 8px;
-  min-width: 476px;
+  min-width: 620px;
 }
 
 .cashierItemHeader {
@@ -2324,7 +2324,8 @@ textarea {
   text-transform: uppercase;
 }
 
-.cashierItemRow input {
+.cashierItemRow input,
+.cashierItemRow select {
   min-height: 38px;
   padding: 0 9px;
   min-width: 0;
@@ -2649,6 +2650,30 @@ textarea {
 @page receipt {
   size: 210mm 165mm landscape;
   margin: 5mm;
+}
+
+/* Named print pages for physical label stickers (7x5cm / 10x7cm), matching the .labelSheet
+   sizes below. Without this, the unnamed @page A4 rules elsewhere in this file win the cascade
+   and the print dialog shrinks the label into a corner of an A4 sheet instead of matching the
+   sticker paper loaded in the printer. */
+@page label-simple {
+  size: 70mm 50mm;
+  margin: 0;
+}
+
+@page label-qc {
+  size: 100mm 70mm;
+  margin: 0;
+}
+
+@media print {
+  .labelPageSimple {
+    page: label-simple;
+  }
+
+  .labelPageQc {
+    page: label-qc;
+  }
 }
 
 /* ===== Nota (receipt document) ===== */

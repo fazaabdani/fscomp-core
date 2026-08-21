@@ -352,6 +352,10 @@ export async function getQcHarianPageData() {
 
 export async function getDashboardData() {
   try {
+    const todayJakarta = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+    const todayStart = new Date(`${todayJakarta}T00:00:00+07:00`);
+    const todayEnd = new Date(`${todayJakarta}T23:59:59.999+07:00`);
+
     const [batches, units, totalUnitCount, dailyQcCount, aiLogs] = await Promise.all([
       prisma.batchPSI.findMany({ include: { units: true }, orderBy: { tanggalMasuk: "desc" }, take: 6 }),
       prisma.unit.findMany({
@@ -366,7 +370,7 @@ export async function getDashboardData() {
         take: 30
       }),
       prisma.unit.count(),
-      prisma.qcHarian.count(),
+      prisma.qcHarian.count({ where: { tanggal: { gte: todayStart, lte: todayEnd } } }),
       prisma.aiLog.findMany({
         where: { status: "OPEN" },
         include: { unit: true },

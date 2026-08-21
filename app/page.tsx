@@ -106,7 +106,7 @@ export default async function DashboardPage() {
         <article className="statCard"><MonitorCog size={19} /><span>Unit aktif</span><strong>{stats.unitAktif}</strong></article>
         <article className="statCard"><ClipboardCheck size={19} /><span>Siap katalog</span><strong>{stats.siapKatalog}</strong></article>
         <article className="statCard"><TriangleAlert size={19} /><span>Perlu perhatian</span><strong>{stats.perluPerhatian}</strong></article>
-        <article className="statCard"><MonitorCog size={19} /><span>QC harian</span><strong>{stats.qcHarian}</strong></article>
+        <article className="statCard"><MonitorCog size={19} /><span>QC harian hari ini</span><strong>{stats.qcHarian}</strong></article>
       </div>
 
       <section className="panel dangerPanel">
@@ -121,7 +121,7 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div className="infoBox">
-          Unit wajib QC harian maksimal {dueDailyQc.dueHours} jam sekali. Unit tetap tampil di kasir dan katalog, bagian ini hanya alarm operasional.
+          Unit wajib QC harian maksimal {dueDailyQc.dueHours} jam sekali. Kalau QC sudah kadaluarsa, unit otomatis disembunyikan dari katalog dan tidak bisa dijual sampai QC harian diisi ulang.
         </div>
         <div className="listStack">
           {dueDailyQc.units.length === 0 ? <div className="emptyState">Semua unit aktif masih dalam jadwal QC harian.</div> : dueDailyQc.units.map((unit) => (

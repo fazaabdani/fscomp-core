@@ -8,6 +8,19 @@ const requirements = [
   ["BACKUP_EXPORT_TOKEN", 24]
 ];
 
+// Bukan hard requirement (deploy tetap boleh jalan tanpanya) karena masing-masing fitur sudah
+// punya fallback aman kalau env ini kosong (asisten AI bilang "belum aktif", WA AI skip kirim,
+// dll) -- tapi kalau memang harusnya aktif di production, ini sering kelupaan diisi tanpa ada
+// yang sadar sampai fiturnya "diam-diam" tidak jalan. Cukup diperingatkan di log deploy.
+const optionalButImportant = [
+  ["FONNTE_TOKEN", 1, "AI WhatsApp tidak akan bisa mengirim balasan"],
+  ["FONNTE_WEBHOOK_SECRET", 24, "webhook langsung Fonnte akan menolak semua pesan masuk"],
+  ["WA_CHANNEL_STORE_DEVICE", 1, "toggle nomor WA aktif tidak benar-benar memblokir channel manapun"],
+  ["WA_CHANNEL_PERSONAL_DEVICE", 1, "toggle nomor WA aktif tidak benar-benar memblokir channel manapun"],
+  ["OPENAI_API_KEY", 1, "Asisten AI staff dan AI WhatsApp akan nonaktif"],
+  ["OPENAI_MODEL", 1, "Asisten AI staff dan AI WhatsApp akan nonaktif"]
+];
+
 const invalidVariables = requirements
   .filter(([name, minimum]) => (process.env[name] ?? "").length < minimum)
   .map(([name, minimum]) => `${name} (minimal ${minimum} karakter)`);
@@ -16,6 +29,12 @@ if (invalidVariables.length > 0) {
   console.error("PREDEPLOY GAGAL: environment variable belum valid:");
   invalidVariables.forEach((item) => console.error(`- ${item}`));
   process.exit(1);
+}
+
+const missingOptional = optionalButImportant.filter(([name, minimum]) => (process.env[name] ?? "").length < minimum);
+if (missingOptional.length > 0) {
+  console.warn("PREDEPLOY PERINGATAN: env var berikut belum diisi (deploy tetap lanjut):");
+  missingOptional.forEach(([name, , impact]) => console.warn(`- ${name}: ${impact}`));
 }
 
 const prisma = new PrismaClient();
