@@ -35,6 +35,7 @@ export async function getSaleReceipt(id: string) {
       id: sale.id,
       invoiceNumber: sale.invoiceNumber,
       soldAt: jakartaDateKey(sale.soldAt),
+      soldAtDisplay: new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" }).format(sale.soldAt),
       location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
       store: storeByLocation[sale.location],
       paymentMethod: sale.paymentMethod,
