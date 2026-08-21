@@ -2649,7 +2649,7 @@ textarea {
 }
 
 @page receipt {
-  size: 210mm 165mm landscape;
+  size: A5 landscape;
   margin: 5mm;
 }
 
@@ -3157,31 +3157,32 @@ textarea {
     print-color-adjust: exact;
   }
 
-  /* The nota prints onto fixed 210x165mm paper (see @page receipt above).
-     This single-column layout is far more compact than the old sidebar
-     design, but still needs a tighter print-only scale to comfortably fit
-     transactions with several items or a notes line -- verified against a
-     static repro of the real markup/CSS (see commit message). */
+  /* The nota prints onto A5 landscape paper (210x148mm, see @page receipt
+     above) -- 200x138mm after the 5mm margin. This single-column layout is
+     far more compact than the old sidebar design, but still needs a tighter
+     print-only scale to comfortably fit transactions with several items or
+     a notes line -- verified against a static repro of the real markup/CSS
+     (see commit message). */
   .notaSheet {
     width: 200mm;
-    min-height: 155mm;
-    gap: 6px;
-    padding: 14px 20px;
+    min-height: 138mm;
+    gap: 4px;
+    padding: 10px 18px;
     box-shadow: none;
     border-radius: 0;
     line-height: 1.22;
   }
 
   .notaHeaderRow {
-    gap: 16px;
+    gap: 12px;
   }
 
   .notaBrandBlock {
-    width: 105px;
+    width: 85px;
   }
 
   .notaLogo {
-    max-width: 100px;
+    max-width: 80px;
     margin-bottom: 4px;
   }
 
@@ -3190,15 +3191,16 @@ textarea {
   }
 
   .notaContactBlock {
-    gap: 3px;
+    gap: 2px;
   }
 
   .notaContactLine {
-    font-size: 9px;
+    font-size: 8px;
+    line-height: 1.25;
   }
 
   .notaInvoiceNumber {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .notaInvoiceMeta {
@@ -3219,7 +3221,7 @@ textarea {
   }
 
   .notaInfoGrid {
-    gap: 8px;
+    gap: 6px;
   }
 
   .notaInfoGrid strong {
@@ -3232,7 +3234,7 @@ textarea {
   }
 
   .notaUnitBanner {
-    padding: 5px 10px;
+    padding: 4px 8px;
     gap: 8px;
   }
 
@@ -3251,7 +3253,7 @@ textarea {
 
   .notaTableHead,
   .notaTableRow {
-    padding: 2px 10px;
+    padding: 1.5px 8px;
   }
 
   .notaTableHead {
@@ -3272,7 +3274,7 @@ textarea {
   }
 
   .notaFooterRow {
-    gap: 10px;
+    gap: 8px;
   }
 
   .notaTermsBlock p {
@@ -3282,7 +3284,7 @@ textarea {
   }
 
   .notaTotalBox {
-    padding: 6px 10px;
+    padding: 5px 8px;
     gap: 3px;
   }
 
@@ -3300,7 +3302,7 @@ textarea {
   }
 
   .notaBankRow {
-    padding: 5px 10px;
+    padding: 4px 8px;
   }
 
   .notaBankRowLabel {
