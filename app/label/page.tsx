@@ -79,7 +79,7 @@ export default async function LabelPage({ searchParams }: { searchParams?: { uni
         <div className="labelSheet">
           <article className={mode === "qc" ? "unitLabel qcCompleteLabel" : "unitLabel"}>
             <div className="labelTop">
-              <div>
+              <div className="labelTitleBlock">
                 <span className="labelBrand">FS Comp</span>
                 <h2>{mode === "qc" ? `QC Unit ${selected.nomorUnit}` : `Unit ${selected.nomorUnit}`}</h2>
               </div>
@@ -102,7 +102,7 @@ export default async function LabelPage({ searchParams }: { searchParams?: { uni
             <div className="labelFooter">
               <span className={`statusPill ${statusTone[selected.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{selected.statusObservasi}</span>
               {selected.statusObservasi === "RETUR DISTRIBUTOR" ? <span className="statusPill red">JANGAN DIJUAL</span> : null}
-              <span>QC {selected.qcAwal.tanggal} / {selected.qcAwal.checker}</span>
+              <span className="labelQcInfo">QC {selected.qcAwal.tanggal} / {selected.qcAwal.checker}</span>
             </div>
           </article>
         </div>

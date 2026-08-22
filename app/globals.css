@@ -3210,6 +3210,17 @@ textarea {
   gap: 8px;
 }
 
+/* Both the unit-number title and the QC-date text sit next to a
+   fixed-size sibling (QR code / status pill) in a flex row with no
+   room to spare on a 7cm label -- without min-width:0 a long unit
+   number (e.g. "22HC-08") won't shrink and overlaps the QR code
+   instead of wrapping inside its own column. */
+.labelTitleBlock,
+.labelQcInfo {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
 .labelBrand {
   font-size: 12px;
   font-weight: 800;
@@ -3219,6 +3230,7 @@ textarea {
 .unitLabel h2 {
   margin: 4px 0 0;
   font-size: 28px;
+  overflow-wrap: break-word;
 }
 
 .labelBody {
