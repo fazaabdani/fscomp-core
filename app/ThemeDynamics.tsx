@@ -1,15 +1,36 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ResolvedTheme } from "./useTheme";
+
+function readResolvedTheme(): ResolvedTheme {
+  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+}
 
 export function ThemeDynamics() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const glowRef = useRef<HTMLDivElement | null>(null);
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("dark");
+
+  useEffect(() => {
+    setResolvedTheme(readResolvedTheme());
+    function handleThemeChange(event: Event) {
+      setResolvedTheme((event as CustomEvent<ResolvedTheme>).detail ?? readResolvedTheme());
+    }
+    window.addEventListener("fscomp-theme-change", handleThemeChange);
+    return () => window.removeEventListener("fscomp-theme-change", handleThemeChange);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const glow = glowRef.current;
     if (!canvas || !glow) return;
+
+    // Tema terang sengaja mematikan animasi partikel total (bukan mewarnai ulang) --
+    // orang pindah ke tema terang biasanya justru cari tampilan lebih tenang, dan
+    // partikel ini jalan terus lewat requestAnimationFrame selama halaman terbuka,
+    // jadi mematikannya juga menghemat CPU, bukan cuma soal warna.
+    if (resolvedTheme === "light") return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return;
@@ -148,7 +169,7 @@ export function ThemeDynamics() {
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, []);
+  }, [resolvedTheme]);
 
   return (
     <>

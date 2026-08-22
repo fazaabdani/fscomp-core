@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/session";
 import { NavLinks } from "./NavLinks";
 import { PageTransition } from "./PageTransition";
 import { ThemeDynamics } from "./ThemeDynamics";
+import { ThemeInitScript } from "./ThemeInitScript";
 import "./globals.css";
 import "./ops-overrides.css";
 
@@ -20,6 +21,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="id">
+      <head>
+        <ThemeInitScript />
+      </head>
       <body className={inter.variable}>
         <ThemeDynamics />
         <header className="topbar">
