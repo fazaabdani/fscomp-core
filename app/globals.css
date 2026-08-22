@@ -3797,6 +3797,34 @@ html[data-theme="light"] .sortPill:hover {
   color: var(--cyan);
 }
 
+/* Form fields, list rows, and a few "recessed" surfaces all share the same hardcoded dark-navy
+   background (rgba(5, 12, 22, ...) / rgba(5, 11, 24, ...)) as a design constant -- this covers
+   every one of them in one pass, since select/input/textarea alone appear on nearly every data
+   entry page in the app. */
+html[data-theme="light"] select,
+html[data-theme="light"] textarea,
+html[data-theme="light"] input[type="number"],
+html[data-theme="light"] input[type="text"],
+html[data-theme="light"] input[type="email"],
+html[data-theme="light"] input[type="password"],
+html[data-theme="light"] input[type="date"],
+html[data-theme="light"] input:not([type]),
+html[data-theme="light"] .unitListItem,
+html[data-theme="light"] .keyGrid,
+html[data-theme="light"] .meterShell,
+html[data-theme="light"] .mediaThumb,
+html[data-theme="light"] .mediaPickerFolderRow {
+  background: rgba(241, 245, 249, 0.9);
+}
+
+html[data-theme="light"] .mediaPickerModal {
+  background: #ffffff;
+}
+
+html[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: none;
+}
+
 html {
   scroll-behavior: smooth;
 }
