@@ -3150,8 +3150,8 @@ textarea {
   height: 5cm;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 8px;
-  padding: 12px;
+  gap: 5px;
+  padding: 9px;
   border: 2px solid var(--blue-dark);
   border-radius: 8px;
   background: white;
@@ -3214,11 +3214,24 @@ textarea {
    fixed-size sibling (QR code / status pill) in a flex row with no
    room to spare on a 7cm label -- without min-width:0 a long unit
    number (e.g. "22HC-08") won't shrink and overlaps the QR code
-   instead of wrapping inside its own column. */
-.labelTitleBlock,
+   instead of staying inside its own column.
+   Truncated with an ellipsis rather than wrapped: the label card is a
+   FIXED physical size (7x5cm, must match the sticker paper), so
+   wrapping to a 2nd line just moves the overflow from "overlapping
+   the QR code" to "pushing the rest of the label past the card's
+   bottom edge" for a long enough number (e.g. "22KC-8-8M"). The QR
+   code still encodes the full unit ID for scanning, so a truncated
+   label text is a safe trade-off. */
+.labelTitleBlock {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .labelQcInfo {
   min-width: 0;
-  overflow-wrap: break-word;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .labelBrand {
@@ -3229,28 +3242,39 @@ textarea {
 
 .unitLabel h2 {
   margin: 4px 0 0;
-  font-size: 28px;
-  overflow-wrap: break-word;
+  overflow: hidden;
+  font-size: 24px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .labelBody {
   display: grid;
   align-content: center;
-  gap: 3px;
+  gap: 2px;
 }
 
 .labelBody strong {
-  font-size: 15px;
+  font-size: 13px;
+  line-height: 1.15;
 }
 
 .labelBody b {
   color: var(--blue);
-  font-size: 16px;
+  font-size: 14px;
+  line-height: 1.15;
 }
 
 .labelBody span,
 .labelFooter span:last-child {
-  font-size: 11px;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.labelFooter .statusPill {
+  min-height: 22px;
+  padding: 3px 7px;
+  font-size: 10px;
 }
 
 .qcMiniGrid {

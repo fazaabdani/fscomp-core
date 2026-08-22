@@ -83,7 +83,7 @@ export default async function LabelPage({ searchParams }: { searchParams?: { uni
                 <span className="labelBrand">FS Comp</span>
                 <h2>{mode === "qc" ? `QC Unit ${selected.nomorUnit}` : `Unit ${selected.nomorUnit}`}</h2>
               </div>
-              <QRCodeSVG value={detailUrl} size={mode === "qc" ? 68 : 86} fgColor="#0f2f6b" />
+              <QRCodeSVG value={detailUrl} size={mode === "qc" ? 68 : 62} fgColor="#0f2f6b" />
             </div>
             <div className="labelBody">
               <strong>{selected.model}</strong>
