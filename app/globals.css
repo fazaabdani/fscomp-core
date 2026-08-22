@@ -3825,6 +3825,46 @@ html[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator {
   filter: none;
 }
 
+/* Public catalog hero section (/katalog): its copy, stat boxes, ticker, and feature strip all
+   use their own light-blue-gray text/background constants tuned for the dark page -- pure white
+   numbers, pale blue-gray body text -- which read as barely-visible on a white background. */
+html[data-theme="light"] .catalogHeroCopyPanel p,
+html[data-theme="light"] .catalogHeroStatsPanel p {
+  color: #475569;
+}
+
+html[data-theme="light"] .catalogStatBox {
+  background: rgba(26, 108, 246, 0.06);
+}
+
+html[data-theme="light"] .catalogStatBox strong {
+  color: #101826;
+}
+
+html[data-theme="light"] .catalogStatBox span {
+  color: #475569;
+}
+
+html[data-theme="light"] .catalogTicker {
+  background: rgba(241, 245, 249, 0.9);
+}
+
+html[data-theme="light"] .catalogTickerTrack span {
+  color: #334155;
+}
+
+html[data-theme="light"] .catalogFeatureItem strong {
+  color: #101826;
+}
+
+html[data-theme="light"] .catalogFeatureItem small {
+  color: #64748b;
+}
+
+html[data-theme="light"] .catalogHeroBadge {
+  background: rgba(255, 255, 255, 0.9);
+}
+
 html {
   scroll-behavior: smooth;
 }
