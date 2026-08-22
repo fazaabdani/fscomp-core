@@ -455,6 +455,22 @@ main {
   font-weight: 800;
 }
 
+/* .unitNumber is also used as a fixed-width column in table-like rows elsewhere (batch-psi,
+   sales, unit detail -- see .unitRow's fixed 60px grid track), so the base rule above stays a
+   rigid square there on purpose. Scoped to the catalog card badge only: nomorUnit varies from
+   1 to 10 characters in real data, and the rigid 40-50px box let unit numbers overflow past the
+   badge and get visually clipped by the location pill sitting right next to it. Widening to fit
+   the content here doesn't touch the list-row usage at all. */
+.catalogCardTop .unitNumber {
+  width: auto;
+  height: auto;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 8px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
 .statusPill {
   display: inline-flex;
   align-items: center;
