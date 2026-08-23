@@ -1,3 +1,5 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, CalendarClock, Cpu, HardDrive, MessageCircle, QrCode, ShieldCheck } from "lucide-react";
@@ -11,6 +13,23 @@ import { ShareUnitButton } from "./ShareUnitButton";
 import { UnitGallery } from "../UnitGallery";
 
 export const dynamic = "force-dynamic";
+
+const getUnitCached = cache(getUnitForDetail);
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const unit = await getUnitCached(params.id);
+  if (!unit) return { title: "Unit Tidak Ditemukan | FS Comp" };
+
+  const title = `${unit.model} Second ${unit.stockLocation} - ${formatRupiah(unit.hargaJualRekomendasi)} | FS Comp`;
+  const description = `${unit.model} (${unit.processor}, RAM ${unit.ram}, SSD ${unit.ssd}) laptop second bergaransi di FS Comp ${unit.stockLocation}, Pekalongan. Sudah lolos QC, harga ${formatRupiah(unit.hargaJualRekomendasi)}.`;
+
+  return {
+    title,
+    description,
+    robots: { index: false, follow: false },
+    openGraph: { title, description, url: `/unit/${unit.id}`, siteName: "FS Comp", locale: "id_ID", type: "website" }
+  };
+}
 
 function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: number }) {
   const text = [
@@ -36,7 +55,7 @@ function catalogReturnPath(value?: string | string[]) {
 }
 
 export default async function UnitDetailPage({ params, searchParams }: { params: { id: string }; searchParams?: { from?: string | string[] } }) {
-  const unit = await getUnitForDetail(params.id);
+  const unit = await getUnitCached(params.id);
   if (!unit) notFound();
 
   const currentUser = await getCurrentUser();

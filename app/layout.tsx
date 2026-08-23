@@ -14,6 +14,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const fraunces = Fraunces({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-serif", display: "swap" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://core.fscomp.id"),
   title: "FS Comp Core",
   description: "Manajemen unit, batch, QC, label QR, dan AI reporting FS Comp."
 };

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, PackageCheck, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { CopyWaButton } from "@/app/CopyWaButton";
@@ -9,6 +10,69 @@ import { CatalogFilterShell } from "./CatalogFilterShell";
 import { KatalogDynamics } from "./KatalogDynamics";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Jual Beli Laptop Second Pekalongan Bergaransi | FS Comp",
+  description:
+    "Katalog laptop second ready stock FS Comp Wiradesa & FS.ID Kajen, Pekalongan. QC ketat, garansi toko, harga update tiap hari. Chat admin via WhatsApp untuk cek unit.",
+  keywords: [
+    "laptop second pekalongan",
+    "jual beli laptop pekalongan",
+    "laptop bekas wiradesa",
+    "laptop bekas kajen",
+    "FS Comp",
+    "FS Media Comp",
+    "toko komputer bekas pekalongan"
+  ],
+  alternates: { canonical: "/katalog" },
+  openGraph: {
+    title: "Jual Beli Laptop Second Pekalongan Bergaransi | FS Comp",
+    description: "Katalog laptop second ready stock FS Comp Wiradesa & FS.ID Kajen, Pekalongan. QC ketat, garansi toko, harga update tiap hari.",
+    url: "/katalog",
+    siteName: "FS Comp",
+    locale: "id_ID",
+    type: "website"
+  }
+};
+
+const STORE_LOCATIONS = [
+  {
+    "@type": "ElectronicsStore",
+    name: "FS Comp Wiradesa",
+    alternateName: "FS Media Comp Wiradesa",
+    telephone: "+62816660056",
+    priceRange: "Rp",
+    url: "https://fscomp.id",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Jl. Wiradesa No.1 RT 22 RW 05, Desa Wiradesa",
+      addressLocality: "Wiradesa, Kabupaten Pekalongan",
+      addressRegion: "Jawa Tengah",
+      postalCode: "51152",
+      addressCountry: "ID"
+    }
+  },
+  {
+    "@type": "ElectronicsStore",
+    name: "FS.ID Kajen",
+    alternateName: "FS Comp Kajen",
+    telephone: "+6285182661773",
+    priceRange: "Rp",
+    url: "https://fscomp.id",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Jalan Diponegoro No. 204B (Utara Rumah Dinas Wakil Bupati)",
+      addressLocality: "Kajen, Kabupaten Pekalongan",
+      addressRegion: "Jawa Tengah",
+      addressCountry: "ID"
+    }
+  }
+];
+
+function CatalogStructuredData() {
+  const json = STORE_LOCATIONS.map((store) => ({ "@context": "https://schema.org", ...store }));
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(json) }} />;
+}
 
 function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: number }) {
   const text = [
@@ -877,6 +941,7 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
 
   return (
     <section className="pageStack katalogPage dynamicCatalogPage">
+      <CatalogStructuredData />
       <KatalogDynamics navigationKey={returnTo} />
       <CatalogPageStyles />
       <div className="catalogLandingHero catalogReveal">
