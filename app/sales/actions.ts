@@ -260,7 +260,7 @@ export async function createSaleAction(formData: FormData) {
     }
   }
   const requestedLocation = text(formData, "location");
-  const location: SaleLocation = unit?.stockLocation ?? (requestedLocation === "KAJEN" ? "KAJEN" : "WIRADESA");
+  const location: SaleLocation = requestedLocation === "KAJEN" ? "KAJEN" : "WIRADESA";
 
   const latestDailyQc = unit?.qcHarian[0];
   if (!standalone && !latestDailyQc) {
@@ -439,7 +439,7 @@ export async function updateSaleAction(saleId: string, formData: FormData) {
   const errorPath = `/sales/${saleId}/edit`;
   if (!entityId.safeParse(saleId).success) redirect(`${errorPath}?error=invalid-input`);
 
-  const sale = await prisma.sale.findUnique({ where: { id: saleId }, select: { id: true, unitId: true, subtotal: true, voidedAt: true } });
+  const sale = await prisma.sale.findUnique({ where: { id: saleId }, select: { id: true, unitId: true, subtotal: true, voidedAt: true, location: true } });
   if (!sale) redirect("/sales?error=transaksi-tidak-ditemukan");
   if (sale.voidedAt) redirect(`/sales/${saleId}/receipt?error=transaksi-dibatalkan`);
 
@@ -463,10 +463,19 @@ export async function updateSaleAction(saleId: string, formData: FormData) {
   const warrantyHardware = standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan") : warrantyText(formData, "warrantyHardware", 3, "minggu");
 
   const dbUser = await prisma.user.findFirst({ where: { username: currentUser.username }, select: { id: true } });
+  // Cuma admin yang boleh koreksi lokasi transaksi -- ini nentuin kop nota (FS Comp/FS.ID) dan
+  // ikut dipakai hitung bagi hasil Wiradesa/Kajen di halaman Finance, jadi tidak boleh diubah
+  // sembarangan oleh teknisi/sales lewat form ini (field-nya sendiri juga tidak dirender untuk
+  // role selain admin, ini jaring pengaman kalau ada yang submit manual).
+  const requestedLocation = text(formData, "location");
+  const location: SaleLocation = currentUser.role === "admin" && (requestedLocation === "KAJEN" || requestedLocation === "WIRADESA")
+    ? requestedLocation
+    : sale.location;
 
   await prisma.sale.update({
     where: { id: saleId },
     data: {
+      location,
       paymentMethod,
       buyerName: buyerName || null,
       buyerPhone: buyerPhone || null,

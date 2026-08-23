@@ -13,7 +13,7 @@ function parseWarranty(value: string, fallbackUnit: "minggu" | "bulan") {
 }
 
 export default async function EditSalePage({ params, searchParams }: { params: { id: string }; searchParams?: { error?: string } }) {
-  await requireRole(["admin", "teknisi", "sales"]);
+  const currentUser = await requireRole(["admin", "teknisi", "sales"]);
 
   const sale = await prisma.sale.findUnique({
     where: { id: params.id },
@@ -22,6 +22,7 @@ export default async function EditSalePage({ params, searchParams }: { params: {
       invoiceNumber: true,
       unitId: true,
       voidedAt: true,
+      location: true,
       paymentMethod: true,
       buyerName: true,
       buyerPhone: true,
@@ -61,6 +62,15 @@ export default async function EditSalePage({ params, searchParams }: { params: {
       <FlashNotice message={message} tone="error" queryKeys={["error"]} />
 
       <form className="panel formGrid" action={updateSaleAction.bind(null, sale.id)}>
+        {currentUser.role === "admin" ? (
+          <label>Lokasi transaksi / kop nota
+            <select name="location" defaultValue={sale.location}>
+              <option value="WIRADESA">Wiradesa / FS Comp</option>
+              <option value="KAJEN">Kajen / FS.ID</option>
+            </select>
+            <small className="formHint">Cuma admin yang bisa koreksi ini. Ganti kop nota dan ikut mengubah perhitungan bagi hasil Wiradesa/Kajen di halaman Finance.</small>
+          </label>
+        ) : null}
         <div className="numberGrid">
           <label>Metode bayar
             <select name="paymentMethod" defaultValue={sale.paymentMethod}>
