@@ -24,6 +24,7 @@ export function ReceiptDocument({ sale, publicReceiptUrl }: { sale: SaleReceipt;
       <div className="notaHeaderRow">
         <div className="notaBrandBlock">
           <img className="notaLogo" src="/branding/fs-comp-logo.webp" alt={sale.store.name} />
+          <h2 className="notaBrandName">{sale.store.name}</h2>
           <p className="notaBrandSlogan">Solusi teknologi, untuk <em>masa depan</em></p>
         </div>
 

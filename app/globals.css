@@ -2727,6 +2727,14 @@ textarea {
   margin-bottom: 6px;
 }
 
+.notaBrandName {
+  margin: 0 0 3px;
+  color: var(--nota-navy);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
 .notaBrandSlogan {
   margin: 0;
   color: var(--nota-muted);
@@ -3191,6 +3199,11 @@ textarea {
   .notaLogo {
     max-width: 80px;
     margin-bottom: 4px;
+  }
+
+  .notaBrandName {
+    margin: 0 0 2px;
+    font-size: 11px;
   }
 
   .notaBrandSlogan {
