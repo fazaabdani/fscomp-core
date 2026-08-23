@@ -7,7 +7,6 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { entityId, formValues, nonNegativeInteger, optionalText, requiredText, z } from "@/lib/form-validation";
 import { inferLicenseType, inferLicenseVersion, licenseDisplayName } from "@/lib/licenses";
-import { isQcFresh } from "@/lib/qc-due";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -269,10 +268,6 @@ export async function createSaleAction(formData: FormData) {
 
   if (latestDailyQc && latestDailyQc.masihLolos === "TIDAK_LOLOS") {
     redirect(`${errorPath}?error=qc-harian-belum-lolos`);
-  }
-
-  if (latestDailyQc && !isQcFresh(latestDailyQc.tanggal)) {
-    redirect(`${errorPath}?error=qc-harian-kadaluarsa`);
   }
 
   const items = [

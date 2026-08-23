@@ -1,6 +1,5 @@
 import { resolvePrimaryImageUrl } from "./media-data";
 import { prisma } from "./prisma";
-import { isQcFresh } from "./qc-due";
 import { displayUnitNumber } from "./unit-number";
 
 const CATALOG_UNIT_INCLUDE = {
@@ -49,11 +48,7 @@ export async function getCatalogPageData() {
     const units = candidates
       .filter((unit) => {
         const latestDaily = unit.qcHarian[0];
-        return Boolean(
-          latestDaily &&
-          latestDaily.masihLolos !== "TIDAK_LOLOS" &&
-          isQcFresh(latestDaily.tanggal)
-        );
+        return Boolean(latestDaily && latestDaily.masihLolos !== "TIDAK_LOLOS");
       })
       .map((unit) => {
         const latestDaily = unit.qcHarian[0];
@@ -135,7 +130,7 @@ export async function getRelatedCatalogUnits(unitId: string) {
     const currentBrand = current.model.trim().split(/\s+/)[0]?.toUpperCase() ?? "";
 
     return candidates
-      .filter((unit) => Boolean(unit.qcHarian[0] && unit.qcHarian[0].masihLolos !== "TIDAK_LOLOS" && isQcFresh(unit.qcHarian[0].tanggal)))
+      .filter((unit) => Boolean(unit.qcHarian[0] && unit.qcHarian[0].masihLolos !== "TIDAK_LOLOS"))
       .map((unit) => {
         const brand = unit.model.trim().split(/\s+/)[0]?.toUpperCase() ?? "";
         const score =

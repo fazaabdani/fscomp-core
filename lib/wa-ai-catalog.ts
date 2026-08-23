@@ -1,5 +1,4 @@
 import { prisma } from "./prisma";
-import { isQcFresh } from "./qc-due";
 import { displayUnitNumber } from "./unit-number";
 import { formatWaLocation } from "./wa-ai-responses";
 
@@ -59,7 +58,7 @@ export async function getSafeWaCatalogUnits(input: {
     const units = candidates
       .filter((unit) => {
         const latestDaily = unit.qcHarian[0];
-        if (!latestDaily || latestDaily.masihLolos === "TIDAK_LOLOS" || !isQcFresh(latestDaily.tanggal)) return false;
+        if (!latestDaily || latestDaily.masihLolos === "TIDAK_LOLOS") return false;
         if (!query) return true;
         const haystack = [
           unit.nomorUnit,

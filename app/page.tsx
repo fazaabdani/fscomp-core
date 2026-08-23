@@ -121,7 +121,7 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div className="infoBox">
-          Unit wajib QC harian maksimal {dueDailyQc.dueHours} jam sekali. Kalau QC sudah kadaluarsa, unit otomatis disembunyikan dari katalog dan tidak bisa dijual sampai QC harian diisi ulang.
+          Unit wajib QC harian maksimal {dueDailyQc.dueHours} jam sekali. Unit di bawah ini QC-nya sudah lewat batas itu — tetap tampil di katalog dan tetap bisa dijual, tapi mohon segera di-QC ulang.
         </div>
         <div className="listStack">
           {dueDailyQc.units.length === 0 ? <div className="emptyState">Semua unit aktif masih dalam jadwal QC harian.</div> : dueDailyQc.units.map((unit) => (

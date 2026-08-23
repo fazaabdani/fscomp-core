@@ -2,7 +2,6 @@ import type { Prisma } from "@prisma/client";
 import { chargerTypes } from "./charger-options";
 import { mediaAssetUrl, mediaThumbUrl } from "./media-data";
 import { prisma } from "./prisma";
-import { isQcFresh } from "./qc-due";
 import { displayUnitNumber } from "./unit-number";
 export { getBatchPaymentSummary } from "./batch-payment-data";
 export { getCatalogPageData } from "./catalog-page-data";
@@ -24,7 +23,7 @@ function chargerCountsFromJson(value: unknown) {
 
 function hasSaleReadyDaily(qcHarian: { masihLolos: string; tanggal?: Date | null }[]) {
   const latestDaily = qcHarian[0];
-  return Boolean(latestDaily && latestDaily.masihLolos !== "TIDAK_LOLOS" && isQcFresh(latestDaily.tanggal));
+  return Boolean(latestDaily && latestDaily.masihLolos !== "TIDAK_LOLOS");
 }
 
 export async function getBatchesForPage() {
