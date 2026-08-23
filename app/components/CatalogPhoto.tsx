@@ -1,7 +1,7 @@
 "use client";
 
 import { Maximize2, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { catalogImageCandidates, genericCatalogImageCandidates } from "@/lib/catalog-image";
 
 export function CatalogPhoto({
@@ -27,12 +27,21 @@ export function CatalogPhoto({
   const [loaded, setLoaded] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const source = candidates[index];
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     setIndex(0);
     setLoaded(false);
     setExpanded(false);
   }, [imageWidth, url]);
+
+  // Kalau foto sudah kepakai cache browser, bisa selesai load LEBIH CEPAT dari React sempat
+  // memasang listener onLoad di bawah -- akibatnya event onLoad tidak pernah kepanggil dan foto
+  // nyangkut permanen di opacity loading-skeleton (0.32). img.complete tetap true walau begitu,
+  // jadi dicek manual di sini sebagai jaring pengaman.
+  useEffect(() => {
+    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) setLoaded(true);
+  }, [source]);
 
   useEffect(() => {
     if (!expanded) return;
@@ -61,6 +70,7 @@ export function CatalogPhoto({
 
   const image = (
     <img
+      ref={imgRef}
       className={className}
       src={source}
       alt={isIllustration ? `${alt} ilustrasi` : alt}
