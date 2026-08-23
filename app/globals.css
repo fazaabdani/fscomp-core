@@ -2647,12 +2647,15 @@ textarea {
 }
 
 @page receipt {
-  /* Explicit width-then-height, not the "A5 landscape" keyword combo --
-     Chrome's support for combining a named page-size keyword with an
-     orientation keyword is unreliable and rendered this portrait instead
-     of landscape in testing. Two explicit lengths always mean width then
-     height, so this form is unambiguous. */
-  size: 210mm 148mm;
+  /* A4 portrait, bukan A5 landscape -- sengaja, supaya kasir tidak perlu ganti ukuran
+     kertas atau orientasi tiap kali print, printer/kertas A4 default langsung jalan.
+     .notaSheet di bawah tetap dibuat 200x138mm (ukuran A5 landscape asli), jadi hasil
+     cetaknya otomatis cuma makan setengah bagian atas kertas A4 -- sisanya kosong,
+     tinggal dipotong/dilipat kalau mau ukuran nota yang lebih kecil. Explicit
+     width-then-height, bukan keyword "A4" sendirian, konsisten sama alasan di
+     @page label-simple/label-qc di bawah -- Chrome kadang tidak konsisten soal
+     keyword page-size kalau dicampur sama orientasi. */
+  size: 210mm 297mm;
   margin: 5mm;
 }
 
@@ -3172,12 +3175,11 @@ textarea {
     print-color-adjust: exact;
   }
 
-  /* The nota prints onto A5 landscape paper (210x148mm, see @page receipt
-     above) -- 200x138mm after the 5mm margin. This single-column layout is
-     far more compact than the old sidebar design, but still needs a tighter
-     print-only scale to comfortably fit transactions with several items or
-     a notes line -- verified against a static repro of the real markup/CSS
-     (see commit message). */
+  /* Kertas cetaknya sekarang A4 portrait (lihat @page receipt di atas), tapi kartu nota
+     sendiri tetap dibuat pas 200x138mm (ukuran A5 landscape) supaya cuma makan setengah
+     bagian atas kertas A4, bukan melar penuh 1 halaman. Skala compact ini juga masih
+     dibutuhkan supaya transaksi dengan banyak item atau baris catatan tetap muat pas --
+     verified against a static repro of the real markup/CSS (see commit message). */
   .notaSheet {
     width: 200mm;
     min-height: 138mm;
