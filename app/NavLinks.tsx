@@ -3,26 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-
-type NavUser = {
-  name: string;
-  role: "admin" | "teknisi" | "sales" | "magang";
-};
-
-type NavLink = {
-  href: string;
-  label: string;
-  show: boolean;
-};
-
-function isActive(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-function groupActive(pathname: string, links: NavLink[]) {
-  return links.some((link) => link.show && isActive(pathname, link.href));
-}
+import { getNavEntries, isGroupActive, isNavActive, type NavLink, type NavUser } from "./navLinks.data";
 
 function NavDropdown({ label, links, pathname, menuClassName = "" }: { label: string; links: NavLink[]; pathname: string; menuClassName?: string }) {
   const [open, setOpen] = useState(false);
@@ -45,7 +26,7 @@ function NavDropdown({ label, links, pathname, menuClassName = "" }: { label: st
       <button
         aria-expanded={open}
         aria-haspopup="menu"
-        className={groupActive(pathname, visibleLinks) ? "activeNav" : ""}
+        className={isGroupActive(pathname, visibleLinks) ? "activeNav" : ""}
         onClick={() => setOpen((value) => !value)}
         type="button"
       >
@@ -53,7 +34,7 @@ function NavDropdown({ label, links, pathname, menuClassName = "" }: { label: st
       </button>
       <div className={`navDropdownMenu ${menuClassName} ${open ? "open" : ""}`} role="menu">
         {visibleLinks.map((link) => (
-          <Link className={isActive(pathname, link.href) ? "activeNav" : ""} href={link.href} key={link.href} onClick={() => setOpen(false)}>
+          <Link className={isNavActive(pathname, link.href) ? "activeNav" : ""} href={link.href} key={link.href} onClick={() => setOpen(false)}>
             {link.label}
           </Link>
         ))}
@@ -66,57 +47,33 @@ export function NavLinks({ currentUser }: { currentUser: NavUser | null }) {
   const pathname = usePathname();
 
   if (!currentUser) {
-    return <Link className={isActive(pathname, "/login") ? "activeNav" : ""} href="/login">Login</Link>;
+    return <Link className={isNavActive(pathname, "/login") ? "activeNav" : ""} href="/login">Login</Link>;
   }
 
-  const isMagang = currentUser.role === "magang";
-  const canSeeLicense = currentUser.role === "admin" || currentUser.role === "sales";
-  const qcLinks = [
-    { href: "/qc-harian", label: "QC Harian", show: true },
-    { href: "/qc-tools", label: "QC Tools", show: true }
-  ];
-  const operationLinks = [
-    { href: "/inventory", label: "Inventaris", show: true },
-    { href: "/media", label: "Media Foto Produk", show: currentUser.role === "admin" || currentUser.role === "teknisi" },
-    { href: "/sales/non-laptop", label: "Kasir Non-Laptop", show: !isMagang },
-    { href: "/sales/archive", label: "Arsip Penjualan", show: currentUser.role === "admin" },
-    { href: "/rakit-pc", label: "Rakit PC", show: canSeeLicense },
-    { href: "/licenses", label: "Lisensi", show: canSeeLicense },
-    { href: "/wa-ai", label: "AI WhatsApp", show: canSeeLicense },
-    { href: "/asisten-ai", label: "Asisten AI", show: !isMagang },
-    { href: "/owner-dashboard", label: "Owner Dashboard", show: currentUser.role === "admin" },
-    { href: "/pengaturan", label: "Pengaturan", show: currentUser.role === "admin" }
-  ];
-  const links = [
-    { href: "/", label: "Dashboard", show: !isMagang },
-    { href: "/batch-psi", label: "Batch", show: !isMagang },
-    { href: "/katalog", label: "Katalog", show: true },
-    { href: "/label", label: "Label QR", show: true },
-    { href: "/attendance", label: "Absensi", show: true },
-    { href: "/sales", label: "Penjualan", show: !isMagang },
-    { href: "/users", label: "User", show: currentUser.role === "admin" }
-  ];
+  const entries = getNavEntries(currentUser);
 
   return (
     <>
-      {links.slice(0, 2).filter((link) => link.show).map((link) => (
-        <Link className={isActive(pathname, link.href) ? "activeNav" : ""} href={link.href} key={link.href}>
-          {link.label}
-        </Link>
-      ))}
-      <NavDropdown label="QC" links={qcLinks} pathname={pathname} />
-      {links.slice(2, 6).filter((link) => link.show).map((link) => (
-        <Link className={isActive(pathname, link.href) ? "activeNav" : ""} href={link.href} key={link.href}>
-          {link.label}
-        </Link>
-      ))}
-      <NavDropdown label="Operasional" links={operationLinks} pathname={pathname} menuClassName="navDropdownMenuWide" />
-      {links.slice(6).filter((link) => link.show).map((link) => (
-        <Link className={isActive(pathname, link.href) ? "activeNav" : ""} href={link.href} key={link.href}>
-          {link.label}
-        </Link>
-      ))}
-      <Link className={isActive(pathname, "/login") ? "activeNav" : ""} href="/login">{currentUser.name} ({currentUser.role})</Link>
+      {entries.map((entry) => {
+        if (entry.kind === "group") {
+          return (
+            <NavDropdown
+              key={entry.label}
+              label={entry.label}
+              links={entry.links}
+              pathname={pathname}
+              menuClassName={entry.label === "Operasional" ? "navDropdownMenuWide" : ""}
+            />
+          );
+        }
+        if (!entry.show) return null;
+        return (
+          <Link className={isNavActive(pathname, entry.href) ? "activeNav" : ""} href={entry.href} key={entry.href}>
+            {entry.label}
+          </Link>
+        );
+      })}
+      <Link className={isNavActive(pathname, "/login") ? "activeNav" : ""} href="/login">{currentUser.name} ({currentUser.role})</Link>
     </>
   );
 }

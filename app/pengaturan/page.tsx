@@ -31,8 +31,8 @@ export default async function PengaturanPage({ searchParams }: { searchParams?: 
       <section className="panel">
         <div className="panelHeader">
           <div>
-            <p className="eyebrow">Tema</p>
-            <h2>Terang atau gelap</h2>
+            <p className="eyebrow">Tema &amp; Layout</p>
+            <h2>Terang/gelap, dan posisi menu</h2>
           </div>
         </div>
         <SettingsPanel theme={theme} layout={layout} />
