@@ -178,6 +178,7 @@ model User {
   licenseRecords LicenseRecord[]
   mediaAssets MediaAsset[]
   saleEdits      Sale[]
+  appSettingEdits AppSetting[]
 }
 
 model Attendance {
@@ -499,6 +500,18 @@ model WaAiSetting {
   value     Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// Pengaturan tampilan aplikasi (tema, mode layout) -- berlaku global untuk semua orang yang
+/// akses core.fscomp.id, bukan per-browser. Diubah lewat /pengaturan, admin-only.
+model AppSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  updatedAt   DateTime @updatedAt
+  updatedById String?
+
+  updatedBy   User?    @relation(fields: [updatedById], references: [id])
 }
 
 model WaAiEventLog {

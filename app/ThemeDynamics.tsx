@@ -1,25 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { ResolvedTheme } from "./useTheme";
+import { useEffect, useRef } from "react";
+import type { ThemePreference } from "@/lib/app-settings";
 
-function readResolvedTheme(): ResolvedTheme {
-  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
-}
-
-export function ThemeDynamics() {
+export function ThemeDynamics({ resolvedTheme }: { resolvedTheme: ThemePreference }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const glowRef = useRef<HTMLDivElement | null>(null);
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("dark");
-
-  useEffect(() => {
-    setResolvedTheme(readResolvedTheme());
-    function handleThemeChange(event: Event) {
-      setResolvedTheme((event as CustomEvent<ResolvedTheme>).detail ?? readResolvedTheme());
-    }
-    window.addEventListener("fscomp-theme-change", handleThemeChange);
-    return () => window.removeEventListener("fscomp-theme-change", handleThemeChange);
-  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;

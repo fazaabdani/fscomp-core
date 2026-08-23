@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
+import { getAppSettings } from "@/lib/app-settings";
 import { getCurrentUser } from "@/lib/session";
 import { NavLinks } from "./NavLinks";
 import { PageTransition } from "./PageTransition";
 import { ThemeDynamics } from "./ThemeDynamics";
-import { ThemeInitScript } from "./ThemeInitScript";
 import "./globals.css";
 import "./ops-overrides.css";
 
@@ -17,15 +17,12 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const currentUser = await getCurrentUser();
+  const [currentUser, { theme, layout }] = await Promise.all([getCurrentUser(), getAppSettings()]);
 
   return (
-    <html lang="id">
-      <head>
-        <ThemeInitScript />
-      </head>
+    <html lang="id" data-theme={theme} data-layout={layout}>
       <body className={inter.variable}>
-        <ThemeDynamics />
+        <ThemeDynamics resolvedTheme={theme} />
         <header className="topbar">
           <Link className="brand" href="/">
             <span className="brandMark">FS</span>

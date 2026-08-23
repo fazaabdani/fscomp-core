@@ -1,31 +1,28 @@
-"use client";
-
-import { Monitor, Moon, Sun } from "lucide-react";
-import { useTheme, type ThemePreference } from "./useTheme";
+import { Moon, Sun } from "lucide-react";
+import type { ThemePreference } from "@/lib/app-settings";
+import { updateThemeAction } from "./pengaturan/actions";
 
 const options: { value: ThemePreference; label: string; icon: typeof Sun }[] = [
   { value: "light", label: "Terang", icon: Sun },
-  { value: "dark", label: "Gelap", icon: Moon },
-  { value: "system", label: "Ikuti sistem", icon: Monitor }
+  { value: "dark", label: "Gelap", icon: Moon }
 ];
 
-export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-
+export function ThemeToggle({ current }: { current: ThemePreference }) {
   return (
     <div className="themeToggle" role="radiogroup" aria-label="Pilih tema tampilan">
       {options.map(({ value, label, icon: Icon }) => (
-        <button
-          key={value}
-          type="button"
-          role="radio"
-          aria-checked={theme === value}
-          className={theme === value ? "themeToggleOption active" : "themeToggleOption"}
-          onClick={() => setTheme(value)}
-        >
-          <Icon size={18} />
-          <span>{label}</span>
-        </button>
+        <form action={updateThemeAction} key={value}>
+          <input type="hidden" name="theme" value={value} />
+          <button
+            type="submit"
+            role="radio"
+            aria-checked={current === value}
+            className={current === value ? "themeToggleOption active" : "themeToggleOption"}
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </button>
+        </form>
       ))}
     </div>
   );
