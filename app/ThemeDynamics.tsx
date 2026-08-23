@@ -12,11 +12,11 @@ export function ThemeDynamics({ resolvedTheme }: { resolvedTheme: ThemePreferenc
     const glow = glowRef.current;
     if (!canvas || !glow) return;
 
-    // Tema terang sengaja mematikan animasi partikel total (bukan mewarnai ulang) --
-    // orang pindah ke tema terang biasanya justru cari tampilan lebih tenang, dan
+    // Tema selain gelap sengaja mematikan animasi partikel total (bukan mewarnai ulang) --
+    // orang pindah ke tema terang/elegan biasanya justru cari tampilan lebih tenang, dan
     // partikel ini jalan terus lewat requestAnimationFrame selama halaman terbuka,
     // jadi mematikannya juga menghemat CPU, bukan cuma soal warna.
-    if (resolvedTheme === "light") return;
+    if (resolvedTheme !== "dark") return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return;

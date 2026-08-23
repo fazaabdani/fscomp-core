@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 import Link from "next/link";
 import { getAppSettings } from "@/lib/app-settings";
 import { getCurrentUser } from "@/lib/session";
@@ -11,6 +11,7 @@ import "./globals.css";
 import "./ops-overrides.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const fraunces = Fraunces({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-serif", display: "swap" });
 
 export const metadata: Metadata = {
   title: "FS Comp Core",
@@ -23,7 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="id" data-theme={theme} data-layout={layout}>
-      <body className={inter.variable}>
+      <body className={`${inter.variable} ${fraunces.variable}`}>
         <ThemeDynamics resolvedTheme={theme} />
         {useSidebar && currentUser ? (
           <div className="appShell">
