@@ -297,7 +297,11 @@ export async function createSaleAction(formData: FormData) {
   if (standalone && (items.length === 0 || subtotal <= 0)) {
     redirect(`${errorPath}?error=item-wajib`);
   }
-  const dpAmount = Math.min(Math.max(0, dpAmountInput), subtotal);
+  // "Cash"/"Transfer" berarti lunas seketika -- field dpAmount cuma relevan buat metode "DP"
+  // (transaksi cicil/uang muka). Kasir diarahkan mengosongkan field itu untuk Cash/Transfer
+  // (lihat hint "Isi kalau DP" di form), jadi kalau dipaksa dipakai apa adanya, sisa pembayaran
+  // salah tampil sebesar subtotal penuh padahal sudah lunas.
+  const dpAmount = paymentMethod === "DP" ? Math.min(Math.max(0, dpAmountInput), subtotal) : subtotal;
   const totalCost = items.reduce((sum, item) => sum + item.qty * item.unitCost, 0);
   const bundleHandlingCost = hasBundledBagAndMouse(items) ? 50000 : 0;
   const grossProfit = subtotal - totalCost - bundleHandlingCost;
@@ -453,7 +457,7 @@ export async function updateSaleAction(saleId: string, formData: FormData) {
   const buyerPhone = text(formData, "buyerPhone");
   const buyerAddress = text(formData, "buyerAddress");
   const notes = text(formData, "notes");
-  const dpAmount = Math.min(Math.max(0, numberValue(formData, "dpAmount")), sale.subtotal);
+  const dpAmount = paymentMethod === "DP" ? Math.min(Math.max(0, numberValue(formData, "dpAmount")), sale.subtotal) : sale.subtotal;
   const warrantySoftware = standalone ? "Tidak ada" : warrantyText(formData, "warrantySoftware", 3, "bulan");
   const warrantyHardware = standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan") : warrantyText(formData, "warrantyHardware", 3, "minggu");
 
