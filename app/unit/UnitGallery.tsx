@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Maximize2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type GalleryPhoto = { url: string; thumbUrl: string };
@@ -10,13 +10,16 @@ export function UnitGallery({
   alt,
   className,
   placeholderClassName = "catalogImagePlaceholder",
-  priority = false
+  priority = false,
+  downloadNamePrefix
 }: {
   photos: GalleryPhoto[];
   alt: string;
   className: string;
   placeholderClassName?: string;
   priority?: boolean;
+  /** Kalau diisi, tampilkan tombol unduh foto kualitas penuh dengan nama file "<prefix>-<nomor>.webp". */
+  downloadNamePrefix?: string;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [expanded, setExpanded] = useState(false);
@@ -55,6 +58,10 @@ export function UnitGallery({
     setActiveIndex((index + photos.length) % photos.length);
   }
 
+  function downloadFileName(index: number) {
+    return `${downloadNamePrefix}-${index + 1}.webp`;
+  }
+
   function handleTouchStart(event: React.TouchEvent) {
     setTouchStartX(event.touches[0].clientX);
     didSwipeRef.current = false;
@@ -80,17 +87,29 @@ export function UnitGallery({
 
   return (
     <>
-      <button
-        type="button"
-        className="catalogPhotoZoomTrigger"
-        onClick={handleZoomTriggerClick}
-        aria-label={`Perbesar ${alt}`}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        <img className={className} src={photos[activeIndex].url} alt={alt} loading={priority ? "eager" : "lazy"} decoding="async" />
-        <span><Maximize2 size={17} /> Perbesar foto</span>
-      </button>
+      <div className="galleryPhotoStage">
+        <button
+          type="button"
+          className="catalogPhotoZoomTrigger"
+          onClick={handleZoomTriggerClick}
+          aria-label={`Perbesar ${alt}`}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          <img className={className} src={photos[activeIndex].url} alt={alt} loading={priority ? "eager" : "lazy"} decoding="async" />
+          <span><Maximize2 size={17} /> Perbesar foto</span>
+        </button>
+        {downloadNamePrefix ? (
+          <a
+            className="secondaryButton galleryDownloadButton"
+            href={photos[activeIndex].url}
+            download={downloadFileName(activeIndex)}
+            aria-label={`Unduh ${alt} kualitas penuh`}
+          >
+            <Download size={16} /> Unduh foto
+          </a>
+        ) : null}
+      </div>
 
       {photos.length > 1 ? (
         <div className="mediaGrid">
@@ -111,6 +130,17 @@ export function UnitGallery({
       {expanded ? (
         <div className="catalogPhotoLightbox" role="dialog" aria-modal="true" aria-label={`Foto besar ${alt}`} onClick={() => setExpanded(false)}>
           <button type="button" onClick={() => setExpanded(false)} aria-label="Tutup foto"><X size={24} /></button>
+          {downloadNamePrefix ? (
+            <a
+              className="lightboxDownload"
+              href={photos[activeIndex].url}
+              download={downloadFileName(activeIndex)}
+              onClick={(event) => event.stopPropagation()}
+              aria-label={`Unduh ${alt} kualitas penuh`}
+            >
+              <Download size={20} />
+            </a>
+          ) : null}
           {photos.length > 1 ? (
             <>
               <button type="button" className="lightboxNav lightboxNavPrev" onClick={(event) => { event.stopPropagation(); goTo(activeIndex - 1); }} aria-label="Foto sebelumnya">

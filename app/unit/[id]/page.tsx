@@ -22,6 +22,14 @@ function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: 
   return `https://wa.me/62816660056?text=${encodeURIComponent(text)}`;
 }
 
+function photoFileNamePrefix(model: string) {
+  return model
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "FOTO-UNIT";
+}
+
 function catalogReturnPath(value?: string | string[]) {
   const raw = Array.isArray(value) ? value[0] : value;
   if (!raw) return "/katalog";
@@ -185,7 +193,14 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
           {isInternalUser ? <Link className="secondaryButton" href={`/unit/${unit.id}/edit`}>Edit Foto</Link> : null}
         </div>
         {unit.gallery.length > 0 ? (
-          <UnitGallery photos={unit.gallery} alt={`Foto ${unit.model}`} className="publicUnitPhoto" placeholderClassName="publicUnitPhoto placeholderPhoto" priority />
+          <UnitGallery
+            photos={unit.gallery}
+            alt={`Foto ${unit.model}`}
+            className="publicUnitPhoto"
+            placeholderClassName="publicUnitPhoto placeholderPhoto"
+            priority
+            downloadNamePrefix={photoFileNamePrefix(unit.model)}
+          />
         ) : (
           <CatalogPhoto
             url={unit.catalogImageUrl}

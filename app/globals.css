@@ -1698,6 +1698,16 @@ textarea {
   backdrop-filter: blur(12px);
 }
 
+.galleryPhotoStage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.galleryDownloadButton {
+  align-self: flex-start;
+}
+
 .catalogPhotoLightbox {
   position: fixed;
   z-index: 100;
@@ -1721,6 +1731,25 @@ textarea {
   border-radius: 9px;
   background: rgba(8, 22, 39, 0.88);
   color: #ffffff;
+}
+
+.catalogPhotoLightbox .lightboxDownload {
+  position: absolute;
+  top: 18px;
+  right: 74px;
+  z-index: 1;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 9px;
+  background: rgba(8, 22, 39, 0.88);
+  color: #ffffff;
+}
+
+.catalogPhotoLightbox .lightboxDownload:hover {
+  background: rgba(55, 163, 255, 0.28);
 }
 
 .catalogPhotoLightbox > img {
