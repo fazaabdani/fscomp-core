@@ -6,6 +6,7 @@ import { formatRupiah } from "@/lib/api";
 import { getRelatedCatalogUnits } from "@/lib/catalog-page-data";
 import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
+import { slugifyFileName } from "@/lib/file-naming";
 import { getCurrentUser } from "@/lib/session";
 import { ShareUnitButton } from "./ShareUnitButton";
 import { UnitGallery } from "../UnitGallery";
@@ -20,14 +21,6 @@ function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: 
     "Apakah unitnya masih ready?"
   ].join("\n");
   return `https://wa.me/62816660056?text=${encodeURIComponent(text)}`;
-}
-
-function photoFileNamePrefix(model: string) {
-  return model
-    .trim()
-    .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "FOTO-UNIT";
 }
 
 function catalogReturnPath(value?: string | string[]) {
@@ -199,7 +192,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
             className="publicUnitPhoto"
             placeholderClassName="publicUnitPhoto placeholderPhoto"
             priority
-            downloadNamePrefix={photoFileNamePrefix(unit.model)}
+            downloadNamePrefix={slugifyFileName(unit.model)}
           />
         ) : (
           <CatalogPhoto

@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { FolderPlus, Image as ImageIcon, RefreshCcw, Trash2, Upload } from "lucide-react";
+import { Download, FolderPlus, Image as ImageIcon, RefreshCcw, Trash2, Upload } from "lucide-react";
 import { FlashNotice } from "@/app/FlashNotice";
 import { SubmitButton } from "@/app/SubmitButton";
+import { slugifyFileName } from "@/lib/file-naming";
 import { getFolderContents } from "@/lib/media-data";
 import { requireRole } from "@/lib/session";
 import { createFolderAction, deleteAssetAction, deleteFolderAction, migrateGoogleDrivePhotosAction, renameFolderAction, uploadMediaAction } from "./actions";
@@ -119,9 +120,17 @@ export default async function MediaLibraryPage({
 
         <div className="mediaGrid">
           {data.assets.length === 0 ? <div className="emptyState">Belum ada foto di folder ini.</div> : null}
-          {data.assets.map((asset) => (
+          {data.assets.map((asset, index) => (
             <div className="mediaThumb" key={asset.id}>
               <img src={asset.thumbUrl} alt={asset.originalName} loading="lazy" />
+              <a
+                className="iconButton mediaDownloadLink"
+                href={asset.url}
+                download={`${slugifyFileName(data.folder?.name ?? asset.originalName)}-${index + 1}.webp`}
+                aria-label={`Unduh ${asset.originalName} kualitas penuh`}
+              >
+                <Download size={14} />
+              </a>
               <form action={deleteAssetAction.bind(null, asset.id)}>
                 <input type="hidden" name="folderId" value={currentFolderId ?? ""} />
                 <SubmitButton className="iconButton" icon={<Trash2 size={14} />} iconSize={14} ariaLabel={`Hapus ${asset.originalName}`} />

@@ -2319,6 +2319,12 @@ textarea {
   right: 6px;
 }
 
+.mediaThumb .mediaDownloadLink {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+}
+
 .mediaPickerField {
   display: grid;
   gap: 8px;
