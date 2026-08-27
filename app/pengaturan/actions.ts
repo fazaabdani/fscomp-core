@@ -27,3 +27,11 @@ export async function updateLayoutAction(formData: FormData) {
   revalidatePath("/", "layout");
   redirect("/pengaturan?success=layout-updated");
 }
+
+export async function updateCatalogFeaturedAction(formData: FormData) {
+  const currentUser = await requireRole(["admin"]);
+  const enabled = formData.get("catalogFeatured") === "on";
+  await setAppSetting("catalogFeatured", enabled ? "on" : "off", await currentUserId(currentUser.username));
+  revalidatePath("/katalog");
+  redirect("/pengaturan?success=catalog-featured-updated");
+}

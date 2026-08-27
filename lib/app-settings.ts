@@ -13,17 +13,18 @@ function toThemePreference(value: string | undefined): ThemePreference {
 
 export async function getAppSettings() {
   try {
-    const rows = await prisma.appSetting.findMany({ where: { key: { in: ["theme", "layout"] } } });
+    const rows = await prisma.appSetting.findMany({ where: { key: { in: ["theme", "layout", "catalogFeatured"] } } });
     const map = new Map(rows.map((row) => [row.key, row.value]));
     const theme = toThemePreference(map.get("theme"));
     const layout: LayoutPreference = map.get("layout") === "sidebar" ? "sidebar" : DEFAULT_LAYOUT;
-    return { theme, layout };
+    const catalogFeaturedEnabled = map.get("catalogFeatured") !== "off";
+    return { theme, layout, catalogFeaturedEnabled };
   } catch {
-    return { theme: DEFAULT_THEME, layout: DEFAULT_LAYOUT };
+    return { theme: DEFAULT_THEME, layout: DEFAULT_LAYOUT, catalogFeaturedEnabled: true };
   }
 }
 
-export async function setAppSetting(key: "theme" | "layout", value: string, updatedById: string | null) {
+export async function setAppSetting(key: "theme" | "layout" | "catalogFeatured", value: string, updatedById: string | null) {
   await prisma.appSetting.upsert({
     where: { key },
     update: { value, updatedById },

@@ -6,14 +6,16 @@ import { SettingsPanel } from "./SettingsPanel";
 
 export default async function PengaturanPage({ searchParams }: { searchParams?: { success?: string } }) {
   await requireRole(["admin"]);
-  const { theme, layout } = await getAppSettings();
+  const { theme, layout, catalogFeaturedEnabled } = await getAppSettings();
 
   const message =
     searchParams?.success === "theme-updated"
       ? "Tema berhasil diperbarui untuk semua orang."
       : searchParams?.success === "layout-updated"
         ? "Mode layout berhasil diperbarui untuk semua orang."
-        : "";
+        : searchParams?.success === "catalog-featured-updated"
+          ? "Pengaturan Unit Rekomendasi katalog berhasil diperbarui."
+          : "";
 
   return (
     <section className="pageStack">
@@ -35,7 +37,7 @@ export default async function PengaturanPage({ searchParams }: { searchParams?: 
             <h2>Terang/gelap, dan posisi menu</h2>
           </div>
         </div>
-        <SettingsPanel theme={theme} layout={layout} />
+        <SettingsPanel theme={theme} layout={layout} catalogFeaturedEnabled={catalogFeaturedEnabled} />
       </section>
     </section>
   );

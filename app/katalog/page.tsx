@@ -5,6 +5,7 @@ import { CopyWaButton } from "@/app/CopyWaButton";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
 import { brandOf } from "@/lib/catalog-image";
+import { getAppSettings } from "@/lib/app-settings";
 import { getCatalogPageData, pickFeaturedUnits } from "@/lib/catalog-page-data";
 import { CatalogFilterShell } from "./CatalogFilterShell";
 import { KatalogDynamics } from "./KatalogDynamics";
@@ -860,7 +861,10 @@ function CatalogPageStyles() {
 }
 
 export default async function KatalogPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
-  const { wiradesaUnits, kajenUnits, connected } = await getCatalogPageData();
+  const [{ wiradesaUnits, kajenUnits, connected }, { catalogFeaturedEnabled }] = await Promise.all([
+    getCatalogPageData(),
+    getAppSettings()
+  ]);
   const filters: CatalogFilters = {
     q: singleParam(searchParams?.q),
     sort: singleParam(searchParams?.sort) || "unit",
@@ -930,7 +934,7 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
         </div>
       </div>
 
-      {featuredUnits.length > 0 ? (
+      {catalogFeaturedEnabled && featuredUnits.length > 0 ? (
         <CatalogSection
           title="Unit Rekomendasi Terbaik"
           subtitle="Pilihan Admin"
