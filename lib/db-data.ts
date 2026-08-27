@@ -85,6 +85,7 @@ export async function getUnitForEdit(id: string) {
       lcdSize: unit.lcdSize ?? "",
       lcdResolution: unit.lcdResolution ?? "",
       isTouchscreen: unit.isTouchscreen,
+      isFeatured: unit.isFeatured,
       entryNotes: unit.entryNotes ?? "-",
       hargaModal: unit.hargaModal,
       hargaJualRekomendasi: unit.hargaJualRekomendasi,

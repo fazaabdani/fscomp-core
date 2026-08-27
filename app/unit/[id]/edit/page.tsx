@@ -83,6 +83,13 @@ export default async function EditUnitPage({ params, searchParams }: { params: {
             <option>Ya</option>
           </select>
         </label>
+        <label>Unit Rekomendasi (tampil di hero katalog)
+          <select name="isFeatured" defaultValue={unit.isFeatured ? "Ya" : "Tidak"}>
+            <option>Tidak</option>
+            <option>Ya</option>
+          </select>
+          <small>Kalau "Ya", unit ini diprioritaskan tampil di bagian rekomendasi hero katalog publik.</small>
+        </label>
         <label>Lokasi stok
           <select name="stockLocation" defaultValue={unit.stockLocation ?? "WIRADESA"}>
             <option value="WIRADESA">Wiradesa utama</option>

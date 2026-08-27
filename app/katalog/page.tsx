@@ -1,10 +1,11 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { CheckCircle2, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, PackageCheck, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { CheckCircle2, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, PackageCheck, Search, ShieldCheck, SlidersHorizontal, Sparkles, Star } from "lucide-react";
 import { CopyWaButton } from "@/app/CopyWaButton";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
 import { brandOf } from "@/lib/catalog-image";
-import { getCatalogPageData } from "@/lib/catalog-page-data";
+import { getCatalogPageData, pickFeaturedUnits } from "@/lib/catalog-page-data";
 import { CatalogFilterShell } from "./CatalogFilterShell";
 import { KatalogDynamics } from "./KatalogDynamics";
 
@@ -198,13 +199,17 @@ function CatalogSection({
   subtitle,
   units,
   returnTo,
-  view
+  view,
+  icon,
+  featured
 }: {
   title: string;
   subtitle: string;
   units: CatalogUnit[];
   returnTo: string;
   view: string;
+  icon?: ReactNode;
+  featured?: boolean;
 }) {
   return (
     <section className="panel catalogPublicSection">
@@ -213,12 +218,15 @@ function CatalogSection({
           <p className="eyebrow">{subtitle}</p>
           <h2>{title}</h2>
         </div>
-        <MapPin size={22} />
+        {icon ?? <MapPin size={22} />}
       </div>
       <div className={`catalogPublicGrid catalogView-${view}`}>
         {units.map((unit, index) => (
           <article className="catalogPublicCard catalogReveal" key={unit.id}>
             <span className="catalogCardShine" aria-hidden="true" />
+            {featured ? (
+              <span className="catalogHeroPill catalogCardFeaturedTag"><Star size={13} /> Rekomendasi</span>
+            ) : null}
             <CatalogPhoto url={unit.catalogImageUrl} className="catalogImage" alt={`Foto ${unit.model}`} priority={index < 3} imageWidth={720} />
             <div className="catalogCardTop">
               <span className="unitNumber">{unit.nomorUnit}</span>
@@ -378,6 +386,13 @@ function CatalogPageStyles() {
       .catalogShareBox small {
         color: #9ec1df;
         font-weight: 700;
+      }
+
+      .catalogCardFeaturedTag {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 2;
       }
 
       .catalogBrand {
@@ -858,6 +873,7 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
     view: ["compact", "list"].includes(singleParam(searchParams?.view)) ? singleParam(searchParams?.view) : "grid"
   };
   const allRawUnits = [...wiradesaUnits, ...kajenUnits];
+  const featuredUnits = pickFeaturedUnits(allRawUnits, 4);
   const visibleUnits = sortUnits(filterUnits(allRawUnits, filters), filters.sort);
   const visibleWiradesa = filters.lokasi === "kajen" ? [] : visibleUnits.filter((unit) => unit.stockLocation === "Wiradesa");
   const visibleKajen = filters.lokasi === "wiradesa" ? [] : visibleUnits.filter((unit) => unit.stockLocation === "Kajen");
@@ -913,6 +929,18 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           <p>Harga dan stok mengikuti update dari Core FS Comp. Klik detail unit untuk melihat ringkasan, atau chat admin untuk cek ketersediaan.</p>
         </div>
       </div>
+
+      {featuredUnits.length > 0 ? (
+        <CatalogSection
+          title="Unit Rekomendasi Terbaik"
+          subtitle="Pilihan Admin"
+          units={featuredUnits}
+          returnTo={returnTo}
+          view="grid"
+          icon={<Sparkles size={22} />}
+          featured
+        />
+      ) : null}
 
       <div className="catalogTicker" aria-hidden="true">
         <div className="catalogTickerTrack">

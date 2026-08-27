@@ -19,6 +19,34 @@ const CATALOG_UNIT_INCLUDE = {
   unitPhotos: { orderBy: { order: "asc" as const }, take: 1, include: { asset: { select: { fileName: true } } } }
 };
 
+function capacityGb(value: string) {
+  const match = value.match(/(\d+)\s*(GB|TB)/i);
+  if (!match) return 0;
+  const number = Number(match[1]);
+  return match[2].toUpperCase() === "TB" ? number * 1024 : number;
+}
+
+function conditionScore(unit: { ssdHealth: number; batteryHealth: number; ram: string; ssd: string; windowsVersion: string }) {
+  const healthScore = (unit.ssdHealth + unit.batteryHealth) / 2;
+  const specScore = Math.min(100, capacityGb(unit.ram) * 3) * 0.5 + Math.min(100, (capacityGb(unit.ssd) / 1024) * 100) * 0.5;
+  const windowsBonus = unit.windowsVersion.includes("11") ? 5 : 0;
+  return healthScore * 0.6 + specScore * 0.35 + windowsBonus;
+}
+
+export function pickFeaturedUnits<
+  T extends { id: string; isFeatured: boolean; ssdHealth: number; batteryHealth: number; ram: string; ssd: string; windowsVersion: string }
+>(units: T[], limit = 4): T[] {
+  const pinned = units.filter((unit) => unit.isFeatured);
+  if (pinned.length >= limit) return pinned.slice(0, limit);
+
+  const fallback = units
+    .filter((unit) => !unit.isFeatured)
+    .sort((a, b) => conditionScore(b) - conditionScore(a))
+    .slice(0, limit - pinned.length);
+
+  return [...pinned, ...fallback];
+}
+
 export async function getCatalogPageData() {
   try {
     const [wiradesaCandidates, kajenCandidates] = await Promise.all([
@@ -62,6 +90,7 @@ export async function getCatalogPageData() {
           lcdSize: unit.lcdSize ?? "-",
           lcdResolution: unit.lcdResolution ?? "-",
           isTouchscreen: unit.isTouchscreen,
+          isFeatured: unit.isFeatured,
           hargaJualRekomendasi: unit.hargaJualRekomendasi,
           catalogImageUrl: resolvePrimaryImageUrl(unit.unitPhotos, unit.catalogImageUrl, true),
           stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
