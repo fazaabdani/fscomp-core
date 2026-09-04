@@ -1,11 +1,12 @@
-import { Gem, Moon, Sun } from "lucide-react";
+import { Cpu, Gem, Moon, Sun } from "lucide-react";
 import type { ThemePreference } from "@/lib/app-settings";
 import { updateThemeAction } from "./pengaturan/actions";
 
 const options: { value: ThemePreference; label: string; icon: typeof Sun }[] = [
   { value: "light", label: "Terang", icon: Sun },
   { value: "dark", label: "Gelap", icon: Moon },
-  { value: "elegant", label: "Elegan", icon: Gem }
+  { value: "elegant", label: "Elegan", icon: Gem },
+  { value: "rakit", label: "Rakit", icon: Cpu }
 ];
 
 export function ThemeToggle({ current }: { current: ThemePreference }) {

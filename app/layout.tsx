@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Fraunces, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import { getAppSettings } from "@/lib/app-settings";
 import { getCurrentUser } from "@/lib/session";
@@ -12,6 +12,7 @@ import "./ops-overrides.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const fraunces = Fraunces({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-serif", display: "swap" });
+const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["500", "600", "700", "800"], variable: "--font-jakarta", display: "swap" });
 
 export const metadata: Metadata = {
   title: "FS Comp Core",
@@ -24,7 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="id" data-theme={theme} data-layout={layout}>
-      <body className={`${inter.variable} ${fraunces.variable}`}>
+      <body className={`${inter.variable} ${fraunces.variable} ${jakarta.variable}`}>
         <ThemeDynamics resolvedTheme={theme} />
         {useSidebar && currentUser ? (
           <div className="appShell">

@@ -4420,6 +4420,133 @@ html[data-theme="elegant"] .brand strong {
   letter-spacing: 0;
 }
 
+/* Tema Rakit -- opsi ke-4, meniru palet biru navy datar dan font Plus Jakarta Sans yang sudah
+   dipakai di /katalog/rakit-pc (lihat pc-builder.css). Struktur override sama seperti tema
+   terang/elegan di atas (redeclare token yang sama), plus meratakan kartu (hilangkan blur/gradasi
+   sheen) dan ganti font body supaya benar-benar senada dengan halaman Rakit PC. */
+html[data-theme="rakit"] {
+  --ink: #f0f6ff;
+  --muted: #93a9bc;
+  --line: #29445d;
+  --line-strong: #3a5c7a;
+  --surface: #10263c;
+  --surface-strong: #0e2237;
+  --band: #10263c;
+  --blue: #1f9bff;
+  --blue-br: #49adff;
+  --blue-dark: #0e5aa8;
+  --cyan: #1f9bff;
+  --green: #65dda8;
+  --yellow: #ffcf70;
+  --red: #ff858e;
+  --shadow: 0 12px 32px rgba(2, 10, 22, 0.4);
+}
+
+html[data-theme="rakit"] body {
+  font-family: var(--font-jakarta), var(--font-inter), Inter, Arial, Helvetica, sans-serif;
+}
+
+html[data-theme="rakit"] .heroBand,
+html[data-theme="rakit"] .unitHero,
+html[data-theme="rakit"] .panel,
+html[data-theme="rakit"] .metric,
+html[data-theme="rakit"] .statCard,
+html[data-theme="rakit"] .catalogItem,
+html[data-theme="rakit"] .batchCard,
+html[data-theme="rakit"] .unitRow,
+html[data-theme="rakit"] .downloadCard,
+html[data-theme="rakit"] .panelSubsection,
+html[data-theme="rakit"] .reminderGrid span,
+html[data-theme="rakit"] .catalogHeroCopyPanel,
+html[data-theme="rakit"] .catalogHeroStatsPanel,
+html[data-theme="rakit"] .catalogFeatureStrip,
+html[data-theme="rakit"] .catalogFilterPanel,
+html[data-theme="rakit"] .catalogResultBar,
+html[data-theme="rakit"] .catalogPublicCard {
+  background: #10263c;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+html[data-theme="rakit"] .heroBand,
+html[data-theme="rakit"] .unitHero,
+html[data-theme="rakit"] .catalogHeroCopyPanel,
+html[data-theme="rakit"] .catalogHeroStatsPanel {
+  background: #0e2237;
+}
+
+html[data-theme="rakit"] .catalogCardShine {
+  display: none;
+}
+
+html[data-theme="rakit"] .catalogHeroPill::before {
+  animation: none;
+  box-shadow: none;
+}
+
+html[data-theme="rakit"] .primaryButton,
+html[data-theme="rakit"] .greenButton {
+  background: #1f9bff;
+  box-shadow: none;
+}
+
+html[data-theme="rakit"] .primaryButton:hover,
+html[data-theme="rakit"] .greenButton:hover {
+  background: #49adff;
+  box-shadow: none;
+}
+
+html[data-theme="rakit"] .secondaryButton,
+html[data-theme="rakit"] .iconButton,
+html[data-theme="rakit"] .sortPill {
+  background: transparent;
+  border-color: #29445d;
+}
+
+html[data-theme="rakit"] .secondaryButton:hover,
+html[data-theme="rakit"] .iconButton:hover,
+html[data-theme="rakit"] .sortPill:hover {
+  background: rgba(31, 155, 255, 0.12);
+}
+
+html[data-theme="rakit"] .catalogHeroCopyPanel p,
+html[data-theme="rakit"] .catalogHeroStatsPanel p {
+  color: #a9bed0;
+}
+
+html[data-theme="rakit"] .catalogStatBox {
+  background: #10263c;
+  border-color: #29445d;
+}
+
+html[data-theme="rakit"] .catalogStatBox span {
+  color: #93a9bc;
+}
+
+html[data-theme="rakit"] .catalogTicker {
+  background: #0d2034;
+  border-color: #263f56;
+}
+
+html[data-theme="rakit"] .catalogFeatureItem {
+  background: #10263c;
+  border-color: #29445d;
+}
+
+html[data-theme="rakit"] .catalogFeatureItem small {
+  color: #93a9bc;
+}
+
+html[data-theme="rakit"] .heroBand h1,
+html[data-theme="rakit"] .sectionTitle h1,
+html[data-theme="rakit"] .unitHero h1,
+html[data-theme="rakit"] .catalogHeroCopyPanel h1,
+html[data-theme="rakit"] .catalogSectionTitle h2,
+html[data-theme="rakit"] .brand strong {
+  font-family: var(--font-jakarta), var(--font-inter), Inter, Arial, Helvetica, sans-serif;
+  letter-spacing: -0.03em;
+}
+
 html {
   scroll-behavior: smooth;
 }

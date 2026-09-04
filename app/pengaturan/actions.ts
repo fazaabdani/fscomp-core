@@ -14,7 +14,7 @@ async function currentUserId(username: string) {
 export async function updateThemeAction(formData: FormData) {
   const currentUser = await requireRole(["admin"]);
   const raw = formData.get("theme");
-  const theme = raw === "light" || raw === "elegant" ? raw : "dark";
+  const theme = raw === "light" || raw === "elegant" || raw === "rakit" ? raw : "dark";
   await setAppSetting("theme", theme, await currentUserId(currentUser.username));
   revalidatePath("/", "layout");
   redirect("/pengaturan?success=theme-updated");
