@@ -25,6 +25,10 @@ body {
     linear-gradient(180deg, #08111f 0%, #0b1320 42%, #070b12 100%);
   color: var(--ink);
   font-family: var(--font-inter), Inter, Arial, Helvetica, sans-serif;
+  /* Cegah browser diam-diam mempertahankan posisi scroll lama saat layout bergeser di tengah
+     transisi pindah halaman (lihat PageTransition.tsx) -- tanpa ini, reset scroll ke atas bisa
+     "dilawan" balik oleh scroll anchoring bawaan browser. */
+  overflow-anchor: none;
 }
 
 a {
