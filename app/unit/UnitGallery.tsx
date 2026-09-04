@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Download, Maximize2, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Download, Maximize2, Share2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { slugifyFileName } from "@/lib/file-naming";
 
 type GalleryPhoto = { url: string; thumbUrl: string };
 
@@ -24,6 +25,7 @@ export function UnitGallery({
   const [activeIndex, setActiveIndex] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [shareStatus, setShareStatus] = useState<"idle" | "shared" | "saved">("idle");
   const didSwipeRef = useRef(false);
   const photoCount = photos.length;
 
@@ -60,6 +62,32 @@ export function UnitGallery({
 
   function downloadFileName(index: number) {
     return `${downloadNamePrefix}-${index + 1}.webp`;
+  }
+
+  function shareFileName(index: number, extension: string) {
+    if (downloadNamePrefix) return `${downloadNamePrefix}-${index + 1}.${extension}`;
+    return `${slugifyFileName(alt)}-${index + 1}.${extension}`;
+  }
+
+  async function sharePhoto(index: number) {
+    const photo = photos[index];
+    try {
+      const response = await fetch(photo.url);
+      const blob = await response.blob();
+      const extension = blob.type.split("/")[1]?.split("+")[0] || "jpg";
+      const file = new File([blob], shareFileName(index, extension), { type: blob.type || "image/jpeg" });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: alt });
+        setShareStatus("shared");
+        window.setTimeout(() => setShareStatus("idle"), 1800);
+        return;
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+    }
+    window.open(photo.url, "_blank", "noopener,noreferrer");
+    setShareStatus("saved");
+    window.setTimeout(() => setShareStatus("idle"), 2500);
   }
 
   function handleTouchStart(event: React.TouchEvent) {
@@ -99,16 +127,22 @@ export function UnitGallery({
           <img className={className} src={photos[activeIndex].url} alt={alt} loading={priority ? "eager" : "lazy"} decoding="async" />
           <span><Maximize2 size={17} /> Perbesar foto</span>
         </button>
-        {downloadNamePrefix ? (
-          <a
-            className="secondaryButton galleryDownloadButton"
-            href={photos[activeIndex].url}
-            download={downloadFileName(activeIndex)}
-            aria-label={`Unduh ${alt} kualitas penuh`}
-          >
-            <Download size={16} /> Unduh foto
-          </a>
-        ) : null}
+        <div className="galleryActionsRow">
+          {downloadNamePrefix ? (
+            <a
+              className="secondaryButton galleryDownloadButton"
+              href={photos[activeIndex].url}
+              download={downloadFileName(activeIndex)}
+              aria-label={`Unduh ${alt} kualitas penuh`}
+            >
+              <Download size={16} /> Unduh foto
+            </a>
+          ) : null}
+          <button type="button" className="secondaryButton galleryShareButton" onClick={() => sharePhoto(activeIndex)} aria-label={`Bagikan ${alt}`}>
+            {shareStatus === "shared" ? <Check size={16} /> : <Share2 size={16} />}
+            {shareStatus === "shared" ? "Foto Terkirim" : shareStatus === "saved" ? "Foto Dibuka" : "Bagikan Foto"}
+          </button>
+        </div>
       </div>
 
       {photos.length > 1 ? (
@@ -141,6 +175,14 @@ export function UnitGallery({
               <Download size={20} />
             </a>
           ) : null}
+          <button
+            type="button"
+            className={`lightboxShare ${downloadNamePrefix ? "lightboxShareWithDownload" : ""}`}
+            onClick={(event) => { event.stopPropagation(); sharePhoto(activeIndex); }}
+            aria-label={`Bagikan ${alt}`}
+          >
+            {shareStatus === "shared" ? <Check size={20} /> : <Share2 size={20} />}
+          </button>
           {photos.length > 1 ? (
             <>
               <button type="button" className="lightboxNav lightboxNavPrev" onClick={(event) => { event.stopPropagation(); goTo(activeIndex - 1); }} aria-label="Foto sebelumnya">

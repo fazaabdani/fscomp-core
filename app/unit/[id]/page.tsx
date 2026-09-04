@@ -51,6 +51,12 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
   const latestDaily = dailyHistory[0];
   const publicWindows = latestDaily?.windowsVersion ?? qcAwal?.software.Windows ?? "-";
   const publicWaLink = waLink(unit);
+  const extraFeatures = [
+    unit.hasKeyboardBacklight ? "Keyboard Backlight" : null,
+    unit.hasFingerprint ? "Fingerprint" : null,
+    unit.hasFaceRecognition ? "Face Recognition" : null,
+    unit.hasStylus ? "Stylus/Pen" : null
+  ].filter((label): label is string => Boolean(label));
   const catalogReturnHref = catalogReturnPath(searchParams?.from);
 
   if (!isInternalUser) {
@@ -102,6 +108,11 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
               <div><HardDrive size={16} /> {unit.ram} / {unit.ssd}</div>
               <div><CalendarClock size={16} /> {publicWindows}</div>
             </div>
+            {extraFeatures.length > 0 ? (
+              <div className="miniMetrics">
+                {extraFeatures.map((label) => <span key={label}>{label}</span>)}
+              </div>
+            ) : null}
             <div className="kv"><span>LCD</span><strong>{unit.lcdSize}</strong></div>
             <div className="kv"><span>Resolusi</span><strong>{unit.lcdResolution}</strong></div>
             <div className="kv"><span>Touchscreen</span><strong>{unit.isTouchscreen ? "Ya" : "Tidak"}</strong></div>
@@ -248,6 +259,11 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
             <div><HardDrive size={16} /> SSD health {unit.ssdHealth}%</div>
             <div><CalendarClock size={16} /> Tempo {unit.tempo}</div>
           </div>
+          {extraFeatures.length > 0 ? (
+            <div className="miniMetrics">
+              {extraFeatures.map((label) => <span key={label}>{label}</span>)}
+            </div>
+          ) : null}
           {isInternalUser ? <div className="kv"><span>Batch</span><strong>{unit.batch.nomorBatch}</strong></div> : null}
           {isInternalUser ? <div className="kv"><span>Supplier</span><strong>{unit.supplier}</strong></div> : null}
           {isInternalUser ? <div className="kv"><span>Lokasi stok</span><strong>{unit.stockLocation}</strong></div> : null}

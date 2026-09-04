@@ -230,6 +230,10 @@ model Unit {
   lcdSize              String?
   lcdResolution        String?
   isTouchscreen        Boolean    @default(false)
+  hasKeyboardBacklight Boolean    @default(false)
+  hasFingerprint       Boolean    @default(false)
+  hasFaceRecognition   Boolean    @default(false)
+  hasStylus            Boolean    @default(false)
   isFeatured           Boolean    @default(false)
   entryNotes           String?
   hargaModal           Int

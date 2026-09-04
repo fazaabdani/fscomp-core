@@ -29,7 +29,8 @@ function textArray(formData: FormData, key: string) {
   return formData.getAll(key).map((value) => String(value ?? "").trim());
 }
 
-function warrantyText(formData: FormData, key: string, fallbackAmount: number, fallbackUnit: "minggu" | "bulan") {
+function warrantyText(formData: FormData, key: string, fallbackAmount: number, fallbackUnit: "minggu" | "bulan", allowEmpty = false) {
+  if (allowEmpty && !text(formData, `${key}Amount`)) return "Tidak ada";
   const amount = Math.max(1, numberValue(formData, `${key}Amount`) || fallbackAmount);
   const unitInput = text(formData, `${key}Unit`).toLowerCase();
   const unit = unitInput === "minggu" || unitInput === "bulan" ? unitInput : fallbackUnit;
@@ -218,7 +219,7 @@ export async function createSaleAction(formData: FormData) {
   const buyerAddress = text(formData, "buyerAddress");
   const notes = text(formData, "notes");
   const warrantySoftware = standalone ? "Tidak ada" : warrantyText(formData, "warrantySoftware", 3, "bulan");
-  const warrantyHardware = standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan") : warrantyText(formData, "warrantyHardware", 3, "minggu");
+  const warrantyHardware = standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan", true) : warrantyText(formData, "warrantyHardware", 3, "minggu");
   const itemNames = textArray(formData, "itemName");
   const itemCategories = textArray(formData, "itemCategory");
   const itemQty = numberArray(formData, "itemQty");
@@ -459,7 +460,7 @@ export async function updateSaleAction(saleId: string, formData: FormData) {
   const notes = text(formData, "notes");
   const dpAmount = paymentMethod === "DP" ? Math.min(Math.max(0, numberValue(formData, "dpAmount")), sale.subtotal) : sale.subtotal;
   const warrantySoftware = standalone ? "Tidak ada" : warrantyText(formData, "warrantySoftware", 3, "bulan");
-  const warrantyHardware = standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan") : warrantyText(formData, "warrantyHardware", 3, "minggu");
+  const warrantyHardware = standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan", true) : warrantyText(formData, "warrantyHardware", 3, "minggu");
 
   const dbUser = await prisma.user.findFirst({ where: { username: currentUser.username }, select: { id: true } });
   // Cuma admin yang boleh koreksi lokasi transaksi -- ini nentuin kop nota (FS Comp/FS.ID) dan

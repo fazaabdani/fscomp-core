@@ -16,6 +16,7 @@ function Eyebrow({ children }: { children: string }) {
 
 export function ReceiptDocument({ sale, publicReceiptUrl }: { sale: SaleReceipt; publicReceiptUrl: string }) {
   const hasNotes = Boolean(sale.notes) && sale.notes !== "-";
+  const noWarranty = sale.warrantySoftware === "Tidak ada" && sale.warrantyHardware === "Tidak ada";
 
   return (
     <article className="notaSheet">
@@ -61,8 +62,14 @@ export function ReceiptDocument({ sale, publicReceiptUrl }: { sale: SaleReceipt;
         </div>
         <div>
           <Eyebrow>GARANSI</Eyebrow>
-          <strong>Software {sale.warrantySoftware}</strong>
-          <small>Hardware {sale.warrantyHardware}</small>
+          {noWarranty ? (
+            <strong>Tanpa garansi tambahan</strong>
+          ) : (
+            <>
+              <strong>Software {sale.warrantySoftware}</strong>
+              <small>Hardware {sale.warrantyHardware}</small>
+            </>
+          )}
         </div>
       </div>
 
@@ -104,10 +111,14 @@ export function ReceiptDocument({ sale, publicReceiptUrl }: { sale: SaleReceipt;
       <div className="notaFooterRow">
         <div className="notaTermsBlock">
           <Eyebrow>KETENTUAN GARANSI</Eyebrow>
-          <p>
-            Garansi software {sale.warrantySoftware} dan hardware {sale.warrantyHardware} berlaku sesuai hasil QC
-            dan pemakaian normal. Data pribadi pembeli disarankan dicadangkan mandiri.
-          </p>
+          {noWarranty ? (
+            <p>Barang/jasa ini dijual tanpa garansi tambahan dari FS Comp. Data pribadi pembeli disarankan dicadangkan mandiri.</p>
+          ) : (
+            <p>
+              Garansi software {sale.warrantySoftware} dan hardware {sale.warrantyHardware} berlaku sesuai hasil QC
+              dan pemakaian normal. Data pribadi pembeli disarankan dicadangkan mandiri.
+            </p>
+          )}
           {hasNotes ? <p className="notaExtraNote">Catatan: {sale.notes}</p> : null}
         </div>
         <div className="notaTotalBox">

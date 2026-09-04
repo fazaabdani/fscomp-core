@@ -83,6 +83,34 @@ export default async function EditUnitPage({ params, searchParams }: { params: {
             <option>Ya</option>
           </select>
         </label>
+        <div className="numberGrid">
+          <label>Keyboard Backlight
+            <select name="hasKeyboardBacklight" defaultValue={unit.hasKeyboardBacklight ? "Ya" : "Tidak"}>
+              <option>Tidak</option>
+              <option>Ya</option>
+            </select>
+          </label>
+          <label>Fingerprint
+            <select name="hasFingerprint" defaultValue={unit.hasFingerprint ? "Ya" : "Tidak"}>
+              <option>Tidak</option>
+              <option>Ya</option>
+            </select>
+          </label>
+        </div>
+        <div className="numberGrid">
+          <label>Face Recognition
+            <select name="hasFaceRecognition" defaultValue={unit.hasFaceRecognition ? "Ya" : "Tidak"}>
+              <option>Tidak</option>
+              <option>Ya</option>
+            </select>
+          </label>
+          <label>Stylus/Pen
+            <select name="hasStylus" defaultValue={unit.hasStylus ? "Ya" : "Tidak"}>
+              <option>Tidak</option>
+              <option>Ya</option>
+            </select>
+          </label>
+        </div>
         <label>Unit Rekomendasi (tampil di hero katalog)
           <select name="isFeatured" defaultValue={unit.isFeatured ? "Ya" : "Tidak"}>
             <option>Tidak</option>

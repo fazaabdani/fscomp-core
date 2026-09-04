@@ -7,6 +7,7 @@ import { updateSaleAction } from "../../actions";
 import { FlashNotice } from "@/app/FlashNotice";
 
 function parseWarranty(value: string, fallbackUnit: "minggu" | "bulan") {
+  if (value === "Tidak ada") return { amount: null as number | null, unit: fallbackUnit };
   const match = value.match(/^(\d+)\s+(minggu|bulan)/i);
   if (!match) return { amount: 3, unit: fallbackUnit };
   return { amount: Number(match[1]), unit: match[2].toLowerCase() as "minggu" | "bulan" };
@@ -88,18 +89,21 @@ export default async function EditSalePage({ params, searchParams }: { params: {
         <label>Alamat pembeli<input name="buyerAddress" defaultValue={sale.buyerAddress ?? ""} /></label>
 
         {standalone ? (
-          <div className="numberGrid">
-            <label>Garansi hardware<input name="warrantyHardwareAmount" type="number" min="1" defaultValue={hardwareWarranty.amount} /></label>
-            <label>Periode<select name="warrantyHardwareUnit" defaultValue={hardwareWarranty.unit}><option value="minggu">Minggu</option><option value="bulan">Bulan</option></select></label>
-          </div>
+          <>
+            <div className="numberGrid">
+              <label>Garansi hardware<input name="warrantyHardwareAmount" type="number" min="0" defaultValue={hardwareWarranty.amount ?? ""} /></label>
+              <label>Periode<select name="warrantyHardwareUnit" defaultValue={hardwareWarranty.unit}><option value="minggu">Minggu</option><option value="bulan">Bulan</option></select></label>
+            </div>
+            <small className="formHint">Kosongkan Garansi hardware kalau barang/jasa ini memang tidak ada garansi.</small>
+          </>
         ) : (
           <>
             <div className="numberGrid">
-              <label>Garansi software<input name="warrantySoftwareAmount" type="number" min="1" defaultValue={softwareWarranty.amount} /></label>
+              <label>Garansi software<input name="warrantySoftwareAmount" type="number" min="1" defaultValue={softwareWarranty.amount ?? 3} /></label>
               <label>Periode software<select name="warrantySoftwareUnit" defaultValue={softwareWarranty.unit}><option value="minggu">Minggu</option><option value="bulan">Bulan</option></select></label>
             </div>
             <div className="numberGrid">
-              <label>Garansi hardware<input name="warrantyHardwareAmount" type="number" min="1" defaultValue={hardwareWarranty.amount} /></label>
+              <label>Garansi hardware<input name="warrantyHardwareAmount" type="number" min="1" defaultValue={hardwareWarranty.amount ?? 3} /></label>
               <label>Periode hardware<select name="warrantyHardwareUnit" defaultValue={hardwareWarranty.unit}><option value="minggu">Minggu</option><option value="bulan">Bulan</option></select></label>
             </div>
           </>

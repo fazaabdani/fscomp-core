@@ -121,9 +121,10 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
         <div className="panelSubsection formGrid">
           <div><p className="eyebrow">Nota</p><h3>Garansi dan catatan</h3></div>
           <div className="numberGrid">
-            <label>Garansi hardware<input name="warrantyHardwareAmount" type="number" min="1" defaultValue={3} /></label>
+            <label>Garansi hardware<input name="warrantyHardwareAmount" type="number" min="0" defaultValue={3} /></label>
             <label>Periode<select name="warrantyHardwareUnit" defaultValue="bulan"><option value="minggu">Minggu</option><option value="bulan">Bulan</option></select></label>
           </div>
+          <small className="formHint">Kosongkan Garansi hardware kalau barang/jasa ini memang tidak ada garansi.</small>
           <label>Catatan<textarea name="notes" placeholder="Detail barang, layanan, garansi, atau informasi aktivasi." /></label>
           <SubmitButton icon={<Receipt size={16} />} pendingLabel="Menyimpan transaksi...">Simpan dan Buat Nota</SubmitButton>
         </div>
