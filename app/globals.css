@@ -4324,15 +4324,13 @@ html[data-theme="elegant"] .siteFooter {
   border-top-color: rgba(154, 116, 68, 0.18);
 }
 
-html[data-theme="elegant"] .primaryButton,
-html[data-theme="elegant"] .greenButton {
+html[data-theme="elegant"] .primaryButton {
   background: linear-gradient(135deg, #b8862f, #8a5a1f);
   color: #fffaf0;
   box-shadow: 0 0 24px rgba(184, 134, 47, 0.35);
 }
 
-html[data-theme="elegant"] .primaryButton:hover,
-html[data-theme="elegant"] .greenButton:hover {
+html[data-theme="elegant"] .primaryButton:hover {
   box-shadow: 0 0 30px rgba(184, 134, 47, 0.4);
 }
 
@@ -4489,14 +4487,12 @@ html[data-theme="rakit"] .catalogHeroPill::before {
   box-shadow: none;
 }
 
-html[data-theme="rakit"] .primaryButton,
-html[data-theme="rakit"] .greenButton {
+html[data-theme="rakit"] .primaryButton {
   background: #1f9bff;
   box-shadow: none;
 }
 
-html[data-theme="rakit"] .primaryButton:hover,
-html[data-theme="rakit"] .greenButton:hover {
+html[data-theme="rakit"] .primaryButton:hover {
   background: #49adff;
   box-shadow: none;
 }
