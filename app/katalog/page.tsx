@@ -44,9 +44,11 @@ type CatalogFilters = {
   sort: string;
   lokasi: string;
   merek: string;
+  processor: string;
   ram: string;
   storage: string;
   windows: string;
+  touchscreen: string;
   harga: string;
   view: string;
 };
@@ -72,6 +74,16 @@ function storageLabel(value: string) {
   return size ? `${size}GB` : value;
 }
 
+function distinctResolution(lcdSize: string, lcdResolution: string) {
+  if (!lcdResolution) return "";
+  return lcdResolution.trim().toLowerCase() === lcdSize.trim().toLowerCase() ? "" : lcdResolution;
+}
+
+function processorFamily(value: string) {
+  const match = value.match(/i([3579])/i);
+  return match ? `Core i${match[1]}` : "Lainnya";
+}
+
 function uniqueSorted(values: string[]) {
   return Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.localeCompare(b, "id", { numeric: true }));
 }
@@ -94,9 +106,12 @@ function filterUnits(units: CatalogUnit[], filters: CatalogFilters) {
     if (q && !searchText.includes(q)) return false;
     if (filters.lokasi !== "semua" && unit.stockLocation.toLowerCase() !== filters.lokasi) return false;
     if (filters.merek && brandOf(unit.model).toLowerCase() !== filters.merek.toLowerCase()) return false;
+    if (filters.processor && processorFamily(unit.processor) !== filters.processor) return false;
     if (filters.ram && ramLabel(unit.ram) !== filters.ram) return false;
     if (filters.storage && storageLabel(unit.ssd) !== filters.storage) return false;
     if (filters.windows && unit.windowsVersion !== filters.windows) return false;
+    if (filters.touchscreen === "ya" && !unit.isTouchscreen) return false;
+    if (filters.touchscreen === "tidak" && unit.isTouchscreen) return false;
     if (filters.harga === "maks-3" && unit.hargaJualRekomendasi > 3_000_000) return false;
     if (filters.harga === "3-5" && (unit.hargaJualRekomendasi <= 3_000_000 || unit.hargaJualRekomendasi > 5_000_000)) return false;
     if (filters.harga === "diatas-5" && unit.hargaJualRekomendasi <= 5_000_000) return false;
@@ -138,9 +153,11 @@ function activeFilterText(filters: CatalogFilters) {
     filters.q ? `cari "${filters.q}"` : "",
     filters.lokasi !== "semua" ? `lokasi ${filters.lokasi}` : "",
     filters.merek ? `merek ${filters.merek}` : "",
+    filters.processor ? filters.processor : "",
     filters.ram ? `RAM ${filters.ram}` : "",
     filters.storage ? `SSD ${filters.storage}` : "",
     filters.windows ? filters.windows : "",
+    filters.touchscreen === "ya" ? "touchscreen" : filters.touchscreen === "tidak" ? "non-touchscreen" : "",
     priceLabels[filters.harga] ?? ""
   ].filter(Boolean);
   return parts.length ? parts.join(", ") : "semua unit ready";
@@ -151,9 +168,11 @@ function activeFilterCount(filters: CatalogFilters) {
     filters.q,
     filters.lokasi !== "semua" ? filters.lokasi : "",
     filters.merek,
+    filters.processor,
     filters.ram,
     filters.storage,
     filters.windows,
+    filters.touchscreen,
     filters.harga !== "semua" ? filters.harga : ""
   ].filter(Boolean).length;
 }
@@ -165,9 +184,11 @@ function catalogHref(filters: CatalogFilters, overrides: Partial<CatalogFilters>
   if (next.sort !== "unit") query.set("sort", next.sort);
   if (next.lokasi !== "semua") query.set("lokasi", next.lokasi);
   if (next.merek) query.set("merek", next.merek);
+  if (next.processor) query.set("processor", next.processor);
   if (next.ram) query.set("ram", next.ram);
   if (next.storage) query.set("storage", next.storage);
   if (next.windows) query.set("windows", next.windows);
+  if (next.touchscreen) query.set("touchscreen", next.touchscreen);
   if (next.harga !== "semua") query.set("harga", next.harga);
   if (next.view !== "grid") query.set("view", next.view);
   const text = query.toString();
@@ -245,7 +266,7 @@ function CatalogSection({
             </div>
             <div className="catalogSpecList">
               <span>{unit.windowsVersion}</span>
-              <span>LCD {unit.lcdSize} {unit.lcdResolution}</span>
+              <span>LCD {unit.lcdSize}{distinctResolution(unit.lcdSize, unit.lcdResolution) ? ` / ${distinctResolution(unit.lcdSize, unit.lcdResolution)}` : ""}</span>
             </div>
             <div className="catalogTrustRow">
               <span><CheckCircle2 size={14} /> QC {unit.latestQcAt}</span>
@@ -255,7 +276,7 @@ function CatalogSection({
             <strong className="catalogPrice">{formatRupiah(unit.hargaJualRekomendasi)}</strong>
             <div className="buttonRow catalogCardActions">
               <Link className="secondaryButton" href={{ pathname: `/unit/${unit.id}`, query: { from: returnTo } }}>Lihat Detail</Link>
-              <a className="primaryButton" href={waLink(unit)} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Unit</a>
+              <a className="greenButton" href={waLink(unit)} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Unit</a>
             </div>
           </article>
         ))}
@@ -594,6 +615,8 @@ function CatalogPageStyles() {
           color: #eef8ff;
           font-size: 15px;
           outline: none;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .catalogMobileSearchBar button {
@@ -870,9 +893,11 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
     sort: singleParam(searchParams?.sort) || "unit",
     lokasi: singleParam(searchParams?.lokasi) || "semua",
     merek: singleParam(searchParams?.merek),
+    processor: singleParam(searchParams?.processor),
     ram: singleParam(searchParams?.ram),
     storage: singleParam(searchParams?.storage),
     windows: singleParam(searchParams?.windows),
+    touchscreen: ["ya", "tidak"].includes(singleParam(searchParams?.touchscreen)) ? singleParam(searchParams?.touchscreen) : "",
     harga: ["maks-3", "3-5", "diatas-5"].includes(singleParam(searchParams?.harga)) ? singleParam(searchParams?.harga) : "semua",
     view: ["compact", "list"].includes(singleParam(searchParams?.view)) ? singleParam(searchParams?.view) : "grid"
   };
@@ -885,6 +910,7 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
   const filterCount = activeFilterCount(filters);
   const total = wiradesaUnits.length + kajenUnits.length;
   const brandOptions = uniqueSorted(allRawUnits.map((unit) => brandOf(unit.model)));
+  const processorOptions = uniqueSorted(allRawUnits.map((unit) => processorFamily(unit.processor)));
   const ramOptions = uniqueSorted(allRawUnits.map((unit) => ramLabel(unit.ram)));
   const storageOptions = uniqueSorted(allRawUnits.map((unit) => storageLabel(unit.ssd)));
   const windowsOptions = uniqueSorted(allRawUnits.map((unit) => unit.windowsVersion));
@@ -978,13 +1004,15 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
         mobileSearch={
           <form className="catalogMobileSearchBar" action="/katalog#produk-ready" role="search">
             <Search size={17} />
-            <input type="search" name="q" defaultValue={filters.q} placeholder="Cari unit, model, processor, spek" aria-label="Cari produk" />
+            <input type="search" name="q" defaultValue={filters.q} placeholder="Cari laptop, model, spek..." aria-label="Cari produk" />
             {filters.sort !== "unit" ? <input type="hidden" name="sort" value={filters.sort} /> : null}
             {filters.lokasi !== "semua" ? <input type="hidden" name="lokasi" value={filters.lokasi} /> : null}
             {filters.merek ? <input type="hidden" name="merek" value={filters.merek} /> : null}
+            {filters.processor ? <input type="hidden" name="processor" value={filters.processor} /> : null}
             {filters.ram ? <input type="hidden" name="ram" value={filters.ram} /> : null}
             {filters.storage ? <input type="hidden" name="storage" value={filters.storage} /> : null}
             {filters.windows ? <input type="hidden" name="windows" value={filters.windows} /> : null}
+            {filters.touchscreen ? <input type="hidden" name="touchscreen" value={filters.touchscreen} /> : null}
             {filters.harga !== "semua" ? <input type="hidden" name="harga" value={filters.harga} /> : null}
             {filters.view !== "grid" ? <input type="hidden" name="view" value={filters.view} /> : null}
             <button type="submit" aria-label="Cari produk"><Search size={16} /></button>
@@ -1012,6 +1040,13 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           </select>
         </label>
         <label>
+          Processor
+          <select name="processor" defaultValue={filters.processor}>
+            <option value="">Semua processor</option>
+            {processorOptions.map((processor) => <option value={processor} key={processor}>{processor}</option>)}
+          </select>
+        </label>
+        <label>
           RAM
           <select name="ram" defaultValue={filters.ram}>
             <option value="">Semua RAM</option>
@@ -1030,6 +1065,14 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           <select name="windows" defaultValue={filters.windows}>
             <option value="">Semua Windows</option>
             {windowsOptions.map((windows) => <option value={windows} key={windows}>{windows}</option>)}
+          </select>
+        </label>
+        <label>
+          Touchscreen
+          <select name="touchscreen" defaultValue={filters.touchscreen}>
+            <option value="">Semua</option>
+            <option value="ya">Touchscreen</option>
+            <option value="tidak">Non-touchscreen</option>
           </select>
         </label>
         <label>
@@ -1090,7 +1133,7 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           <p>Coba hapus beberapa filter, lihat semua unit ready, atau tanyakan kebutuhan langsung ke admin.</p>
           <div className="buttonRow">
             <Link className="primaryButton" href="/katalog#produk-ready">Lihat Semua Laptop</Link>
-            <a className="secondaryButton" href="https://wa.me/62816660056?text=Assalamu%27alaikum%20FS%20Comp.%20Saya%20belum%20menemukan%20laptop%20yang%20sesuai%20di%20katalog." target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Admin</a>
+            <a className="greenButton" href="https://wa.me/62816660056?text=Assalamu%27alaikum%20FS%20Comp.%20Saya%20belum%20menemukan%20laptop%20yang%20sesuai%20di%20katalog." target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Admin</a>
           </div>
         </div>
       ) : null}

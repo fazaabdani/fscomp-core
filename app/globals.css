@@ -3704,7 +3704,8 @@ textarea {
   }
 
   .publicUnitMobileBar .primaryButton,
-  .publicUnitMobileBar .secondaryButton {
+  .publicUnitMobileBar .secondaryButton,
+  .publicUnitMobileBar .greenButton {
     min-height: 46px;
     white-space: nowrap;
   }
@@ -4804,6 +4805,28 @@ main,
 .greenButton:hover {
   box-shadow: 0 0 50px rgba(0, 212, 255, 0.5);
   transform: translateY(-2px);
+}
+
+/* .greenButton dipakai khusus tombol menuju WhatsApp -- sengaja pakai hijau WhatsApp yang fix
+   di semua tema (brand color tujuan eksternal, bukan aksen dekoratif tema), dan sengaja
+   ditaruh setelah rule di atas supaya menang. Sebelumnya class ini sama sekali belum ada
+   style-nya (tanpa padding/border-radius/background), jadi tombolnya tampil polos tanpa
+   bentuk tombol sama sekali. */
+.greenButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #25d366, #128c4a);
+  box-shadow: 0 0 30px rgba(37, 211, 102, 0.35);
+}
+
+.greenButton:hover {
+  box-shadow: 0 0 50px rgba(37, 211, 102, 0.45);
 }
 
 .secondaryButton,

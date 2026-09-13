@@ -13,6 +13,11 @@ import { UnitGallery } from "../UnitGallery";
 
 export const dynamic = "force-dynamic";
 
+function distinctResolution(lcdSize: string, lcdResolution: string) {
+  if (!lcdResolution) return "";
+  return lcdResolution.trim().toLowerCase() === lcdSize.trim().toLowerCase() ? "" : lcdResolution;
+}
+
 function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: number }) {
   const text = [
     "Assalamu'alaikum FS Comp.",
@@ -75,7 +80,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
           <div className="unitHeroActions">
             <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
             <ShareUnitButton model={unit.model} />
-            <a className="primaryButton" href={publicWaLink} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Unit</a>
+            <a className="greenButton" href={publicWaLink} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Unit</a>
           </div>
         </div>
 
@@ -114,7 +119,9 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
               </div>
             ) : null}
             <div className="kv"><span>LCD</span><strong>{unit.lcdSize}</strong></div>
-            <div className="kv"><span>Resolusi</span><strong>{unit.lcdResolution}</strong></div>
+            {distinctResolution(unit.lcdSize, unit.lcdResolution) ? (
+              <div className="kv"><span>Resolusi</span><strong>{distinctResolution(unit.lcdSize, unit.lcdResolution)}</strong></div>
+            ) : null}
             <div className="kv"><span>Touchscreen</span><strong>{unit.isTouchscreen ? "Ya" : "Tidak"}</strong></div>
             <div className="kv"><span>Lokasi stok</span><strong>{unit.stockLocation}</strong></div>
             <div className="kv"><span>Harga jual</span><strong>{formatRupiah(unit.hargaJualRekomendasi)}</strong></div>
@@ -156,7 +163,10 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
                     <span>{relatedUnit.ssd}</span>
                   </div>
                   <strong className="catalogPrice">{formatRupiah(relatedUnit.hargaJualRekomendasi)}</strong>
-                  <Link className="secondaryButton" href={{ pathname: `/unit/${relatedUnit.id}`, query: { from: catalogReturnHref } }}>Lihat Detail</Link>
+                  <div className="buttonRow catalogCardActions">
+                    <Link className="secondaryButton" href={{ pathname: `/unit/${relatedUnit.id}`, query: { from: catalogReturnHref } }}>Lihat Detail</Link>
+                    <a className="greenButton" href={waLink(relatedUnit)} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Unit</a>
+                  </div>
                 </article>
               ))}
             </div>
@@ -165,7 +175,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
 
         <div className="publicUnitMobileBar printHidden" aria-label="Aksi produk">
           <Link className="secondaryButton" href={catalogReturnHref}><ArrowLeft size={17} /> Katalog</Link>
-          <a className="primaryButton" href={publicWaLink} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya via WhatsApp</a>
+          <a className="greenButton" href={publicWaLink} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya via WhatsApp</a>
         </div>
       </section>
     );
@@ -269,7 +279,9 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
           {isInternalUser ? <div className="kv"><span>Lokasi stok</span><strong>{unit.stockLocation}</strong></div> : null}
           {isInternalUser ? <div className="kv"><span>Seri SSD</span><strong>{unit.ssdSerial}</strong></div> : null}
           <div className="kv"><span>LCD</span><strong>{unit.lcdSize}</strong></div>
-          <div className="kv"><span>Resolusi</span><strong>{unit.lcdResolution}</strong></div>
+          {distinctResolution(unit.lcdSize, unit.lcdResolution) ? (
+            <div className="kv"><span>Resolusi</span><strong>{distinctResolution(unit.lcdSize, unit.lcdResolution)}</strong></div>
+          ) : null}
           <div className="kv"><span>Touchscreen</span><strong>{unit.isTouchscreen ? "Ya" : "Tidak"}</strong></div>
           <div className="kv"><span>Battery</span><strong>{unit.batteryHealth}%</strong></div>
           <div className="kv"><span>Harga jual</span><strong>{formatRupiah(unit.hargaJualRekomendasi)}</strong></div>
