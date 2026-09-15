@@ -4334,6 +4334,19 @@ html[data-theme="elegant"] .primaryButton:hover {
   box-shadow: 0 0 30px rgba(184, 134, 47, 0.4);
 }
 
+/* Hijau WhatsApp yang biasa (di tema lain) kurang senada dengan palet krem/emas tema ini, jadi
+   dilembutkan pakai --green tema Elegan sendiri (sage/earthy) yang sudah dipakai statusPill hijau
+   di tema ini -- tetap kebaca "hijau/aman" tapi harmonis, bukan hijau WA yang terlalu ngejreng. */
+html[data-theme="elegant"] .greenButton {
+  background: linear-gradient(135deg, #6b8f4e, #4d6b38);
+  box-shadow: 0 0 24px rgba(107, 143, 78, 0.35);
+  color: #fffaf0;
+}
+
+html[data-theme="elegant"] .greenButton:hover {
+  box-shadow: 0 0 30px rgba(107, 143, 78, 0.4);
+}
+
 html[data-theme="elegant"] .secondaryButton,
 html[data-theme="elegant"] .iconButton,
 html[data-theme="elegant"] .sortPill {
