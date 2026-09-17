@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { CheckCircle2, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, PackageCheck, Search, ShieldCheck, SlidersHorizontal, Sparkles, Star } from "lucide-react";
+import { CheckCircle2, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, PackageCheck, Search, ShieldCheck, SlidersHorizontal, Sparkles, Star, TrendingUp, Truck, Wallet } from "lucide-react";
 import { CopyWaButton } from "@/app/CopyWaButton";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
 import { brandOf } from "@/lib/catalog-image";
 import { getAppSettings } from "@/lib/app-settings";
-import { getCatalogPageData, pickFeaturedUnits } from "@/lib/catalog-page-data";
+import { getCatalogPageData, getMonthlySoldUnitsCount, pickFeaturedUnits } from "@/lib/catalog-page-data";
 import { CatalogFilterShell } from "./CatalogFilterShell";
 import { KatalogDynamics } from "./KatalogDynamics";
 
@@ -415,6 +415,10 @@ function CatalogPageStyles() {
         top: 12px;
         left: 12px;
         z-index: 2;
+      }
+
+      .catalogSocialProofPill {
+        margin: 14px 0 2px;
       }
 
       .catalogBrand {
@@ -884,9 +888,10 @@ function CatalogPageStyles() {
 }
 
 export default async function KatalogPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
-  const [{ wiradesaUnits, kajenUnits, connected }, { catalogFeaturedEnabled }] = await Promise.all([
+  const [{ wiradesaUnits, kajenUnits, connected }, { catalogFeaturedEnabled }, monthlySoldCount] = await Promise.all([
     getCatalogPageData(),
-    getAppSettings()
+    getAppSettings(),
+    getMonthlySoldUnitsCount()
   ]);
   const filters: CatalogFilters = {
     q: singleParam(searchParams?.q),
@@ -920,6 +925,12 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
     ["3", "Servis profesional", "Teknisi berpengalaman"],
     ["4", "Stok update", "Data dari Core FS Comp"]
   ];
+  const purchaseInfo: [ReactNode, string, string][] = [
+    [<Wallet size={16} key="icon" />, "Pembayaran", "Cash atau transfer bank"],
+    [<MapPin size={16} key="icon" />, "Ambil di toko", "Wiradesa atau Kajen"],
+    [<Truck size={16} key="icon" />, "Bisa dikirim", "COD/ekspedisi luar kota, ongkir tanya admin"],
+    [<ShieldCheck size={16} key="icon" />, "Garansi toko", "Hardware 3 minggu, software 3 bulan"]
+  ];
 
   return (
     <section className="pageStack katalogPage dynamicCatalogPage">
@@ -930,6 +941,9 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           <span className="catalogHeroPill"><CheckCircle2 size={16} /> Katalog Laptop Second FS Comp</span>
           <h1><span>Laptop Second</span> <span>Berkualitas</span> <span>Siap Dipilih</span></h1>
           <p>Cari laptop ready sesuai kebutuhan panjenengan. Data stok mengikuti sistem Core, lengkap dengan spesifikasi, harga, lokasi stok, foto, dan tombol chat admin.</p>
+          {monthlySoldCount > 0 ? (
+            <span className="catalogHeroPill catalogSocialProofPill"><TrendingUp size={16} /> {monthlySoldCount} laptop terjual bulan ini</span>
+          ) : null}
           <div className="buttonRow">
             <a className="primaryButton" href="#produk-ready">Lihat Katalog</a>
             <Link className="secondaryButton" href="/katalog/rakit-pc">Rakit PC</Link>
@@ -984,6 +998,20 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
         {features.map(([number, title, desc]) => (
           <div className="catalogFeatureItem" key={number}>
             <span>{number}</span>
+            <strong>{title}</strong>
+            <small>{desc}</small>
+          </div>
+        ))}
+      </div>
+
+      <div className="catalogSectionTitle catalogReveal">
+        <p className="eyebrow">Sebelum Order</p>
+        <h2>Cara belanja &amp; garansi</h2>
+      </div>
+      <div className="catalogFeatureStrip catalogReveal revealDelay1">
+        {purchaseInfo.map(([icon, title, desc]) => (
+          <div className="catalogFeatureItem" key={title}>
+            <span>{icon}</span>
             <strong>{title}</strong>
             <small>{desc}</small>
           </div>

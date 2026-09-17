@@ -1,6 +1,31 @@
+import { jakartaDateKey } from "./inventory";
 import { resolvePrimaryImageUrl } from "./media-data";
 import { prisma } from "./prisma";
 import { displayUnitNumber } from "./unit-number";
+
+function jakartaMonthRange(date: Date) {
+  const [year, month] = jakartaDateKey(date).split("-").map(Number);
+  const start = new Date(Date.UTC(year, month - 1, 1) - 7 * 3600 * 1000);
+  const end = month === 12
+    ? new Date(Date.UTC(year + 1, 0, 1) - 7 * 3600 * 1000)
+    : new Date(Date.UTC(year, month, 1) - 7 * 3600 * 1000);
+  return { start, end };
+}
+
+export async function getMonthlySoldUnitsCount() {
+  try {
+    const { start, end } = jakartaMonthRange(new Date());
+    return await prisma.sale.count({
+      where: {
+        unitId: { not: null },
+        voidedAt: null,
+        soldAt: { gte: start, lt: end }
+      }
+    });
+  } catch {
+    return 0;
+  }
+}
 
 const CATALOG_UNIT_INCLUDE = {
   qcHarian: {
