@@ -62,7 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <>
             <header className="topbar">
               <Link className="brand" href="/">
-                <span className="brandMark">FS</span>
+                <span className="brandMark"><img src="/branding/fs-comp-icon.png" alt="FS Comp" /></span>
                 <span>
                   <strong>FS Comp Core</strong>
                   <small>Unit, QC, PSI, Label QR</small>

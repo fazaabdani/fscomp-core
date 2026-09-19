@@ -27,7 +27,7 @@ export function SidebarNav({ currentUser }: { currentUser: NavUser }) {
     <>
       <div className="sidebarMobileBar">
         <Link className="brand" href="/">
-          <span className="brandMark">FS</span>
+          <span className="brandMark"><img src="/branding/fs-comp-icon.png" alt="FS Comp" /></span>
           <strong>FS Comp Core</strong>
         </Link>
         <button aria-label="Buka menu" className="iconButton" onClick={() => setMobileOpen(true)} type="button">
@@ -40,7 +40,7 @@ export function SidebarNav({ currentUser }: { currentUser: NavUser }) {
       <aside className={mobileOpen ? "sidebarShell open" : "sidebarShell"}>
         <div className="sidebarHeader">
           <Link className="brand" href="/">
-            <span className="brandMark">FS</span>
+            <span className="brandMark"><img src="/branding/fs-comp-icon.png" alt="FS Comp" /></span>
             <span>
               <strong>FS Comp Core</strong>
               <small>Unit, QC, PSI, Label QR</small>
