@@ -424,14 +424,16 @@ function CatalogPageStyles() {
       .catalogAnnouncementBanner {
         display: grid;
         justify-items: center;
-        gap: 12px;
+        gap: 14px;
         text-align: center;
+        max-width: 460px;
+        margin: 0 auto;
       }
 
       .catalogAnnouncementBanner img {
         max-width: 100%;
         max-height: 460px;
-        width: auto;
+        width: 100%;
         border-radius: 8px;
         object-fit: contain;
       }
@@ -439,13 +441,40 @@ function CatalogPageStyles() {
       .catalogAnnouncementBanner p,
       .catalogAnnouncementBanner a {
         margin: 0;
-        color: var(--muted);
-        font-size: 14px;
-        font-weight: 700;
+        color: var(--ink);
+        font-size: 15px;
+        line-height: 1.6;
+        font-weight: 600;
       }
 
       .catalogAnnouncementBanner > a:first-child {
         display: block;
+      }
+
+      .catalogAnnouncementBannerSplit {
+        justify-items: stretch;
+        gap: 24px;
+        text-align: left;
+        max-width: none;
+        margin: 0;
+        grid-template-columns: minmax(200px, 300px) minmax(0, 1fr);
+        align-items: center;
+      }
+
+      .catalogAnnouncementBannerSplit img {
+        max-height: 340px;
+        object-fit: cover;
+      }
+
+      @media (max-width: 720px) {
+        .catalogAnnouncementBannerSplit {
+          grid-template-columns: 1fr;
+          text-align: center;
+        }
+
+        .catalogAnnouncementBannerSplit img {
+          max-height: 300px;
+        }
       }
 
       .catalogBrand {
@@ -1004,7 +1033,7 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
       </div>
 
       {announcement.enabled && (announcement.imageUrl || announcement.text) ? (
-        <div className="panel catalogAnnouncementBanner catalogReveal">
+        <div className={`panel catalogAnnouncementBanner catalogReveal ${announcement.imageUrl && announcement.text ? "catalogAnnouncementBannerSplit" : ""}`}>
           {announcement.imageUrl ? (
             announcement.link ? (
               <a href={announcement.link} target={announcement.link.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
