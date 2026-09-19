@@ -1477,6 +1477,11 @@ textarea {
   line-height: 1;
 }
 
+.catalogStatBox strong.catalogStatUrgent {
+  color: var(--yellow);
+  font-size: 20px;
+}
+
 .catalogStatBox span {
   color: #b8cbe1;
   font-size: 13px;

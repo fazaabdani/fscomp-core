@@ -5,7 +5,7 @@ import { CopyWaButton } from "@/app/CopyWaButton";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
 import { brandOf } from "@/lib/catalog-image";
-import { getAppSettings } from "@/lib/app-settings";
+import { getAppSettings, getCatalogAnnouncement } from "@/lib/app-settings";
 import { getCatalogPageData, getMonthlySoldUnitsCount, pickFeaturedUnits } from "@/lib/catalog-page-data";
 import { CatalogFilterShell } from "./CatalogFilterShell";
 import { KatalogDynamics } from "./KatalogDynamics";
@@ -419,6 +419,33 @@ function CatalogPageStyles() {
 
       .catalogSocialProofPill {
         margin: 14px 0 2px;
+      }
+
+      .catalogAnnouncementBanner {
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+        text-align: center;
+      }
+
+      .catalogAnnouncementBanner img {
+        max-width: 100%;
+        max-height: 460px;
+        width: auto;
+        border-radius: 8px;
+        object-fit: contain;
+      }
+
+      .catalogAnnouncementBanner p,
+      .catalogAnnouncementBanner a {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .catalogAnnouncementBanner > a:first-child {
+        display: block;
       }
 
       .catalogBrand {
@@ -888,10 +915,11 @@ function CatalogPageStyles() {
 }
 
 export default async function KatalogPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
-  const [{ wiradesaUnits, kajenUnits, connected }, { catalogFeaturedEnabled }, monthlySoldCount] = await Promise.all([
+  const [{ wiradesaUnits, kajenUnits, connected }, { catalogFeaturedEnabled }, monthlySoldCount, announcement] = await Promise.all([
     getCatalogPageData(),
     getAppSettings(),
-    getMonthlySoldUnitsCount()
+    getMonthlySoldUnitsCount(),
+    getCatalogAnnouncement()
   ]);
   const filters: CatalogFilters = {
     q: singleParam(searchParams?.q),
@@ -914,6 +942,7 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
   const returnTo = catalogHref(filters);
   const filterCount = activeFilterCount(filters);
   const total = wiradesaUnits.length + kajenUnits.length;
+  const isLowStock = total > 0 && total < 15;
   const brandOptions = uniqueSorted(allRawUnits.map((unit) => brandOf(unit.model)));
   const processorOptions = uniqueSorted(allRawUnits.map((unit) => processorFamily(unit.processor)));
   const ramOptions = uniqueSorted(allRawUnits.map((unit) => ramLabel(unit.ram)));
@@ -954,11 +983,11 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
         <div className="catalogHeroStatsPanel dynamicStatsPanel">
           <div className="catalogHeroStatsGrid">
             <div className="catalogStatBox">
-              <strong data-count-target={total}>{total}</strong>
+              {isLowStock ? <strong className="catalogStatUrgent">Terbatas</strong> : <strong data-count-target={total}>{total}</strong>}
               <span>Total unit tampil</span>
             </div>
             <div className="catalogStatBox">
-              <strong data-count-target={total}>{total}</strong>
+              {isLowStock ? <strong className="catalogStatUrgent">Terbatas</strong> : <strong data-count-target={total}>{total}</strong>}
               <span>Ready stock</span>
             </div>
             <div className="catalogStatBox">
@@ -973,6 +1002,27 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           <p>Harga dan stok mengikuti update dari Core FS Comp. Klik detail unit untuk melihat ringkasan, atau chat admin untuk cek ketersediaan.</p>
         </div>
       </div>
+
+      {announcement.enabled && (announcement.imageUrl || announcement.text) ? (
+        <div className="panel catalogAnnouncementBanner catalogReveal">
+          {announcement.imageUrl ? (
+            announcement.link ? (
+              <a href={announcement.link} target={announcement.link.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
+                <img src={announcement.imageUrl} alt={announcement.text || "Pengumuman FS Comp"} />
+              </a>
+            ) : (
+              <img src={announcement.imageUrl} alt={announcement.text || "Pengumuman FS Comp"} />
+            )
+          ) : null}
+          {announcement.text ? (
+            announcement.link && !announcement.imageUrl ? (
+              <a href={announcement.link} target={announcement.link.startsWith("http") ? "_blank" : undefined} rel="noreferrer">{announcement.text}</a>
+            ) : (
+              <p>{announcement.text}</p>
+            )
+          ) : null}
+        </div>
+      ) : null}
 
       {catalogFeaturedEnabled && featuredUnits.length > 0 ? (
         <CatalogSection
