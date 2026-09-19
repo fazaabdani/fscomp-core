@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { cache } from "react";
 import { chargerTypes } from "./charger-options";
 import { mediaAssetUrl, mediaThumbUrl } from "./media-data";
 import { prisma } from "./prisma";
@@ -126,7 +127,7 @@ export async function getBatchForEdit(id: string) {
   }
 }
 
-export async function getUnitForDetail(id: string) {
+export const getUnitForDetail = cache(async (id: string) => {
   try {
     const unit = await prisma.unit.findUnique({
       where: { id },
@@ -277,7 +278,7 @@ export async function getUnitForDetail(id: string) {
   } catch {
     return null;
   }
-}
+});
 
 export async function getQcHarianPageData() {
   try {

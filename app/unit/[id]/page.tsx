@@ -1,9 +1,10 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CalendarClock, Cpu, HardDrive, MessageCircle, QrCode, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CalendarClock, Cpu, HardDrive, MessageCircle, QrCode, ShieldCheck, TrendingUp } from "lucide-react";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
-import { getRelatedCatalogUnits } from "@/lib/catalog-page-data";
+import { getMonthlySoldUnitsCount, getRelatedCatalogUnits } from "@/lib/catalog-page-data";
 import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 import { slugifyFileName } from "@/lib/file-naming";
@@ -41,13 +42,42 @@ function catalogReturnPath(value?: string | string[]) {
   }
 }
 
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const unit = await getUnitForDetail(params.id);
+  if (!unit) return {};
+
+  const title = `${unit.model} - ${formatRupiah(unit.hargaJualRekomendasi)} - FS Comp`;
+  const description = `${unit.processor} / ${unit.ram} / ${unit.ssd}. Lokasi stok: ${unit.stockLocation}. Laptop second sudah QC ketat, bergaransi toko FS Comp.`;
+  const image = unit.gallery[0]?.url || unit.catalogImageUrl || "/branding/fs-comp-logo.webp";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `/unit/${unit.id}`,
+      images: [image],
+      type: "website"
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image]
+    }
+  };
+}
+
 export default async function UnitDetailPage({ params, searchParams }: { params: { id: string }; searchParams?: { from?: string | string[] } }) {
   const unit = await getUnitForDetail(params.id);
   if (!unit) notFound();
 
   const currentUser = await getCurrentUser();
   const isInternalUser = Boolean(currentUser);
-  const relatedUnits = isInternalUser ? [] : await getRelatedCatalogUnits(unit.id);
+  const [relatedUnits, monthlySoldCount] = isInternalUser
+    ? [[], 0]
+    : await Promise.all([getRelatedCatalogUnits(unit.id), getMonthlySoldUnitsCount()]);
   const dailyHistory = unit.dailyHistory;
   const qcAwal = unit.qcAwal;
   const visibleHardware = qcAwal
@@ -76,6 +106,9 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
             <p className="eyebrow">Katalog FS Comp</p>
             <h1>{unit.model}</h1>
             <p className="heroCopy">{unit.processor} / {unit.ram} / {unit.ssd}</p>
+            {monthlySoldCount > 0 ? (
+              <span className="catalogHeroPill"><TrendingUp size={16} /> {monthlySoldCount} laptop terjual bulan ini</span>
+            ) : null}
           </div>
           <div className="unitHeroActions">
             <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>

@@ -1,16 +1,35 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { CheckCircle2, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, PackageCheck, Search, ShieldCheck, SlidersHorizontal, Sparkles, Star, TrendingUp, Truck, Wallet } from "lucide-react";
+import { CheckCircle2, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, MessageSquareQuote, PackageCheck, Search, ShieldCheck, SlidersHorizontal, Sparkles, Star, TrendingUp, Truck, Wallet } from "lucide-react";
 import { CopyWaButton } from "@/app/CopyWaButton";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
 import { brandOf } from "@/lib/catalog-image";
 import { getAppSettings, getCatalogAnnouncement } from "@/lib/app-settings";
-import { getCatalogPageData, getMonthlySoldUnitsCount, pickFeaturedUnits } from "@/lib/catalog-page-data";
+import { getCatalogPageData, getMonthlySoldUnitsCount, getPublishedTestimonials, pickFeaturedUnits } from "@/lib/catalog-page-data";
 import { CatalogFilterShell } from "./CatalogFilterShell";
 import { KatalogDynamics } from "./KatalogDynamics";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Katalog Laptop Second Berkualitas - FS Comp",
+  description: "Cari laptop second ready sesuai kebutuhan panjenengan. Lengkap dengan spesifikasi, harga, lokasi stok, foto, dan QC ketat sebelum dijual.",
+  openGraph: {
+    title: "Katalog Laptop Second Berkualitas - FS Comp",
+    description: "Cari laptop second ready sesuai kebutuhan panjenengan. Lengkap dengan spesifikasi, harga, lokasi stok, foto, dan QC ketat sebelum dijual.",
+    url: "/katalog",
+    images: ["/branding/fs-comp-logo.webp"],
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Katalog Laptop Second Berkualitas - FS Comp",
+    description: "Cari laptop second ready sesuai kebutuhan panjenengan. Lengkap dengan spesifikasi, harga, lokasi stok, foto, dan QC ketat sebelum dijual.",
+    images: ["/branding/fs-comp-logo.webp"]
+  }
+};
 
 function waLink(unit: { nomorUnit: string; model: string; hargaJualRekomendasi: number }) {
   const text = [
@@ -475,6 +494,41 @@ function CatalogPageStyles() {
         .catalogAnnouncementBannerSplit img {
           max-height: 300px;
         }
+      }
+
+      .catalogTestimonialGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+      }
+
+      .catalogTestimonialCard {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+        padding: 16px;
+        border: 1px solid rgba(55, 163, 255, 0.28);
+        border-radius: 10px;
+        background: rgba(8, 20, 36, 0.6);
+      }
+
+      .catalogTestimonialStars {
+        color: #ffc857;
+        font-size: 15px;
+        letter-spacing: 2px;
+      }
+
+      .catalogTestimonialCard p {
+        margin: 0;
+        color: var(--ink);
+        line-height: 1.6;
+        font-style: italic;
+      }
+
+      .catalogTestimonialCard strong {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
       }
 
       .catalogBrand {
@@ -944,11 +998,12 @@ function CatalogPageStyles() {
 }
 
 export default async function KatalogPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
-  const [{ wiradesaUnits, kajenUnits, connected }, { catalogFeaturedEnabled }, monthlySoldCount, announcement] = await Promise.all([
+  const [{ wiradesaUnits, kajenUnits, connected }, { catalogFeaturedEnabled }, monthlySoldCount, announcement, testimonials] = await Promise.all([
     getCatalogPageData(),
     getAppSettings(),
     getMonthlySoldUnitsCount(),
-    getCatalogAnnouncement()
+    getCatalogAnnouncement(),
+    getPublishedTestimonials()
   ]);
   const filters: CatalogFilters = {
     q: singleParam(searchParams?.q),
@@ -1096,6 +1151,27 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           </div>
         ))}
       </div>
+
+      {testimonials.length > 0 ? (
+        <section className="panel catalogTestimonials catalogReveal revealDelay1">
+          <div className="panelHeader">
+            <div>
+              <p className="eyebrow">Kata Mereka</p>
+              <h2>Testimoni pembeli FS Comp</h2>
+            </div>
+            <MessageSquareQuote size={22} />
+          </div>
+          <div className="catalogTestimonialGrid">
+            {testimonials.map((testimonial) => (
+              <div className="catalogTestimonialCard" key={testimonial.id}>
+                <span className="catalogTestimonialStars">{"★".repeat(testimonial.rating)}{"☆".repeat(5 - testimonial.rating)}</span>
+                <p>&ldquo;{testimonial.quote}&rdquo;</p>
+                <strong>{testimonial.buyerName}</strong>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {!connected ? (
         <div className="infoBox dangerInfo">Katalog belum tersambung ke database production.</div>

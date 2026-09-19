@@ -33,8 +33,23 @@ const jakarta = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://core.fscomp.id"),
   title: "FS Comp Core",
-  description: "Manajemen unit, batch, QC, label QR, dan AI reporting FS Comp."
+  description: "Manajemen unit, batch, QC, label QR, dan AI reporting FS Comp.",
+  openGraph: {
+    title: "FS Comp Core",
+    description: "Manajemen unit, batch, QC, label QR, dan AI reporting FS Comp.",
+    siteName: "FS Comp Core",
+    images: ["/branding/fs-comp-logo.webp"],
+    locale: "id_ID",
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FS Comp Core",
+    description: "Manajemen unit, batch, QC, label QR, dan AI reporting FS Comp.",
+    images: ["/branding/fs-comp-logo.webp"]
+  }
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

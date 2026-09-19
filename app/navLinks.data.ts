@@ -40,6 +40,7 @@ export function getNavEntries(currentUser: NavUser): NavEntry[] {
     { href: "/wa-ai", label: "AI WhatsApp", show: canSeeLicense },
     { href: "/asisten-ai", label: "Asisten AI", show: !isMagang },
     { href: "/owner-dashboard", label: "Owner Dashboard", show: currentUser.role === "admin" },
+    { href: "/testimoni", label: "Testimoni Katalog", show: currentUser.role === "admin" },
     { href: "/pengaturan", label: "Pengaturan", show: currentUser.role === "admin" }
   ];
 

@@ -27,6 +27,19 @@ export async function getMonthlySoldUnitsCount() {
   }
 }
 
+export async function getPublishedTestimonials(limit = 6) {
+  try {
+    return await prisma.testimonial.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      select: { id: true, buyerName: true, quote: true, rating: true }
+    });
+  } catch {
+    return [];
+  }
+}
+
 const CATALOG_UNIT_INCLUDE = {
   qcHarian: {
     orderBy: { tanggal: "desc" as const },
