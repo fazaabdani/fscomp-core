@@ -1,23 +1,9 @@
 import { NextResponse } from "next/server";
 import { csvCell } from "@/lib/csv";
+import { saleProfitSplit } from "@/lib/finance-page-data";
 import { jakartaDateKey } from "@/lib/inventory";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
-
-function saleProfitSplit(location: string, grossProfit: number) {
-  if (location !== "KAJEN") {
-    return {
-      wiradesaShare: grossProfit,
-      kajenShare: 0
-    };
-  }
-
-  const wiradesaShare = Math.round(grossProfit * 0.6);
-  return {
-    wiradesaShare,
-    kajenShare: grossProfit - wiradesaShare
-  };
-}
 
 function dateFilter(from: string | null, to: string | null) {
   const soldAt: { gte?: Date; lte?: Date } = {};
