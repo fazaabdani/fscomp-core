@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { resolveUnitPhotos } from "@/lib/media-data";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
-import { entityId, formValues, percentage, requiredText, rupiahInput, z } from "@/lib/form-validation";
+import { entityId, formValues, optionalText, percentage, requiredText, rupiahInput, z } from "@/lib/form-validation";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -36,6 +36,7 @@ export async function updateUnitAction(unitId: string, formData: FormData) {
     hargaModal: rupiahInput,
     hargaJualRekomendasi: rupiahInput,
     stockLocation: z.enum(["WIRADESA", "KAJEN"]),
+    catalogDescription: optionalText(4000),
     ssdHealth: percentage,
     batteryHealth: percentage,
     statusObservasi: z.enum(["RECHECK", "CANDIDATE_RETUR", "RETUR_DISTRIBUTOR", "VERIFIED", "VERIFIED_WITH_NOTES"])
@@ -65,6 +66,7 @@ export async function updateUnitAction(unitId: string, formData: FormData) {
       hargaJualRekomendasi: true,
       stockLocation: true,
       catalogImageUrl: true,
+      catalogDescription: true,
       entryNotes: true,
       ssdHealth: true,
       batteryHealth: true,
@@ -109,6 +111,7 @@ export async function updateUnitAction(unitId: string, formData: FormData) {
     hargaJualRekomendasi: rupiahValue(formData, "hargaJualRekomendasi"),
     stockLocation: (text(formData, "stockLocation") || "WIRADESA") as SaleLocation,
     catalogImageUrl: text(formData, "catalogImageUrl") || null,
+    catalogDescription: text(formData, "catalogDescription").replace(/\r\n/g, "\n") || null,
     entryNotes: text(formData, "entryNotes") || null,
     ssdHealth: numberValue(formData, "ssdHealth"),
     batteryHealth: numberValue(formData, "batteryHealth"),

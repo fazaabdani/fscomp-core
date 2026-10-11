@@ -8,8 +8,10 @@ import { getMonthlySoldUnitsCount, getRelatedCatalogUnits } from "@/lib/catalog-
 import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 import { slugifyFileName } from "@/lib/file-naming";
+import { descriptionSnippet } from "@/lib/unit-description";
 import { getCurrentUser } from "@/lib/session";
 import { ShareUnitButton } from "./ShareUnitButton";
+import { UnitDescription } from "../UnitDescription";
 import { UnitGallery } from "../UnitGallery";
 
 export const dynamic = "force-dynamic";
@@ -47,7 +49,10 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   if (!unit) return {};
 
   const title = `${unit.model} - ${formatRupiah(unit.hargaJualRekomendasi)} - FS Comp`;
-  const description = `${unit.processor} / ${unit.ram} / ${unit.ssd}. Lokasi stok: ${unit.stockLocation}. Laptop second sudah QC ketat, bergaransi toko FS Comp.`;
+  const highlight = descriptionSnippet(unit.catalogDescription, 140);
+  const description = highlight
+    ? `${highlight} (${unit.processor} / ${unit.ram} / ${unit.ssd}, stok ${unit.stockLocation}). Bergaransi toko FS Comp.`
+    : `${unit.processor} / ${unit.ram} / ${unit.ssd}. Lokasi stok: ${unit.stockLocation}. Laptop second sudah QC ketat, bergaransi toko FS Comp.`;
   const image = unit.gallery[0]?.url || unit.catalogImageUrl || "/branding/fs-comp-logo.webp";
 
   return {
@@ -162,6 +167,8 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
           </aside>
         </div>
 
+        <UnitDescription text={unit.catalogDescription} />
+
         <section className="panel">
           <div className="panelHeader">
             <div>
@@ -260,6 +267,8 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
           />
         )}
       </section>
+
+      <UnitDescription text={unit.catalogDescription} />
 
       <div className="contentGrid">
         <section className="panel wide">

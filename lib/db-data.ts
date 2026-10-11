@@ -96,6 +96,7 @@ export async function getUnitForEdit(id: string) {
       hargaJualRekomendasi: unit.hargaJualRekomendasi,
       stockLocation: unit.stockLocation,
       catalogImageUrl: unit.catalogImageUrl ?? "",
+      catalogDescription: unit.catalogDescription ?? "",
       batteryHealth: unit.batteryHealth ?? 0,
       ssdHealth: unit.ssdHealth ?? 0,
       statusObservasi: unit.statusObservasi
@@ -175,6 +176,7 @@ export const getUnitForDetail = cache(async (id: string) => {
       hargaJualRekomendasi: unit.hargaJualRekomendasi,
       stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
       catalogImageUrl: gallery[0]?.url ?? unit.catalogImageUrl ?? "",
+      catalogDescription: unit.catalogDescription ?? "",
       gallery,
       batteryHealth: unit.batteryHealth ?? 0,
       ssdHealth: unit.ssdHealth ?? 0,

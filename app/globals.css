@@ -5091,3 +5091,26 @@ body:has(.waAiPage) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.unitDescription {
+  display: grid;
+  gap: 12px;
+}
+
+.unitDescription p,
+.unitDescription li {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.7;
+}
+
+.unitDescription ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 22px;
+}
+
+.unitDescription li::marker {
+  color: var(--cyan);
+}

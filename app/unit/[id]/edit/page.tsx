@@ -131,7 +131,17 @@ export default async function EditUnitPage({ params, searchParams }: { params: {
         <div className="formFieldGroup">Galeri foto
           <MediaPicker fieldName="unitPhotoAssetIds" initial={gallery.map((photo) => ({ id: photo.assetId, url: photo.url, thumbUrl: photo.thumbUrl }))} />
         </div>
-        <label>Catatan admin unit
+        <label>Deskripsi katalog (tampil ke pembeli)
+          <textarea
+            name="catalogDescription"
+            rows={8}
+            maxLength={4000}
+            defaultValue={unit.catalogDescription}
+            placeholder={"Tulis keunggulan unit ini dengan bahasa sendiri. Contoh:\nUnit mulus, fullset dengan charger original, siap pakai kerja & kuliah.\n\n- Keyboard backlit + fingerprint\n- Baterai masih awet, sekitar 5 jam pemakaian\n- Layar FHD IPS, warna tajam\n- Bonus tas laptop"}
+          />
+          <small>Opsional. Baris berawalan &quot;- &quot; otomatis jadi daftar poin. Ini BEDA dari catatan admin di bawah — yang ditulis di sini akan tampil publik, jadi jangan isi alasan retur/info internal. Cocok juga buat menjelaskan unit berstatus &quot;Verified with notes&quot; dengan bahasa yang enak dibaca pembeli.</small>
+        </label>
+        <label>Catatan admin unit (internal, tidak tampil publik)
           <textarea
             name="entryNotes"
             defaultValue={unit.entryNotes === "-" ? "" : unit.entryNotes}

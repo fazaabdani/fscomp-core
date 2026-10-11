@@ -247,6 +247,7 @@ model Unit {
   tempo                DateTime?
   catalogLiveUrl       String?
   catalogImageUrl      String?
+  catalogDescription   String?
   soldAt               DateTime?
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
