@@ -1,14 +1,14 @@
 import { mediaAssetUrl, mediaThumbUrl } from "./media-data";
 import { prisma } from "./prisma";
 
-export type ThemePreference = "light" | "dark" | "elegant" | "rakit";
+export type ThemePreference = "light" | "dark" | "elegant" | "rakit" | "nyaman";
 export type LayoutPreference = "topbar" | "sidebar";
 
 const DEFAULT_THEME: ThemePreference = "dark";
 const DEFAULT_LAYOUT: LayoutPreference = "topbar";
 
 function toThemePreference(value: string | undefined): ThemePreference {
-  if (value === "light" || value === "elegant" || value === "rakit") return value;
+  if (value === "light" || value === "elegant" || value === "rakit" || value === "nyaman") return value;
   return DEFAULT_THEME;
 }
 

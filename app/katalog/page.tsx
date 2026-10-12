@@ -7,7 +7,7 @@ import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
 import { brandOf } from "@/lib/catalog-image";
 import { getAppSettings, getCatalogAnnouncement } from "@/lib/app-settings";
-import { getCatalogPageData, getMonthlySoldUnitsCount, getPublishedTestimonials, pickFeaturedUnits } from "@/lib/catalog-page-data";
+import { getCatalogPageData, getRecentSoldUnitsCount, getPublishedTestimonials, pickFeaturedUnits } from "@/lib/catalog-page-data";
 import { CatalogFilterShell } from "./CatalogFilterShell";
 import { KatalogDynamics } from "./KatalogDynamics";
 
@@ -254,7 +254,7 @@ function CatalogSection({
   featured?: boolean;
 }) {
   return (
-    <section className="panel catalogPublicSection">
+    <section className={`panel catalogPublicSection${featured ? " catalogPublicSectionFeatured" : ""}`}>
       <div className="panelHeader">
         <div>
           <p className="eyebrow">{subtitle}</p>
@@ -1001,10 +1001,10 @@ function CatalogPageStyles() {
 }
 
 export default async function KatalogPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
-  const [{ wiradesaUnits, kajenUnits, connected }, { catalogFeaturedEnabled }, monthlySoldCount, announcement, testimonials] = await Promise.all([
+  const [{ wiradesaUnits, kajenUnits, connected }, { catalogFeaturedEnabled }, recentSoldCount, announcement, testimonials] = await Promise.all([
     getCatalogPageData(),
     getAppSettings(),
-    getMonthlySoldUnitsCount(),
+    getRecentSoldUnitsCount(),
     getCatalogAnnouncement(),
     getPublishedTestimonials()
   ]);
@@ -1057,8 +1057,8 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           <span className="catalogHeroPill"><CheckCircle2 size={16} /> Katalog Laptop Second FS Comp</span>
           <h1><span>Laptop Second</span> <span>Berkualitas</span> <span>Siap Dipilih</span></h1>
           <p>Cari laptop ready sesuai kebutuhan panjenengan. Data stok mengikuti sistem Core, lengkap dengan spesifikasi, harga, lokasi stok, foto, dan tombol chat admin.</p>
-          {monthlySoldCount > 0 ? (
-            <span className="catalogHeroPill catalogSocialProofPill"><TrendingUp size={16} /> {monthlySoldCount} laptop terjual bulan ini</span>
+          {recentSoldCount > 0 ? (
+            <span className="catalogHeroPill catalogSocialProofPill"><TrendingUp size={16} /> {recentSoldCount} laptop terjual dalam 1 bulan terakhir</span>
           ) : null}
           <div className="buttonRow">
             <a className="primaryButton" href="#produk-ready">Lihat Katalog</a>
@@ -1069,10 +1069,17 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
         </div>
         <div className="catalogHeroStatsPanel dynamicStatsPanel">
           <div className="catalogHeroStatsGrid">
-            <div className="catalogStatBox">
-              {isLowStock ? <strong className="catalogStatUrgent">Terbatas</strong> : <strong data-count-target={total}>{total}</strong>}
-              <span>Total unit tampil</span>
-            </div>
+            {recentSoldCount > 0 ? (
+              <div className="catalogStatBox catalogStatSold">
+                <strong data-count-target={recentSoldCount}>{recentSoldCount}</strong>
+                <span>Laptop terjual, 1 bulan terakhir</span>
+              </div>
+            ) : (
+              <div className="catalogStatBox">
+                {isLowStock ? <strong className="catalogStatUrgent">Terbatas</strong> : <strong data-count-target={total}>{total}</strong>}
+                <span>Total unit tampil</span>
+              </div>
+            )}
             <div className="catalogStatBox">
               {isLowStock ? <strong className="catalogStatUrgent">Terbatas</strong> : <strong data-count-target={total}>{total}</strong>}
               <span>Ready stock</span>

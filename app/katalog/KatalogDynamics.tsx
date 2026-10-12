@@ -3,6 +3,24 @@
 import { useEffect } from "react";
 
 export function KatalogDynamics({ navigationKey }: { navigationKey: string }) {
+  // Tema "Nyaman" di desktop lebar: filter di sidebar langsung diterapkan begitu pilihan diganti,
+  // tanpa perlu menekan "Terapkan". Di HP (drawer) tetap manual supaya bisa memilih beberapa
+  // filter sekaligus sebelum drawer menutup.
+  useEffect(() => {
+    const form = document.querySelector<HTMLFormElement>("form.catalogFilterPanel");
+    if (!form) return;
+
+    function submitOnChange(event: Event) {
+      if (document.documentElement.dataset.theme !== "nyaman") return;
+      if (!window.matchMedia("(min-width: 1100px)").matches) return;
+      if (!(event.target instanceof HTMLSelectElement)) return;
+      form?.requestSubmit();
+    }
+
+    form.addEventListener("change", submitOnChange);
+    return () => form.removeEventListener("change", submitOnChange);
+  }, []);
+
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const revealItems = Array.from(document.querySelectorAll<HTMLElement>(".catalogReveal"));

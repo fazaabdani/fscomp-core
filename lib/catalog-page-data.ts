@@ -1,26 +1,16 @@
-import { jakartaDateKey } from "./inventory";
 import { resolvePrimaryImageUrl } from "./media-data";
 import { prisma } from "./prisma";
 import { displayUnitNumber } from "./unit-number";
 import { descriptionSnippet } from "./unit-description";
 
-function jakartaMonthRange(date: Date) {
-  const [year, month] = jakartaDateKey(date).split("-").map(Number);
-  const start = new Date(Date.UTC(year, month - 1, 1) - 7 * 3600 * 1000);
-  const end = month === 12
-    ? new Date(Date.UTC(year + 1, 0, 1) - 7 * 3600 * 1000)
-    : new Date(Date.UTC(year, month, 1) - 7 * 3600 * 1000);
-  return { start, end };
-}
-
-export async function getMonthlySoldUnitsCount() {
+// Jendela 30 hari bergulir (bukan "bulan ini") supaya angkanya tidak ke-reset ke 0 tiap tanggal 1.
+export async function getRecentSoldUnitsCount(days = 30) {
   try {
-    const { start, end } = jakartaMonthRange(new Date());
     return await prisma.sale.count({
       where: {
         unitId: { not: null },
         voidedAt: null,
-        soldAt: { gte: start, lt: end }
+        soldAt: { gte: new Date(Date.now() - days * 24 * 3600 * 1000) }
       }
     });
   } catch {

@@ -1,0 +1,993 @@
+/* ===== Tema Nyaman (opsi ke-5) =====
+   Dirancang untuk katalog publik: dipakai pembeli berjam-jam membandingkan laptop, jadi yang
+   dikejar kenyamanan mata & kejelasan, bukan "wah".
+   - Warna: kertas hangat (#f5f2ec) + kartu krem-putih (bukan putih murni -> tidak silau), teks
+     arang kebiruan (#1f2933, kontras ~12:1), satu aksen teal tenang. Pasangan teks/latar utama
+     dicek >= 4.5:1 (WCAG AA). Teks sekunder pakai warna solid (#52606d), bukan alpha.
+   - Font: Inter (badan, angka rapi) + Plus Jakarta Sans (judul), ukuran terkecil 12px, spek 14px.
+   - Tenang: tanpa blur/glow/shine/ticker berjalan, animasi muncul-pelan dimatikan, hover kartu
+     cuma naik 2px.
+   - Tata letak desktop (>=1100px): filter menempel di kiri (sticky), hasil di kanan. Di semua
+     ukuran layar, blok info (cara belanja, garansi, testimoni) dipindah ke BAWAH daftar produk
+     supaya pembeli langsung ketemu laptopnya.
+   Dimuat setelah globals.css (lihat app/layout.tsx). Struktur override mengikuti tema
+   terang/elegan: redeclare token yang sama + permukaan umum + permukaan katalog. */
+html[data-theme="nyaman"] {
+  --ink: #1f2933;
+  --muted: #52606d;
+  --line: #e2dccf;
+  --line-strong: #cfc6b8;
+  --surface: #fffdfa;
+  --surface-strong: #ffffff;
+  --band: #efe9de;
+  --blue: #0f766e;
+  --blue-br: #14938a;
+  --blue-dark: #0b5f58;
+  --cyan: #0f766e;
+  --green: #14683a;
+  --yellow: #8a5a00;
+  --red: #b42318;
+  --shadow: 0 1px 2px rgba(50, 40, 25, 0.05), 0 8px 24px rgba(50, 40, 25, 0.07);
+}
+
+html[data-theme="nyaman"] body {
+  background: #f5f2ec;
+  color: var(--ink);
+  font-family: var(--font-inter), Inter, "Segoe UI", Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html[data-theme="nyaman"] body::before {
+  background: linear-gradient(180deg, #f8f6f1 0%, #f3efe7 100%);
+}
+
+html[data-theme="nyaman"] .themeCanvas,
+html[data-theme="nyaman"] .themeCursorGlow {
+  display: none;
+}
+
+html[data-theme="nyaman"] main {
+  max-width: 1320px;
+}
+
+html[data-theme="nyaman"] h1,
+html[data-theme="nyaman"] h2,
+html[data-theme="nyaman"] h3,
+html[data-theme="nyaman"] .brand strong {
+  font-family: var(--font-jakarta), var(--font-inter), Inter, Arial, Helvetica, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* --- Kerangka: topbar, sidebar, dropdown, footer --- */
+html[data-theme="nyaman"] .topbar {
+  background: rgba(250, 247, 242, 0.94);
+  border-bottom-color: #e2dccf;
+}
+
+html[data-theme="nyaman"] .topbar nav a:hover {
+  background: rgba(15, 118, 110, 0.09);
+  transform: none;
+}
+
+html[data-theme="nyaman"] .brandMark {
+  box-shadow: 0 0 0 1px #e2dccf;
+  animation: none;
+}
+
+html[data-theme="nyaman"] .sidebarShell,
+html[data-theme="nyaman"] .sidebarMobileBar {
+  background: rgba(250, 247, 242, 0.96);
+  border-color: #e2dccf;
+}
+
+html[data-theme="nyaman"] .sidebarNav > a:hover,
+html[data-theme="nyaman"] .sidebarGroupTrigger:hover,
+html[data-theme="nyaman"] .sidebarGroupMenu a:hover,
+html[data-theme="nyaman"] .sidebarFooter a:hover {
+  background: rgba(15, 118, 110, 0.09);
+  color: #16202a;
+}
+
+html[data-theme="nyaman"] .sidebarNav > a.activeNav,
+html[data-theme="nyaman"] .sidebarGroupTrigger.activeNav,
+html[data-theme="nyaman"] .sidebarGroupMenu a.activeNav {
+  border-color: rgba(15, 118, 110, 0.4);
+  background: rgba(15, 118, 110, 0.12);
+  color: #16202a;
+  box-shadow: inset 2px 0 0 #0f766e;
+}
+
+html[data-theme="nyaman"] .navDropdownMenu {
+  background: #fffdfa;
+  border-color: #e2dccf;
+  box-shadow: 0 18px 48px rgba(50, 40, 25, 0.14);
+}
+
+html[data-theme="nyaman"] .topbar nav .navDropdownMenu a {
+  background: #faf8f3;
+  color: #1f2933;
+  border-color: #e2dccf;
+}
+
+html[data-theme="nyaman"] .topbar nav .navDropdownMenu a:hover,
+html[data-theme="nyaman"] .topbar nav .navDropdownMenu a.activeNav {
+  background: rgba(15, 118, 110, 0.12);
+  color: #16202a;
+  border-color: rgba(15, 118, 110, 0.4);
+}
+
+html[data-theme="nyaman"] .topbar nav a.activeNav,
+html[data-theme="nyaman"] .topbar nav .navDropdown > button:hover,
+html[data-theme="nyaman"] .topbar nav .navDropdown:focus-within > button,
+html[data-theme="nyaman"] .topbar nav .navDropdown > button.activeNav {
+  border-color: rgba(15, 118, 110, 0.4);
+  background: rgba(15, 118, 110, 0.1);
+  color: #16202a;
+  box-shadow: inset 0 -2px 0 #0f766e;
+}
+
+html[data-theme="nyaman"] .siteFooter {
+  background: rgba(250, 247, 242, 0.7);
+  border-top-color: #e2dccf;
+}
+
+/* --- Permukaan: kartu/panel datar, bayangan lembut, tanpa blur --- */
+html[data-theme="nyaman"] .heroBand,
+html[data-theme="nyaman"] .unitHero,
+html[data-theme="nyaman"] .panel,
+html[data-theme="nyaman"] .metric,
+html[data-theme="nyaman"] .statCard,
+html[data-theme="nyaman"] .catalogItem,
+html[data-theme="nyaman"] .batchCard,
+html[data-theme="nyaman"] .unitRow,
+html[data-theme="nyaman"] .downloadCard,
+html[data-theme="nyaman"] .panelSubsection,
+html[data-theme="nyaman"] .reminderGrid span,
+html[data-theme="nyaman"] .paymentSummary div,
+html[data-theme="nyaman"] .paymentNote,
+html[data-theme="nyaman"] .paymentRow,
+html[data-theme="nyaman"] .catalogHeroCopyPanel,
+html[data-theme="nyaman"] .catalogHeroStatsPanel,
+html[data-theme="nyaman"] .catalogFeatureStrip,
+html[data-theme="nyaman"] .catalogFilterPanel,
+html[data-theme="nyaman"] .catalogResultBar,
+html[data-theme="nyaman"] .catalogPublicCard {
+  background: #fffdfa;
+  border-color: #e2dccf;
+  backdrop-filter: none;
+  box-shadow: var(--shadow);
+}
+
+html[data-theme="nyaman"] .panel:hover,
+html[data-theme="nyaman"] .metric:hover,
+html[data-theme="nyaman"] .statCard:hover,
+html[data-theme="nyaman"] .paymentRow:hover,
+html[data-theme="nyaman"] .unitRow:hover,
+html[data-theme="nyaman"] .catalogItem:hover,
+html[data-theme="nyaman"] .downloadCard:hover,
+html[data-theme="nyaman"] .reminderGrid span:hover {
+  background: #fffdfa;
+  border-color: #cfc6b8;
+  box-shadow: var(--shadow);
+  transform: none;
+}
+
+html[data-theme="nyaman"] .dynamicHeroPanel,
+html[data-theme="nyaman"] .dynamicStatsPanel {
+  box-shadow: var(--shadow);
+}
+
+html[data-theme="nyaman"] .dynamicHeroPanel::before,
+html[data-theme="nyaman"] .dynamicStatsPanel::before,
+html[data-theme="nyaman"] .catalogPublicCard::before,
+html[data-theme="nyaman"] .catalogCardShine {
+  display: none;
+}
+
+/* Seksi daftar unit tidak perlu kotak sendiri: kartu laptop sudah berbingkai, jadi dibiarkan
+   mengambang di atas "kertas" supaya tidak ada kotak-di-dalam-kotak. */
+html[data-theme="nyaman"] .catalogPublicSection,
+html[data-theme="nyaman"] .catalogPublicSection:hover {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+html[data-theme="nyaman"] .dataTable th {
+  color: #0b5f58;
+}
+
+html[data-theme="nyaman"] .mediaPickerModal {
+  background: #fffdfa;
+}
+
+/* --- Tombol --- */
+html[data-theme="nyaman"] .primaryButton {
+  min-height: 46px;
+  border-radius: 10px;
+  background: #0f766e;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+html[data-theme="nyaman"] .primaryButton:hover {
+  background: #115e59;
+  box-shadow: none;
+  transform: none;
+}
+
+html[data-theme="nyaman"] .primaryButton::after,
+html[data-theme="nyaman"] .greenButton::after {
+  display: none;
+}
+
+/* Hijau WhatsApp digelapkan sedikit supaya teks putihnya lolos kontras 4.5:1 dan tidak
+   menyilaukan di latar krem, tapi tetap terbaca "hijau/WhatsApp". */
+html[data-theme="nyaman"] .greenButton {
+  min-height: 46px;
+  border-radius: 10px;
+  background: #12783d;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+html[data-theme="nyaman"] .greenButton:hover {
+  background: #0e6330;
+  box-shadow: none;
+  transform: none;
+}
+
+html[data-theme="nyaman"] .secondaryButton,
+html[data-theme="nyaman"] .iconButton,
+html[data-theme="nyaman"] .sortPill {
+  border: 1.5px solid #cfc6b8;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f2933;
+}
+
+html[data-theme="nyaman"] .secondaryButton {
+  min-height: 46px;
+  font-weight: 700;
+}
+
+html[data-theme="nyaman"] .secondaryButton:hover,
+html[data-theme="nyaman"] .iconButton:hover,
+html[data-theme="nyaman"] .sortPill:hover {
+  border-color: #b5a98f;
+  background: #f1ece3;
+  color: #1f2933;
+}
+
+html[data-theme="nyaman"] .sortPill.active {
+  border-color: #0f766e;
+  background: #e3f1ec;
+  color: #0b5f58;
+}
+
+/* --- Isian formulir --- */
+html[data-theme="nyaman"] select,
+html[data-theme="nyaman"] textarea,
+html[data-theme="nyaman"] input[type="number"],
+html[data-theme="nyaman"] input[type="text"],
+html[data-theme="nyaman"] input[type="email"],
+html[data-theme="nyaman"] input[type="password"],
+html[data-theme="nyaman"] input[type="date"],
+html[data-theme="nyaman"] input[type="search"],
+html[data-theme="nyaman"] input:not([type]),
+html[data-theme="nyaman"] .unitListItem,
+html[data-theme="nyaman"] .keyGrid,
+html[data-theme="nyaman"] .meterShell,
+html[data-theme="nyaman"] .mediaThumb,
+html[data-theme="nyaman"] .mediaPickerFolderRow {
+  background: #fff;
+  border-color: #cfc6b8;
+  color: #1f2933;
+}
+
+html[data-theme="nyaman"] select,
+html[data-theme="nyaman"] input[type="number"],
+html[data-theme="nyaman"] input[type="text"],
+html[data-theme="nyaman"] input[type="search"],
+html[data-theme="nyaman"] input:not([type]) {
+  min-height: 46px;
+  border-width: 1.5px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+html[data-theme="nyaman"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: none;
+}
+
+html[data-theme="nyaman"] select:focus,
+html[data-theme="nyaman"] textarea:focus,
+html[data-theme="nyaman"] input:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
+  outline: none;
+}
+
+html[data-theme="nyaman"] a:focus-visible,
+html[data-theme="nyaman"] button:focus-visible,
+html[data-theme="nyaman"] summary:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.55);
+  outline-offset: 2px;
+}
+
+/* --- Label status --- */
+html[data-theme="nyaman"] .green,
+html[data-theme="nyaman"] .statusPill.green {
+  background: #e4f2e9;
+  color: #14683a;
+}
+
+html[data-theme="nyaman"] .yellow {
+  background: #fbf0d4;
+  color: #7a4f00;
+}
+
+html[data-theme="nyaman"] .red {
+  background: #fde8e6;
+  color: #a1281e;
+}
+
+/* --- Kotak info/peringatan --- */
+html[data-theme="nyaman"] .infoBox {
+  color: var(--ink);
+}
+
+html[data-theme="nyaman"] .dangerInfo {
+  border-color: #f0b4ad;
+  background: #fde8e6;
+  color: #8f1d14;
+}
+
+html[data-theme="nyaman"] .successBox {
+  border-color: #b7dcc3;
+  background: #e4f2e9;
+  color: #14683a;
+}
+
+/* --- Hero katalog --- */
+html[data-theme="nyaman"] .catalogLandingHero {
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
+  gap: 20px;
+}
+
+html[data-theme="nyaman"] .catalogHeroCopyPanel,
+html[data-theme="nyaman"] .catalogHeroStatsPanel {
+  padding: 28px 32px;
+  border-radius: 16px;
+}
+
+html[data-theme="nyaman"] .catalogHeroCopyPanel h1 {
+  max-width: 640px;
+  margin: 16px 0 12px;
+  color: #16202a;
+  font-size: clamp(30px, 4.2vw, 48px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+html[data-theme="nyaman"] .catalogHeroCopyPanel h1 span {
+  display: inline;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: #16202a;
+  animation: none;
+}
+
+html[data-theme="nyaman"] .catalogHeroCopyPanel h1 span:nth-child(2) {
+  color: #0f766e;
+}
+
+html[data-theme="nyaman"] .catalogHeroCopyPanel p,
+html[data-theme="nyaman"] .catalogHeroStatsPanel p {
+  color: #3e4c59;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+html[data-theme="nyaman"] .catalogHeroPill {
+  min-height: 34px;
+  border-color: #bfdcd5;
+  background: #e3f1ec;
+  color: #0b5f58;
+  font-size: 14px;
+  font-weight: 700;
+  animation: none;
+}
+
+html[data-theme="nyaman"] .catalogHeroPill::before {
+  background: #0f766e;
+  box-shadow: none;
+  animation: none;
+}
+
+html[data-theme="nyaman"] .catalogHeroPill.catalogSocialProofPill {
+  border-color: #b7dcc3;
+  background: #e4f2e9;
+  color: #14683a;
+}
+
+html[data-theme="nyaman"] .catalogHeroPill.catalogCardFeaturedTag {
+  border-color: transparent;
+  background: #0f766e;
+  color: #fff;
+}
+
+html[data-theme="nyaman"] .catalogHeroPill.catalogCardFeaturedTag::before {
+  display: none;
+}
+
+html[data-theme="nyaman"] .catalogStatBox {
+  min-height: 84px;
+  border: 1px solid #e2dccf;
+  border-radius: 12px;
+  background: #f6f2ea;
+  color: #1f2933;
+}
+
+html[data-theme="nyaman"] .catalogStatBox:hover {
+  border-color: #cfc6b8;
+  background: #f6f2ea;
+  transform: none;
+}
+
+html[data-theme="nyaman"] .catalogStatBox strong {
+  color: #16202a;
+  font-size: 30px;
+}
+
+html[data-theme="nyaman"] .catalogStatBox span {
+  color: #52606d;
+  font-size: 14px;
+}
+
+html[data-theme="nyaman"] .catalogStatBox.catalogStatSold {
+  border-color: #b7dcc3;
+  background: #e4f2e9;
+}
+
+html[data-theme="nyaman"] .catalogStatBox.catalogStatSold strong {
+  color: #14683a;
+}
+
+html[data-theme="nyaman"] .catalogStatBox strong.catalogStatUrgent {
+  color: #8a5a00;
+}
+
+html[data-theme="nyaman"] .catalogFeatureItem span {
+  border-color: #bfdcd5;
+  background: #e3f1ec;
+  color: #0b5f58;
+}
+
+html[data-theme="nyaman"] .catalogFeatureItem strong {
+  color: #1f2933;
+  font-size: 15px;
+}
+
+html[data-theme="nyaman"] .catalogFeatureItem small {
+  color: #52606d;
+  font-size: 13.5px;
+}
+
+html[data-theme="nyaman"] .catalogSectionTitle h2 {
+  color: #16202a;
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+html[data-theme="nyaman"] .eyebrow {
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+}
+
+html[data-theme="nyaman"] .catalogTicker {
+  display: none;
+}
+
+html[data-theme="nyaman"] .catalogTestimonialCard {
+  border-color: #e2dccf;
+  background: #faf8f3;
+}
+
+html[data-theme="nyaman"] .catalogTestimonialStars {
+  color: #b7791f;
+}
+
+html[data-theme="nyaman"] .catalogTestimonialCard strong {
+  color: #52606d;
+}
+
+html[data-theme="nyaman"] .catalogEmptyState p {
+  color: #52606d;
+}
+
+/* Urutan: blok info (cara belanja, garansi, testimoni) dipindah ke BAWAH daftar produk di semua
+   ukuran layar -- pembeli datang untuk memilih laptop, jadi produk harus langsung kelihatan.
+   Pakai `order` (pageStack = grid), tanpa mengubah markup. */
+html[data-theme="nyaman"] .catalogTicker + .catalogFeatureStrip,
+html[data-theme="nyaman"] .catalogSectionTitle:not(#produk-ready),
+html[data-theme="nyaman"] .catalogSectionTitle:not(#produk-ready) + .catalogFeatureStrip,
+html[data-theme="nyaman"] .catalogTestimonials {
+  order: 20;
+}
+
+/* Animasi muncul-pelan dimatikan: konten selalu langsung terlihat, tidak "loncat" saat di-scroll. */
+html[data-theme="nyaman"] .catalogReveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* --- Kartu laptop --- */
+html[data-theme="nyaman"] .catalogPublicGrid {
+  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+}
+
+html[data-theme="nyaman"] .catalogPublicGrid.catalogView-compact {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+html[data-theme="nyaman"] .catalogPublicGrid.catalogView-list {
+  grid-template-columns: 1fr;
+}
+
+html[data-theme="nyaman"] .catalogPublicCard {
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(50, 40, 25, 0.05);
+}
+
+/* Kartu grid: kolom flex supaya harga + tombol selalu sejajar di dasar kartu, walau ada kartu
+   yang tidak punya deskripsi/spek sepanjang tetangganya. Mode daftar tetap pakai grid aslinya. */
+html[data-theme="nyaman"] .catalogPublicGrid {
+  align-items: stretch;
+}
+
+html[data-theme="nyaman"] .catalogPublicGrid:not(.catalogView-list) .catalogPublicCard {
+  display: flex;
+  flex-direction: column;
+}
+
+html[data-theme="nyaman"] .catalogPublicGrid:not(.catalogView-list) .catalogPrice {
+  margin-top: auto;
+}
+
+html[data-theme="nyaman"] .catalogPublicGrid:not(.catalogView-list) .catalogCardActions {
+  margin-top: 0;
+}
+
+html[data-theme="nyaman"] .catalogPublicCard:hover {
+  border-color: #cbbfa8;
+  background: #fffdfa;
+  box-shadow: 0 10px 28px rgba(50, 40, 25, 0.1);
+  transform: translateY(-2px);
+}
+
+html[data-theme="nyaman"] .catalogImage,
+html[data-theme="nyaman"] .catalogImagePlaceholder {
+  border: 0;
+  border-radius: 12px;
+  background: #ece6db;
+}
+
+html[data-theme="nyaman"] .catalogPublicCard:hover .catalogImage,
+html[data-theme="nyaman"] .catalogPublicCard:hover .catalogImagePlaceholder {
+  transform: none;
+}
+
+html[data-theme="nyaman"] .catalogBrand {
+  color: #0f766e;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+html[data-theme="nyaman"] .catalogPublicCard h3 {
+  color: #16202a;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+html[data-theme="nyaman"] .catalogPublicCard p,
+html[data-theme="nyaman"] .catalogSpecList {
+  color: #3e4c59;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+html[data-theme="nyaman"] .catalogPublicCard .catalogCardHighlight {
+  color: #52606d;
+  font-size: 13.5px;
+}
+
+html[data-theme="nyaman"] .catalogCardTop .unitNumber {
+  min-height: 32px;
+  border-radius: 8px;
+  background: #efe9de;
+  color: #2f3b46;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+html[data-theme="nyaman"] .catalogCardTop .statusPill {
+  border-radius: 8px;
+  background: #e3f1ec;
+  color: #0b5f58;
+  font-size: 12.5px;
+}
+
+html[data-theme="nyaman"] .miniMetrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+html[data-theme="nyaman"] .miniMetrics span {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 8px;
+  background: #efe9de;
+  color: #2f3b46;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+html[data-theme="nyaman"] .catalogTrustRow span {
+  min-height: 28px;
+  border-color: #e2dccf;
+  background: #faf8f3;
+  color: #3e4c59;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* "Garansi toko" & "Stok aktual" sama di semua kartu (sudah ada di hero & blok info) -> hanya
+   tanggal QC yang spesifik per unit yang ditampilkan, supaya kartu lebih pendek dan mudah
+   dibandingkan. */
+html[data-theme="nyaman"] .catalogTrustRow span:nth-child(n + 2) {
+  display: none;
+}
+
+html[data-theme="nyaman"] .catalogSpecList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+}
+
+html[data-theme="nyaman"] .catalogTrustRow span svg {
+  color: #0f766e;
+}
+
+html[data-theme="nyaman"] .catalogPrice {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: #0b5f58;
+  font-family: var(--font-jakarta), var(--font-inter), Inter, Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-theme="nyaman"] .catalogCardActions {
+  gap: 10px;
+}
+
+/* --- Filter, bar hasil, pilihan tampilan --- */
+html[data-theme="nyaman"] .catalogFilterPanel {
+  border-radius: 16px;
+}
+
+html[data-theme="nyaman"] .catalogFilterPanel label {
+  color: #3e4c59;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+html[data-theme="nyaman"] .catalogFilterPanel input,
+html[data-theme="nyaman"] .catalogFilterPanel select {
+  min-height: 46px;
+  border-color: #cfc6b8;
+  background: #fff;
+  color: #1f2933;
+}
+
+html[data-theme="nyaman"] .catalogFilterPanel input:focus,
+html[data-theme="nyaman"] .catalogFilterPanel select:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
+}
+
+html[data-theme="nyaman"] .catalogResultBar {
+  border-radius: 16px;
+}
+
+html[data-theme="nyaman"] .catalogResultCount strong {
+  color: #16202a;
+  font-size: 26px;
+}
+
+html[data-theme="nyaman"] .catalogResultCount span,
+html[data-theme="nyaman"] .catalogShareBox small {
+  color: #52606d;
+}
+
+html[data-theme="nyaman"] .catalogShareBox {
+  border-color: #e2dccf;
+  background: #faf8f3;
+}
+
+html[data-theme="nyaman"] .catalogViewSwitch {
+  border-color: #e2dccf;
+  background: #f1ece3;
+}
+
+html[data-theme="nyaman"] .catalogViewSwitch a {
+  color: #3e4c59;
+  font-size: 13px;
+}
+
+html[data-theme="nyaman"] .catalogViewSwitch a.active {
+  background: #fff;
+  color: #0b5f58;
+  box-shadow: 0 1px 2px rgba(50, 40, 25, 0.12);
+}
+
+/* --- Desktop lebar: filter menempel di kiri, hasil di kanan --- */
+@media (min-width: 1100px) {
+  html[data-theme="nyaman"] .katalogPage {
+    grid-template-columns: 320px minmax(0, 1fr);
+    column-gap: 28px;
+    align-items: start;
+  }
+
+  html[data-theme="nyaman"] .katalogPage > * {
+    grid-column: 1 / -1;
+  }
+
+  html[data-theme="nyaman"] .katalogPage > .catalogFilterShell {
+    grid-column: 1;
+    grid-row: span 3;
+    position: sticky;
+    top: 88px;
+    z-index: 5;
+    align-self: start;
+  }
+
+  html[data-theme="nyaman"] .katalogPage > .catalogResultBar,
+  html[data-theme="nyaman"] .katalogPage > .catalogEmptyState,
+  html[data-theme="nyaman"] .katalogPage > .catalogPublicSection:not(.catalogPublicSectionFeatured) {
+    grid-column: 2;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterDrawer {
+    max-height: calc(100vh - 108px);
+    overflow-y: auto;
+    border-radius: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: #cfc6b8 transparent;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterPanel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 10px;
+    align-items: start;
+    padding: 18px;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterPanel select,
+  html[data-theme="nyaman"] .catalogFilterPanel input {
+    min-height: 42px;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterPanel select {
+    padding: 0 8px 0 10px;
+    font-size: 14.5px;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterPanel::before {
+    content: "Saring laptop";
+    grid-column: 1 / -1;
+    color: #16202a;
+    font-family: var(--font-jakarta), var(--font-inter), Inter, Arial, sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(1),
+  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(4),
+  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(7),
+  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(8),
+  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(9),
+  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(10),
+  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(12) {
+    grid-column: 1 / -1;
+  }
+
+  /* Pilihan tampilan sudah ada di bar hasil; select-nya tetap dikirim form (hanya disembunyikan). */
+  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(11) {
+    display: none;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterActions {
+    justify-content: stretch;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterActions > * {
+    flex: 1;
+  }
+}
+
+/* Dengan sidebar menu admin (data-layout="sidebar") area konten lebih sempit -> sidebar filter
+   baru dipakai di layar yang benar-benar lega. */
+@media (min-width: 1100px) and (max-width: 1499px) {
+  html[data-theme="nyaman"][data-layout="sidebar"] .katalogPage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-theme="nyaman"][data-layout="sidebar"] .katalogPage > .catalogFilterShell,
+  html[data-theme="nyaman"][data-layout="sidebar"] .katalogPage > .catalogResultBar,
+  html[data-theme="nyaman"][data-layout="sidebar"] .katalogPage > .catalogEmptyState,
+  html[data-theme="nyaman"][data-layout="sidebar"] .katalogPage > .catalogPublicSection {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    position: static;
+  }
+
+  html[data-theme="nyaman"][data-layout="sidebar"] .catalogFilterDrawer {
+    max-height: none;
+    overflow: visible;
+  }
+
+  html[data-theme="nyaman"][data-layout="sidebar"] .catalogFilterPanel {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  html[data-theme="nyaman"][data-layout="sidebar"] .catalogFilterPanel::before,
+  html[data-theme="nyaman"][data-layout="sidebar"] .catalogFilterPanel > :nth-child(11) {
+    display: none;
+  }
+}
+
+/* --- HP & tablet kecil: drawer filter, bar pencarian, tombol filter --- */
+@media (max-width: 820px) {
+  /* Header tetap menempel tapi lebih ramping: subjudul internal disembunyikan di layar kecil
+     supaya lebih banyak ruang untuk laptop. */
+  html[data-theme="nyaman"] .topbar {
+    padding: 8px 14px;
+    gap: 8px;
+  }
+
+  html[data-theme="nyaman"] .topbar .brand small {
+    display: none;
+  }
+
+  html[data-theme="nyaman"] .catalogStatBox {
+    min-height: 64px;
+    padding: 12px 14px;
+    gap: 4px;
+  }
+
+  html[data-theme="nyaman"] .catalogStatBox strong {
+    font-size: 24px;
+  }
+
+  html[data-theme="nyaman"] .catalogLandingHero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-theme="nyaman"] .catalogHeroCopyPanel,
+  html[data-theme="nyaman"] .catalogHeroStatsPanel {
+    padding: 20px;
+  }
+
+  html[data-theme="nyaman"] .catalogHeroCopyPanel p {
+    font-size: 15.5px;
+  }
+
+  html[data-theme="nyaman"] .catalogHeroStatsPanel > p {
+    display: none;
+  }
+
+  html[data-theme="nyaman"] .catalogMobileSearchBar,
+  html[data-theme="nyaman"] .catalogFilterMobileButton {
+    border: 1.5px solid #cfc6b8;
+    border-radius: 12px;
+    background: #fff;
+    color: #1f2933;
+    box-shadow: 0 6px 18px rgba(50, 40, 25, 0.1);
+  }
+
+  html[data-theme="nyaman"] .catalogMobileSearchBar {
+    color: #52606d;
+  }
+
+  html[data-theme="nyaman"] .catalogMobileSearchBar input {
+    color: #1f2933;
+    font-size: 16px;
+  }
+
+  html[data-theme="nyaman"] .catalogMobileSearchBar button {
+    background: #e3f1ec;
+    color: #0b5f58;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterMobileButton strong {
+    background: #0f766e;
+    color: #fff;
+    font-size: 11.5px;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterBackdrop {
+    background: rgba(31, 41, 51, 0.45);
+  }
+
+  html[data-theme="nyaman"] .catalogFilterDrawer {
+    background: #f8f6f1;
+    box-shadow: -16px 0 48px rgba(31, 41, 51, 0.22);
+  }
+
+  html[data-theme="nyaman"] .catalogFilterDrawerHeader {
+    border-bottom-color: #e2dccf;
+    background: rgba(248, 246, 241, 0.97);
+    backdrop-filter: none;
+    color: #16202a;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterDrawerHeader span {
+    color: #52606d;
+    font-size: 12.5px;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterDrawerHeader button {
+    border-color: #cfc6b8;
+    background: #fff;
+    color: #1f2933;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterPanel {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  html[data-theme="nyaman"] .catalogFilterActions {
+    border-top-color: #e2dccf;
+    background: rgba(248, 246, 241, 0.98);
+  }
+
+  html[data-theme="nyaman"] .catalogPublicGrid {
+    gap: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="nyaman"] *,
+  html[data-theme="nyaman"] *::before,
+  html[data-theme="nyaman"] *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

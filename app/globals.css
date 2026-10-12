@@ -5125,3 +5125,17 @@ body:has(.waAiPage) {
   line-height: 1.5;
   color: var(--muted);
 }
+
+.catalogStatBox.catalogStatSold {
+  border-color: rgba(37, 211, 102, 0.5);
+  background: rgba(37, 211, 102, 0.1);
+}
+
+.catalogStatBox.catalogStatSold strong {
+  color: #25d366;
+}
+
+.catalogSocialProofPill {
+  border-color: rgba(37, 211, 102, 0.5);
+  background: rgba(37, 211, 102, 0.1);
+}

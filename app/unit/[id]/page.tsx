@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, CalendarClock, Cpu, HardDrive, MessageCircle, QrCode, ShieldCheck, TrendingUp } from "lucide-react";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
-import { getMonthlySoldUnitsCount, getRelatedCatalogUnits } from "@/lib/catalog-page-data";
+import { getRecentSoldUnitsCount, getRelatedCatalogUnits } from "@/lib/catalog-page-data";
 import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 import { slugifyFileName } from "@/lib/file-naming";
@@ -80,9 +80,9 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
 
   const currentUser = await getCurrentUser();
   const isInternalUser = Boolean(currentUser);
-  const [relatedUnits, monthlySoldCount] = isInternalUser
+  const [relatedUnits, recentSoldCount] = isInternalUser
     ? [[], 0]
-    : await Promise.all([getRelatedCatalogUnits(unit.id), getMonthlySoldUnitsCount()]);
+    : await Promise.all([getRelatedCatalogUnits(unit.id), getRecentSoldUnitsCount()]);
   const dailyHistory = unit.dailyHistory;
   const qcAwal = unit.qcAwal;
   const visibleHardware = qcAwal
@@ -111,8 +111,8 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
             <p className="eyebrow">Katalog FS Comp</p>
             <h1>{unit.model}</h1>
             <p className="heroCopy">{unit.processor} / {unit.ram} / {unit.ssd}</p>
-            {monthlySoldCount > 0 ? (
-              <span className="catalogHeroPill"><TrendingUp size={16} /> {monthlySoldCount} laptop terjual bulan ini</span>
+            {recentSoldCount > 0 ? (
+              <span className="catalogHeroPill"><TrendingUp size={16} /> {recentSoldCount} laptop terjual dalam 1 bulan terakhir</span>
             ) : null}
           </div>
           <div className="unitHeroActions">

@@ -8,6 +8,7 @@ import { PageTransition } from "./PageTransition";
 import { SidebarNav } from "./SidebarNav";
 import { ThemeDynamics } from "./ThemeDynamics";
 import "./globals.css";
+import "./theme-nyaman.css";
 import "./ops-overrides.css";
 
 // File font disalin dari paket @fontsource-variable/* (bukan next/font/google) supaya build
