@@ -2,6 +2,7 @@ import { jakartaDateKey } from "./inventory";
 import { resolvePrimaryImageUrl } from "./media-data";
 import { prisma } from "./prisma";
 import { displayUnitNumber } from "./unit-number";
+import { descriptionSnippet } from "./unit-description";
 
 function jakartaMonthRange(date: Date) {
   const [year, month] = jakartaDateKey(date).split("-").map(Number);
@@ -129,6 +130,7 @@ export async function getCatalogPageData() {
           lcdResolution: unit.lcdResolution ?? "-",
           isTouchscreen: unit.isTouchscreen,
           isFeatured: unit.isFeatured,
+          descriptionHighlight: descriptionSnippet(unit.catalogDescription ?? "", 110),
           hargaJualRekomendasi: unit.hargaJualRekomendasi,
           catalogImageUrl: resolvePrimaryImageUrl(unit.unitPhotos, unit.catalogImageUrl, true),
           stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",

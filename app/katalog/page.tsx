@@ -51,6 +51,7 @@ type CatalogUnit = {
   lcdSize: string;
   lcdResolution: string;
   isTouchscreen: boolean;
+  descriptionHighlight: string;
   hargaJualRekomendasi: number;
   catalogImageUrl: string;
   stockLocation: string;
@@ -278,6 +279,7 @@ function CatalogSection({
               <h3>{unit.model}</h3>
             </div>
             <p>{unit.processor}</p>
+            {unit.descriptionHighlight ? <p className="catalogCardHighlight">{unit.descriptionHighlight}</p> : null}
             <div className="miniMetrics">
               <span>{unit.ram}</span>
               <span>{unit.ssd}</span>
@@ -907,6 +909,7 @@ function CatalogPageStyles() {
         }
 
         .catalogView-list .catalogSpecList,
+        .catalogView-list .catalogCardHighlight,
         .catalogView-list .catalogTrustRow {
           display: none;
         }
