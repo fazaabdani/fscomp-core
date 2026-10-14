@@ -11,7 +11,7 @@ export function KatalogDynamics({ navigationKey }: { navigationKey: string }) {
     if (!form) return;
 
     function submitOnChange(event: Event) {
-      if (document.documentElement.dataset.theme !== "nyaman") return;
+      if (document.documentElement.dataset.theme !== "nyaman" && document.documentElement.dataset.theme !== "fscomp") return;
       if (!window.matchMedia("(min-width: 1100px)").matches) return;
       if (!(event.target instanceof HTMLSelectElement)) return;
       form?.requestSubmit();

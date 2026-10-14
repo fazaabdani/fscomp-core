@@ -1,0 +1,186 @@
+/* ===== Tema FS Comp (opsi ke-6) =====
+   Saudara tema Nyaman: struktur, tata letak (filter sticky di kiri), tipografi, dan semua
+   aturan kenyamanannya dipakai bersama (app/theme-nyaman.css lewat variabel --nz-*). Yang beda:
+   - Palet diambil dari logo FS Comp: biru royal #2447b2, arang kebiruan untuk teks, dasar putih
+     kebiruan yang dingin dan bersih (kontras teks tetap >= 4.5:1).
+   - Sentuhan khas merek: hero berlatar biru merek dengan motif lingkaran ala logo, tagline
+     "SOLUSI TEKNOLOGI, UNTUK MASA DEPAN" di dasar hero, titik biru di akhir judul seksi (seperti
+     titik pada "FS Comp."), dan garis biru tipis di puncak header.
+   Dimuat setelah theme-nyaman.css (lihat app/layout.tsx). */
+html[data-theme="fscomp"] {
+  --nz-paper: #f2f5fb;
+  --nz-paper-top: #f8faff;
+  --nz-card: #ffffff;
+  --nz-card-soft: #f7f9fe;
+  --nz-line: #dde4f1;
+  --nz-line-strong: #c1cce4;
+  --nz-line-hover: #9db0dc;
+  --nz-chip: #e8edf9;
+  --nz-photo: #e4eaf6;
+  --nz-hover: #edf1fa;
+  --nz-stat: #eef2fb;
+  --nz-drawer: #f7f9fe;
+  --nz-bar-rgb: 255, 255, 255;
+  --nz-drawer-rgb: 247, 249, 254;
+  --nz-shadow-rgb: 22, 40, 90;
+  --nz-ink-rgb: 20, 30, 58;
+  --nz-ink: #232937;
+  --nz-ink-strong: #121a30;
+  --nz-ink-soft: #3a4558;
+  --nz-ink-chip: #2c3650;
+  --nz-muted: #566178;
+  --nz-accent: #2447b2;
+  --nz-accent-rgb: 36, 71, 178;
+  --nz-accent-strong: #1b3585;
+  --nz-accent-hover: #1d3a96;
+  --nz-accent-br: #3a62d6;
+  --nz-accent-soft: #e8eefc;
+  --nz-accent-line: #c4d3f5;
+}
+
+html[data-theme="fscomp"] ::selection {
+  background: rgba(var(--nz-accent-rgb), 0.22);
+}
+
+/* Garis biru merek di puncak header. */
+html[data-theme="fscomp"] .topbar,
+html[data-theme="fscomp"] .sidebarMobileBar {
+  box-shadow: inset 0 3px 0 var(--nz-accent);
+}
+
+/* Titik biru khas logo ("FS Comp.") di akhir judul seksi dan judul hero. */
+html[data-theme="fscomp"] .catalogSectionTitle h2::after,
+html[data-theme="fscomp"] .catalogPublicSection .panelHeader h2::after,
+html[data-theme="fscomp"] .catalogHeroCopyPanel h1 span:last-child::after {
+  content: ".";
+  color: var(--nz-accent);
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel h1 span:last-child::after {
+  color: #9cc2ff;
+}
+
+/* --- Hero berlatar biru merek --- */
+html[data-theme="fscomp"] .catalogHeroCopyPanel {
+  position: relative;
+  overflow: hidden;
+  border-color: transparent;
+  background: linear-gradient(135deg, #2749b8 0%, #1b3585 100%);
+  box-shadow: 0 14px 36px rgba(var(--nz-accent-rgb), 0.28);
+}
+
+/* Motif lingkaran besar, gema dari lingkaran pada logo. */
+html[data-theme="fscomp"] .catalogHeroCopyPanel::before {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: auto;
+  top: -110px;
+  right: -90px;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 68%);
+  opacity: 1;
+  pointer-events: none;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel > * {
+  position: relative;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel::after {
+  content: "SOLUSI TEKNOLOGI, UNTUK MASA DEPAN";
+  display: block;
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel h1,
+html[data-theme="fscomp"] .catalogHeroCopyPanel h1 span {
+  color: #fff;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel h1 span:nth-child(2) {
+  color: #9cc2ff;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel p {
+  color: #e3ebff;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel .catalogHeroPill {
+  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel .catalogHeroPill::before {
+  background: #9cc2ff;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel .catalogHeroPill.catalogSocialProofPill {
+  border-color: #b7dcc3;
+  background: #e4f2e9;
+  color: #14683a;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel .catalogHeroPill.catalogSocialProofPill::before {
+  background: #14683a;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel .primaryButton {
+  background: #fff;
+  color: var(--nz-accent-strong);
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel .primaryButton:hover {
+  background: #eaf0ff;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel .secondaryButton {
+  border-color: rgba(255, 255, 255, 0.55);
+  background: transparent;
+  color: #fff;
+}
+
+html[data-theme="fscomp"] .catalogHeroCopyPanel .secondaryButton:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+/* Panel statistik: kartu putih dengan angka biru merek. */
+html[data-theme="fscomp"] .catalogStatBox strong {
+  color: var(--nz-accent);
+}
+
+html[data-theme="fscomp"] .catalogStatBox.catalogStatSold strong {
+  color: #14683a;
+}
+
+/* --- Katalog --- */
+html[data-theme="fscomp"] .catalogPublicCard:hover {
+  box-shadow: 0 12px 30px rgba(var(--nz-accent-rgb), 0.14);
+}
+
+html[data-theme="fscomp"] .catalogPrice {
+  color: var(--nz-accent);
+}
+
+html[data-theme="fscomp"] .catalogBrand {
+  color: var(--nz-accent-br);
+}
+
+html[data-theme="fscomp"] .catalogFilterPanel::before {
+  color: var(--nz-accent-strong);
+}
+
+html[data-theme="fscomp"] .catalogResultCount strong {
+  color: var(--nz-accent-strong);
+}

@@ -9,6 +9,7 @@ import { SidebarNav } from "./SidebarNav";
 import { ThemeDynamics } from "./ThemeDynamics";
 import "./globals.css";
 import "./theme-nyaman.css";
+import "./theme-fscomp.css";
 import "./ops-overrides.css";
 
 // File font disalin dari paket @fontsource-variable/* (bukan next/font/google) supaya build

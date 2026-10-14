@@ -1,9 +1,9 @@
 /* ===== Tema Nyaman (opsi ke-5) =====
    Dirancang untuk katalog publik: dipakai pembeli berjam-jam membandingkan laptop, jadi yang
    dikejar kenyamanan mata & kejelasan, bukan "wah".
-   - Warna: kertas hangat (#f5f2ec) + kartu krem-putih (bukan putih murni -> tidak silau), teks
-     arang kebiruan (#1f2933, kontras ~12:1), satu aksen teal tenang. Pasangan teks/latar utama
-     dicek >= 4.5:1 (WCAG AA). Teks sekunder pakai warna solid (#52606d), bukan alpha.
+   - Warna: kertas hangat (var(--nz-paper)) + kartu krem-putih (bukan putih murni -> tidak silau), teks
+     arang kebiruan (var(--nz-ink), kontras ~12:1), satu aksen teal tenang. Pasangan teks/latar utama
+     dicek >= 4.5:1 (WCAG AA). Teks sekunder pakai warna solid (var(--nz-muted)), bukan alpha.
    - Font: Inter (badan, angka rapi) + Plus Jakarta Sans (judul), ukuran terkecil 12px, spek 14px.
    - Tenang: tanpa blur/glow/shine/ticker berjalan, animasi muncul-pelan dimatikan, hover kartu
      cuma naik 2px.
@@ -12,26 +12,60 @@
      supaya pembeli langsung ketemu laptopnya.
    Dimuat setelah globals.css (lihat app/layout.tsx). Struktur override mengikuti tema
    terang/elegan: redeclare token yang sama + permukaan umum + permukaan katalog. */
+/* Palet tema Nyaman (teal hangat). Seluruh aturan di bawah memakai variabel --nz-* ini, dan juga
+   dipakai tema "FS Comp" (app/theme-fscomp.css) yang cuma mengganti nilai palet + beberapa
+   sentuhan khas. Jadi struktur/tata letak/tipografi cukup dirawat di satu tempat. */
 html[data-theme="nyaman"] {
-  --ink: #1f2933;
-  --muted: #52606d;
-  --line: #e2dccf;
-  --line-strong: #cfc6b8;
-  --surface: #fffdfa;
+  --nz-paper: #f5f2ec;
+  --nz-paper-top: #f8f6f1;
+  --nz-card: #fffdfa;
+  --nz-card-soft: #faf8f3;
+  --nz-line: #e2dccf;
+  --nz-line-strong: #cfc6b8;
+  --nz-line-hover: #cbbfa8;
+  --nz-chip: #efe9de;
+  --nz-photo: #ece6db;
+  --nz-hover: #f1ece3;
+  --nz-stat: #f6f2ea;
+  --nz-drawer: #f8f6f1;
+  --nz-bar-rgb: 250, 247, 242;
+  --nz-drawer-rgb: 248, 246, 241;
+  --nz-shadow-rgb: 50, 40, 25;
+  --nz-ink-rgb: 31, 41, 51;
+  --nz-ink: #1f2933;
+  --nz-ink-strong: #16202a;
+  --nz-ink-soft: #3e4c59;
+  --nz-ink-chip: #2f3b46;
+  --nz-muted: #52606d;
+  --nz-accent: #0f766e;
+  --nz-accent-rgb: 15, 118, 110;
+  --nz-accent-strong: #0b5f58;
+  --nz-accent-hover: #115e59;
+  --nz-accent-br: #14938a;
+  --nz-accent-soft: #e3f1ec;
+  --nz-accent-line: #bfdcd5;
+}
+
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) {
+  --ink: var(--nz-ink);
+  --muted: var(--nz-muted);
+  --line: var(--nz-line);
+  --line-strong: var(--nz-line-strong);
+  --surface: var(--nz-card);
   --surface-strong: #ffffff;
-  --band: #efe9de;
-  --blue: #0f766e;
-  --blue-br: #14938a;
-  --blue-dark: #0b5f58;
-  --cyan: #0f766e;
+  --band: var(--nz-chip);
+  --blue: var(--nz-accent);
+  --blue-br: var(--nz-accent-br);
+  --blue-dark: var(--nz-accent-strong);
+  --cyan: var(--nz-accent);
   --green: #14683a;
   --yellow: #8a5a00;
   --red: #b42318;
-  --shadow: 0 1px 2px rgba(50, 40, 25, 0.05), 0 8px 24px rgba(50, 40, 25, 0.07);
+  --shadow: 0 1px 2px rgba(var(--nz-shadow-rgb), 0.05), 0 8px 24px rgba(var(--nz-shadow-rgb), 0.07);
 }
 
-html[data-theme="nyaman"] body {
-  background: #f5f2ec;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) body {
+  background: var(--nz-paper);
   color: var(--ink);
   font-family: var(--font-inter), Inter, "Segoe UI", Arial, Helvetica, sans-serif;
   font-size: 16px;
@@ -40,195 +74,195 @@ html[data-theme="nyaman"] body {
   text-rendering: optimizeLegibility;
 }
 
-html[data-theme="nyaman"] body::before {
-  background: linear-gradient(180deg, #f8f6f1 0%, #f3efe7 100%);
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) body::before {
+  background: linear-gradient(180deg, var(--nz-paper-top) 0%, var(--nz-paper) 100%);
 }
 
-html[data-theme="nyaman"] .themeCanvas,
-html[data-theme="nyaman"] .themeCursorGlow {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .themeCanvas,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .themeCursorGlow {
   display: none;
 }
 
-html[data-theme="nyaman"] main {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) main {
   max-width: 1320px;
 }
 
-html[data-theme="nyaman"] h1,
-html[data-theme="nyaman"] h2,
-html[data-theme="nyaman"] h3,
-html[data-theme="nyaman"] .brand strong {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) h1,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) h2,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) h3,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .brand strong {
   font-family: var(--font-jakarta), var(--font-inter), Inter, Arial, Helvetica, sans-serif;
   letter-spacing: -0.02em;
 }
 
 /* --- Kerangka: topbar, sidebar, dropdown, footer --- */
-html[data-theme="nyaman"] .topbar {
-  background: rgba(250, 247, 242, 0.94);
-  border-bottom-color: #e2dccf;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .topbar {
+  background: rgba(var(--nz-bar-rgb), 0.94);
+  border-bottom-color: var(--nz-line);
 }
 
-html[data-theme="nyaman"] .topbar nav a:hover {
-  background: rgba(15, 118, 110, 0.09);
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .topbar nav a:hover {
+  background: rgba(var(--nz-accent-rgb), 0.09);
   transform: none;
 }
 
-html[data-theme="nyaman"] .brandMark {
-  box-shadow: 0 0 0 1px #e2dccf;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .brandMark {
+  box-shadow: 0 0 0 1px var(--nz-line);
   animation: none;
 }
 
-html[data-theme="nyaman"] .sidebarShell,
-html[data-theme="nyaman"] .sidebarMobileBar {
-  background: rgba(250, 247, 242, 0.96);
-  border-color: #e2dccf;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sidebarShell,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sidebarMobileBar {
+  background: rgba(var(--nz-bar-rgb), 0.96);
+  border-color: var(--nz-line);
 }
 
-html[data-theme="nyaman"] .sidebarNav > a:hover,
-html[data-theme="nyaman"] .sidebarGroupTrigger:hover,
-html[data-theme="nyaman"] .sidebarGroupMenu a:hover,
-html[data-theme="nyaman"] .sidebarFooter a:hover {
-  background: rgba(15, 118, 110, 0.09);
-  color: #16202a;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sidebarNav > a:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sidebarGroupTrigger:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sidebarGroupMenu a:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sidebarFooter a:hover {
+  background: rgba(var(--nz-accent-rgb), 0.09);
+  color: var(--nz-ink-strong);
 }
 
-html[data-theme="nyaman"] .sidebarNav > a.activeNav,
-html[data-theme="nyaman"] .sidebarGroupTrigger.activeNav,
-html[data-theme="nyaman"] .sidebarGroupMenu a.activeNav {
-  border-color: rgba(15, 118, 110, 0.4);
-  background: rgba(15, 118, 110, 0.12);
-  color: #16202a;
-  box-shadow: inset 2px 0 0 #0f766e;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sidebarNav > a.activeNav,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sidebarGroupTrigger.activeNav,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sidebarGroupMenu a.activeNav {
+  border-color: rgba(var(--nz-accent-rgb), 0.4);
+  background: rgba(var(--nz-accent-rgb), 0.12);
+  color: var(--nz-ink-strong);
+  box-shadow: inset 2px 0 0 var(--nz-accent);
 }
 
-html[data-theme="nyaman"] .navDropdownMenu {
-  background: #fffdfa;
-  border-color: #e2dccf;
-  box-shadow: 0 18px 48px rgba(50, 40, 25, 0.14);
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .navDropdownMenu {
+  background: var(--nz-card);
+  border-color: var(--nz-line);
+  box-shadow: 0 18px 48px rgba(var(--nz-shadow-rgb), 0.14);
 }
 
-html[data-theme="nyaman"] .topbar nav .navDropdownMenu a {
-  background: #faf8f3;
-  color: #1f2933;
-  border-color: #e2dccf;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .topbar nav .navDropdownMenu a {
+  background: var(--nz-card-soft);
+  color: var(--nz-ink);
+  border-color: var(--nz-line);
 }
 
-html[data-theme="nyaman"] .topbar nav .navDropdownMenu a:hover,
-html[data-theme="nyaman"] .topbar nav .navDropdownMenu a.activeNav {
-  background: rgba(15, 118, 110, 0.12);
-  color: #16202a;
-  border-color: rgba(15, 118, 110, 0.4);
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .topbar nav .navDropdownMenu a:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .topbar nav .navDropdownMenu a.activeNav {
+  background: rgba(var(--nz-accent-rgb), 0.12);
+  color: var(--nz-ink-strong);
+  border-color: rgba(var(--nz-accent-rgb), 0.4);
 }
 
-html[data-theme="nyaman"] .topbar nav a.activeNav,
-html[data-theme="nyaman"] .topbar nav .navDropdown > button:hover,
-html[data-theme="nyaman"] .topbar nav .navDropdown:focus-within > button,
-html[data-theme="nyaman"] .topbar nav .navDropdown > button.activeNav {
-  border-color: rgba(15, 118, 110, 0.4);
-  background: rgba(15, 118, 110, 0.1);
-  color: #16202a;
-  box-shadow: inset 0 -2px 0 #0f766e;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .topbar nav a.activeNav,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .topbar nav .navDropdown > button:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .topbar nav .navDropdown:focus-within > button,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .topbar nav .navDropdown > button.activeNav {
+  border-color: rgba(var(--nz-accent-rgb), 0.4);
+  background: rgba(var(--nz-accent-rgb), 0.1);
+  color: var(--nz-ink-strong);
+  box-shadow: inset 0 -2px 0 var(--nz-accent);
 }
 
-html[data-theme="nyaman"] .siteFooter {
-  background: rgba(250, 247, 242, 0.7);
-  border-top-color: #e2dccf;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .siteFooter {
+  background: rgba(var(--nz-bar-rgb), 0.7);
+  border-top-color: var(--nz-line);
 }
 
 /* --- Permukaan: kartu/panel datar, bayangan lembut, tanpa blur --- */
-html[data-theme="nyaman"] .heroBand,
-html[data-theme="nyaman"] .unitHero,
-html[data-theme="nyaman"] .panel,
-html[data-theme="nyaman"] .metric,
-html[data-theme="nyaman"] .statCard,
-html[data-theme="nyaman"] .catalogItem,
-html[data-theme="nyaman"] .batchCard,
-html[data-theme="nyaman"] .unitRow,
-html[data-theme="nyaman"] .downloadCard,
-html[data-theme="nyaman"] .panelSubsection,
-html[data-theme="nyaman"] .reminderGrid span,
-html[data-theme="nyaman"] .paymentSummary div,
-html[data-theme="nyaman"] .paymentNote,
-html[data-theme="nyaman"] .paymentRow,
-html[data-theme="nyaman"] .catalogHeroCopyPanel,
-html[data-theme="nyaman"] .catalogHeroStatsPanel,
-html[data-theme="nyaman"] .catalogFeatureStrip,
-html[data-theme="nyaman"] .catalogFilterPanel,
-html[data-theme="nyaman"] .catalogResultBar,
-html[data-theme="nyaman"] .catalogPublicCard {
-  background: #fffdfa;
-  border-color: #e2dccf;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .heroBand,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .unitHero,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .panel,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .metric,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .statCard,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogItem,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .batchCard,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .unitRow,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .downloadCard,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .panelSubsection,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .reminderGrid span,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .paymentSummary div,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .paymentNote,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .paymentRow,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroCopyPanel,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroStatsPanel,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFeatureStrip,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogResultBar,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicCard {
+  background: var(--nz-card);
+  border-color: var(--nz-line);
   backdrop-filter: none;
   box-shadow: var(--shadow);
 }
 
-html[data-theme="nyaman"] .panel:hover,
-html[data-theme="nyaman"] .metric:hover,
-html[data-theme="nyaman"] .statCard:hover,
-html[data-theme="nyaman"] .paymentRow:hover,
-html[data-theme="nyaman"] .unitRow:hover,
-html[data-theme="nyaman"] .catalogItem:hover,
-html[data-theme="nyaman"] .downloadCard:hover,
-html[data-theme="nyaman"] .reminderGrid span:hover {
-  background: #fffdfa;
-  border-color: #cfc6b8;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .panel:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .metric:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .statCard:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .paymentRow:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .unitRow:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogItem:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .downloadCard:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .reminderGrid span:hover {
+  background: var(--nz-card);
+  border-color: var(--nz-line-strong);
   box-shadow: var(--shadow);
   transform: none;
 }
 
-html[data-theme="nyaman"] .dynamicHeroPanel,
-html[data-theme="nyaman"] .dynamicStatsPanel {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .dynamicHeroPanel,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .dynamicStatsPanel {
   box-shadow: var(--shadow);
 }
 
-html[data-theme="nyaman"] .dynamicHeroPanel::before,
-html[data-theme="nyaman"] .dynamicStatsPanel::before,
-html[data-theme="nyaman"] .catalogPublicCard::before,
-html[data-theme="nyaman"] .catalogCardShine {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .dynamicHeroPanel::before,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .dynamicStatsPanel::before,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicCard::before,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogCardShine {
   display: none;
 }
 
 /* Seksi daftar unit tidak perlu kotak sendiri: kartu laptop sudah berbingkai, jadi dibiarkan
    mengambang di atas "kertas" supaya tidak ada kotak-di-dalam-kotak. */
-html[data-theme="nyaman"] .catalogPublicSection,
-html[data-theme="nyaman"] .catalogPublicSection:hover {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicSection,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicSection:hover {
   padding: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
 }
 
-html[data-theme="nyaman"] .dataTable th {
-  color: #0b5f58;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .dataTable th {
+  color: var(--nz-accent-strong);
 }
 
-html[data-theme="nyaman"] .mediaPickerModal {
-  background: #fffdfa;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .mediaPickerModal {
+  background: var(--nz-card);
 }
 
 /* --- Tombol --- */
-html[data-theme="nyaman"] .primaryButton {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .primaryButton {
   min-height: 46px;
   border-radius: 10px;
-  background: #0f766e;
+  background: var(--nz-accent);
   color: #fff;
   font-weight: 700;
   box-shadow: none;
 }
 
-html[data-theme="nyaman"] .primaryButton:hover {
-  background: #115e59;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .primaryButton:hover {
+  background: var(--nz-accent-hover);
   box-shadow: none;
   transform: none;
 }
 
-html[data-theme="nyaman"] .primaryButton::after,
-html[data-theme="nyaman"] .greenButton::after {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .primaryButton::after,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .greenButton::after {
   display: none;
 }
 
 /* Hijau WhatsApp digelapkan sedikit supaya teks putihnya lolos kontras 4.5:1 dan tidak
    menyilaukan di latar krem, tapi tetap terbaca "hijau/WhatsApp". */
-html[data-theme="nyaman"] .greenButton {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .greenButton {
   min-height: 46px;
   border-radius: 10px;
   background: #12783d;
@@ -237,424 +271,424 @@ html[data-theme="nyaman"] .greenButton {
   box-shadow: none;
 }
 
-html[data-theme="nyaman"] .greenButton:hover {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .greenButton:hover {
   background: #0e6330;
   box-shadow: none;
   transform: none;
 }
 
-html[data-theme="nyaman"] .secondaryButton,
-html[data-theme="nyaman"] .iconButton,
-html[data-theme="nyaman"] .sortPill {
-  border: 1.5px solid #cfc6b8;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .secondaryButton,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .iconButton,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sortPill {
+  border: 1.5px solid var(--nz-line-strong);
   border-radius: 10px;
   background: #fff;
-  color: #1f2933;
+  color: var(--nz-ink);
 }
 
-html[data-theme="nyaman"] .secondaryButton {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .secondaryButton {
   min-height: 46px;
   font-weight: 700;
 }
 
-html[data-theme="nyaman"] .secondaryButton:hover,
-html[data-theme="nyaman"] .iconButton:hover,
-html[data-theme="nyaman"] .sortPill:hover {
-  border-color: #b5a98f;
-  background: #f1ece3;
-  color: #1f2933;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .secondaryButton:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .iconButton:hover,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sortPill:hover {
+  border-color: var(--nz-line-hover);
+  background: var(--nz-hover);
+  color: var(--nz-ink);
 }
 
-html[data-theme="nyaman"] .sortPill.active {
-  border-color: #0f766e;
-  background: #e3f1ec;
-  color: #0b5f58;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .sortPill.active {
+  border-color: var(--nz-accent);
+  background: var(--nz-accent-soft);
+  color: var(--nz-accent-strong);
 }
 
 /* --- Isian formulir --- */
-html[data-theme="nyaman"] select,
-html[data-theme="nyaman"] textarea,
-html[data-theme="nyaman"] input[type="number"],
-html[data-theme="nyaman"] input[type="text"],
-html[data-theme="nyaman"] input[type="email"],
-html[data-theme="nyaman"] input[type="password"],
-html[data-theme="nyaman"] input[type="date"],
-html[data-theme="nyaman"] input[type="search"],
-html[data-theme="nyaman"] input:not([type]),
-html[data-theme="nyaman"] .unitListItem,
-html[data-theme="nyaman"] .keyGrid,
-html[data-theme="nyaman"] .meterShell,
-html[data-theme="nyaman"] .mediaThumb,
-html[data-theme="nyaman"] .mediaPickerFolderRow {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) select,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) textarea,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input[type="number"],
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input[type="text"],
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input[type="email"],
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input[type="password"],
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input[type="date"],
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input[type="search"],
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input:not([type]),
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .unitListItem,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .keyGrid,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .meterShell,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .mediaThumb,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .mediaPickerFolderRow {
   background: #fff;
-  border-color: #cfc6b8;
-  color: #1f2933;
+  border-color: var(--nz-line-strong);
+  color: var(--nz-ink);
 }
 
-html[data-theme="nyaman"] select,
-html[data-theme="nyaman"] input[type="number"],
-html[data-theme="nyaman"] input[type="text"],
-html[data-theme="nyaman"] input[type="search"],
-html[data-theme="nyaman"] input:not([type]) {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) select,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input[type="number"],
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input[type="text"],
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input[type="search"],
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input:not([type]) {
   min-height: 46px;
   border-width: 1.5px;
   border-radius: 10px;
   font-size: 15px;
 }
 
-html[data-theme="nyaman"] input[type="date"]::-webkit-calendar-picker-indicator {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input[type="date"]::-webkit-calendar-picker-indicator {
   filter: none;
 }
 
-html[data-theme="nyaman"] select:focus,
-html[data-theme="nyaman"] textarea:focus,
-html[data-theme="nyaman"] input:focus {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) select:focus,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) textarea:focus,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) input:focus {
+  border-color: var(--nz-accent);
+  box-shadow: 0 0 0 3px rgba(var(--nz-accent-rgb), 0.18);
   outline: none;
 }
 
-html[data-theme="nyaman"] a:focus-visible,
-html[data-theme="nyaman"] button:focus-visible,
-html[data-theme="nyaman"] summary:focus-visible {
-  outline: 3px solid rgba(15, 118, 110, 0.55);
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) a:focus-visible,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) button:focus-visible,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) summary:focus-visible {
+  outline: 3px solid rgba(var(--nz-accent-rgb), 0.55);
   outline-offset: 2px;
 }
 
 /* --- Label status --- */
-html[data-theme="nyaman"] .green,
-html[data-theme="nyaman"] .statusPill.green {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .green,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .statusPill.green {
   background: #e4f2e9;
   color: #14683a;
 }
 
-html[data-theme="nyaman"] .yellow {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .yellow {
   background: #fbf0d4;
   color: #7a4f00;
 }
 
-html[data-theme="nyaman"] .red {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .red {
   background: #fde8e6;
   color: #a1281e;
 }
 
 /* --- Kotak info/peringatan --- */
-html[data-theme="nyaman"] .infoBox {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .infoBox {
   color: var(--ink);
 }
 
-html[data-theme="nyaman"] .dangerInfo {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .dangerInfo {
   border-color: #f0b4ad;
   background: #fde8e6;
   color: #8f1d14;
 }
 
-html[data-theme="nyaman"] .successBox {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .successBox {
   border-color: #b7dcc3;
   background: #e4f2e9;
   color: #14683a;
 }
 
 /* --- Hero katalog --- */
-html[data-theme="nyaman"] .catalogLandingHero {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogLandingHero {
   grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
   gap: 20px;
 }
 
-html[data-theme="nyaman"] .catalogHeroCopyPanel,
-html[data-theme="nyaman"] .catalogHeroStatsPanel {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroCopyPanel,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroStatsPanel {
   padding: 28px 32px;
   border-radius: 16px;
 }
 
-html[data-theme="nyaman"] .catalogHeroCopyPanel h1 {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroCopyPanel h1 {
   max-width: 640px;
   margin: 16px 0 12px;
-  color: #16202a;
+  color: var(--nz-ink-strong);
   font-size: clamp(30px, 4.2vw, 48px);
   font-weight: 800;
   line-height: 1.12;
   letter-spacing: -0.025em;
 }
 
-html[data-theme="nyaman"] .catalogHeroCopyPanel h1 span {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroCopyPanel h1 span {
   display: inline;
   background: none;
   -webkit-background-clip: border-box;
   background-clip: border-box;
-  color: #16202a;
+  color: var(--nz-ink-strong);
   animation: none;
 }
 
-html[data-theme="nyaman"] .catalogHeroCopyPanel h1 span:nth-child(2) {
-  color: #0f766e;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroCopyPanel h1 span:nth-child(2) {
+  color: var(--nz-accent);
 }
 
-html[data-theme="nyaman"] .catalogHeroCopyPanel p,
-html[data-theme="nyaman"] .catalogHeroStatsPanel p {
-  color: #3e4c59;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroCopyPanel p,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroStatsPanel p {
+  color: var(--nz-ink-soft);
   font-size: 16px;
   line-height: 1.7;
 }
 
-html[data-theme="nyaman"] .catalogHeroPill {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroPill {
   min-height: 34px;
-  border-color: #bfdcd5;
-  background: #e3f1ec;
-  color: #0b5f58;
+  border-color: var(--nz-accent-line);
+  background: var(--nz-accent-soft);
+  color: var(--nz-accent-strong);
   font-size: 14px;
   font-weight: 700;
   animation: none;
 }
 
-html[data-theme="nyaman"] .catalogHeroPill::before {
-  background: #0f766e;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroPill::before {
+  background: var(--nz-accent);
   box-shadow: none;
   animation: none;
 }
 
-html[data-theme="nyaman"] .catalogHeroPill.catalogSocialProofPill {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroPill.catalogSocialProofPill {
   border-color: #b7dcc3;
   background: #e4f2e9;
   color: #14683a;
 }
 
-html[data-theme="nyaman"] .catalogHeroPill.catalogCardFeaturedTag {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroPill.catalogCardFeaturedTag {
   border-color: transparent;
-  background: #0f766e;
+  background: var(--nz-accent);
   color: #fff;
 }
 
-html[data-theme="nyaman"] .catalogHeroPill.catalogCardFeaturedTag::before {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroPill.catalogCardFeaturedTag::before {
   display: none;
 }
 
-html[data-theme="nyaman"] .catalogStatBox {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogStatBox {
   min-height: 84px;
-  border: 1px solid #e2dccf;
+  border: 1px solid var(--nz-line);
   border-radius: 12px;
-  background: #f6f2ea;
-  color: #1f2933;
+  background: var(--nz-stat);
+  color: var(--nz-ink);
 }
 
-html[data-theme="nyaman"] .catalogStatBox:hover {
-  border-color: #cfc6b8;
-  background: #f6f2ea;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogStatBox:hover {
+  border-color: var(--nz-line-strong);
+  background: var(--nz-stat);
   transform: none;
 }
 
-html[data-theme="nyaman"] .catalogStatBox strong {
-  color: #16202a;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogStatBox strong {
+  color: var(--nz-ink-strong);
   font-size: 30px;
 }
 
-html[data-theme="nyaman"] .catalogStatBox span {
-  color: #52606d;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogStatBox span {
+  color: var(--nz-muted);
   font-size: 14px;
 }
 
-html[data-theme="nyaman"] .catalogStatBox.catalogStatSold {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogStatBox.catalogStatSold {
   border-color: #b7dcc3;
   background: #e4f2e9;
 }
 
-html[data-theme="nyaman"] .catalogStatBox.catalogStatSold strong {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogStatBox.catalogStatSold strong {
   color: #14683a;
 }
 
-html[data-theme="nyaman"] .catalogStatBox strong.catalogStatUrgent {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogStatBox strong.catalogStatUrgent {
   color: #8a5a00;
 }
 
-html[data-theme="nyaman"] .catalogFeatureItem span {
-  border-color: #bfdcd5;
-  background: #e3f1ec;
-  color: #0b5f58;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFeatureItem span {
+  border-color: var(--nz-accent-line);
+  background: var(--nz-accent-soft);
+  color: var(--nz-accent-strong);
 }
 
-html[data-theme="nyaman"] .catalogFeatureItem strong {
-  color: #1f2933;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFeatureItem strong {
+  color: var(--nz-ink);
   font-size: 15px;
 }
 
-html[data-theme="nyaman"] .catalogFeatureItem small {
-  color: #52606d;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFeatureItem small {
+  color: var(--nz-muted);
   font-size: 13.5px;
 }
 
-html[data-theme="nyaman"] .catalogSectionTitle h2 {
-  color: #16202a;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogSectionTitle h2 {
+  color: var(--nz-ink-strong);
   font-size: clamp(24px, 3vw, 32px);
   font-weight: 800;
   line-height: 1.2;
 }
 
-html[data-theme="nyaman"] .eyebrow {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .eyebrow {
   font-size: 12.5px;
   letter-spacing: 0.08em;
 }
 
-html[data-theme="nyaman"] .catalogTicker {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogTicker {
   display: none;
 }
 
-html[data-theme="nyaman"] .catalogTestimonialCard {
-  border-color: #e2dccf;
-  background: #faf8f3;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogTestimonialCard {
+  border-color: var(--nz-line);
+  background: var(--nz-card-soft);
 }
 
-html[data-theme="nyaman"] .catalogTestimonialStars {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogTestimonialStars {
   color: #b7791f;
 }
 
-html[data-theme="nyaman"] .catalogTestimonialCard strong {
-  color: #52606d;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogTestimonialCard strong {
+  color: var(--nz-muted);
 }
 
-html[data-theme="nyaman"] .catalogEmptyState p {
-  color: #52606d;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogEmptyState p {
+  color: var(--nz-muted);
 }
 
 /* Urutan: blok info (cara belanja, garansi, testimoni) dipindah ke BAWAH daftar produk di semua
    ukuran layar -- pembeli datang untuk memilih laptop, jadi produk harus langsung kelihatan.
    Pakai `order` (pageStack = grid), tanpa mengubah markup. */
-html[data-theme="nyaman"] .catalogTicker + .catalogFeatureStrip,
-html[data-theme="nyaman"] .catalogSectionTitle:not(#produk-ready),
-html[data-theme="nyaman"] .catalogSectionTitle:not(#produk-ready) + .catalogFeatureStrip,
-html[data-theme="nyaman"] .catalogTestimonials {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogTicker + .catalogFeatureStrip,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogSectionTitle:not(#produk-ready),
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogSectionTitle:not(#produk-ready) + .catalogFeatureStrip,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogTestimonials {
   order: 20;
 }
 
 /* Animasi muncul-pelan dimatikan: konten selalu langsung terlihat, tidak "loncat" saat di-scroll. */
-html[data-theme="nyaman"] .catalogReveal {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogReveal {
   opacity: 1;
   transform: none;
   transition: none;
 }
 
 /* --- Kartu laptop --- */
-html[data-theme="nyaman"] .catalogPublicGrid {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicGrid {
   gap: 18px;
   grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
 }
 
-html[data-theme="nyaman"] .catalogPublicGrid.catalogView-compact {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicGrid.catalogView-compact {
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
-html[data-theme="nyaman"] .catalogPublicGrid.catalogView-list {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicGrid.catalogView-list {
   grid-template-columns: 1fr;
 }
 
-html[data-theme="nyaman"] .catalogPublicCard {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicCard {
   gap: 12px;
   padding: 16px;
   border-radius: 16px;
-  box-shadow: 0 1px 2px rgba(50, 40, 25, 0.05);
+  box-shadow: 0 1px 2px rgba(var(--nz-shadow-rgb), 0.05);
 }
 
 /* Kartu grid: kolom flex supaya harga + tombol selalu sejajar di dasar kartu, walau ada kartu
    yang tidak punya deskripsi/spek sepanjang tetangganya. Mode daftar tetap pakai grid aslinya. */
-html[data-theme="nyaman"] .catalogPublicGrid {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicGrid {
   align-items: stretch;
 }
 
-html[data-theme="nyaman"] .catalogPublicGrid:not(.catalogView-list) .catalogPublicCard {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicGrid:not(.catalogView-list) .catalogPublicCard {
   display: flex;
   flex-direction: column;
 }
 
-html[data-theme="nyaman"] .catalogPublicGrid:not(.catalogView-list) .catalogPrice {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicGrid:not(.catalogView-list) .catalogPrice {
   margin-top: auto;
 }
 
-html[data-theme="nyaman"] .catalogPublicGrid:not(.catalogView-list) .catalogCardActions {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicGrid:not(.catalogView-list) .catalogCardActions {
   margin-top: 0;
 }
 
-html[data-theme="nyaman"] .catalogPublicCard:hover {
-  border-color: #cbbfa8;
-  background: #fffdfa;
-  box-shadow: 0 10px 28px rgba(50, 40, 25, 0.1);
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicCard:hover {
+  border-color: var(--nz-line-hover);
+  background: var(--nz-card);
+  box-shadow: 0 10px 28px rgba(var(--nz-shadow-rgb), 0.1);
   transform: translateY(-2px);
 }
 
-html[data-theme="nyaman"] .catalogImage,
-html[data-theme="nyaman"] .catalogImagePlaceholder {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogImage,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogImagePlaceholder {
   border: 0;
   border-radius: 12px;
-  background: #ece6db;
+  background: var(--nz-photo);
 }
 
-html[data-theme="nyaman"] .catalogPublicCard:hover .catalogImage,
-html[data-theme="nyaman"] .catalogPublicCard:hover .catalogImagePlaceholder {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicCard:hover .catalogImage,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicCard:hover .catalogImagePlaceholder {
   transform: none;
 }
 
-html[data-theme="nyaman"] .catalogBrand {
-  color: #0f766e;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogBrand {
+  color: var(--nz-accent);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.06em;
 }
 
-html[data-theme="nyaman"] .catalogPublicCard h3 {
-  color: #16202a;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicCard h3 {
+  color: var(--nz-ink-strong);
   font-size: 18px;
   font-weight: 700;
   line-height: 1.3;
 }
 
-html[data-theme="nyaman"] .catalogPublicCard p,
-html[data-theme="nyaman"] .catalogSpecList {
-  color: #3e4c59;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicCard p,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogSpecList {
+  color: var(--nz-ink-soft);
   font-size: 14px;
   line-height: 1.5;
 }
 
-html[data-theme="nyaman"] .catalogPublicCard .catalogCardHighlight {
-  color: #52606d;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicCard .catalogCardHighlight {
+  color: var(--nz-muted);
   font-size: 13.5px;
 }
 
-html[data-theme="nyaman"] .catalogCardTop .unitNumber {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogCardTop .unitNumber {
   min-height: 32px;
   border-radius: 8px;
-  background: #efe9de;
-  color: #2f3b46;
+  background: var(--nz-chip);
+  color: var(--nz-ink-chip);
   font-size: 13px;
   font-weight: 800;
 }
 
-html[data-theme="nyaman"] .catalogCardTop .statusPill {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogCardTop .statusPill {
   border-radius: 8px;
-  background: #e3f1ec;
-  color: #0b5f58;
+  background: var(--nz-accent-soft);
+  color: var(--nz-accent-strong);
   font-size: 12.5px;
 }
 
-html[data-theme="nyaman"] .miniMetrics {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .miniMetrics {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-html[data-theme="nyaman"] .miniMetrics span {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .miniMetrics span {
   min-height: 32px;
   padding: 0 11px;
   border: 0;
   border-radius: 8px;
-  background: #efe9de;
-  color: #2f3b46;
+  background: var(--nz-chip);
+  color: var(--nz-ink-chip);
   font-size: 13px;
   font-weight: 700;
 }
 
-html[data-theme="nyaman"] .catalogTrustRow span {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogTrustRow span {
   min-height: 28px;
-  border-color: #e2dccf;
-  background: #faf8f3;
-  color: #3e4c59;
+  border-color: var(--nz-line);
+  background: var(--nz-card-soft);
+  color: var(--nz-ink-soft);
   font-size: 12px;
   font-weight: 600;
 }
@@ -662,25 +696,25 @@ html[data-theme="nyaman"] .catalogTrustRow span {
 /* "Garansi toko" & "Stok aktual" sama di semua kartu (sudah ada di hero & blok info) -> hanya
    tanggal QC yang spesifik per unit yang ditampilkan, supaya kartu lebih pendek dan mudah
    dibandingkan. */
-html[data-theme="nyaman"] .catalogTrustRow span:nth-child(n + 2) {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogTrustRow span:nth-child(n + 2) {
   display: none;
 }
 
-html[data-theme="nyaman"] .catalogSpecList {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogSpecList {
   display: flex;
   flex-wrap: wrap;
   gap: 2px 14px;
 }
 
-html[data-theme="nyaman"] .catalogTrustRow span svg {
-  color: #0f766e;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogTrustRow span svg {
+  color: var(--nz-accent);
 }
 
-html[data-theme="nyaman"] .catalogPrice {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPrice {
   background: none;
   -webkit-background-clip: border-box;
   background-clip: border-box;
-  color: #0b5f58;
+  color: var(--nz-accent-strong);
   font-family: var(--font-jakarta), var(--font-inter), Inter, Arial, sans-serif;
   font-size: 22px;
   font-weight: 800;
@@ -688,83 +722,83 @@ html[data-theme="nyaman"] .catalogPrice {
   font-variant-numeric: tabular-nums;
 }
 
-html[data-theme="nyaman"] .catalogCardActions {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogCardActions {
   gap: 10px;
 }
 
 /* --- Filter, bar hasil, pilihan tampilan --- */
-html[data-theme="nyaman"] .catalogFilterPanel {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel {
   border-radius: 16px;
 }
 
-html[data-theme="nyaman"] .catalogFilterPanel label {
-  color: #3e4c59;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel label {
+  color: var(--nz-ink-soft);
   font-size: 13px;
   font-weight: 700;
 }
 
-html[data-theme="nyaman"] .catalogFilterPanel input,
-html[data-theme="nyaman"] .catalogFilterPanel select {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel input,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel select {
   min-height: 46px;
-  border-color: #cfc6b8;
+  border-color: var(--nz-line-strong);
   background: #fff;
-  color: #1f2933;
+  color: var(--nz-ink);
 }
 
-html[data-theme="nyaman"] .catalogFilterPanel input:focus,
-html[data-theme="nyaman"] .catalogFilterPanel select:focus {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel input:focus,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel select:focus {
+  border-color: var(--nz-accent);
+  box-shadow: 0 0 0 3px rgba(var(--nz-accent-rgb), 0.18);
 }
 
-html[data-theme="nyaman"] .catalogResultBar {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogResultBar {
   border-radius: 16px;
 }
 
-html[data-theme="nyaman"] .catalogResultCount strong {
-  color: #16202a;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogResultCount strong {
+  color: var(--nz-ink-strong);
   font-size: 26px;
 }
 
-html[data-theme="nyaman"] .catalogResultCount span,
-html[data-theme="nyaman"] .catalogShareBox small {
-  color: #52606d;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogResultCount span,
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogShareBox small {
+  color: var(--nz-muted);
 }
 
-html[data-theme="nyaman"] .catalogShareBox {
-  border-color: #e2dccf;
-  background: #faf8f3;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogShareBox {
+  border-color: var(--nz-line);
+  background: var(--nz-card-soft);
 }
 
-html[data-theme="nyaman"] .catalogViewSwitch {
-  border-color: #e2dccf;
-  background: #f1ece3;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogViewSwitch {
+  border-color: var(--nz-line);
+  background: var(--nz-hover);
 }
 
-html[data-theme="nyaman"] .catalogViewSwitch a {
-  color: #3e4c59;
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogViewSwitch a {
+  color: var(--nz-ink-soft);
   font-size: 13px;
 }
 
-html[data-theme="nyaman"] .catalogViewSwitch a.active {
+html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogViewSwitch a.active {
   background: #fff;
-  color: #0b5f58;
-  box-shadow: 0 1px 2px rgba(50, 40, 25, 0.12);
+  color: var(--nz-accent-strong);
+  box-shadow: 0 1px 2px rgba(var(--nz-shadow-rgb), 0.12);
 }
 
 /* --- Desktop lebar: filter menempel di kiri, hasil di kanan --- */
 @media (min-width: 1100px) {
-  html[data-theme="nyaman"] .katalogPage {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .katalogPage {
     grid-template-columns: 320px minmax(0, 1fr);
     column-gap: 28px;
     align-items: start;
   }
 
-  html[data-theme="nyaman"] .katalogPage > * {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .katalogPage > * {
     grid-column: 1 / -1;
   }
 
-  html[data-theme="nyaman"] .katalogPage > .catalogFilterShell {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .katalogPage > .catalogFilterShell {
     grid-column: 1;
     grid-row: span 3;
     position: sticky;
@@ -773,67 +807,67 @@ html[data-theme="nyaman"] .catalogViewSwitch a.active {
     align-self: start;
   }
 
-  html[data-theme="nyaman"] .katalogPage > .catalogResultBar,
-  html[data-theme="nyaman"] .katalogPage > .catalogEmptyState,
-  html[data-theme="nyaman"] .katalogPage > .catalogPublicSection:not(.catalogPublicSectionFeatured) {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .katalogPage > .catalogResultBar,
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .katalogPage > .catalogEmptyState,
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .katalogPage > .catalogPublicSection:not(.catalogPublicSectionFeatured) {
     grid-column: 2;
   }
 
-  html[data-theme="nyaman"] .catalogFilterDrawer {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterDrawer {
     max-height: calc(100vh - 108px);
     overflow-y: auto;
     border-radius: 16px;
     scrollbar-width: thin;
-    scrollbar-color: #cfc6b8 transparent;
+    scrollbar-color: var(--nz-line-strong) transparent;
   }
 
-  html[data-theme="nyaman"] .catalogFilterPanel {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px 10px;
     align-items: start;
     padding: 18px;
   }
 
-  html[data-theme="nyaman"] .catalogFilterPanel select,
-  html[data-theme="nyaman"] .catalogFilterPanel input {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel select,
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel input {
     min-height: 42px;
   }
 
-  html[data-theme="nyaman"] .catalogFilterPanel select {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel select {
     padding: 0 8px 0 10px;
     font-size: 14.5px;
   }
 
-  html[data-theme="nyaman"] .catalogFilterPanel::before {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel::before {
     content: "Saring laptop";
     grid-column: 1 / -1;
-    color: #16202a;
+    color: var(--nz-ink-strong);
     font-family: var(--font-jakarta), var(--font-inter), Inter, Arial, sans-serif;
     font-size: 17px;
     font-weight: 800;
     letter-spacing: -0.01em;
   }
 
-  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(1),
-  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(4),
-  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(7),
-  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(8),
-  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(9),
-  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(10),
-  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(12) {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel > :nth-child(1),
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel > :nth-child(4),
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel > :nth-child(7),
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel > :nth-child(8),
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel > :nth-child(9),
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel > :nth-child(10),
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel > :nth-child(12) {
     grid-column: 1 / -1;
   }
 
   /* Pilihan tampilan sudah ada di bar hasil; select-nya tetap dikirim form (hanya disembunyikan). */
-  html[data-theme="nyaman"] .catalogFilterPanel > :nth-child(11) {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel > :nth-child(11) {
     display: none;
   }
 
-  html[data-theme="nyaman"] .catalogFilterActions {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterActions {
     justify-content: stretch;
   }
 
-  html[data-theme="nyaman"] .catalogFilterActions > * {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterActions > * {
     flex: 1;
   }
 }
@@ -841,30 +875,30 @@ html[data-theme="nyaman"] .catalogViewSwitch a.active {
 /* Dengan sidebar menu admin (data-layout="sidebar") area konten lebih sempit -> sidebar filter
    baru dipakai di layar yang benar-benar lega. */
 @media (min-width: 1100px) and (max-width: 1499px) {
-  html[data-theme="nyaman"][data-layout="sidebar"] .katalogPage {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"])[data-layout="sidebar"] .katalogPage {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  html[data-theme="nyaman"][data-layout="sidebar"] .katalogPage > .catalogFilterShell,
-  html[data-theme="nyaman"][data-layout="sidebar"] .katalogPage > .catalogResultBar,
-  html[data-theme="nyaman"][data-layout="sidebar"] .katalogPage > .catalogEmptyState,
-  html[data-theme="nyaman"][data-layout="sidebar"] .katalogPage > .catalogPublicSection {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"])[data-layout="sidebar"] .katalogPage > .catalogFilterShell,
+  html:is([data-theme="nyaman"], [data-theme="fscomp"])[data-layout="sidebar"] .katalogPage > .catalogResultBar,
+  html:is([data-theme="nyaman"], [data-theme="fscomp"])[data-layout="sidebar"] .katalogPage > .catalogEmptyState,
+  html:is([data-theme="nyaman"], [data-theme="fscomp"])[data-layout="sidebar"] .katalogPage > .catalogPublicSection {
     grid-column: 1 / -1;
     grid-row: auto;
     position: static;
   }
 
-  html[data-theme="nyaman"][data-layout="sidebar"] .catalogFilterDrawer {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"])[data-layout="sidebar"] .catalogFilterDrawer {
     max-height: none;
     overflow: visible;
   }
 
-  html[data-theme="nyaman"][data-layout="sidebar"] .catalogFilterPanel {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"])[data-layout="sidebar"] .catalogFilterPanel {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  html[data-theme="nyaman"][data-layout="sidebar"] .catalogFilterPanel::before,
-  html[data-theme="nyaman"][data-layout="sidebar"] .catalogFilterPanel > :nth-child(11) {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"])[data-layout="sidebar"] .catalogFilterPanel::before,
+  html:is([data-theme="nyaman"], [data-theme="fscomp"])[data-layout="sidebar"] .catalogFilterPanel > :nth-child(11) {
     display: none;
   }
 }
@@ -873,119 +907,119 @@ html[data-theme="nyaman"] .catalogViewSwitch a.active {
 @media (max-width: 820px) {
   /* Header tetap menempel tapi lebih ramping: subjudul internal disembunyikan di layar kecil
      supaya lebih banyak ruang untuk laptop. */
-  html[data-theme="nyaman"] .topbar {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .topbar {
     padding: 8px 14px;
     gap: 8px;
   }
 
-  html[data-theme="nyaman"] .topbar .brand small {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .topbar .brand small {
     display: none;
   }
 
-  html[data-theme="nyaman"] .catalogStatBox {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogStatBox {
     min-height: 64px;
     padding: 12px 14px;
     gap: 4px;
   }
 
-  html[data-theme="nyaman"] .catalogStatBox strong {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogStatBox strong {
     font-size: 24px;
   }
 
-  html[data-theme="nyaman"] .catalogLandingHero {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogLandingHero {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  html[data-theme="nyaman"] .catalogHeroCopyPanel,
-  html[data-theme="nyaman"] .catalogHeroStatsPanel {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroCopyPanel,
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroStatsPanel {
     padding: 20px;
   }
 
-  html[data-theme="nyaman"] .catalogHeroCopyPanel p {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroCopyPanel p {
     font-size: 15.5px;
   }
 
-  html[data-theme="nyaman"] .catalogHeroStatsPanel > p {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogHeroStatsPanel > p {
     display: none;
   }
 
-  html[data-theme="nyaman"] .catalogMobileSearchBar,
-  html[data-theme="nyaman"] .catalogFilterMobileButton {
-    border: 1.5px solid #cfc6b8;
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogMobileSearchBar,
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterMobileButton {
+    border: 1.5px solid var(--nz-line-strong);
     border-radius: 12px;
     background: #fff;
-    color: #1f2933;
-    box-shadow: 0 6px 18px rgba(50, 40, 25, 0.1);
+    color: var(--nz-ink);
+    box-shadow: 0 6px 18px rgba(var(--nz-shadow-rgb), 0.1);
   }
 
-  html[data-theme="nyaman"] .catalogMobileSearchBar {
-    color: #52606d;
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogMobileSearchBar {
+    color: var(--nz-muted);
   }
 
-  html[data-theme="nyaman"] .catalogMobileSearchBar input {
-    color: #1f2933;
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogMobileSearchBar input {
+    color: var(--nz-ink);
     font-size: 16px;
   }
 
-  html[data-theme="nyaman"] .catalogMobileSearchBar button {
-    background: #e3f1ec;
-    color: #0b5f58;
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogMobileSearchBar button {
+    background: var(--nz-accent-soft);
+    color: var(--nz-accent-strong);
   }
 
-  html[data-theme="nyaman"] .catalogFilterMobileButton strong {
-    background: #0f766e;
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterMobileButton strong {
+    background: var(--nz-accent);
     color: #fff;
     font-size: 11.5px;
   }
 
-  html[data-theme="nyaman"] .catalogFilterBackdrop {
-    background: rgba(31, 41, 51, 0.45);
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterBackdrop {
+    background: rgba(var(--nz-ink-rgb), 0.45);
   }
 
-  html[data-theme="nyaman"] .catalogFilterDrawer {
-    background: #f8f6f1;
-    box-shadow: -16px 0 48px rgba(31, 41, 51, 0.22);
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterDrawer {
+    background: var(--nz-drawer);
+    box-shadow: -16px 0 48px rgba(var(--nz-ink-rgb), 0.22);
   }
 
-  html[data-theme="nyaman"] .catalogFilterDrawerHeader {
-    border-bottom-color: #e2dccf;
-    background: rgba(248, 246, 241, 0.97);
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterDrawerHeader {
+    border-bottom-color: var(--nz-line);
+    background: rgba(var(--nz-drawer-rgb), 0.97);
     backdrop-filter: none;
-    color: #16202a;
+    color: var(--nz-ink-strong);
   }
 
-  html[data-theme="nyaman"] .catalogFilterDrawerHeader span {
-    color: #52606d;
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterDrawerHeader span {
+    color: var(--nz-muted);
     font-size: 12.5px;
   }
 
-  html[data-theme="nyaman"] .catalogFilterDrawerHeader button {
-    border-color: #cfc6b8;
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterDrawerHeader button {
+    border-color: var(--nz-line-strong);
     background: #fff;
-    color: #1f2933;
+    color: var(--nz-ink);
   }
 
-  html[data-theme="nyaman"] .catalogFilterPanel {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterPanel {
     border: 0;
     border-radius: 0;
     background: transparent;
     box-shadow: none;
   }
 
-  html[data-theme="nyaman"] .catalogFilterActions {
-    border-top-color: #e2dccf;
-    background: rgba(248, 246, 241, 0.98);
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogFilterActions {
+    border-top-color: var(--nz-line);
+    background: rgba(var(--nz-drawer-rgb), 0.98);
   }
 
-  html[data-theme="nyaman"] .catalogPublicGrid {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) .catalogPublicGrid {
     gap: 16px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-theme="nyaman"] *,
-  html[data-theme="nyaman"] *::before,
-  html[data-theme="nyaman"] *::after {
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) *,
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) *::before,
+  html:is([data-theme="nyaman"], [data-theme="fscomp"]) *::after {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
