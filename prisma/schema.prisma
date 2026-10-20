@@ -691,6 +691,8 @@ model Sale {
   soldAt        DateTime     @default(now())
   marketplaceName String?
   marketplaceFee  Int        @default(0)
+  // Mode paket (mis. PC rakitan): nota hanya menampilkan total paket + daftar komponen (S/N & garansi), tanpa harga per baris.
+  packageMode   Boolean      @default(false)
   voidedAt      DateTime?
   voidReason    String?
   notes         String?
@@ -772,6 +774,8 @@ model SaleItem {
   lineTotal       Int
   lineCost        Int           @default(0)
   inventoryItemId String?
+  serialNumber    String?
+  warrantyNote    String?
   createdAt       DateTime      @default(now())
 
   sale            Sale          @relation(fields: [saleId], references: [id], onDelete: Cascade)

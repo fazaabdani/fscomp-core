@@ -5139,3 +5139,67 @@ body:has(.waAiPage) {
   border-color: rgba(37, 211, 102, 0.5);
   background: rgba(37, 211, 102, 0.1);
 }
+
+/* Nota paket (PC rakitan): banner harga paket + tabel komponen tanpa harga per baris. */
+.notaPackageBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+  padding: 12px 16px;
+  border: 1px solid var(--nota-line);
+  border-left: 4px solid var(--nota-navy);
+  border-radius: 8px;
+  background-color: rgba(10, 24, 49, 0.03);
+}
+
+.notaPackageBanner strong {
+  display: block;
+  font-size: 14px;
+}
+
+.notaPackageBanner small {
+  display: block;
+  margin-top: 2px;
+  color: var(--nota-muted);
+  font-size: 11px;
+}
+
+.notaPackageBanner b {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.notaTablePackage .notaTableHead,
+.notaTablePackage .notaTableRow {
+  grid-template-columns: minmax(0, 1fr) 44px 170px 110px;
+}
+
+.notaTablePackage .notaTableHead span:not(:first-child),
+.notaTablePackage .notaTableRow span:not(:first-child) {
+  text-align: left;
+}
+
+.notaTablePackage .notaTableRow span:nth-child(2),
+.notaTablePackage .notaTableHead span:nth-child(2) {
+  text-align: center;
+}
+
+.notaTablePackage .notaTableRow span {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .notaTablePackage .notaTableHead,
+  .notaTablePackage .notaTableRow {
+    grid-template-columns: minmax(0, 1fr) 28px 92px 66px;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .notaPackageBanner b {
+    font-size: 15px;
+  }
+}

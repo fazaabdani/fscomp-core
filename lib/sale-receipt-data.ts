@@ -51,6 +51,7 @@ export async function getSaleReceipt(id: string) {
       remainingPayment: paymentStatus({ paymentMethod: sale.paymentMethod, subtotal: sale.subtotal, dpAmount: sale.dpAmount, paymentCount: sale.payments.length }).remaining,
       costPrice: sale.costPrice,
       grossProfit: sale.grossProfit,
+      packageMode: sale.packageMode,
       marketplaceName: sale.marketplaceName ?? "",
       marketplaceFee: sale.marketplaceFee,
       payments: sale.payments.map((payment) => ({
@@ -79,7 +80,9 @@ export async function getSaleReceipt(id: string) {
         category: item.category,
         qty: item.qty,
         unitPrice: item.unitPrice,
-        lineTotal: item.lineTotal
+        lineTotal: item.lineTotal,
+        serialNumber: item.serialNumber ?? "",
+        warrantyNote: item.warrantyNote ?? ""
       }))
     };
   } catch {

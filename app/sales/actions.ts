@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { entityId, formValues, nonNegativeInteger, optionalText, requiredText, z } from "@/lib/form-validation";
 import { inferLicenseType, inferLicenseVersion, licenseDisplayName } from "@/lib/licenses";
+import { PACKAGE_CATEGORY, buildPackageLines, cleanLineText, componentsMissingCost, warrantyLabel } from "@/lib/pc-package";
 import { PAYMENT_METHODS, clampMarketplaceFee, itemsMissingCost, marketplaceNameValue, paymentStatus } from "@/lib/sale-payments";
 
 function text(formData: FormData, key: string) {
@@ -219,14 +220,22 @@ export async function createSaleAction(formData: FormData) {
   const buyerPhone = text(formData, "buyerPhone");
   const buyerAddress = text(formData, "buyerAddress");
   const notes = text(formData, "notes");
+  // Mode paket (PC rakitan): satu harga paket, komponen per baris dengan S/N & garansi masing-masing.
+  const packageMode = standalone && text(formData, "packageMode") === "on";
   const warrantySoftware = standalone ? "Tidak ada" : warrantyText(formData, "warrantySoftware", 3, "bulan");
-  const warrantyHardware = standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan", true) : warrantyText(formData, "warrantyHardware", 3, "minggu");
+  const warrantyHardware = packageMode
+    ? "Per komponen"
+    : standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan", true) : warrantyText(formData, "warrantyHardware", 3, "minggu");
   const itemNames = textArray(formData, "itemName");
   const itemCategories = textArray(formData, "itemCategory");
   const itemQty = numberArray(formData, "itemQty");
   const itemPrices = numberArray(formData, "itemPrice");
   const itemCosts = numberArray(formData, "itemCost");
   const itemInventoryIds = textArray(formData, "itemInventoryId");
+  const itemSerials = textArray(formData, "itemSerial");
+  const itemWarranties = textArray(formData, "itemWarranty");
+  const packageName = cleanLineText(text(formData, "packageName"), 120);
+  const packagePrice = numberValue(formData, "packagePrice");
   const selectedLicenseType = licenseTypeValue(text(formData, "licenseType"));
   const licenseVersionInput = text(formData, "licenseVersion");
   const licenseDurationType = licenseDurationValue(text(formData, "licenseDurationType"));
@@ -272,28 +281,49 @@ export async function createSaleAction(formData: FormData) {
     redirect(`${errorPath}?error=qc-harian-belum-lolos`);
   }
 
-  const items = [
-    ...(unit ? [{
-      name: `Laptop ${unit.model}`,
-      category: "LAPTOP",
-      qty: 1,
-      unitPrice: soldPrice,
-      unitCost: unit.hargaModal,
-      inventoryItemId: null as string | null
-    }] : []),
-    ...itemNames.map((name, index) => {
-      const inventoryItemId = itemInventoryIds[index] || null;
-      return {
-        name,
-        category: itemCategories[index] || "BONUS",
-        qty: inventoryItemId ? 1 : Math.max(0, itemQty[index] || 0),
-        unitPrice: Math.max(0, itemPrices[index] || 0),
-        unitCost: Math.max(0, itemCosts[index] || 0),
-        inventoryItemId
-      };
-    })
-  ].filter((item) => item.name && item.qty > 0);
-  const licenseItems = items.filter((item) => item.category !== "LAPTOP" && inferLicenseType(item.name, item.category));
+  if (packageMode && packagePrice <= 0) redirect(`${errorPath}?error=paket-harga`);
+
+  // Serial number & garansi per baris: isian kasir, atau otomatis dari data inventaris yang ditautkan.
+  const linkedIds = itemInventoryIds.filter(Boolean);
+  const inventoryInfo = new Map<string, { serialNumber: string | null; warrantyDuration: number; warrantyDurationUnit: string }>();
+  if (linkedIds.length > 0) {
+    const rows = await prisma.inventoryItem.findMany({
+      where: { id: { in: linkedIds } },
+      select: { id: true, serialNumber: true, warrantyDuration: true, warrantyDurationUnit: true }
+    });
+    for (const row of rows) inventoryInfo.set(row.id, row);
+  }
+  const rowItems = itemNames.map((name, index) => {
+    const inventoryItemId = itemInventoryIds[index] || null;
+    const linked = inventoryItemId ? inventoryInfo.get(inventoryItemId) : undefined;
+    return {
+      name,
+      category: itemCategories[index] || "BONUS",
+      qty: inventoryItemId ? 1 : Math.max(0, itemQty[index] || 0),
+      unitPrice: Math.max(0, itemPrices[index] || 0),
+      unitCost: Math.max(0, itemCosts[index] || 0),
+      inventoryItemId,
+      serialNumber: cleanLineText(itemSerials[index] || linked?.serialNumber || "", 80),
+      warrantyNote: cleanLineText(itemWarranties[index] || (linked ? warrantyLabel(linked.warrantyDuration, linked.warrantyDurationUnit) : ""), 60)
+    };
+  });
+  const components = rowItems.filter((item) => item.name && item.qty > 0);
+  const items = packageMode
+    ? buildPackageLines(packageName, packagePrice, components)
+    : [
+        ...(unit ? [{
+          name: `Laptop ${unit.model}`,
+          category: "LAPTOP",
+          qty: 1,
+          unitPrice: soldPrice,
+          unitCost: unit.hargaModal,
+          inventoryItemId: null as string | null,
+          serialNumber: "",
+          warrantyNote: ""
+        }] : []),
+        ...rowItems
+      ].filter((item) => item.name && item.qty > 0);
+  const licenseItems = items.filter((item) => item.category !== "LAPTOP" && item.category !== PACKAGE_CATEGORY && inferLicenseType(item.name, item.category));
 
   const subtotal = items.reduce((sum, item) => sum + item.qty * item.unitPrice, 0);
   if (standalone && (items.length === 0 || subtotal <= 0)) {
@@ -301,7 +331,8 @@ export async function createSaleAction(formData: FormData) {
   }
   // Modal Rp 0 pada barang berharga jual > 0 membuat laba terhitung 100% (pernah terjadi pada PC
   // rakitan & monitor). Kasir harus mengisi modalnya, atau mencentang konfirmasi kalau memang gratis.
-  const missingCost = itemsMissingCost(items);
+  // Paket: harga ada di baris PAKET, jadi yang diperiksa modal tiap komponen.
+  const missingCost = packageMode ? componentsMissingCost(components) : itemsMissingCost(items);
   if (missingCost.length > 0 && text(formData, "confirmZeroCost") !== "on") {
     const detail = encodeURIComponent(missingCost.map((item) => item.name).join(", ").slice(0, 200));
     redirect(`${errorPath}?error=modal-kosong&detail=${detail}`);
@@ -334,6 +365,7 @@ export async function createSaleAction(formData: FormData) {
           grossProfit,
           marketplaceName: marketplaceName || null,
           marketplaceFee,
+          packageMode,
           paymentMethod,
           buyerName: buyerName || null,
           buyerPhone: buyerPhone || null,
@@ -368,7 +400,9 @@ export async function createSaleAction(formData: FormData) {
           unitCost: item.unitCost,
           lineTotal: item.qty * item.unitPrice,
           lineCost: item.qty * item.unitCost,
-          inventoryItemId: item.inventoryItemId
+          inventoryItemId: item.inventoryItemId,
+          serialNumber: item.serialNumber || null,
+          warrantyNote: item.warrantyNote || null
         }))
       });
 
@@ -468,7 +502,7 @@ export async function updateSaleAction(saleId: string, formData: FormData) {
   const sale = await prisma.sale.findUnique({
     where: { id: saleId },
     select: {
-      id: true, unitId: true, subtotal: true, dpAmount: true, voidedAt: true, location: true,
+      id: true, unitId: true, subtotal: true, dpAmount: true, voidedAt: true, location: true, packageMode: true, warrantySoftware: true, warrantyHardware: true,
       grossProfit: true, costPrice: true, marketplaceFee: true, marketplaceName: true,
       _count: { select: { payments: true } }
     }
@@ -504,8 +538,11 @@ export async function updateSaleAction(saleId: string, formData: FormData) {
     ? (marketplaceName ? clampMarketplaceFee(numberValue(formData, "marketplaceFee"), sale.subtotal) : 0)
     : sale.marketplaceFee;
   const feeDelta = marketplaceFee - sale.marketplaceFee;
-  const warrantySoftware = standalone ? "Tidak ada" : warrantyText(formData, "warrantySoftware", 3, "bulan");
-  const warrantyHardware = standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan", true) : warrantyText(formData, "warrantyHardware", 3, "minggu");
+  // Transaksi paket: garansi per komponen ada di baris item, jangan ditimpa dari form ini.
+  const warrantySoftware = sale.packageMode ? sale.warrantySoftware : standalone ? "Tidak ada" : warrantyText(formData, "warrantySoftware", 3, "bulan");
+  const warrantyHardware = sale.packageMode
+    ? sale.warrantyHardware
+    : standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan", true) : warrantyText(formData, "warrantyHardware", 3, "minggu");
 
   const dbUser = await prisma.user.findFirst({ where: { username: currentUser.username }, select: { id: true } });
   // Cuma admin yang boleh koreksi lokasi transaksi -- ini nentuin kop nota (FS Comp/FS.ID) dan

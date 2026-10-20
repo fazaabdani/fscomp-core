@@ -3,20 +3,13 @@ import { ArrowLeft, Boxes, Receipt, ShoppingBag } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { MARKETPLACES } from "@/lib/sale-payments";
+import { warrantyLabel } from "@/lib/pc-package";
+import { NonLaptopItems } from "./NonLaptopItems";
 import { formatRupiah } from "@/lib/api";
 import { jakartaDateKey } from "@/lib/inventory";
 import { SubmitButton } from "../../SubmitButton";
 import { createSaleAction } from "../actions";
 import { FlashNotice } from "../../FlashNotice";
-
-const itemRows = [
-  { name: "Microsoft Office", category: "LISENSI" },
-  { name: "Windows", category: "LISENSI" },
-  { name: "", category: "AKSESORI" },
-  { name: "", category: "SPAREPART" },
-  { name: "", category: "JASA" },
-  { name: "", category: "LAINNYA" }
-];
 
 const SOLD_ITEMS_LIMIT = 150;
 
@@ -26,7 +19,7 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
     prisma.inventoryItem.findMany({
       where: { status: "STOCK" },
       orderBy: { name: "asc" },
-      select: { id: true, name: true, category: true, serialNumber: true, costPrice: true }
+      select: { id: true, name: true, category: true, serialNumber: true, costPrice: true, warrantyDuration: true, warrantyDurationUnit: true }
     }),
     prisma.saleItem.findMany({
       where: { sale: { unitId: null, voidedAt: null } },
@@ -41,6 +34,8 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
     ? "Isi minimal satu item dengan qty dan harga jual lebih dari nol."
     : searchParams?.error === "inventaris-sudah-terjual"
       ? "Salah satu barang inventaris yang dipilih ternyata sudah terjual duluan. Periksa ulang pilihan barang."
+      : searchParams?.error === "paket-harga"
+      ? "Isi harga paket PC (total) lebih dari nol."
       : searchParams?.error === "modal-kosong"
         ? `Modal belum diisi untuk: ${searchParams.detail ?? "item berbayar"}. Isi kolom Modal/pcs (atau tautkan ke inventaris yang sudah punya harga modal), atau centang "Modal memang Rp 0" kalau barangnya gratis.`
         : searchParams?.error
@@ -91,30 +86,15 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
         <label>Alamat pembeli<input name="buyerAddress" placeholder="Alamat pembeli untuk nota" /></label>
       </div>
 
-      <div className="panelSubsection cashierItems">
-        <div><p className="eyebrow">Daftar Item</p><h3>Barang atau layanan yang dijual</h3></div>
-        <div className="cashierItemHeader"><span>Item</span><span>Stok inventaris</span><span>Kategori</span><span>Qty</span><span>Jual/pcs</span><span>Modal/pcs (wajib)</span></div>
-        {itemRows.map((item, index) => <div className="cashierItemRow" key={`${item.category}-${index}`}>
-          <input name="itemName" defaultValue={item.name} placeholder="Nama barang/layanan" data-item-name={index} />
-          <select name="itemInventoryId" defaultValue="" aria-label={`Tautkan ke barang inventaris untuk item ${index + 1}`} data-item-inventory={index}>
-            <option value="">Tidak terhubung inventaris</option>
-            {stockItems.map((stockItem) => (
-              <option value={stockItem.id} key={stockItem.id} data-name={stockItem.name} data-cost={stockItem.costPrice}>
-                {stockItem.name}{stockItem.serialNumber ? ` (${stockItem.serialNumber})` : ""}
-              </option>
-            ))}
-          </select>
-          <select name="itemCategory" defaultValue={item.category} aria-label={`Kategori item ${index + 1}`}>
-            <option value="LISENSI">Lisensi</option><option value="SOFTWARE">Software</option><option value="AKSESORI">Aksesori</option>
-            <option value="SPAREPART">Sparepart</option><option value="JASA">Jasa</option><option value="LAINNYA">Lainnya</option>
-          </select>
-          <input name="itemQty" type="number" min="0" defaultValue={0} aria-label={`Qty item ${index + 1}`} />
-          <input name="itemPrice" type="number" inputMode="numeric" min="0" step="1000" defaultValue={0} aria-label={`Harga jual item ${index + 1}`} />
-          <input name="itemCost" type="number" inputMode="numeric" min="0" step="1000" defaultValue={0} aria-label={`Modal item ${index + 1}`} data-item-cost={index} />
-        </div>)}
-        <small className="formHint">Item dengan qty 0 tidak ikut nota. Kalau ditautkan ke barang inventaris, qty otomatis dianggap 1, nama dan modal terisi otomatis dari data inventaris, dan barang itu ditandai terjual. Untuk transaksi lisensi, isi jenis dan detail aktivasi di bagian bawah. Item berharga jual wajib punya modal (kecuali kategori Jasa).</small>
-        <label className="checkTile"><input type="checkbox" name="confirmZeroCost" /> Modal item memang Rp 0 (gratis / tanpa modal)</label>
-      </div>
+      <NonLaptopItems
+        stockItems={stockItems.map((stock) => ({
+          id: stock.id,
+          name: stock.name,
+          serialNumber: stock.serialNumber ?? "",
+          costPrice: stock.costPrice,
+          warranty: warrantyLabel(stock.warrantyDuration, stock.warrantyDurationUnit)
+        }))}
+      />
 
       <div className="cashierBottomGrid">
         <div className="panelSubsection formGrid">
@@ -189,25 +169,5 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
       )}
     </section>
 
-    <script
-      dangerouslySetInnerHTML={{
-        __html: `
-document.addEventListener("change", function (event) {
-  var target = event.target;
-  if (!target || target.getAttribute("data-item-inventory") === null) return;
-  var row = target.closest(".cashierItemRow");
-  if (!row) return;
-  var nameInput = row.querySelector("[data-item-name]");
-  var costInput = row.querySelector("[data-item-cost]");
-  var option = target.options[target.selectedIndex];
-  if (!target.value || !option) return;
-  var name = option.getAttribute("data-name");
-  var cost = option.getAttribute("data-cost");
-  if (nameInput && name) nameInput.value = name;
-  if (costInput && cost) costInput.value = cost;
-});
-`.trim()
-      }}
-    />
   </section>;
 }

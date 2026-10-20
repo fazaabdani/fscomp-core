@@ -36,6 +36,7 @@ export default async function EditSalePage({ params, searchParams }: { params: {
       notes: true,
       marketplaceName: true,
       marketplaceFee: true,
+      packageMode: true,
       _count: { select: { payments: true } },
       unit: { select: { nomorUnit: true, model: true } }
     }
@@ -110,7 +111,9 @@ export default async function EditSalePage({ params, searchParams }: { params: {
 
         <label>Alamat pembeli<input name="buyerAddress" defaultValue={sale.buyerAddress ?? ""} /></label>
 
-        {standalone ? (
+        {sale.packageMode ? (
+          <small className="formHint">Transaksi paket: garansi dan serial number dicatat per komponen di baris item, jadi tidak diubah dari form ini.</small>
+        ) : standalone ? (
           <>
             <div className="numberGrid">
               <label>Garansi hardware<input name="warrantyHardwareAmount" type="number" min="0" defaultValue={hardwareWarranty.amount ?? ""} /></label>
