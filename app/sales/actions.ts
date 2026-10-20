@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { entityId, formValues, nonNegativeInteger, optionalText, requiredText, z } from "@/lib/form-validation";
 import { inferLicenseType, inferLicenseVersion, licenseDisplayName } from "@/lib/licenses";
+import { PAYMENT_METHODS, clampMarketplaceFee, itemsMissingCost, marketplaceNameValue, paymentStatus } from "@/lib/sale-payments";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -298,6 +299,15 @@ export async function createSaleAction(formData: FormData) {
   if (standalone && (items.length === 0 || subtotal <= 0)) {
     redirect(`${errorPath}?error=item-wajib`);
   }
+  // Modal Rp 0 pada barang berharga jual > 0 membuat laba terhitung 100% (pernah terjadi pada PC
+  // rakitan & monitor). Kasir harus mengisi modalnya, atau mencentang konfirmasi kalau memang gratis.
+  const missingCost = itemsMissingCost(items);
+  if (missingCost.length > 0 && text(formData, "confirmZeroCost") !== "on") {
+    const detail = encodeURIComponent(missingCost.map((item) => item.name).join(", ").slice(0, 200));
+    redirect(`${errorPath}?error=modal-kosong&detail=${detail}`);
+  }
+  const marketplaceName = marketplaceNameValue(text(formData, "marketplaceName"));
+  const marketplaceFee = marketplaceName ? clampMarketplaceFee(numberValue(formData, "marketplaceFee"), subtotal) : 0;
   // "Cash"/"Transfer" berarti lunas seketika -- field dpAmount cuma relevan buat metode "DP"
   // (transaksi cicil/uang muka). Kasir diarahkan mengosongkan field itu untuk Cash/Transfer
   // (lihat hint "Isi kalau DP" di form), jadi kalau dipaksa dipakai apa adanya, sisa pembayaran
@@ -305,7 +315,8 @@ export async function createSaleAction(formData: FormData) {
   const dpAmount = paymentMethod === "DP" ? Math.min(Math.max(0, dpAmountInput), subtotal) : subtotal;
   const totalCost = items.reduce((sum, item) => sum + item.qty * item.unitCost, 0);
   const bundleHandlingCost = hasBundledBagAndMouse(items) ? 50000 : 0;
-  const grossProfit = subtotal - totalCost - bundleHandlingCost;
+  // Potongan admin marketplace dicatat sebagai biaya: mengurangi laba dan masuk ke harga modal nota.
+  const grossProfit = subtotal - totalCost - bundleHandlingCost - marketplaceFee;
   let saleId = "";
   const invoice = invoiceNumber();
 
@@ -317,10 +328,12 @@ export async function createSaleAction(formData: FormData) {
           invoiceNumber: invoice,
           location,
           soldPrice: subtotal,
-          costPrice: totalCost + bundleHandlingCost,
+          costPrice: totalCost + bundleHandlingCost + marketplaceFee,
           subtotal,
           dpAmount,
           grossProfit,
+          marketplaceName: marketplaceName || null,
+          marketplaceFee,
           paymentMethod,
           buyerName: buyerName || null,
           buyerPhone: buyerPhone || null,
@@ -331,6 +344,19 @@ export async function createSaleAction(formData: FormData) {
         }
       });
       saleId = sale.id;
+
+      if (dpAmount > 0) {
+        const payer = await tx.user.findFirst({ where: { username: currentUser.username }, select: { id: true } });
+        await tx.salePayment.create({
+          data: {
+            saleId: sale.id,
+            amount: dpAmount,
+            method: paymentMethod === "DP" ? "DP" : paymentMethod,
+            note: paymentMethod === "DP" ? "Uang muka saat transaksi" : "Pembayaran saat transaksi",
+            createdById: payer?.id ?? null
+          }
+        });
+      }
 
       await tx.saleItem.createMany({
         data: items.map((item) => ({
@@ -439,7 +465,14 @@ export async function updateSaleAction(saleId: string, formData: FormData) {
   const errorPath = `/sales/${saleId}/edit`;
   if (!entityId.safeParse(saleId).success) redirect(`${errorPath}?error=invalid-input`);
 
-  const sale = await prisma.sale.findUnique({ where: { id: saleId }, select: { id: true, unitId: true, subtotal: true, voidedAt: true, location: true } });
+  const sale = await prisma.sale.findUnique({
+    where: { id: saleId },
+    select: {
+      id: true, unitId: true, subtotal: true, dpAmount: true, voidedAt: true, location: true,
+      grossProfit: true, costPrice: true, marketplaceFee: true, marketplaceName: true,
+      _count: { select: { payments: true } }
+    }
+  });
   if (!sale) redirect("/sales?error=transaksi-tidak-ditemukan");
   if (sale.voidedAt) redirect(`/sales/${saleId}/receipt?error=transaksi-dibatalkan`);
 
@@ -458,7 +491,19 @@ export async function updateSaleAction(saleId: string, formData: FormData) {
   const buyerPhone = text(formData, "buyerPhone");
   const buyerAddress = text(formData, "buyerAddress");
   const notes = text(formData, "notes");
-  const dpAmount = paymentMethod === "DP" ? Math.min(Math.max(0, numberValue(formData, "dpAmount")), sale.subtotal) : sale.subtotal;
+  // Kalau transaksi sudah punya riwayat pembayaran, total dibayar dikelola lewat riwayat itu
+  // (tambah/hapus pembayaran di nota), bukan diedit manual di sini.
+  const dpAmount = sale._count.payments > 0
+    ? sale.dpAmount
+    : paymentMethod === "DP" ? Math.min(Math.max(0, numberValue(formData, "dpAmount")), sale.subtotal) : sale.subtotal;
+  // Potongan marketplace memengaruhi laba, jadi cuma admin yang boleh mengubahnya (sama seperti lokasi).
+  // Halaman edit lama (belum di-refresh) tidak mengirim field ini -> jangan sampai menghapus potongan yang ada.
+  const canEditMarketplace = currentUser.role === "admin" && formData.has("marketplaceName");
+  const marketplaceName = canEditMarketplace ? marketplaceNameValue(text(formData, "marketplaceName")) : (sale.marketplaceName ?? "");
+  const marketplaceFee = canEditMarketplace
+    ? (marketplaceName ? clampMarketplaceFee(numberValue(formData, "marketplaceFee"), sale.subtotal) : 0)
+    : sale.marketplaceFee;
+  const feeDelta = marketplaceFee - sale.marketplaceFee;
   const warrantySoftware = standalone ? "Tidak ada" : warrantyText(formData, "warrantySoftware", 3, "bulan");
   const warrantyHardware = standalone ? warrantyText(formData, "warrantyHardware", 3, "bulan", true) : warrantyText(formData, "warrantyHardware", 3, "minggu");
 
@@ -481,6 +526,10 @@ export async function updateSaleAction(saleId: string, formData: FormData) {
       buyerPhone: buyerPhone || null,
       buyerAddress: buyerAddress || null,
       dpAmount,
+      marketplaceName: marketplaceName || null,
+      marketplaceFee,
+      grossProfit: sale.grossProfit - feeDelta,
+      costPrice: sale.costPrice + feeDelta,
       warrantySoftware,
       warrantyHardware,
       notes: notes || null,
@@ -493,6 +542,7 @@ export async function updateSaleAction(saleId: string, formData: FormData) {
   revalidatePath(`/nota/${saleId}`);
   revalidatePath("/sales");
   revalidatePath("/sales/non-laptop");
+  revalidatePath("/sales/piutang");
   redirect(`/sales/${saleId}/receipt?success=updated`);
 }
 
@@ -585,4 +635,87 @@ export async function restoreSaleAction(saleId: string) {
   if (sale.unitId) revalidatePath(`/unit/${sale.unitId}`);
   revalidatePath(`/sales/${saleId}/receipt`);
   redirect("/sales?restored=1");
+}
+
+function paymentReturnPath(saleId: string, formData: FormData) {
+  return text(formData, "returnTo") === "piutang" ? "/sales/piutang" : `/sales/${saleId}/receipt`;
+}
+
+function withParam(path: string, key: string, value: string) {
+  return `${path}${path.includes("?") ? "&" : "?"}${key}=${encodeURIComponent(value)}`;
+}
+
+// Catat pembayaran lanjutan (pelunasan / cicilan) pada transaksi yang sama -- jangan bikin transaksi baru,
+// supaya omzet dan laba tidak terhitung dobel.
+export async function addSalePaymentAction(saleId: string, formData: FormData) {
+  const currentUser = await requireRole(["admin", "teknisi", "sales"]);
+  const backTo = paymentReturnPath(saleId, formData);
+  if (!entityId.safeParse(saleId).success) redirect(withParam(backTo, "error", "invalid-input"));
+
+  const amount = Math.round(numberValue(formData, "amount"));
+  const methodInput = text(formData, "method");
+  const method = (PAYMENT_METHODS as readonly string[]).includes(methodInput) ? methodInput : "Cash";
+  const note = text(formData, "note").slice(0, 300);
+  const paidAt = dateValue(text(formData, "paidAt")) ?? new Date();
+  if (!Number.isFinite(amount) || amount <= 0) redirect(withParam(backTo, "error", "jumlah-pembayaran-tidak-valid"));
+
+  const sale = await prisma.sale.findUnique({
+    where: { id: saleId },
+    select: { id: true, subtotal: true, dpAmount: true, paymentMethod: true, voidedAt: true, _count: { select: { payments: true } } }
+  });
+  if (!sale) redirect(withParam(backTo, "error", "transaksi-tidak-ditemukan"));
+  if (sale.voidedAt) redirect(withParam(backTo, "error", "transaksi-dibatalkan"));
+  // Transaksi lama Cash/Transfer tanpa DP dianggap sudah lunas (lihat isReceivable di lib/sale-payments).
+  const remaining = paymentStatus({ paymentMethod: sale.paymentMethod, subtotal: sale.subtotal, dpAmount: sale.dpAmount, paymentCount: sale._count.payments }).remaining;
+  if (remaining <= 0) redirect(withParam(backTo, "error", "sudah-lunas"));
+  if (amount > remaining) redirect(withParam(backTo, "error", "melebihi-sisa"));
+
+  const payer = await prisma.user.findFirst({ where: { username: currentUser.username }, select: { id: true } });
+  try {
+    await prisma.$transaction(async (tx) => {
+      // updateMany + syarat dpAmount lama = pengaman kalau dua orang menyimpan pembayaran bersamaan.
+      const updated = await tx.sale.updateMany({
+        where: { id: sale.id, voidedAt: null, dpAmount: sale.dpAmount },
+        data: { dpAmount: sale.dpAmount + amount }
+      });
+      if (updated.count === 0) throw new Error("pembayaran-bentrok");
+      await tx.salePayment.create({
+        data: { saleId: sale.id, amount, method, paidAt, note: note || null, createdById: payer?.id ?? null }
+      });
+    });
+  } catch {
+    redirect(withParam(backTo, "error", "pembayaran-gagal-coba-lagi"));
+  }
+
+  revalidatePath(`/sales/${saleId}/receipt`);
+  revalidatePath(`/nota/${saleId}`);
+  revalidatePath("/sales");
+  revalidatePath("/sales/piutang");
+  revalidatePath("/finance");
+  redirect(withParam(backTo, "success", "payment-added"));
+}
+
+// Hapus pembayaran yang salah catat (admin saja). Total dibayar otomatis dikurangi.
+export async function deleteSalePaymentAction(paymentId: string, formData: FormData) {
+  await requireRole(["admin"]);
+  if (!entityId.safeParse(paymentId).success) redirect("/sales?error=invalid-input");
+
+  const payment = await prisma.salePayment.findUnique({ where: { id: paymentId }, select: { id: true, saleId: true, amount: true } });
+  if (!payment) redirect("/sales?error=transaksi-tidak-ditemukan");
+  const backTo = paymentReturnPath(payment.saleId, formData);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.salePayment.delete({ where: { id: payment.id } });
+    const sale = await tx.sale.findUnique({ where: { id: payment.saleId }, select: { dpAmount: true } });
+    if (sale) {
+      await tx.sale.update({ where: { id: payment.saleId }, data: { dpAmount: Math.max(0, sale.dpAmount - payment.amount) } });
+    }
+  });
+
+  revalidatePath(`/sales/${payment.saleId}/receipt`);
+  revalidatePath(`/nota/${payment.saleId}`);
+  revalidatePath("/sales");
+  revalidatePath("/sales/piutang");
+  revalidatePath("/finance");
+  redirect(withParam(backTo, "success", "payment-removed"));
 }

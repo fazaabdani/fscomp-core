@@ -7,11 +7,12 @@ import { requireRole } from "@/lib/session";
 import { restoreSaleAction, voidSaleAction } from "../../actions";
 import { RestoreSaleButton } from "../../RestoreSaleButton";
 import { VoidSaleButton } from "../../VoidSaleButton";
+import { PaymentPanel } from "./PaymentPanel";
 import { PrintReceiptButton } from "./PrintReceiptButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function SaleReceiptPage({ params, searchParams }: { params: { id: string }; searchParams?: { duplicate?: string; success?: string } }) {
+export default async function SaleReceiptPage({ params, searchParams }: { params: { id: string }; searchParams?: { duplicate?: string; success?: string; error?: string } }) {
   const currentUser = await requireRole(["admin", "teknisi", "sales"]);
   const sale = await getSaleReceipt(params.id);
   if (!sale) notFound();
@@ -42,6 +43,15 @@ export default async function SaleReceiptPage({ params, searchParams }: { params
     "Kalau ada kendala atau ingin konsultasi, silakan langsung hubungi kami nggih.",
     `Terima kasih sudah percaya belanja di ${storeShortName}.`
   ].join("\n");
+  const paymentErrors: Record<string, string> = {
+    "jumlah-pembayaran-tidak-valid": "Jumlah pembayaran harus lebih dari nol.",
+    "melebihi-sisa": "Jumlah pembayaran melebihi sisa tagihan.",
+    "sudah-lunas": "Transaksi ini sudah lunas.",
+    "transaksi-dibatalkan": "Transaksi ini sudah dibatalkan.",
+    "pembayaran-gagal-coba-lagi": "Pembayaran gagal disimpan. Muat ulang halaman (bisa jadi baru saja dicatat orang lain) lalu coba lagi."
+  };
+  const paymentError = searchParams?.error ? (paymentErrors[searchParams.error] ?? `Gagal: ${searchParams.error}`) : "";
+  const outstanding = sale.remainingPayment;
   const waHref = buyerWa.length >= 10
     ? `https://wa.me/${buyerWa}?text=${encodeURIComponent(waText)}`
     : `https://wa.me/?text=${encodeURIComponent(waText)}`;
@@ -53,6 +63,16 @@ export default async function SaleReceiptPage({ params, searchParams }: { params
       ) : null}
       {searchParams?.success === "updated" ? (
         <div className="infoBox printHidden">Nota berhasil diperbarui.</div>
+      ) : null}
+      {searchParams?.success === "payment-added" ? (
+        <div className="infoBox printHidden">Pembayaran dicatat.</div>
+      ) : null}
+      {searchParams?.success === "payment-removed" ? (
+        <div className="infoBox printHidden">Pembayaran dihapus dan total dibayar disesuaikan.</div>
+      ) : null}
+      {paymentError ? <div className="infoBox dangerInfo printHidden">{paymentError}</div> : null}
+      {!sale.voidedAt && outstanding > 0 ? (
+        <div className="infoBox printHidden">Belum lunas, sisa <strong>Rp {outstanding.toLocaleString("id-ID")}</strong>. Catat pelunasan di panel <a href="#pembayaran">Pembayaran</a> di bawah nota, jangan buat transaksi baru.</div>
       ) : null}
       {sale.lastEditedByName ? (
         <div className="infoBox printHidden">Terakhir diedit oleh <strong>{sale.lastEditedByName}</strong> pada {sale.lastEditedAt}.</div>
@@ -82,6 +102,8 @@ export default async function SaleReceiptPage({ params, searchParams }: { params
       </div>
 
       <ReceiptDocument sale={sale} publicReceiptUrl={publicReceiptUrl} />
+
+      <PaymentPanel sale={sale} isAdmin={currentUser.role === "admin"} />
     </section>
   );
 }

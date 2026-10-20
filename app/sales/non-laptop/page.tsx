@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Boxes, Receipt, ShoppingBag } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { MARKETPLACES } from "@/lib/sale-payments";
 import { formatRupiah } from "@/lib/api";
 import { jakartaDateKey } from "@/lib/inventory";
 import { SubmitButton } from "../../SubmitButton";
@@ -19,7 +20,7 @@ const itemRows = [
 
 const SOLD_ITEMS_LIMIT = 150;
 
-export default async function NonLaptopCashierPage({ searchParams }: { searchParams?: { error?: string } }) {
+export default async function NonLaptopCashierPage({ searchParams }: { searchParams?: { error?: string; detail?: string } }) {
   await requireRole(["admin", "teknisi", "sales"]);
   const [stockItems, soldItems, soldItemsTotalCount] = await Promise.all([
     prisma.inventoryItem.findMany({
@@ -40,9 +41,11 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
     ? "Isi minimal satu item dengan qty dan harga jual lebih dari nol."
     : searchParams?.error === "inventaris-sudah-terjual"
       ? "Salah satu barang inventaris yang dipilih ternyata sudah terjual duluan. Periksa ulang pilihan barang."
-      : searchParams?.error
-        ? `Transaksi gagal: ${searchParams.error}`
-        : "";
+      : searchParams?.error === "modal-kosong"
+        ? `Modal belum diisi untuk: ${searchParams.detail ?? "item berbayar"}. Isi kolom Modal/pcs (atau tautkan ke inventaris yang sudah punya harga modal), atau centang "Modal memang Rp 0" kalau barangnya gratis.`
+        : searchParams?.error
+          ? `Transaksi gagal: ${searchParams.error}`
+          : "";
 
   return <section className="pageStack">
     <div className="sectionTitle">
@@ -75,7 +78,14 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
         <label>Metode bayar
           <select name="paymentMethod" defaultValue="Cash"><option>Cash</option><option>Transfer</option><option>DP</option></select>
         </label>
-        <label>DP / uang masuk<input name="dpAmount" type="number" inputMode="numeric" min="0" step="1000" placeholder="Isi kalau DP" /></label>
+        <label>DP / uang masuk<input name="dpAmount" type="number" inputMode="numeric" min="0" step="1000" placeholder="Isi kalau DP" /><small className="formHint">Pelunasan DP dicatat di nota nanti, bukan transaksi baru.</small></label>
+        <label>Channel penjualan
+          <select name="marketplaceName" defaultValue="">
+            <option value="">Langsung (toko)</option>
+            {MARKETPLACES.map((marketplace) => <option key={marketplace}>{marketplace}</option>)}
+          </select>
+        </label>
+        <label>Potongan admin marketplace (Rp)<input name="marketplaceFee" type="number" inputMode="numeric" min="0" step="1000" placeholder="Isi kalau jual lewat marketplace" /></label>
         <label>Nama pembeli<input name="buyerName" placeholder="Nama pembeli" /></label>
         <label>No. WhatsApp pembeli<input name="buyerPhone" placeholder="08xxxxxxxxxx" /></label>
         <label>Alamat pembeli<input name="buyerAddress" placeholder="Alamat pembeli untuk nota" /></label>
@@ -83,7 +93,7 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
 
       <div className="panelSubsection cashierItems">
         <div><p className="eyebrow">Daftar Item</p><h3>Barang atau layanan yang dijual</h3></div>
-        <div className="cashierItemHeader"><span>Item</span><span>Stok inventaris</span><span>Kategori</span><span>Qty</span><span>Jual/pcs</span><span>Modal/pcs</span></div>
+        <div className="cashierItemHeader"><span>Item</span><span>Stok inventaris</span><span>Kategori</span><span>Qty</span><span>Jual/pcs</span><span>Modal/pcs (wajib)</span></div>
         {itemRows.map((item, index) => <div className="cashierItemRow" key={`${item.category}-${index}`}>
           <input name="itemName" defaultValue={item.name} placeholder="Nama barang/layanan" data-item-name={index} />
           <select name="itemInventoryId" defaultValue="" aria-label={`Tautkan ke barang inventaris untuk item ${index + 1}`} data-item-inventory={index}>
@@ -102,7 +112,8 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
           <input name="itemPrice" type="number" inputMode="numeric" min="0" step="1000" defaultValue={0} aria-label={`Harga jual item ${index + 1}`} />
           <input name="itemCost" type="number" inputMode="numeric" min="0" step="1000" defaultValue={0} aria-label={`Modal item ${index + 1}`} data-item-cost={index} />
         </div>)}
-        <small className="formHint">Item dengan qty 0 tidak ikut nota. Kalau ditautkan ke barang inventaris, qty otomatis dianggap 1, nama dan modal terisi otomatis dari data inventaris, dan barang itu ditandai terjual. Untuk transaksi lisensi, isi jenis dan detail aktivasi di bagian bawah.</small>
+        <small className="formHint">Item dengan qty 0 tidak ikut nota. Kalau ditautkan ke barang inventaris, qty otomatis dianggap 1, nama dan modal terisi otomatis dari data inventaris, dan barang itu ditandai terjual. Untuk transaksi lisensi, isi jenis dan detail aktivasi di bagian bawah. Item berharga jual wajib punya modal (kecuali kategori Jasa).</small>
+        <label className="checkTile"><input type="checkbox" name="confirmZeroCost" /> Modal item memang Rp 0 (gratis / tanpa modal)</label>
       </div>
 
       <div className="cashierBottomGrid">

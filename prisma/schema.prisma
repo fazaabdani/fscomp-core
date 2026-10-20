@@ -180,6 +180,7 @@ model User {
   saleEdits      Sale[]
   appSettingEdits AppSetting[]
   testimonials    Testimonial[]
+  salePayments    SalePayment[]
 }
 
 model Attendance {
@@ -688,6 +689,8 @@ model Sale {
   warrantySoftware String    @default("3 bulan")
   warrantyHardware String    @default("3 minggu")
   soldAt        DateTime     @default(now())
+  marketplaceName String?
+  marketplaceFee  Int        @default(0)
   voidedAt      DateTime?
   voidReason    String?
   notes         String?
@@ -699,7 +702,26 @@ model Sale {
   unit          Unit?        @relation(fields: [unitId], references: [id])
   lastEditedBy  User?        @relation(fields: [lastEditedById], references: [id])
   items         SaleItem[]
+  payments      SalePayment[]
   licenseRecords LicenseRecord[]
+}
+
+// Riwayat pembayaran per transaksi (DP, pelunasan, transfer). Sale.dpAmount tetap menyimpan TOTAL
+// yang sudah masuk (dipakai nota & laporan), diperbarui tiap pembayaran ditambah/dihapus.
+model SalePayment {
+  id          String   @id @default(cuid())
+  saleId      String
+  amount      Int
+  method      String
+  paidAt      DateTime @default(now())
+  note        String?
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+
+  @@index([saleId])
 }
 
 model LicenseRecord {

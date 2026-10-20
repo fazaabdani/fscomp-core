@@ -41,12 +41,12 @@ export async function getSalesPageData() {
       return Boolean(latestDaily && latestDaily.masihLolos !== "TIDAK_LOLOS");
     });
 
-    let sales: Array<Prisma.SaleGetPayload<{ include: { unit: true; items: true } }>> = [];
+    let sales: Array<Prisma.SaleGetPayload<{ include: { unit: true; items: true; _count: { select: { payments: true } } } }>> = [];
     let salesReady = true;
 
     try {
       sales = await prisma.sale.findMany({
-        include: { unit: true, items: true },
+        include: { unit: true, items: true, _count: { select: { payments: true } } },
         orderBy: { soldAt: "desc" },
         take: 200
       });
@@ -84,6 +84,11 @@ export async function getSalesPageData() {
         soldPrice: sale.soldPrice,
         costPrice: sale.costPrice,
         grossProfit: sale.grossProfit,
+        subtotal: sale.subtotal,
+        dpAmount: sale.dpAmount,
+        paymentCount: sale._count.payments,
+        marketplaceName: sale.marketplaceName ?? "",
+        marketplaceFee: sale.marketplaceFee,
         paymentMethod: sale.paymentMethod,
         buyerName: sale.buyerName ?? "-",
         itemCount: sale.items.reduce((sum, item) => sum + item.qty, 0),

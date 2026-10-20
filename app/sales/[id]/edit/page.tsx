@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { MARKETPLACES } from "@/lib/sale-payments";
 import { updateSaleAction } from "../../actions";
 import { FlashNotice } from "@/app/FlashNotice";
 
@@ -33,6 +34,9 @@ export default async function EditSalePage({ params, searchParams }: { params: {
       warrantySoftware: true,
       warrantyHardware: true,
       notes: true,
+      marketplaceName: true,
+      marketplaceFee: true,
+      _count: { select: { payments: true } },
       unit: { select: { nomorUnit: true, model: true } }
     }
   });
@@ -78,8 +82,26 @@ export default async function EditSalePage({ params, searchParams }: { params: {
               <option>Cash</option><option>Transfer</option><option>DP</option>
             </select>
           </label>
-          <label>DP / uang masuk<input name="dpAmount" type="number" inputMode="numeric" min="0" step="1000" defaultValue={sale.dpAmount} /></label>
+          <label>DP / uang masuk
+            <input name="dpAmount" type="number" inputMode="numeric" min="0" step="1000" defaultValue={sale.dpAmount} readOnly={sale._count.payments > 0} />
+            {sale._count.payments > 0 ? <small className="formHint">Sudah ada riwayat pembayaran. Tambah atau hapus pembayaran lewat panel Pembayaran di halaman nota.</small> : null}
+          </label>
         </div>
+
+        {currentUser.role === "admin" ? (
+          <div className="numberGrid">
+            <label>Channel penjualan
+              <select name="marketplaceName" defaultValue={sale.marketplaceName ?? ""}>
+                <option value="">Langsung (toko)</option>
+                {MARKETPLACES.map((marketplace) => <option key={marketplace}>{marketplace}</option>)}
+              </select>
+            </label>
+            <label>Potongan admin marketplace (Rp)
+              <input name="marketplaceFee" type="number" inputMode="numeric" min="0" step="1000" defaultValue={sale.marketplaceFee} />
+              <small className="formHint">Mengurangi laba otomatis. Cuma admin yang bisa mengubahnya.</small>
+            </label>
+          </div>
+        ) : null}
 
         <div className="numberGrid">
           <label>Nama pembeli<input name="buyerName" defaultValue={sale.buyerName ?? ""} /></label>

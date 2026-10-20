@@ -3,6 +3,7 @@ import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
 import { getSalesPageData } from "@/lib/sales-page-data";
 import { requireRole } from "@/lib/session";
+import { MARKETPLACES, paymentStatus } from "@/lib/sale-payments";
 import { SubmitButton } from "../SubmitButton";
 import { createSaleAction, restoreSaleAction, voidSaleAction } from "./actions";
 import { RestoreSaleButton } from "./RestoreSaleButton";
@@ -22,7 +23,7 @@ function salesHref(params: Record<string, string>) {
   return text ? `/sales?${text}` : "/sales";
 }
 
-export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string; restored?: string; sort?: string; q?: string; lokasi?: string; status?: string } }) {
+export default async function SalesPage({ searchParams }: { searchParams?: { saved?: string; error?: string; voided?: string; restored?: string; sort?: string; q?: string; lokasi?: string; status?: string; detail?: string } }) {
   const currentUser = await requireRole(["admin", "teknisi", "sales"]);
   const { readyUnits, sales, stats, salesReady, blockedByDailyQc } = await getSalesPageData();
   const sort = searchParams?.sort ?? "terbaru";
@@ -63,9 +64,11 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
       ? "Transaksi dibatalkan. Unit kembali ke stok siap jual."
       : searchParams?.restored
         ? "Transaksi aktif kembali dan unit ditandai terjual."
-        : searchParams?.error
-          ? `Transaksi gagal: ${searchParams.error}`
-          : "";
+        : searchParams?.error === "modal-kosong"
+          ? `Modal belum diisi untuk: ${searchParams.detail ?? "item berbayar"}. Isi kolom Modal/pcs, atau centang "Modal memang Rp 0" kalau barangnya gratis.`
+          : searchParams?.error
+            ? `Transaksi gagal: ${searchParams.error}`
+            : "";
 
   return (
     <section className="pageStack">
@@ -136,7 +139,10 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
             <p className="eyebrow">Kasir</p>
             <h2>Catat laptop terjual</h2>
           </div>
-          <Link className="secondaryButton" href="/sales/non-laptop">Kasir Non-Laptop</Link>
+          <div className="buttonRow noMargin">
+            <Link className="secondaryButton" href="/sales/non-laptop">Kasir Non-Laptop</Link>
+            {currentUser.role === "admin" ? <Link className="secondaryButton" href="/sales/piutang">Piutang</Link> : null}
+          </div>
         </div>
         <FlashNotice message={flashMessage} tone={searchParams?.error ? "error" : "success"} queryKeys={["saved", "voided", "restored", "error"]} />
 
@@ -153,6 +159,18 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
           <label>
             DP / uang masuk
             <input name="dpAmount" type="number" inputMode="numeric" min="0" step="1000" placeholder="Isi kalau DP" />
+            <small className="formHint">Pelunasan DP dicatat di nota nanti, bukan transaksi baru.</small>
+          </label>
+          <label>
+            Channel penjualan
+            <select name="marketplaceName" defaultValue="">
+              <option value="">Langsung (toko)</option>
+              {MARKETPLACES.map((marketplace) => <option key={marketplace}>{marketplace}</option>)}
+            </select>
+          </label>
+          <label>
+            Potongan admin marketplace (Rp)
+            <input name="marketplaceFee" type="number" inputMode="numeric" min="0" step="1000" placeholder="Isi kalau jual lewat marketplace" />
           </label>
           <label>
             Nama pembeli
@@ -195,7 +213,8 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
                 <input aria-label={`${item.name} modal`} name="itemCost" type="number" inputMode="numeric" min="0" step="1000" defaultValue={item.cost} />
               </div>
             ))}
-            <small className="formHint">Qty 0 = item tidak ikut. Nominal ditulis angka rupiah tanpa titik, contoh 4100000.</small>
+            <small className="formHint">Qty 0 = item tidak ikut. Nominal ditulis angka rupiah tanpa titik, contoh 4100000. Item berharga jual wajib punya modal.</small>
+            <label className="checkTile"><input type="checkbox" name="confirmZeroCost" /> Modal item tambahan memang Rp 0 (gratis)</label>
           </div>
           <div className="cashierSide">
             <div className="receiptWarranty">
@@ -300,12 +319,21 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
               <div>
                 <Link href={`/sales/${sale.id}/receipt`}><strong>Unit {sale.nomorUnit} - {sale.model}</strong></Link>
                 <small>{sale.soldAt} / {sale.location} / {sale.paymentMethod} / {sale.buyerName} / {sale.itemCount} item {sale.voidedAt ? `/ BATAL: ${sale.voidReason}` : ""}</small>
+                {!sale.voidedAt ? (
+                  <small>
+                    {paymentStatus(sale).settled ? "Lunas" : `Dibayar ${formatRupiah(sale.dpAmount)}, sisa ${formatRupiah(paymentStatus(sale).remaining)}`}
+                    {currentUser.role === "admin" ? ` / Laba ${formatRupiah(sale.grossProfit)}` : ""}
+                    {currentUser.role === "admin" && sale.marketplaceFee > 0 ? ` / Potongan ${sale.marketplaceName || "admin"} ${formatRupiah(sale.marketplaceFee)}` : ""}
+                  </small>
+                ) : null}
               </div>
               <b>{formatRupiah(sale.soldPrice)}</b>
               {sale.voidedAt ? (
                 <span className="statusPill red">Batal</span>
+              ) : paymentStatus(sale).settled ? (
+                <span className="statusPill green">Lunas</span>
               ) : (
-                <span className="statusPill green">Aktif</span>
+                <span className="statusPill yellow">Belum lunas</span>
               )}
               <Link className="secondaryButton compactButton" href={`/sales/${sale.id}/receipt`}>Nota / Cetak ulang</Link>
               {currentUser.role === "admin" && !sale.voidedAt ? (

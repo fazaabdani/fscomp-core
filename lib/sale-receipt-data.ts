@@ -1,5 +1,6 @@
 import { jakartaDateKey } from "./inventory";
 import { prisma } from "./prisma";
+import { paymentStatus } from "./sale-payments";
 
 const storeByLocation = {
   WIRADESA: {
@@ -25,6 +26,7 @@ export async function getSaleReceipt(id: string) {
       include: {
         unit: true,
         items: { orderBy: { createdAt: "asc" } },
+        payments: { orderBy: [{ paidAt: "asc" }, { createdAt: "asc" }], include: { createdBy: { select: { name: true } } } },
         lastEditedBy: { select: { name: true } }
       }
     });
@@ -46,9 +48,19 @@ export async function getSaleReceipt(id: string) {
       warrantyHardware: sale.warrantyHardware,
       subtotal: sale.subtotal,
       dpAmount: sale.dpAmount,
-      remainingPayment: Math.max(0, sale.subtotal - sale.dpAmount),
+      remainingPayment: paymentStatus({ paymentMethod: sale.paymentMethod, subtotal: sale.subtotal, dpAmount: sale.dpAmount, paymentCount: sale.payments.length }).remaining,
       costPrice: sale.costPrice,
       grossProfit: sale.grossProfit,
+      marketplaceName: sale.marketplaceName ?? "",
+      marketplaceFee: sale.marketplaceFee,
+      payments: sale.payments.map((payment) => ({
+        id: payment.id,
+        amount: payment.amount,
+        method: payment.method,
+        paidAt: jakartaDateKey(payment.paidAt),
+        note: payment.note ?? "",
+        byName: payment.createdBy?.name ?? ""
+      })),
       voidedAt: sale.voidedAt ? jakartaDateKey(sale.voidedAt) : "",
       voidReason: sale.voidReason ?? "",
       notes: sale.notes ?? "-",

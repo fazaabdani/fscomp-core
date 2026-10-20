@@ -57,7 +57,7 @@ export function ReceiptDocument({ sale, publicReceiptUrl }: { sale: SaleReceipt;
         <div>
           <Eyebrow>PEMBAYARAN</Eyebrow>
           <strong>{sale.paymentMethod}</strong>
-          {sale.dpAmount > 0 ? <small>DP masuk {formatRupiah(sale.dpAmount)}</small> : null}
+          {sale.dpAmount > 0 && sale.remainingPayment > 0 ? <small>DP masuk {formatRupiah(sale.dpAmount)}</small> : null}
           <small>{sale.remainingPayment > 0 ? `Sisa ${formatRupiah(sale.remainingPayment)}` : "Lunas"}</small>
         </div>
         <div>
