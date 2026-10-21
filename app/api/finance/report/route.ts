@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { csvCell } from "@/lib/csv";
-import { saleProfitSplit } from "@/lib/finance-page-data";
+import { saleProfitSplit } from "@/lib/profit-split";
 import { jakartaDateKey } from "@/lib/inventory";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";

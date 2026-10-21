@@ -1,22 +1,8 @@
 import type { Prisma } from "@prisma/client";
 import { jakartaDateKey } from "./inventory";
 import { prisma } from "./prisma";
+import { saleProfitSplit } from "./profit-split";
 import { displayUnitNumber } from "./unit-number";
-
-function saleProfitSplit(location: string, grossProfit: number) {
-  if (location !== "KAJEN") {
-    return {
-      wiradesaShare: grossProfit,
-      kajenShare: 0
-    };
-  }
-
-  const wiradesaShare = Math.round(grossProfit * 0.6);
-  return {
-    wiradesaShare,
-    kajenShare: grossProfit - wiradesaShare
-  };
-}
 
 export async function getSalesPageData() {
   try {

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { entityId, formValues, nonNegativeInteger, optionalText, requiredText, z } from "@/lib/form-validation";
 import { inferLicenseType, inferLicenseVersion, licenseDisplayName } from "@/lib/licenses";
+import { saleProfitSplit } from "@/lib/profit-split";
 import { PACKAGE_CATEGORY, buildPackageLines, cleanLineText, componentsMissingCost, warrantyLabel } from "@/lib/pc-package";
 import { PAYMENT_METHODS, clampMarketplaceFee, itemsMissingCost, marketplaceNameValue, paymentStatus } from "@/lib/sale-payments";
 
@@ -88,20 +89,6 @@ function invoiceNumber() {
   return `FS-${date}-${time}-${suffix}`;
 }
 
-function profitSplit(location: SaleLocation, grossProfit: number) {
-  if (location !== "KAJEN") {
-    return {
-      wiradesaShare: grossProfit,
-      kajenShare: 0
-    };
-  }
-
-  return {
-    wiradesaShare: Math.round(grossProfit * 0.6),
-    kajenShare: grossProfit - Math.round(grossProfit * 0.6)
-  };
-}
-
 function buildCustomerThanksMessage(receiptUrl: string, location: SaleLocation, includesLaptop: boolean) {
   const storeName = location === "KAJEN" ? "FSID" : "FS Comp";
   if (!includesLaptop) {
@@ -158,7 +145,7 @@ async function notifySaleToN8n(payload: {
   const webhookUrl = process.env.N8N_SALES_WEBHOOK_URL;
   const publicUrl = process.env.CORE_PUBLIC_URL ?? "https://core.fscomp.id";
   if (!webhookUrl) return;
-  const split = profitSplit(payload.location, payload.grossProfit);
+  const split = saleProfitSplit(payload.location, payload.grossProfit);
 
   try {
     await fetch(webhookUrl, {

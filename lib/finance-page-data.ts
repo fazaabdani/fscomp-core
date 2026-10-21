@@ -1,27 +1,10 @@
 import { jakartaDateKey } from "./inventory";
 import { prisma } from "./prisma";
+import { saleProfitSplit } from "./profit-split";
 import { displayUnitNumber } from "./unit-number";
 
-/**
- * Aturan bagi hasil FS Comp: unit yang TERJUAL DI KAJEN, profitnya dibagi
- * 60% ke Wiradesa dan 40% ke Kajen. Unit yang terjual di Wiradesa, 100%
- * masuk Wiradesa (tidak dibagi). Satu-satunya sumber aturan ini -- dipakai
- * juga oleh app/api/finance/report/route.ts, jangan duplikat di tempat lain.
- */
-export function saleProfitSplit(location: string, grossProfit: number) {
-  if (location !== "KAJEN") {
-    return {
-      wiradesaShare: grossProfit,
-      kajenShare: 0
-    };
-  }
-
-  const wiradesaShare = Math.round(grossProfit * 0.6);
-  return {
-    wiradesaShare,
-    kajenShare: grossProfit - wiradesaShare
-  };
-}
+// Aturan bagi hasil (60% Wiradesa / 40% Kajen untuk penjualan di Kajen) ada di lib/profit-split.ts.
+export { saleProfitSplit };
 
 type FinanceFilters = {
   from?: string;
