@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createRateLimiter, sanitizeEvent } from "@/lib/catalog-analytics";
+import { INTERNAL_COOKIE } from "@/lib/internal-traffic";
 import { prisma } from "@/lib/prisma";
 import { SESSION_COOKIE_NAME } from "@/lib/session-token";
 
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
     if (body.length > MAX_BODY) return done();
     const event = sanitizeEvent(JSON.parse(body), {
       userAgent: request.headers.get("user-agent"),
-      hasStaffSession: Boolean(request.cookies.get(SESSION_COOKIE_NAME)?.value)
+      hasStaffSession: Boolean(request.cookies.get(SESSION_COOKIE_NAME)?.value) || request.cookies.get(INTERNAL_COOKIE)?.value === "1"
     });
     if (!event) return done();
     if (!overall("all") || !perVisitor(event.visitorId)) return done();

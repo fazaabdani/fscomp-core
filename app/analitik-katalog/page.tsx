@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ArrowLeft, BarChart3, Eye, Lightbulb, MessageCircle, Search, Users } from "lucide-react";
 import { formatRupiah } from "@/lib/api";
 import { getCatalogAnalytics, parsePeriod, PERIOD_OPTIONS } from "@/lib/catalog-analytics-data";
+import { INTERNAL_COOKIE } from "@/lib/internal-traffic";
 import { requireRole } from "@/lib/session";
 import "./analitik.css";
 
@@ -27,6 +29,7 @@ export default async function CatalogAnalyticsPage({ searchParams }: { searchPar
   await requireRole(["admin"]);
   const days = parsePeriod(searchParams?.hari);
   const data = await getCatalogAnalytics(days);
+  const deviceInternal = cookies().get(INTERNAL_COOKIE)?.value === "1";
   const t = data.totals;
   const hasData = data.eventCount > 0 && t.sessions > 0;
 
@@ -70,6 +73,21 @@ export default async function CatalogAnalyticsPage({ searchParams }: { searchPar
         ))}
         <small>{data.dataSince ? `Data tercatat sejak ${wib(data.dataSince)}` : "Belum ada data tercatat"}</small>
       </div>
+
+      <section className="panel analitikInternal">
+        <div className="panelHeader"><div><p className="eyebrow">Lalu lintas internal</p><h2>Jangan hitung kunjungan tim sendiri</h2></div></div>
+        <p className="bodyText">
+          Staf yang sedang login otomatis tidak dihitung. Untuk <strong>HP atau laptop tim yang membuka katalog tanpa login</strong>, buka tautan di bawah sekali di tiap perangkat. Setelah itu perangkat tersebut tidak dihitung di Google Analytics, Meta Pixel, maupun halaman ini (berlaku ±1 tahun).
+        </p>
+        <p className="bodyText">
+          Perangkat yang sedang Anda pakai: {deviceInternal ? <span className="statusPill green">ditandai internal</span> : <span className="statusPill yellow">belum ditandai</span>}
+        </p>
+        <div className="buttonRow noMargin">
+          <a className="secondaryButton" href="/api/internal-traffic?set=on">Tandai perangkat ini internal</a>
+          <a className="secondaryButton" href="/api/internal-traffic?set=off">Lepas penanda</a>
+        </div>
+        <small className="formHint">Bagikan ke tim: <code>https://core.fscomp.id/api/internal-traffic?set=on</code></small>
+      </section>
 
       {!hasData ? (
         <div className="infoBox">Belum ada kunjungan publik tercatat pada periode ini. Pencatatan baru berjalan setelah fitur ini di-deploy; kunjungan Anda sendiri saat login tidak dihitung, jadi uji dengan jendela incognito.</div>

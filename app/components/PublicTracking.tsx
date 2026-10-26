@@ -1,5 +1,6 @@
 import Script from "next/script";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { INTERNAL_COOKIE, isInternalTraffic } from "@/lib/internal-traffic";
 import { SESSION_COOKIE_NAME } from "@/lib/session-token";
 import { TrackingEvents } from "./TrackingEvents";
 
@@ -9,8 +10,10 @@ const META_PIXEL_ID = "1026284083787634";
 
 // Hanya dipasang di halaman publik (katalog & detail unit), dan dilewati untuk staf yang sedang login
 // supaya kunjungan internal tidak mengotori data pelanggan dan URL halaman internal tidak terkirim ke Google/Meta.
+// Dilewati juga untuk perangkat yang ditandai internal (/api/internal-traffic?set=on) dan untuk lingkungan lokal/uji.
 export function PublicTracking() {
   if (cookies().get(SESSION_COOKIE_NAME)?.value) return null;
+  if (isInternalTraffic(cookies().get(INTERNAL_COOKIE)?.value, headers().get("host"))) return null;
 
   return (
     <>
