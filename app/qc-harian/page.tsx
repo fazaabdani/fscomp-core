@@ -6,7 +6,6 @@ import { requireRole } from "@/lib/session";
 import { createDailyQcAction } from "./actions";
 import { QcUnitSelect } from "./QcUnitSelect";
 import { StockLocationField } from "./StockLocationField";
-import { AutoRefresh } from "../AutoRefresh";
 
 const checklist = [
   { label: "Keyboard", name: "keyboard", icon: Keyboard },
@@ -28,7 +27,10 @@ export default async function QcHarianPage({ searchParams }: { searchParams?: { 
 
   return (
     <section className="pageStack">
-      <AutoRefresh />
+      {/* Sengaja TANPA <AutoRefresh />: ini halaman isian yang lama dikerjakan per unit. router.refresh()
+          berkala bisa menimpa isian yang belum disimpan (nilai default ikut data terbaru unit) dan,
+          kalau kebetulan ada deploy baru di tengah pengisian, memaksa browser reload penuh sehingga
+          seluruh isian hilang. Dashboard (read-only) tetap boleh auto-refresh. */}
       <div className="sectionTitle">
         <div>
           <p className="eyebrow">QC Harian</p>

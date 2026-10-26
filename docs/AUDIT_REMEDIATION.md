@@ -18,7 +18,7 @@
 - Pesan batch, sales, inventaris, dan lisensi memakai flash notice serta membersihkan query status.
 - Inter, breakpoint HP kecil, focus-visible, danger button, loading, error boundary, robots, dan sitemap ditambahkan.
 - AI log dikelompokkan per unit dan halaman label memiliki shortcut unit berikutnya.
-- Dashboard dan QC refresh otomatis setiap lima menit saat tab aktif.
+- Dashboard refresh otomatis setiap lima menit saat tab aktif (halaman QC harian TIDAK, sejak 26 Okt 2026 — refresh berkala menimpa isian yang belum disimpan).
 - Sort unit batch berjalan client-side tanpa reload halaman.
 - Input server utama divalidasi dengan Zod.
 - Partikel latar dikurangi pada perangkat mobile.
