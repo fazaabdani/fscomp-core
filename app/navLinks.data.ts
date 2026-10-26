@@ -36,6 +36,7 @@ export function getNavEntries(currentUser: NavUser): NavEntry[] {
     { href: "/sales/non-laptop", label: "Kasir Non-Laptop", show: !isMagang },
     { href: "/sales/archive", label: "Arsip Penjualan", show: currentUser.role === "admin" },
     { href: "/sales/piutang", label: "Piutang", show: currentUser.role === "admin" },
+    { href: "/analitik-katalog", label: "Analitik Katalog", show: currentUser.role === "admin" },
     { href: "/rakit-pc", label: "Rakit PC", show: canSeeLicense },
     { href: "/licenses", label: "Lisensi", show: canSeeLicense },
     { href: "/wa-ai", label: "AI WhatsApp", show: canSeeLicense },

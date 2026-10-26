@@ -808,3 +808,27 @@ model CatalogSync {
 
   unit        Unit              @relation(fields: [unitId], references: [id])
 }
+
+// Analitik katalog first-party: kunjungan, klik WhatsApp per unit, dan pencarian pengunjung PUBLIK. Tanpa data pribadi
+// (tidak ada IP/nama/nomor HP); visitorId & sessionId acak dari browser. Staf login, bot, dan DNT tidak dicatat.
+model CatalogEvent {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  visitorId   String
+  sessionId   String
+  type        String
+  path        String
+  unitId      String?
+  label       String?
+  query       String?
+  filters     String?
+  resultCount Int?
+  source      String?
+  medium      String?
+  campaign    String?
+  device      String?
+
+  @@index([createdAt])
+  @@index([type, createdAt])
+  @@index([unitId, type])
+}
