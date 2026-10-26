@@ -4,12 +4,15 @@ import Link from "next/link";
 import { ArrowLeft, CalendarClock, Cpu, HardDrive, MessageCircle, QrCode, ShieldCheck, TrendingUp } from "lucide-react";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
-import { getRecentSoldUnitsCount, getRelatedCatalogUnits } from "@/lib/catalog-page-data";
+import { getRelatedCatalogUnits } from "@/lib/catalog-page-data";
+import { STORE_SOLD_CLAIM } from "@/lib/store-facts";
 import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 import { slugifyFileName } from "@/lib/file-naming";
 import { descriptionSnippet } from "@/lib/unit-description";
+import { absoluteUrl, productJsonLd, unitSeoDescription, unitSeoTitle, WARRANTY_SUMMARY, type UnitAvailability } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
+import { JsonLd } from "@/app/components/JsonLd";
 import { ShareUnitButton } from "./ShareUnitButton";
 import { UnitDescription } from "../UnitDescription";
 import { UnitGallery } from "../UnitGallery";
@@ -48,16 +51,15 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const unit = await getUnitForDetail(params.id);
   if (!unit) return {};
 
-  const title = `${unit.model} - ${formatRupiah(unit.hargaJualRekomendasi)} - FS Comp`;
-  const highlight = descriptionSnippet(unit.catalogDescription, 140);
-  const description = highlight
-    ? `${highlight} (${unit.processor} / ${unit.ram} / ${unit.ssd}, stok ${unit.stockLocation}). Bergaransi toko FS Comp.`
-    : `${unit.processor} / ${unit.ram} / ${unit.ssd}. Lokasi stok: ${unit.stockLocation}. Laptop second sudah QC ketat, bergaransi toko FS Comp.`;
+  const title = unitSeoTitle(unit);
+  const description = unitSeoDescription(unit);
   const image = unit.gallery[0]?.url || unit.catalogImageUrl || "/branding/fs-comp-logo.webp";
 
   return {
     title,
     description,
+    // URL kanonik tanpa ?from= / ?view= supaya tautan dari katalog tidak jadi duplikat di Google.
+    alternates: { canonical: `/unit/${unit.id}` },
     openGraph: {
       title,
       description,
@@ -80,9 +82,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
 
   const currentUser = await getCurrentUser();
   const isInternalUser = Boolean(currentUser);
-  const [relatedUnits, recentSoldCount] = isInternalUser
-    ? [[], 0]
-    : await Promise.all([getRelatedCatalogUnits(unit.id), getRecentSoldUnitsCount()]);
+  const relatedUnits = isInternalUser ? [] : await getRelatedCatalogUnits(unit.id);
   const dailyHistory = unit.dailyHistory;
   const qcAwal = unit.qcAwal;
   const visibleHardware = qcAwal
@@ -100,8 +100,15 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
   const catalogReturnHref = catalogReturnPath(searchParams?.from);
 
   if (!isInternalUser) {
+    const forSale = !unit.soldAt && /^VERIFIED/.test(unit.statusObservasi) && latestDaily?.masihLolos !== "TIDAK LOLOS";
+    const availability: UnitAvailability = unit.soldAt ? "SoldOut" : forSale ? "InStock" : "OutOfStock";
+    const photos = (unit.gallery.length ? unit.gallery.map((photo) => photo.url) : [unit.catalogImageUrl])
+      .filter((url) => url && !url.includes("drive.google.com"))
+      .map(absoluteUrl);
+
     return (
       <section className="pageStack publicUnitPage">
+        <JsonLd data={productJsonLd(unit, { photos, highlight: descriptionSnippet(unit.catalogDescription, 200), availability })} />
         <Link className="backLink" href={catalogReturnHref}>
           <ArrowLeft size={16} /> Kembali ke Katalog Lengkap
         </Link>
@@ -111,8 +118,8 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
             <p className="eyebrow">Katalog FS Comp</p>
             <h1>{unit.model}</h1>
             <p className="heroCopy">{unit.processor} / {unit.ram} / {unit.ssd}</p>
-            {recentSoldCount > 0 ? (
-              <span className="catalogHeroPill"><TrendingUp size={16} /> {recentSoldCount} laptop terjual dalam 1 bulan terakhir</span>
+            {!isInternalUser ? (
+              <span className="catalogHeroPill"><TrendingUp size={16} /> {STORE_SOLD_CLAIM}</span>
             ) : null}
           </div>
           <div className="unitHeroActions">
@@ -177,7 +184,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
             </div>
             <ShieldCheck size={22} />
           </div>
-          <p className="bodyText">Detail teknis seperti health SSD, health baterai, seri SSD, dan catatan internal disimpan di sistem FS Comp. Untuk kondisi spesifik unit, silakan tanyakan langsung ke admin sebelum transaksi.</p>
+          <p className="bodyText">Detail teknis seperti health SSD, health baterai, seri SSD, dan catatan internal disimpan di sistem FS Comp. Untuk kondisi spesifik unit, silakan tanyakan langsung ke admin sebelum transaksi. Toko FS Comp memberi {WARRANTY_SUMMARY}.</p>
         </section>
 
         {relatedUnits.length > 0 ? (
