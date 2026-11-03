@@ -27,16 +27,16 @@ export function ReceiptDocument({ sale, publicReceiptUrl }: { sale: SaleReceipt;
 
       <div className="notaHeaderRow">
         <div className="notaBrandBlock">
-          <img className="notaLogo" src="/branding/fs-comp-logo.webp" alt={sale.store.name} />
+          <img className={sale.location === "Kajen" ? "notaLogo notaLogoRound" : "notaLogo"} src={sale.store.logo} alt={sale.store.name} />
           <h2 className="notaBrandName">{sale.store.name}</h2>
-          <p className="notaBrandSlogan">Solusi teknologi, untuk <em>masa depan</em></p>
+          <p className="notaBrandSlogan">{sale.store.slogan}</p>
         </div>
 
         <div className="notaContactBlock">
           <div className="notaContactLine"><Laptop2 size={15} /><span><strong>{sale.store.tagline}</strong><br />{sale.store.branch}</span></div>
           <div className="notaContactLine"><MapPin size={15} /><span>{sale.store.address}</span></div>
           <div className="notaContactLine"><Phone size={15} /><span>WA: {sale.store.phone}</span></div>
-          <div className="notaContactLine"><Globe size={15} /><span>fscomp.id</span></div>
+          <div className="notaContactLine"><Globe size={15} /><span>{sale.store.website}</span></div>
         </div>
 
         <div className="notaInvoiceBlock">
@@ -156,7 +156,7 @@ export function ReceiptDocument({ sale, publicReceiptUrl }: { sale: SaleReceipt;
               Data pribadi pembeli disarankan dicadangkan mandiri.
             </p>
           ) : noWarranty ? (
-            <p>Barang/jasa ini dijual tanpa garansi tambahan dari FS Comp. Data pribadi pembeli disarankan dicadangkan mandiri.</p>
+            <p>Barang/jasa ini dijual tanpa garansi tambahan dari {sale.store.name}. Data pribadi pembeli disarankan dicadangkan mandiri.</p>
           ) : (
             <p>
               Garansi software {sale.warrantySoftware} dan hardware {sale.warrantyHardware} berlaku sesuai hasil QC
@@ -173,7 +173,7 @@ export function ReceiptDocument({ sale, publicReceiptUrl }: { sale: SaleReceipt;
       </div>
 
       <div className="notaBankRow">
-        <p className="notaBankRowLabel">Rekening transaksi FS Comp</p>
+        <p className="notaBankRowLabel">Rekening transaksi {sale.store.name}</p>
         <div className="notaBankList">
           <span><strong>BCA</strong> 251-029-8724</span>
           <span><strong>MANDIRI</strong> 139-00-1590821-7</span>
@@ -187,7 +187,7 @@ export function ReceiptDocument({ sale, publicReceiptUrl }: { sale: SaleReceipt;
         <p className="notaThanks">Terima kasih atas kepercayaan Anda.</p>
         <div className="notaSignRow">
           <div className="notaSignBlock"><span>Pembeli</span></div>
-          <div className="notaSignBlock"><span>Admin FS Comp</span></div>
+          <div className="notaSignBlock"><span>Admin {sale.store.name}</span></div>
         </div>
       </div>
     </article>

@@ -8,14 +8,20 @@ const storeByLocation = {
     tagline: "Laptop second berkualitas, QC jelas, garansi tertulis.",
     branch: "FS Comp / FS Media Comp Wiradesa",
     address: "Jl. Wiradesa No.1 RT 22 RW 05, Desa Wiradesa, Kecamatan Wiradesa, Kabupaten Pekalongan, Jawa Tengah 51152",
-    phone: "0816660056"
+    phone: "0816660056",
+    website: "fscomp.id",
+    logo: "/branding/fs-comp-logo.webp",
+    slogan: "Solusi teknologi, untuk masa depan"
   },
   KAJEN: {
     name: "FS.ID",
     tagline: "Laptop second berkualitas, QC jelas, garansi tertulis.",
     branch: "FS.ID Kajen",
     address: "Jalan Diponegoro No. 204B (Utara Rumah Dinas Wakil Bupati), Kec. Kajen, Kab. Pekalongan Jawa Tengah",
-    phone: "0851-8266-1773"
+    phone: "0851-8266-1773",
+    website: "fs.id",
+    logo: "/branding/fs-id-logo.jpg",
+    slogan: "Pusat laptop berkualitas"
   }
 } as const;
 

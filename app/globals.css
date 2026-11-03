@@ -2811,6 +2811,10 @@ textarea {
   margin-bottom: 6px;
 }
 
+.notaLogoRound {
+  max-width: 96px;
+}
+
 .notaBrandName {
   margin: 0 0 3px;
   color: var(--nota-navy);
@@ -3282,6 +3286,10 @@ textarea {
   .notaLogo {
     max-width: 80px;
     margin-bottom: 4px;
+  }
+
+  .notaLogoRound {
+    max-width: 52px;
   }
 
   .notaBrandName {
