@@ -2,7 +2,7 @@ import { jakartaDateKey } from "./inventory";
 import { prisma } from "./prisma";
 import { paymentStatus } from "./sale-payments";
 
-const storeByLocation = {
+export const storeByLocation = {
   WIRADESA: {
     name: "FS Comp",
     tagline: "Laptop second berkualitas, QC jelas, garansi tertulis.",

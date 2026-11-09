@@ -3,10 +3,12 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getBatchForEdit } from "@/lib/db-data";
 import { requireRole } from "@/lib/session";
+import { supplierNameOptions } from "@/lib/supplier-data";
 import { updateBatchAction } from "../../actions";
 
 export default async function EditBatchPage({ params, searchParams }: { params: { id: string }; searchParams?: { error?: string } }) {
   await requireRole(["admin", "teknisi"]);
+  const supplierOptions = await supplierNameOptions().catch(() => [] as string[]);
   const batch = await getBatchForEdit(params.id);
   if (!batch) notFound();
   const action = updateBatchAction.bind(null, batch.id);
@@ -25,7 +27,8 @@ export default async function EditBatchPage({ params, searchParams }: { params: 
 
       <form className="panel formGrid" action={action}>
         <label>Nomor Batch<input name="nomorBatch" defaultValue={batch.nomorBatch} required /></label>
-        <label>Supplier<input name="supplier" defaultValue={batch.supplier} required /></label>
+        <label>Supplier<input name="supplier" list="supplierOptions" defaultValue={batch.supplier} required /></label>
+        <datalist id="supplierOptions">{supplierOptions.map((name) => <option key={name} value={name} />)}</datalist>
         <div className="numberGrid">
           <label>Tanggal Masuk<input name="tanggalMasuk" type="date" defaultValue={batch.tanggalMasuk} required /></label>
           <label>Tanggal Tempo<input name="tanggalTempo" type="date" defaultValue={batch.tanggalTempo} required /></label>

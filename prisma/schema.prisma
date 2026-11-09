@@ -832,3 +832,18 @@ model CatalogEvent {
   @@index([type, createdAt])
   @@index([unitId, type])
 }
+
+// Data induk supplier: alamat tujuan retur unit. Dicocokkan ke BatchPSI.supplier lewat nama
+// (tanpa foreign key, supaya data batch lama tidak perlu diubah).
+model Supplier {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  recipientName String?
+  phone         String?
+  address       String
+  city          String?
+  postalCode    String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

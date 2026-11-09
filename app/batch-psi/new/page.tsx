@@ -2,10 +2,12 @@ import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 import { chargerFieldName, chargerTypes } from "@/lib/charger-options";
 import { requireRole } from "@/lib/session";
+import { supplierNameOptions } from "@/lib/supplier-data";
 import { createBatchAction } from "../actions";
 
 export default async function NewBatchPage({ searchParams }: { searchParams?: { error?: string } }) {
   await requireRole(["admin", "teknisi"]);
+  const supplierOptions = await supplierNameOptions().catch(() => [] as string[]);
 
   return (
     <section className="pageStack narrowPage">
@@ -21,7 +23,8 @@ export default async function NewBatchPage({ searchParams }: { searchParams?: { 
 
       <form className="panel formGrid" action={createBatchAction}>
         <label>Nomor Batch<input name="nomorBatch" placeholder="PSI-2026-05-C" required /></label>
-        <label>Supplier<input name="supplier" placeholder="PSI Jakarta" required /></label>
+        <label>Supplier<input name="supplier" list="supplierOptions" placeholder="PSI Jakarta" required /></label>
+        <datalist id="supplierOptions">{supplierOptions.map((name) => <option key={name} value={name} />)}</datalist>
         <div className="numberGrid">
           <label>Tanggal Masuk<input name="tanggalMasuk" type="date" required /></label>
           <label>Tanggal Tempo<input name="tanggalTempo" type="date" required /></label>
