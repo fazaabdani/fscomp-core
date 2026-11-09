@@ -2,6 +2,7 @@
 
 import { Maximize2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { catalogImageCandidates, genericCatalogImageCandidates } from "@/lib/catalog-image";
 
 export function CatalogPhoto({
@@ -97,11 +98,12 @@ export function CatalogPhoto({
             <span><Maximize2 size={17} /> Perbesar foto</span>
           </button>
         ) : image}
-        {zoomable && expanded ? (
+        {zoomable && expanded ? createPortal(
           <div className="catalogPhotoLightbox" role="dialog" aria-modal="true" aria-label={`Foto besar ${alt}`} onClick={() => setExpanded(false)}>
             <button type="button" onClick={() => setExpanded(false)} aria-label="Tutup foto"><X size={24} /></button>
             <img src={source} alt={alt} referrerPolicy="no-referrer" onClick={(event) => event.stopPropagation()} />
-          </div>
+          </div>,
+          document.body
         ) : null}
       </>
     );

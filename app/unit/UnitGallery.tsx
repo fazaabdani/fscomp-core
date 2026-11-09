@@ -2,6 +2,7 @@
 
 import { Check, ChevronLeft, ChevronRight, Download, Maximize2, Share2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { slugifyFileName } from "@/lib/file-naming";
 
 type GalleryPhoto = { url: string; thumbUrl: string };
@@ -161,7 +162,8 @@ export function UnitGallery({
         </div>
       ) : null}
 
-      {expanded ? (
+      {/* Portal ke body: .panel membuat stacking context (z-index 1), tanpa portal panel di bawahnya menimpa lightbox. */}
+      {expanded ? createPortal(
         <div className="catalogPhotoLightbox" role="dialog" aria-modal="true" aria-label={`Foto besar ${alt}`} onClick={() => setExpanded(false)}>
           <button type="button" onClick={() => setExpanded(false)} aria-label="Tutup foto"><X size={24} /></button>
           {downloadNamePrefix ? (
@@ -200,7 +202,8 @@ export function UnitGallery({
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           />
-        </div>
+        </div>,
+        document.body
       ) : null}
     </>
   );
