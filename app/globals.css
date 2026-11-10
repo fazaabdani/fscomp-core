@@ -5221,36 +5221,43 @@ body:has(.waAiPage) {
 
 .returLabelPage { align-items: center; }
 .returLabel {
-  width: 105mm;
-  min-height: 148mm;
+  width: 210mm;
+  min-height: 297mm;
   box-sizing: border-box;
-  padding: 6mm;
+  padding: 14mm 16mm;
   display: flex;
   flex-direction: column;
-  gap: 4mm;
+  gap: 7mm;
   background: #fff;
   color: #000;
   border: 1px solid #000;
-  font-size: 10pt;
-  line-height: 1.3;
+  font-size: 12pt;
+  line-height: 1.35;
 }
 .returLabel p { margin: 0; }
-.returLabel small { display: block; font-size: 7.5pt; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 1mm; }
-.returLabelHead { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #000; padding-bottom: 2mm; font-size: 9pt; }
-.returLabelHead strong { font-size: 14pt; letter-spacing: 0.04em; }
-.returLabelTo { border: 2px solid #000; padding: 3mm; display: grid; gap: 1mm; }
-.returLabelName { font-size: 15pt; }
-.returLabelCompany { font-weight: 700; }
-.returLabelTo p { font-size: 11pt; }
-.returLabelFrom { font-size: 9pt; display: grid; gap: 0.5mm; }
-.returLabelItems { border-top: 1px dashed #000; padding-top: 2mm; font-size: 8.5pt; }
-.returLabelItems ol { margin: 0; padding-left: 5mm; display: grid; gap: 1mm; }
-.returLabelItems li span { display: block; font-size: 7.5pt; }
-.returLabelNote { margin-top: 2mm !important; }
-.returLabelFoot { margin-top: auto; text-align: center; font-weight: 700; font-size: 8pt; border-top: 2px solid #000; padding-top: 2mm; }
+.returLabel small { display: block; font-size: 9pt; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 1.5mm; }
+.returLabelHead { display: flex; justify-content: space-between; align-items: center; gap: 8mm; border-bottom: 3px solid #000; padding-bottom: 5mm; }
+.returLabelBrand { display: flex; align-items: center; gap: 5mm; }
+.returLabelLogo { height: 26mm; width: auto; max-width: 60mm; object-fit: contain; display: block; }
+.returLabelBrand span { font-size: 9pt; max-width: 70mm; }
+.returLabelTitle { text-align: right; display: grid; gap: 1mm; }
+.returLabelTitle strong { font-size: 22pt; letter-spacing: 0.05em; }
+.returLabelTitle span { font-size: 10pt; }
+.returLabelTo { border: 3px solid #000; padding: 7mm; display: grid; gap: 2mm; }
+.returLabelName { font-size: 24pt; line-height: 1.15; }
+.returLabelCompany { font-weight: 700; font-size: 14pt; }
+.returLabelTo p { font-size: 15pt; }
+.returLabelFrom { font-size: 11pt; display: grid; gap: 1mm; padding: 0 2mm; }
+.returLabelFrom strong { font-size: 12pt; }
+.returLabelItems { border-top: 1px dashed #000; padding-top: 5mm; font-size: 11pt; }
+.returLabelItems ol { margin: 0; padding-left: 7mm; display: grid; gap: 2.5mm; }
+.returLabelItems li span { display: block; font-size: 9.5pt; }
+.returLabelNote { margin-top: 4mm !important; }
+.returLabelFoot { margin-top: auto; text-align: center; font-weight: 700; font-size: 10pt; border-top: 3px solid #000; padding-top: 4mm; }
 
-@page retur-resi { size: 105mm 148mm; margin: 0; }
+@page retur-resi { size: A4; margin: 0; }
 @media print {
   .returLabelPage { page: retur-resi; padding: 0 !important; }
-  .returLabel { border: none; width: 105mm; }
+  .returLabel { border: none; width: 210mm; min-height: 296mm; }
+}
 }

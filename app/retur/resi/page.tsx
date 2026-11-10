@@ -52,8 +52,15 @@ export default async function ReturResiPage({ searchParams }: { searchParams?: S
 
       <article className="returLabel">
         <header className="returLabelHead">
-          <strong>RETUR BARANG</strong>
-          <span>{today}</span>
+          <div className="returLabelBrand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="returLabelLogo" src={store.logo} alt={store.name} />
+            <span>{store.slogan}</span>
+          </div>
+          <div className="returLabelTitle">
+            <strong>RETUR BARANG</strong>
+            <span>{today}</span>
+          </div>
         </header>
 
         <section className="returLabelTo">
