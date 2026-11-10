@@ -27,4 +27,6 @@ COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+# Migrasi database dijalankan otomatis tiap container naik (idempotent; kalau gagal, container tidak start
+# dan Coolify mempertahankan container lama).
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
