@@ -1,7 +1,7 @@
 # SEO halaman katalog & unit (core.fscomp.id)
 
 Tanggal: 2026-10-27
-Status: **kode selesai di working tree, build + tes hijau, BELUM di-commit dan BELUM di-deploy** (deploy butuh persetujuan owner).
+Status: **LIVE di core.fscomp.id sejak 15 Nov 2026 06:01 WIB** (commit `aa970643`, auto-deploy server toko setelah CI hijau). Diverifikasi di situs live: canonical + JSON-LD di `/katalog`, `/unit/<id>` (juga dengan `?from=`/`?view=`), canonical di `/katalog/rakit-pc`, sitemap 28 unit = tautan katalog tanpa URL ber-query, `robots.txt` memuat `Allow: /api/media/file/`.
 Asal tugas: audit di `D:\fscomp-landing\docs\SEO-LAPTOP-SECOND.md` (temuan T2, T3, rencana 4B).
 
 ## Yang berubah
@@ -62,8 +62,8 @@ Untuk melihat HTML asli perlu database; CI memakai Postgres, lokal bisa pakai in
 
 ## Yang BELUM / perlu keputusan
 
-1. **Deploy** ke server toko (butuh persetujuan). Setelah live: cek `curl -s https://core.fscomp.id/unit/<id> | grep -o '<link rel="canonical"[^>]*>'`, uji satu URL di Google Rich Results Test, lalu minta pengindeksan ulang di Search Console.
-2. **Commit**: perubahan SEO ini sempat ikut ter-commit tidak sengaja bersama commit lain (lihat `5bf9cba2`) karena `lib/seo.ts` & `JsonLd.tsx` belum di-track. Commit semuanya sekaligus (`lib/seo.ts`, `app/components/JsonLd.tsx`, dan file yang diubah di atas); jangan commit sebagian.
+1. **Langkah owner setelah live (belum dikerjakan):** uji satu URL unit di Google Rich Results Test, kirim ulang `https://core.fscomp.id/sitemap.xml` di Search Console (properti `core.fscomp.id`), lalu minta pengindeksan ulang untuk `/katalog` dan beberapa unit. Hasil di Google butuh hari sampai minggu.
+2. ~~Commit/deploy~~ selesai (lihat Status). Catatan: SEO ini sempat ikut ter-commit tidak sengaja di `5bf9cba2` sebelum dikeluarkan; kini sudah masuk utuh di `aa970643`.
 3. Salah ketik di data: unit `THOSIBA DYNABOOK PORTEGE ...` (seharusnya Toshiba). Di SEO sudah dibenarkan saat render; sebaiknya juga dibenarkan di inventori (filter merek di katalog masih menampilkan "THOSIBA").
 4. Halaman unit yang sudah terjual / tidak lolos tetap bisa diakses dengan JSON-LD `SoldOut`/`OutOfStock` dan tetap boleh diindeks (tidak ada `noindex`). Bila ingin dikeluarkan dari Google, tambahkan `robots: { index: false }` untuk kasus itu.
 5. Keputusan arsitektur "katalog di bawah `fscomp.id/katalog`" tidak termasuk pekerjaan ini; canonical sekarang menunjuk ke `core.fscomp.id`.
