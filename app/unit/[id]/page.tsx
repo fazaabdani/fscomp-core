@@ -10,7 +10,9 @@ import { getUnitForDetail } from "@/lib/db-data";
 import { statusTone } from "@/lib/constants";
 import { slugifyFileName } from "@/lib/file-naming";
 import { descriptionSnippet } from "@/lib/unit-description";
+import { absoluteUrl, productJsonLd, unitSeoDescription, unitSeoTitle, WARRANTY_SUMMARY, type UnitAvailability } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
+import { JsonLd } from "@/app/components/JsonLd";
 import { ShareUnitButton } from "./ShareUnitButton";
 import { UnitDescription } from "../UnitDescription";
 import { UnitGallery } from "../UnitGallery";
@@ -49,16 +51,15 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const unit = await getUnitForDetail(params.id);
   if (!unit) return {};
 
-  const title = `${unit.model} - ${formatRupiah(unit.hargaJualRekomendasi)} - FS Comp`;
-  const highlight = descriptionSnippet(unit.catalogDescription, 140);
-  const description = highlight
-    ? `${highlight} (${unit.processor} / ${unit.ram} / ${unit.ssd}, stok ${unit.stockLocation}). Bergaransi toko FS Comp.`
-    : `${unit.processor} / ${unit.ram} / ${unit.ssd}. Lokasi stok: ${unit.stockLocation}. Laptop second sudah QC ketat, bergaransi toko FS Comp.`;
+  const title = unitSeoTitle(unit);
+  const description = unitSeoDescription(unit);
   const image = unit.gallery[0]?.url || unit.catalogImageUrl || "/branding/fs-comp-logo.webp";
 
   return {
     title,
     description,
+    // URL kanonik tanpa ?from= / ?view= supaya tautan dari katalog tidak jadi duplikat di Google.
+    alternates: { canonical: `/unit/${unit.id}` },
     openGraph: {
       title,
       description,
@@ -99,8 +100,16 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
   const catalogReturnHref = catalogReturnPath(searchParams?.from);
 
   if (!isInternalUser) {
+    // Sama dengan syarat tampil di katalog: terverifikasi, belum terjual, dan QC harian terakhir tidak gagal.
+    const forSale = !unit.soldAt && /^VERIFIED/.test(unit.statusObservasi) && Boolean(latestDaily) && latestDaily?.masihLolos !== "TIDAK LOLOS";
+    const availability: UnitAvailability = unit.soldAt ? "SoldOut" : forSale ? "InStock" : "OutOfStock";
+    const photos = (unit.gallery.length ? unit.gallery.map((photo) => photo.url) : [unit.catalogImageUrl])
+      .filter((url) => url && !url.includes("drive.google.com"))
+      .map(absoluteUrl);
+
     return (
       <section className="pageStack publicUnitPage">
+        <JsonLd data={productJsonLd(unit, { photos, highlight: descriptionSnippet(unit.catalogDescription, 200), availability })} />
         <Link className="backLink" href={catalogReturnHref}>
           <ArrowLeft size={16} /> Kembali ke Katalog Lengkap
         </Link>
@@ -176,7 +185,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
             </div>
             <ShieldCheck size={22} />
           </div>
-          <p className="bodyText">Detail teknis seperti health SSD, health baterai, seri SSD, dan catatan internal disimpan di sistem FS Comp. Untuk kondisi spesifik unit, silakan tanyakan langsung ke admin sebelum transaksi.</p>
+          <p className="bodyText">Detail teknis seperti health SSD, health baterai, seri SSD, dan catatan internal disimpan di sistem FS Comp. Untuk kondisi spesifik unit, silakan tanyakan langsung ke admin sebelum transaksi. Toko FS Comp memberi {WARRANTY_SUMMARY}.</p>
         </section>
 
         {relatedUnits.length > 0 ? (

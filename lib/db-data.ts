@@ -177,6 +177,7 @@ export const getUnitForDetail = cache(async (id: string) => {
       stockLocation: unit.stockLocation === "WIRADESA" ? "Wiradesa" : "Kajen",
       catalogImageUrl: gallery[0]?.url ?? unit.catalogImageUrl ?? "",
       catalogDescription: unit.catalogDescription ?? "",
+      soldAt: unit.soldAt ? unit.soldAt.toISOString() : null,
       gallery,
       batteryHealth: unit.batteryHealth ?? 0,
       ssdHealth: unit.ssdHealth ?? 0,

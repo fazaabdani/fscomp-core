@@ -9,25 +9,29 @@ import { brandOf } from "@/lib/catalog-image";
 import { getAppSettings, getCatalogAnnouncement } from "@/lib/app-settings";
 import { RECENT_SOLD_WINDOW_DAYS, RECENT_SOLD_WINDOW_LABEL, STORE_SOLD_CLAIM } from "@/lib/store-facts";
 import { getCatalogPageData, getRecentSoldUnitsCount, getPublishedTestimonials, pickFeaturedUnits } from "@/lib/catalog-page-data";
+import { JsonLd } from "@/app/components/JsonLd";
+import { CATALOG_SEO_DESCRIPTION, CATALOG_SEO_TITLE, catalogJsonLd } from "@/lib/seo";
 import { CatalogFilterShell } from "./CatalogFilterShell";
 import { KatalogDynamics } from "./KatalogDynamics";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Katalog Laptop Second Berkualitas - FS Comp",
-  description: "Cari laptop second ready sesuai kebutuhan panjenengan. Lengkap dengan spesifikasi, harga, lokasi stok, foto, dan QC ketat sebelum dijual.",
+  title: CATALOG_SEO_TITLE,
+  description: CATALOG_SEO_DESCRIPTION,
+  // Semua variasi filter/urutan (?q=, ?sort=, ?view=, dst) menunjuk ke satu URL kanonik.
+  alternates: { canonical: "/katalog" },
   openGraph: {
-    title: "Katalog Laptop Second Berkualitas - FS Comp",
-    description: "Cari laptop second ready sesuai kebutuhan panjenengan. Lengkap dengan spesifikasi, harga, lokasi stok, foto, dan QC ketat sebelum dijual.",
+    title: CATALOG_SEO_TITLE,
+    description: CATALOG_SEO_DESCRIPTION,
     url: "/katalog",
     images: ["/branding/fs-comp-logo.webp"],
     type: "website"
   },
   twitter: {
     card: "summary_large_image",
-    title: "Katalog Laptop Second Berkualitas - FS Comp",
-    description: "Cari laptop second ready sesuai kebutuhan panjenengan. Lengkap dengan spesifikasi, harga, lokasi stok, foto, dan QC ketat sebelum dijual.",
+    title: CATALOG_SEO_TITLE,
+    description: CATALOG_SEO_DESCRIPTION,
     images: ["/branding/fs-comp-logo.webp"]
   }
 };
@@ -1052,6 +1056,7 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
   return (
     <section className="pageStack katalogPage dynamicCatalogPage">
       <KatalogDynamics navigationKey={returnTo} />
+      <JsonLd data={catalogJsonLd(allRawUnits)} />
       <CatalogPageStyles />
       <div className="catalogLandingHero catalogReveal">
         <div className="catalogHeroCopyPanel dynamicHeroPanel">

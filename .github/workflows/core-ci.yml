@@ -49,5 +49,7 @@ jobs:
         run: npx tsc --noEmit
       - name: Check deployment scripts
         run: node --check scripts/generate-security-env.mjs && node --check scripts/predeploy-check.mjs
+      - name: SEO helper tests
+        run: npm run test:seo
       - name: Production build
         run: npm run build
