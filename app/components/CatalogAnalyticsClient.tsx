@@ -48,7 +48,7 @@ function firstTouch() {
   return value;
 }
 
-function send(partial: Record<string, unknown>) {
+export function send(partial: Record<string, unknown>) {
   if (typeof navigator !== "undefined" && navigator.doNotTrack === "1") return;
   const { vid, sid } = identity();
   const body = JSON.stringify({ vid, sid, device: deviceOfWidth(window.innerWidth), ...firstTouch(), ...partial });

@@ -1,7 +1,7 @@
 // Logika murni analitik katalog (tanpa database/Next) supaya mudah diuji dan dipakai di sisi browser maupun server.
 // Prinsip privasi: tidak menyimpan IP, nama, atau nomor HP -- hanya id acak dari browser dan perilaku di katalog.
 
-export const EVENT_TYPES = ["PAGEVIEW", "UNIT_VIEW", "WA_CLICK", "SEARCH"] as const;
+export const EVENT_TYPES = ["PAGEVIEW", "UNIT_VIEW", "WA_CLICK", "SEARCH", "FESI"] as const;
 export type CatalogEventType = (typeof EVENT_TYPES)[number];
 
 export const FILTER_KEYS = ["lokasi", "merek", "processor", "ram", "storage", "windows", "touchscreen", "harga", "sort", "view"] as const;

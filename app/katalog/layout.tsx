@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { CatalogAnalytics } from "@/app/components/CatalogAnalytics";
+import { FesiWidget } from "@/app/components/FesiWidget";
 import { PublicTracking } from "@/app/components/PublicTracking";
 
 export default function KatalogLayout({ children }: { children: ReactNode }) {
@@ -8,6 +9,7 @@ export default function KatalogLayout({ children }: { children: ReactNode }) {
       {children}
       <PublicTracking />
       <CatalogAnalytics />
+      <FesiWidget />
     </>
   );
 }
