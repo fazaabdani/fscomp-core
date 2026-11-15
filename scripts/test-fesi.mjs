@@ -174,3 +174,26 @@ test("rakit PC diarahkan ke admin dan lokasi punya tautan Google Maps", () => {
   assert.match(lokasi.answer, /FS Comp/);
   assert.equal(lokasi.link.href, "https://www.google.com/maps/search/?api=1&query=FS+Comp");
 });
+
+test("pertanyaan yang belum terjawab ikut tertulis otomatis di pesan WhatsApp", () => {
+  const notes = ["Syarat dan simulasi cicilan SPayLater (Kajen)", '"apakah ada garansi mesin?"'];
+  const general = decodeURIComponent(fesi.waGeneral("kuliah", "3-5", undefined, notes));
+  assert.match(general, /Yang ingin saya tanyakan juga:/);
+  assert.match(general, /- Syarat dan simulasi cicilan SPayLater \(Kajen\)/);
+  assert.match(general, /- "apakah ada garansi mesin\?"/);
+  assert.ok(general.indexOf("Budget") < general.indexOf("Yang ingin saya tanyakan"), "urutan: kebutuhan, budget, lalu pertanyaan");
+  const unit = decodeURIComponent(fesi.waForUnit(STOK[0], notes));
+  assert.match(unit, /Yang ingin saya tanyakan juga:/);
+  assert.match(unit, /Apakah unitnya masih ready\?/);
+  assert.ok(!/Yang ingin saya tanyakan/.test(decodeURIComponent(fesi.waGeneral("kuliah", "3-5"))), "tanpa catatan, blok tidak muncul");
+  assert.equal(fesi.FAQS.find((f) => f.id === "kredit").followUp.includes("SPayLater"), true);
+});
+
+test("alert lead memberi tahu admin ada pertanyaan belum terjawab", () => {
+  const l = lead.sanitizeLead({ sid: "abcdefgh12", kind: "admin", pending: 2 });
+  assert.equal(l.pending, 2);
+  assert.match(lead.buildLeadMessage(l, []), /Ada 2 pertanyaan yang belum terjawab Fesi/);
+  assert.equal(lead.sanitizeLead({ sid: "abcdefgh12", kind: "admin", pending: 99 }).pending, 6);
+  assert.equal(lead.sanitizeLead({ sid: "abcdefgh12", kind: "admin", pending: "x" }).pending, 0);
+  assert.ok(!/belum terjawab/.test(lead.buildLeadMessage(lead.sanitizeLead({ sid: "abcdefgh12", kind: "admin" }), [])));
+});

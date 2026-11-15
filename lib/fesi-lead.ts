@@ -16,6 +16,7 @@ export type CleanLead = {
   shownUnitIds: string[];
   faqTopics: string[];
   device: "mobile" | "tablet" | "desktop" | null;
+  pending: number;
   test: boolean;
 };
 
@@ -39,7 +40,8 @@ export function sanitizeLead(raw: unknown): CleanLead | null {
     : [];
   const faqTopics = Array.isArray(r.faq) ? Array.from(new Set(r.faq.filter((x): x is string => typeof x === "string" && FAQ_IDS.includes(x)))).slice(0, 5) : [];
   const device = r.device === "mobile" || r.device === "tablet" || r.device === "desktop" ? r.device : null;
-  return { sessionId, kind, need, budget, clickedUnitId, shownUnitIds, faqTopics, device, test: sessionId.startsWith("tes-") };
+  const pending = typeof r.pending === "number" && Number.isInteger(r.pending) && r.pending > 0 ? Math.min(r.pending, 6) : 0;
+  return { sessionId, kind, need, budget, clickedUnitId, shownUnitIds, faqTopics, device, pending, test: sessionId.startsWith("tes-") };
 }
 
 export type LeadUnit = { id: string; nomorUnit: string; model: string; price: number; lokasi: string };
@@ -78,6 +80,7 @@ export function buildLeadMessage(lead: CleanLead, units: LeadUnit[], now = new D
     clicked ? `Unit ditanyakan: ${unitLine(clicked)}` : null,
     shown.length > 0 ? `Unit yang ditampilkan Fesi:\n${shown.map((u, i) => `${i + 1}. ${unitLine(u)}`).join("\n")}` : null,
     faq.length > 0 ? `Sempat tanya: ${faq.map((f) => escapeHtml(String(f))).join(", ")}` : null,
+    lead.pending > 0 ? `❓ Ada ${lead.pending} pertanyaan yang belum terjawab Fesi (sudah tertulis di pesan WA-nya).` : null,
     isOpenHours(now) ? null : "🌙 Di luar jam buka (09.00–17.00). Tawarkan janjian ya.",
     [device, wibClock(now)].filter(Boolean).join(" · ")
   ];

@@ -84,8 +84,11 @@ export function FesiWidget() {
   const reduced = useRef(false);
   const shownRef = useRef<string[]>([]);
   const faqRef = useRef<string[]>([]);
+  const questionsRef = useRef<string[]>([]); // pertanyaan ketikan yang tidak terjawab pasti
+  const topicsRef = useRef<string[]>([]); // topik FAQ yang masih perlu admin (syarat kredit, penilaian tukar tambah, dll.)
 
-  const leadContext = () => ({ need: needRef.current, budget: budgetRef.current, shown: shownRef.current, faq: faqRef.current });
+  const pendingNotes = () => [...topicsRef.current, ...questionsRef.current.map((q) => `"${q}"`)];
+  const leadContext = () => ({ need: needRef.current, budget: budgetRef.current, shown: shownRef.current, faq: faqRef.current, pending: pendingNotes().length });
 
   const push = useCallback((items: Omit<Item, "id">[]) => {
     setMessages((prev) => [...prev, ...items.map((item) => ({ ...item, id: idRef.current++ }))]);
@@ -115,7 +118,7 @@ export function FesiWidget() {
 
   // ----- alur percakapan -----
   const askAdmin = useCallback(
-    (extra?: string): Chip => ({ label: "Chat admin (WhatsApp)", href: waGeneral(needRef.current, budgetRef.current, extra), wa: true }),
+    (extra?: string): Chip => ({ label: "Chat admin (WhatsApp)", href: waGeneral(needRef.current, budgetRef.current, extra, pendingNotes()), wa: true }),
     []
   );
 
@@ -299,6 +302,7 @@ export function FesiWidget() {
   function answerFaq(faq: Faq, echo: boolean) {
     track(`faq:${faq.id}`);
     if (!faqRef.current.includes(faq.id)) faqRef.current = [...faqRef.current, faq.id];
+    if (faq.followUp && !topicsRef.current.includes(faq.followUp)) topicsRef.current = [...topicsRef.current, faq.followUp];
     if (echo) you(faq.label);
     say(
       [{ from: "bot", text: faq.answer, link: faq.link }, { from: "bot", text: "Ada lagi yang mau ditanyakan?" }],
@@ -339,8 +343,12 @@ export function FesiWidget() {
     }
     if (faq) return answerFaq(faq.faq, false);
     if (isGreeting(text)) return greet();
+    // Tidak terjawab pasti: dicatat supaya otomatis tertulis di pesan WhatsApp saat kakak klik Chat admin.
+    const saved = text.slice(0, 120);
+    if (!questionsRef.current.includes(saved)) questionsRef.current = [...questionsRef.current, saved].slice(-3);
+    track("text:unanswered");
     say(
-      [{ from: "bot", text: "Hmm, Fesi belum yakin paham maksud kakak 😅 Biar tepat, tanyakan langsung ke admin ya. Atau pilih salah satu di bawah." }],
+      [{ from: "bot", text: "Hmm, Fesi belum bisa jawab yang satu ini dengan pasti 😅 Tenang, pertanyaan kakak sudah Fesi catat dan otomatis tertulis di pesan WhatsApp saat kakak klik Chat admin 👍" }],
       [...mainMenu()],
       "mikir"
     );
@@ -451,7 +459,7 @@ export function FesiWidget() {
                       <Link href={`/unit/${u.id}`} onClick={() => track(`unit:${u.nomorUnit}`)}>
                         Lihat
                       </Link>
-                      <a href={waForUnit(u)} target="_blank" rel="noopener noreferrer" onClick={() => sendLead({ kind: "unit", unitId: u.id, ...leadContext() })}>
+                      <a href={waForUnit(u, pendingNotes())} target="_blank" rel="noopener noreferrer" onClick={() => sendLead({ kind: "unit", unitId: u.id, ...leadContext() })}>
                         Tanya via WA
                       </a>
                     </div>

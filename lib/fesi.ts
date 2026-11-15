@@ -103,16 +103,23 @@ export function waLink(lines: string[]) {
   return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
 }
 
-export function waForUnit(u: FesiUnit) {
+/** Hal yang sebelumnya ditanyakan ke Fesi tapi belum terjawab pasti, ditulis otomatis di pesan WhatsApp. */
+export function notesBlock(notes?: string[]) {
+  const list = (notes ?? []).filter(Boolean);
+  return list.length > 0 ? ["Yang ingin saya tanyakan juga:", ...list.map((n) => `- ${n}`)] : [];
+}
+
+export function waForUnit(u: FesiUnit, notes?: string[]) {
   return waLink([
     "Assalamu'alaikum FS Comp.",
     `Saya tertarik dengan Unit ${u.nomorUnit} - ${u.model}.`,
     `Harga di katalog: ${rupiah(u.price)}.`,
+    ...notesBlock(notes),
     "Apakah unitnya masih ready? (dari asisten Fesi)"
   ]);
 }
 
-export function waGeneral(need?: NeedId, budget?: BudgetId, extra?: string) {
+export function waGeneral(need?: NeedId, budget?: BudgetId, extra?: string, notes?: string[]) {
   const n = NEEDS.find((x) => x.id === need)?.short;
   const b = BUDGETS.find((x) => x.id === budget);
   return waLink(
@@ -120,13 +127,14 @@ export function waGeneral(need?: NeedId, budget?: BudgetId, extra?: string) {
       "Assalamu'alaikum FS Comp, saya dari asisten Fesi di katalog.",
       n ? `Kebutuhan: ${n}.` : "",
       b && b.id !== "any" ? `Budget: ${b.label}.` : "",
+      ...notesBlock(notes),
       extra ?? "Mohon dibantu ya."
     ].filter(Boolean)
   );
 }
 
 // ---------- FAQ (hanya fakta yang sudah tampil di katalog/nota; sisanya diarahkan ke admin) ----------
-export type Faq = { id: string; label: string; keywords: string[]; answer: string; link?: { href: string; text: string }; waText?: string };
+export type Faq = { id: string; label: string; keywords: string[]; answer: string; link?: { href: string; text: string }; waText?: string; followUp?: string };
 
 export const MAPS_URL = "https://www.google.com/maps/search/?api=1&query=FS+Comp";
 
@@ -154,7 +162,8 @@ export const FAQS: Faq[] = [
     id: "kredit",
     label: "Cicilan / kredit",
     keywords: ["cicil", "cicilan", "kredit", "spaylater", "paylater", "angsuran", "nyicil"],
-    answer: "Bisa kredit lewat SPayLater di cabang Kajen (FS.ID Kajen, Jl. Diponegoro No. 204B). Untuk syarat dan simulasi cicilannya, tanya admin ya."
+    answer: "Bisa kredit lewat SPayLater di cabang Kajen (FS.ID Kajen, Jl. Diponegoro No. 204B). Untuk syarat dan simulasi cicilannya, tanya admin ya.",
+    followUp: "Syarat dan simulasi cicilan SPayLater (Kajen)"
   },
   {
     id: "kirim",
@@ -194,7 +203,8 @@ export const FAQS: Faq[] = [
     label: "Tukar tambah",
     keywords: ["tukar", "tambah", "jual laptop", "trade", "laptop lama"],
     answer:
-      "Bisa tukar tambah! Syarat unit lama: kondisinya normal tanpa minus dan tahun pembuatan maksimal 2017. Supaya pasti, bawa unitnya ke toko dulu untuk dicek detail, nanti dinilai langsung."
+      "Bisa tukar tambah! Syarat unit lama: kondisinya normal tanpa minus dan tahun pembuatan maksimal 2017. Supaya pasti, bawa unitnya ke toko dulu untuk dicek detail, nanti dinilai langsung.",
+    followUp: "Tukar tambah laptop lama (mohon info penilaian)"
   }
 ];
 
