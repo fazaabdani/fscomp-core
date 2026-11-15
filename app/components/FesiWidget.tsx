@@ -377,7 +377,14 @@ export function FesiWidget() {
   }, [open, messages.length, greet]);
 
   useEffect(() => {
-    bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight, behavior: reduced.current ? "auto" : "smooth" });
+    const body = bodyRef.current;
+    if (!body) return;
+    const rows = body.querySelectorAll<HTMLElement>("[data-row]");
+    const last = rows[rows.length - 1];
+    const bottom = body.scrollHeight - body.clientHeight;
+    // Balasan yang lebih tinggi dari layar (mis. 3 kartu unit) dibaca dari awalnya, bukan langsung ke dasar.
+    const target = last && body.scrollHeight - last.offsetTop > body.clientHeight ? Math.max(0, last.offsetTop - 8) : bottom;
+    body.scrollTo({ top: Math.min(target, bottom), behavior: reduced.current ? "auto" : "smooth" });
   }, [messages, typing, chips]);
 
   useEffect(() => {
@@ -430,7 +437,7 @@ export function FesiWidget() {
 
           <div className={styles.body} ref={bodyRef} aria-live="polite">
             {messages.map((m) => (
-              <div key={m.id} className={m.from === "bot" ? styles.rowBot : styles.rowUser}>
+              <div key={m.id} data-row className={m.from === "bot" ? styles.rowBot : styles.rowUser}>
                 {m.text ? <div className={m.from === "bot" ? styles.bubbleBot : styles.bubbleUser}>{m.text}</div> : null}
                 {m.link ? (
                   /^https?:/.test(m.link.href) ? (
@@ -476,30 +483,30 @@ export function FesiWidget() {
                 </div>
               </div>
             ) : null}
+            {chips.length > 0 ? (
+              <div className={styles.chips}>
+                {chips.map((c) =>
+                  c.href ? (
+                    <a
+                      key={c.label}
+                      className={`${styles.chip} ${c.wa ? styles.chipWa : ""}`}
+                      href={c.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => c.wa && sendLead({ kind: "admin", ...leadContext() })}
+                    >
+                      {c.label}
+                    </a>
+                  ) : (
+                    <button key={c.label} type="button" className={styles.chip} onClick={c.run}>
+                      {c.label}
+                    </button>
+                  )
+                )}
+              </div>
+            ) : null}
           </div>
 
-          {chips.length > 0 ? (
-            <div className={styles.chips}>
-              {chips.map((c) =>
-                c.href ? (
-                  <a
-                    key={c.label}
-                    className={`${styles.chip} ${c.wa ? styles.chipWa : ""}`}
-                    href={c.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => c.wa && sendLead({ kind: "admin", ...leadContext() })}
-                  >
-                    {c.label}
-                  </a>
-                ) : (
-                  <button key={c.label} type="button" className={styles.chip} onClick={c.run}>
-                    {c.label}
-                  </button>
-                )
-              )}
-            </div>
-          ) : null}
 
           <form
             className={styles.form}

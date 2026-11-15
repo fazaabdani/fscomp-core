@@ -81,6 +81,7 @@
   width: 392px;
   max-width: calc(100vw - 20px);
   max-height: min(640px, calc(100vh - 28px));
+  max-height: min(640px, calc(100dvh - 28px));
   display: flex;
   flex-direction: column;
   border-radius: 26px;
@@ -148,6 +149,9 @@
 }
 
 .body {
+  position: relative;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   flex: 1;
   min-height: 190px;
   overflow-y: auto;
@@ -300,10 +304,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 6px 14px 10px;
-  max-height: 150px;
-  overflow-y: auto;
-  scrollbar-width: none;
+  padding: 6px 0 4px;
 }
 .chip {
   font: inherit;
@@ -381,6 +382,7 @@
   .panel {
     width: calc(100vw - 16px);
     max-height: min(76vh, 600px);
+    max-height: min(78dvh, 600px);
     border-radius: 22px;
   }
   .header {
