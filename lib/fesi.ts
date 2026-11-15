@@ -126,7 +126,9 @@ export function waGeneral(need?: NeedId, budget?: BudgetId, extra?: string) {
 }
 
 // ---------- FAQ (hanya fakta yang sudah tampil di katalog/nota; sisanya diarahkan ke admin) ----------
-export type Faq = { id: string; label: string; keywords: string[]; answer: string; link?: { href: string; text: string } };
+export type Faq = { id: string; label: string; keywords: string[]; answer: string; link?: { href: string; text: string }; waText?: string };
+
+export const MAPS_URL = "https://www.google.com/maps/search/?api=1&query=FS+Comp";
 
 export const FAQS: Faq[] = [
   {
@@ -145,8 +147,14 @@ export const FAQS: Faq[] = [
   {
     id: "bayar",
     label: "Cara bayar",
-    keywords: ["bayar", "pembayaran", "transfer", "cash", "tunai", "cicil", "kredit", "tempo", "kartu"],
-    answer: "Pembayaran bisa cash atau transfer bank. Kalau kakak butuh cicilan atau skema lain, tanya admin dulu ya."
+    keywords: ["bayar", "pembayaran", "transfer", "cash", "tunai", "tempo", "kartu"],
+    answer: "Pembayaran bisa cash atau transfer bank. Kalau mau dicicil, bisa kredit lewat SPayLater di cabang Kajen."
+  },
+  {
+    id: "kredit",
+    label: "Cicilan / kredit",
+    keywords: ["cicil", "cicilan", "kredit", "spaylater", "paylater", "angsuran", "nyicil"],
+    answer: "Bisa kredit lewat SPayLater di cabang Kajen (FS.ID Kajen, Jl. Diponegoro No. 204B). Untuk syarat dan simulasi cicilannya, tanya admin ya."
   },
   {
     id: "kirim",
@@ -157,15 +165,16 @@ export const FAQS: Faq[] = [
   {
     id: "lokasi",
     label: "Lokasi toko",
-    keywords: ["lokasi", "alamat", "toko", "dimana", "di mana", "maps", "buka", "jam", "datang", "wiradesa", "kajen"],
+    keywords: ["lokasi", "alamat", "toko", "dimana", "di mana", "maps", "buka", "jam", "datang", "wiradesa", "kajen", "janji", "janjian", "tutup", "libur"],
     answer:
-      "Ada dua toko. FS Comp Wiradesa: Jl. Wiradesa No.1 RT 22 RW 05, Wiradesa, Kab. Pekalongan (0816-6600-56). FS.ID Kajen: Jl. Diponegoro No. 204B, utara Rumah Dinas Wakil Bupati, Kajen (0851-8266-1773). Untuk jam buka, tanya admin ya."
+      "Pusat laptop second ada di FS Comp Wiradesa: Jl. Wiradesa No.1 RT 22 RW 05, Wiradesa, Kab. Pekalongan (0816-6600-56). Ada juga cabang FS.ID Kajen: Jl. Diponegoro No. 204B, utara Rumah Dinas Wakil Bupati, Kajen (0851-8266-1773). Jam buka 09.00 sampai 17.00; di luar jam itu bisa janjian dulu lewat admin. Di Google Maps, cukup ketik \"FS Comp\".",
+    link: { href: MAPS_URL, text: "Buka di Google Maps" }
   },
   {
     id: "booking",
     label: "Booking / stok",
-    keywords: ["booking", "dp", "tahan", "pesan", "ready", "stok", "masih ada"],
-    answer: "Stok di katalog selalu diperbarui dari sistem toko, jadi unit yang tampil memang tersedia. Untuk booking, chat admin lewat WhatsApp supaya unitnya diamankan."
+    keywords: ["booking", "dp", "tahan", "pesan", "ready", "stok", "masih ada", "pengikat", "amankan"],
+    answer: "Stok di katalog selalu diperbarui dari sistem toko, jadi unit yang tampil memang tersedia. Mau diamankan dulu? Bisa booking dengan DP pengikat Rp500.000, chat admin lewat WhatsApp ya."
   },
   {
     id: "servis",
@@ -177,14 +186,15 @@ export const FAQS: Faq[] = [
     id: "rakit",
     label: "Rakit PC",
     keywords: ["rakit", "pc", "komputer", "gaming", "komponen"],
-    answer: "Bisa! Ada layanan rakit PC: pilih paket rekomendasi atau susun komponen sendiri, harga dan kecocokan komponen dihitung otomatis. Garansi rakitan 1 tahun, pengerjaan 5–7 hari.",
-    link: { href: "/katalog/rakit-pc", text: "Buka Rakit PC" }
+    answer: "Rakit PC lewat website masih dalam pengembangan. Untuk rakit PC, langsung chat admin saja ya, nanti dibantu pilih komponen sesuai kebutuhan dan budget.",
+    waText: "Saya mau tanya soal rakit PC."
   },
   {
     id: "tukar",
     label: "Tukar tambah",
-    keywords: ["tukar", "tambah", "jual laptop", "trade"],
-    answer: "Untuk tukar tambah atau jual laptop lama, langsung tanya admin ya. Nanti dicek apakah bisa dan unitnya dinilai langsung."
+    keywords: ["tukar", "tambah", "jual laptop", "trade", "laptop lama"],
+    answer:
+      "Bisa tukar tambah! Syarat unit lama: kondisinya normal tanpa minus dan tahun pembuatan maksimal 2017. Supaya pasti, bawa unitnya ke toko dulu untuk dicek detail, nanti dinilai langsung."
   }
 ];
 

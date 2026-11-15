@@ -11,11 +11,12 @@ const tempDir = mkdtempSync(join(tmpdir(), "fscomp-fesi-"));
 process.on("exit", () => rmSync(tempDir, { recursive: true, force: true }));
 const compile = spawnSync(
   process.execPath,
-  ["node_modules/typescript/bin/tsc", "lib/fesi.ts", "--target", "ES2022", "--module", "CommonJS", "--moduleResolution", "Node10", "--skipLibCheck", "--strict", "--outDir", tempDir],
+  ["node_modules/typescript/bin/tsc", "lib/fesi.ts", "lib/fesi-lead.ts", "--target", "ES2022", "--module", "CommonJS", "--moduleResolution", "Node10", "--skipLibCheck", "--strict", "--outDir", tempDir],
   { cwd: process.cwd(), stdio: "inherit" }
 );
-assert.equal(compile.status, 0, "lib/fesi.ts harus lolos tsc strict");
+assert.equal(compile.status, 0, "lib/fesi.ts dan lib/fesi-lead.ts harus lolos tsc strict");
 const fesi = createRequire(import.meta.url)(join(tempDir, "fesi.js"));
+const lead = createRequire(import.meta.url)(join(tempDir, "fesi-lead.js"));
 
 const u = (id, model, processor, ram, ssd, price) => ({ id, nomorUnit: id, model, processor, ram, ssd, price, lokasi: "Wiradesa", image: null });
 const STOK = [
@@ -93,4 +94,83 @@ test("FAQ hanya berisi fakta yang sudah ada di katalog (garansi 3 minggu/3 bulan
   const garansi = fesi.FAQS.find((f) => f.id === "garansi");
   assert.match(garansi.answer, /3 minggu/);
   assert.match(garansi.answer, /3 bulan/);
+});
+
+const UID = "cm1abcdefghijklmnopqrstuv"; // bentuk cuid: huruf c + 24 karakter
+const UID2 = "cm2abcdefghijklmnopqrstuv";
+
+test("sanitizeLead hanya meloloskan nilai yang dikenal", () => {
+  const ok = lead.sanitizeLead({ sid: "tes-12345678", kind: "unit", unitId: UID, need: "kuliah", budget: "3-5", shown: [UID, UID2, "bukan-id"], faq: ["garansi", "hack"], device: "mobile" });
+  assert.equal(ok.kind, "unit");
+  assert.equal(ok.need, "kuliah");
+  assert.equal(ok.budget, "3-5");
+  assert.deepEqual(ok.shownUnitIds, [UID, UID2]);
+  assert.deepEqual(ok.faqTopics, ["garansi"]);
+  assert.equal(ok.test, true);
+  assert.equal(lead.sanitizeLead({ sid: "x" }), null, "sid tidak valid ditolak");
+  assert.equal(lead.sanitizeLead({ sid: "abcdefgh12", kind: "unit" }), null, "kind unit tanpa unitId ditolak");
+  const odd = lead.sanitizeLead({ sid: "abcdefgh12", kind: "admin", need: "<script>", budget: "x" });
+  assert.equal(odd.need, null);
+  assert.equal(odd.budget, null);
+});
+
+test("pesan lead lengkap, aman dari HTML, dan tanpa data pribadi", () => {
+  const l = lead.sanitizeLead({ sid: "abcdefgh12", kind: "unit", unitId: UID, need: "kuliah", budget: "3-5", shown: [UID, UID2], faq: ["garansi"], device: "mobile" });
+  const units = [
+    { id: UID, nomorUnit: "A1", model: "X13 <b>&</b>", price: 4300000, lokasi: "Wiradesa" },
+    { id: UID2, nomorUnit: "B2", model: "EliteBook", price: 4200000, lokasi: "Kajen" }
+  ];
+  const text = lead.buildLeadMessage(l, units, new Date("2026-11-16T03:42:00Z"));
+  assert.match(text, /Calon pembeli dari Fesi/);
+  assert.match(text, /Kebutuhan: Kuliah \/ Sekolah/);
+  assert.match(text, /Budget: 3 – 5 jt/);
+  assert.match(text, /Rp4\.300\.000/);
+  assert.match(text, /href="https:\/\/core\.fscomp\.id\/unit\/cm1abcdefghijklmnopqrstuv"/);
+  assert.match(text, /X13 &lt;b&gt;&amp;&lt;\/b&gt;/, "HTML di nama unit di-escape");
+  assert.match(text, /Sempat tanya: Garansi/);
+  assert.match(text, /HP · 10\.42 WIB/);
+  assert.ok(!/\+?62\d{8,}|@/.test(text), "tidak ada nomor HP/email");
+  assert.ok(!/TES/.test(text));
+  const tes = lead.buildLeadMessage(lead.sanitizeLead({ sid: "tes-abcdef12", kind: "admin" }), []);
+  assert.match(tes, /\[TES\]/);
+});
+
+test("pengurang duplikat: satu peringatan per kunci dalam jendela waktu", () => {
+  const once = lead.createLeadDeduper(1000);
+  assert.equal(once("s1:u1", 0), true);
+  assert.equal(once("s1:u1", 500), false);
+  assert.equal(once("s1:u2", 500), true);
+  assert.equal(once("s1:u1", 1500), true);
+});
+
+test("FAQ memuat kebijakan toko yang sudah dikonfirmasi pemilik", () => {
+  assert.equal(fesi.matchFaq("bisa tukar tambah laptop lama?").id, "tukar");
+  assert.match(fesi.FAQS.find((f) => f.id === "tukar").answer, /2017/);
+  assert.match(fesi.FAQS.find((f) => f.id === "tukar").answer, /minus/);
+  assert.equal(fesi.matchFaq("bisa kredit spaylater?").id, "kredit");
+  assert.match(fesi.FAQS.find((f) => f.id === "kredit").answer, /Kajen/);
+  assert.match(fesi.FAQS.find((f) => f.id === "booking").answer, /Rp500\.000/);
+  assert.match(fesi.FAQS.find((f) => f.id === "lokasi").answer, /09\.00 sampai 17\.00/);
+  assert.equal(fesi.matchFaq("buka jam berapa?").id, "lokasi");
+});
+
+test("jam buka 09.00-17.00 WIB menentukan alert senyap", () => {
+  assert.equal(lead.isOpenHours(new Date("2026-11-16T02:00:00Z")), true); // 09.00 WIB
+  assert.equal(lead.isOpenHours(new Date("2026-11-16T09:59:00Z")), true); // 16.59 WIB
+  assert.equal(lead.isOpenHours(new Date("2026-11-16T10:00:00Z")), false); // 17.00 WIB
+  assert.equal(lead.isOpenHours(new Date("2026-11-16T01:59:00Z")), false); // 08.59 WIB
+  const night = lead.buildLeadMessage(lead.sanitizeLead({ sid: "abcdefgh12", kind: "admin" }), [], new Date("2026-11-16T14:00:00Z"));
+  assert.match(night, /Di luar jam buka/);
+});
+
+test("rakit PC diarahkan ke admin dan lokasi punya tautan Google Maps", () => {
+  const rakit = fesi.FAQS.find((f) => f.id === "rakit");
+  assert.match(rakit.answer, /pengembangan/);
+  assert.match(rakit.answer, /chat admin/i);
+  assert.equal(rakit.link, undefined, "tidak lagi menautkan halaman rakit PC");
+  assert.ok(rakit.waText);
+  const lokasi = fesi.FAQS.find((f) => f.id === "lokasi");
+  assert.match(lokasi.answer, /Pusat laptop second ada di FS Comp Wiradesa/);
+  assert.match(lokasi.answer, /FS Comp/);
+  assert.equal(lokasi.link.href, "https://www.google.com/maps/search/?api=1&query=FS+Comp");
 });

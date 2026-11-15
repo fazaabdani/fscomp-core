@@ -20,7 +20,7 @@ function store(kind: "local" | "session") {
   }
 }
 
-function identity() {
+export function identity() {
   const local = store("local");
   const session = store("session");
   let vid = local?.getItem("fscomp_vid") ?? null;

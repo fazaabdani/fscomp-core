@@ -8,8 +8,8 @@ export const FILTER_KEYS = ["lokasi", "merek", "processor", "ram", "storage", "w
 // Nilai bawaan filter = bukan "pencarian aktif".
 const FILTER_DEFAULTS: Record<string, string> = { lokasi: "semua", harga: "semua", sort: "unit", view: "grid" };
 
-const UNIT_ID = /^c[a-z0-9]{20,32}$/;
-const CLIENT_ID = /^[a-z0-9-]{8,48}$/i;
+export const UNIT_ID = /^c[a-z0-9]{20,32}$/;
+export const CLIENT_ID = /^[a-z0-9-]{8,48}$/i;
 const BOT_UA = /bot|crawl|spider|slurp|facebookexternalhit|facebot|preview|headless|lighthouse|pagespeed|gtmetrix|pingdom|uptime|monitor|curl|wget|python-requests|httpclient|axios|node-fetch|go-http|java\/|scrapy|phantom|selenium|puppeteer|playwright|whatsapp|telegrambot|discordbot|twitterbot|linkedinbot|bingpreview|google-read-aloud|chrome-lighthouse/i;
 
 export function isBotUserAgent(userAgent: string | null | undefined) {

@@ -19,7 +19,8 @@ import {
   type FesiUnit,
   type NeedId
 } from "@/lib/fesi";
-import { send } from "./CatalogAnalyticsClient";
+import { deviceOfWidth } from "@/lib/catalog-analytics";
+import { identity, send } from "./CatalogAnalyticsClient";
 import styles from "./FesiWidget.module.css";
 
 type Pose = "salam" | "tanya" | "mikir" | "oke";
@@ -49,6 +50,17 @@ function track(label: string) {
   send({ type: "FESI", path: window.location.pathname, label });
 }
 
+// Kabari admin lewat Telegram bahwa calon pembeli baru klik WhatsApp (tanpa data pribadi; gagal diam-diam).
+function sendLead(payload: Record<string, unknown>) {
+  try {
+    const body = JSON.stringify({ sid: identity().sid, device: deviceOfWidth(window.innerWidth), ...payload });
+    if (navigator.sendBeacon?.("/api/katalog/fesi/lead", new Blob([body], { type: "application/json" }))) return;
+    fetch("/api/katalog/fesi/lead", { method: "POST", body, keepalive: true, headers: { "content-type": "application/json" } }).catch(() => undefined);
+  } catch {
+    /* peringatan tidak boleh mengganggu pengunjung */
+  }
+}
+
 function specLine(u: FesiUnit) {
   return [u.processor, u.ram, u.ssd].filter(Boolean).join(" · ");
 }
@@ -70,6 +82,10 @@ export function FesiWidget() {
   const needRef = useRef<NeedId | undefined>(undefined);
   const budgetRef = useRef<BudgetId | undefined>(undefined);
   const reduced = useRef(false);
+  const shownRef = useRef<string[]>([]);
+  const faqRef = useRef<string[]>([]);
+
+  const leadContext = () => ({ need: needRef.current, budget: budgetRef.current, shown: shownRef.current, faq: faqRef.current });
 
   const push = useCallback((items: Omit<Item, "id">[]) => {
     setMessages((prev) => [...prev, ...items.map((item) => ({ ...item, id: idRef.current++ }))]);
@@ -176,6 +192,7 @@ export function FesiWidget() {
       const more: Chip[] = [
         { label: "Ganti budget", run: () => changeBudget() },
         { label: "Ganti kebutuhan", run: () => changeNeed() },
+        { label: "Bisa dicicil?", run: () => answerFaq(FAQS.find((f) => f.id === "kredit") as Faq, true) },
         { label: "Lihat semua di katalog", run: () => goCatalog() },
         askAdmin(),
         { label: "Tanya hal lain", run: () => faqMenu(true) }
@@ -204,6 +221,7 @@ export function FesiWidget() {
       }
       const rec = recommend(all, need, budget);
       track(`rec:${rec.mode}:${rec.units.length}`);
+      shownRef.current = rec.units.map((u) => u.id);
       if (rec.mode === "kosong") {
         finish(
           [
@@ -280,13 +298,14 @@ export function FesiWidget() {
 
   function answerFaq(faq: Faq, echo: boolean) {
     track(`faq:${faq.id}`);
+    if (!faqRef.current.includes(faq.id)) faqRef.current = [...faqRef.current, faq.id];
     if (echo) you(faq.label);
     say(
       [{ from: "bot", text: faq.answer, link: faq.link }, { from: "bot", text: "Ada lagi yang mau ditanyakan?" }],
       [
         { label: "Tanya hal lain", run: () => faqMenu(true) },
         { label: "Cari laptop", run: () => backToMenu() },
-        askAdmin()
+        askAdmin(faq.waText)
       ],
       "oke"
     );
@@ -406,9 +425,15 @@ export function FesiWidget() {
               <div key={m.id} className={m.from === "bot" ? styles.rowBot : styles.rowUser}>
                 {m.text ? <div className={m.from === "bot" ? styles.bubbleBot : styles.bubbleUser}>{m.text}</div> : null}
                 {m.link ? (
-                  <Link href={m.link.href} className={styles.inlineLink}>
-                    {m.link.text} →
-                  </Link>
+                  /^https?:/.test(m.link.href) ? (
+                    <a href={m.link.href} target="_blank" rel="noopener noreferrer" className={styles.inlineLink}>
+                      {m.link.text} →
+                    </a>
+                  ) : (
+                    <Link href={m.link.href} className={styles.inlineLink}>
+                      {m.link.text} →
+                    </Link>
+                  )
                 ) : null}
                 {m.units?.map((u) => (
                   <article key={u.id} className={styles.card}>
@@ -426,7 +451,7 @@ export function FesiWidget() {
                       <Link href={`/unit/${u.id}`} onClick={() => track(`unit:${u.nomorUnit}`)}>
                         Lihat
                       </Link>
-                      <a href={waForUnit(u)} target="_blank" rel="noopener noreferrer">
+                      <a href={waForUnit(u)} target="_blank" rel="noopener noreferrer" onClick={() => sendLead({ kind: "unit", unitId: u.id, ...leadContext() })}>
                         Tanya via WA
                       </a>
                     </div>
@@ -449,7 +474,14 @@ export function FesiWidget() {
             <div className={styles.chips}>
               {chips.map((c) =>
                 c.href ? (
-                  <a key={c.label} className={`${styles.chip} ${c.wa ? styles.chipWa : ""}`} href={c.href} target="_blank" rel="noopener noreferrer">
+                  <a
+                    key={c.label}
+                    className={`${styles.chip} ${c.wa ? styles.chipWa : ""}`}
+                    href={c.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => c.wa && sendLead({ kind: "admin", ...leadContext() })}
+                  >
                     {c.label}
                   </a>
                 ) : (
