@@ -41,9 +41,10 @@
   line-height: 1.05;
 }
 
-.paymentPage .paymentHeader p {
+.paymentPage .paymentHeader p:not(.eyebrow) {
   margin: 8px 0 0;
-  color: rgba(240, 246, 255, 0.72);
+  /* Ikut warna tema (dulu putih dikunci, hilang di tema terang). */
+  color: color-mix(in srgb, var(--ink) 74%, transparent);
 }
 
 .paymentPage .paymentSummary {
@@ -207,14 +208,16 @@
   grid-template-columns: 78px minmax(0, 1fr) 112px;
 }
 
+/* Warna teks baris pembayaran mengikuti tema (var(--ink)); sebelumnya putih kebiruan dikunci
+   sehingga nyaris tak terbaca di tema terang (Nyaman, FS Comp, Light, Elegant). */
 .paymentPage .paymentRow span {
-  color: rgba(240, 246, 255, 0.74);
+  color: color-mix(in srgb, var(--ink) 74%, transparent);
   font-size: 12px;
   line-height: 1.2;
 }
 
 .paymentPage .paymentRow strong {
-  color: #f0f6ff;
+  color: var(--ink);
   font-size: 13px;
   line-height: 1.15;
 }
@@ -222,13 +225,13 @@
 .paymentPage .paymentRow small {
   display: inline;
   margin-top: 0;
-  color: rgba(240, 246, 255, 0.62);
+  color: color-mix(in srgb, var(--ink) 66%, transparent);
   font-size: 10.5px;
   line-height: 1.1;
 }
 
 .paymentPage .paymentRow b {
-  color: #dff8ff;
+  color: var(--ink);
   font-size: 12px;
   line-height: 1.15;
   text-align: right;
