@@ -1282,7 +1282,31 @@ textarea {
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(7, 17, 30, 0.78);
+  /* Warna mengikuti token tema (gelap/terang/elegan), bukan konstanta gelap, supaya tulisan selalu terbaca. */
+  background: var(--surface-strong);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.checkTile svg {
+  flex: none;
+  color: var(--muted);
+}
+
+/* Terpilih = hijau lembut, jadi sekali lihat terlihat mana yang sudah dicentang. */
+.checkTile:has(input:checked) {
+  border-color: color-mix(in srgb, var(--green) 55%, transparent);
+  background: color-mix(in srgb, var(--green) 14%, var(--surface-strong));
+}
+
+.checkTile:hover {
+  border-color: var(--line-strong);
+}
+
+.checkTile input[type="checkbox"] {
+  flex: none;
+  accent-color: var(--green);
 }
 
 .qcForm {
@@ -1391,6 +1415,18 @@ textarea {
 .qcCompactForm .checkGrid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
+}
+
+/* ".qcCompactForm label" membuat semua label jadi grid, sehingga centang menumpuk di atas teks.
+   Untuk kotak centang, kembalikan ke satu baris: centang, ikon, teks. */
+.qcCompactForm .checkTile,
+.qcForm .checkTile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.2;
 }
 
 .qcCompactForm .panelHeader {
@@ -4161,6 +4197,11 @@ html[data-theme="light"] .mediaPickerFolderRow {
 
 html[data-theme="light"] .mediaPickerModal {
   background: #ffffff;
+}
+
+/* Kotak centang (QC harian dll.) dan pil angka kecil: versi terang dengan kontras cukup. */
+html[data-theme="light"] .miniMetrics span {
+  color: #1554c9;
 }
 
 html[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator {
