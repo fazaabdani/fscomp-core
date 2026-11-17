@@ -25,14 +25,15 @@ export const metadata: Metadata = {
     title: CATALOG_SEO_TITLE,
     description: CATALOG_SEO_DESCRIPTION,
     url: "/katalog",
-    images: ["/branding/fs-comp-logo.webp"],
+    // Gambar 1200x630 JPG (<300 KB): WhatsApp/Facebook menampilkan pratinjau dengan baik; logo WebP persegi tidak.
+    images: [{ url: "/branding/og-katalog.jpg", width: 1200, height: 630, alt: "Katalog Laptop Second FS Comp" }],
     type: "website"
   },
   twitter: {
     card: "summary_large_image",
     title: CATALOG_SEO_TITLE,
     description: CATALOG_SEO_DESCRIPTION,
-    images: ["/branding/fs-comp-logo.webp"]
+    images: ["/branding/og-katalog.jpg"]
   }
 };
 
