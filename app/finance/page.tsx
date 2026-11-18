@@ -6,8 +6,9 @@ import { requireRole } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-function reportUrl(from?: string, to?: string) {
+function reportUrl(from?: string, to?: string, jenis?: string) {
   const params = new URLSearchParams();
+  if (jenis) params.set("jenis", jenis);
   if (from) params.set("from", from);
   if (to) params.set("to", to);
   const query = params.toString();
@@ -23,11 +24,21 @@ function todayJakartaDateString() {
   }).format(new Date());
 }
 
-export default async function FinancePage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+export default async function FinancePage({ searchParams }: { searchParams?: { from?: string; to?: string; jenis?: string } }) {
   await requireRole(["admin"]);
   const from = searchParams?.from ?? "";
   const to = searchParams?.to ?? "";
-  const { stats, sales } = await getFinancePageData({ from, to });
+  const jenis = searchParams?.jenis === "laptop" || searchParams?.jenis === "nonlaptop" ? searchParams.jenis : "";
+  const { stats, laptopStats, nonLaptopStats, sales } = await getFinancePageData({ from, to, jenis });
+  const tabHref = (value: string) => {
+    const params = new URLSearchParams();
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    if (value) params.set("jenis", value);
+    const query = params.toString();
+    return query ? `/finance?${query}` : "/finance";
+  };
+  const jenisLabel = jenis === "laptop" ? "Laptop" : jenis === "nonlaptop" ? "PC & non-laptop" : "Semua penjualan";
 
   return (
     <section className="pageStack">
@@ -37,7 +48,7 @@ export default async function FinancePage({ searchParams }: { searchParams?: { f
           <h1>Laporan omzet, modal, dan estimasi profit kotor</h1>
           <p className="bodyText">Transaksi batal tidak dihitung. Estimasi profit kotor belum termasuk biaya retur, servis, operasional, dan overhead.</p>
         </div>
-        <Link className="primaryButton" href={reportUrl(from, to)}><Download size={17} /> Tarik Laporan CSV</Link>
+        <Link className="primaryButton" href={reportUrl(from, to, jenis)}><Download size={17} /> Tarik Laporan CSV</Link>
       </div>
 
       <form className="panel formGrid" action="/finance">
@@ -58,11 +69,38 @@ export default async function FinancePage({ searchParams }: { searchParams?: { f
         <div className="buttonRow noMargin">
           <button className="secondaryButton" type="submit">Terapkan Filter</button>
           <Link className="secondaryButton" href="/finance">Reset Semua</Link>
-          <Link className="primaryButton" href={reportUrl(from, to)}><Download size={16} /> Export Periode Ini</Link>
+          <Link className="primaryButton" href={reportUrl(from, to, jenis)}><Download size={16} /> Export Periode Ini</Link>
           <Link className="secondaryButton" href="/api/admin/backup"><Download size={16} /> Backup Database JSON</Link>
         </div>
       </form>
 
+      <div className="buttonRow noMargin">
+        <Link className={jenis === "" ? "primaryButton" : "secondaryButton"} href={tabHref("")}>Semua</Link>
+        <Link className={jenis === "laptop" ? "primaryButton" : "secondaryButton"} href={tabHref("laptop")}>Laptop</Link>
+        <Link className={jenis === "nonlaptop" ? "primaryButton" : "secondaryButton"} href={tabHref("nonlaptop")}>PC & non-laptop</Link>
+      </div>
+
+      <section className="panel">
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Ringkasan terpisah</p>
+            <h2>Laptop vs PC & non-laptop</h2>
+          </div>
+        </div>
+        <div className="paymentRows">
+          {[{ label: "Laptop", s: laptopStats }, { label: "PC & non-laptop", s: nonLaptopStats }].map(({ label, s }) => (
+            <div className="paymentRow financeRow" key={label}>
+              <strong>{label}</strong>
+              <div><small>{s.totalTransaksi} transaksi</small></div>
+              <b>Omzet {formatRupiah(s.totalOmzet)}</b>
+              <span>Modal {formatRupiah(s.totalModal)}</span>
+              <span className={s.totalProfit >= 0 ? "profitText" : "lossText"}>Profit {formatRupiah(s.totalProfit)}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <p className="bodyText">Angka di bawah untuk: <strong>{jenisLabel}</strong>.</p>
       <div className="financeStatsGrid">
         <div className="metric metric-cyan metric-highlight"><Banknote size={20} /><span>Omzet</span><strong>{formatRupiah(stats.totalOmzet)}</strong></div>
         <div className="metric metric-green metric-highlight"><TrendingUp size={20} /><span>Estimasi profit kotor</span><strong>{formatRupiah(stats.totalProfit)}</strong></div>
@@ -84,7 +122,7 @@ export default async function FinancePage({ searchParams }: { searchParams?: { f
             <Link className="paymentRow financeRow" href={`/sales/${sale.id}/receipt`} key={sale.id}>
               <span>{sale.invoiceNumber}</span>
               <div>
-                <strong>Unit {sale.unitNomor} - {sale.model}</strong>
+                <strong>{sale.kind === "Laptop" ? `Unit ${sale.unitNomor} - ${sale.model}` : `${sale.kind}: ${sale.model}`}</strong>
                 <small>{sale.soldAt} / {sale.location} / {sale.paymentMethod} / {sale.itemCount} item</small>
               </div>
               <b>{formatRupiah(sale.soldPrice)}</b>

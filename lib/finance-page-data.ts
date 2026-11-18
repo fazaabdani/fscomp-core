@@ -9,7 +9,31 @@ export { saleProfitSplit };
 type FinanceFilters = {
   from?: string;
   to?: string;
+  // "laptop" = penjualan unit laptop, "nonlaptop" = PC, monitor, aksesoris, lisensi, dst. Kosong = keduanya.
+  jenis?: string;
 };
+
+type SaleStats = {
+  totalOmzet: number;
+  totalModal: number;
+  totalProfit: number;
+  totalWiradesaShare: number;
+  totalKajenShare: number;
+  totalTransaksi: number;
+};
+
+const EMPTY_STATS: SaleStats = { totalOmzet: 0, totalModal: 0, totalProfit: 0, totalWiradesaShare: 0, totalKajenShare: 0, totalTransaksi: 0 };
+
+function statsOf(sales: { soldPrice: number; costPrice: number; grossProfit: number; location: "WIRADESA" | "KAJEN" }[]): SaleStats {
+  return {
+    totalOmzet: sales.reduce((sum, sale) => sum + sale.soldPrice, 0),
+    totalModal: sales.reduce((sum, sale) => sum + sale.costPrice, 0),
+    totalProfit: sales.reduce((sum, sale) => sum + sale.grossProfit, 0),
+    totalWiradesaShare: sales.reduce((sum, sale) => sum + saleProfitSplit(sale.location, sale.grossProfit).wiradesaShare, 0),
+    totalKajenShare: sales.reduce((sum, sale) => sum + saleProfitSplit(sale.location, sale.grossProfit).kajenShare, 0),
+    totalTransaksi: sales.length
+  };
+}
 
 function dateFilter(filters: FinanceFilters) {
   const soldAt: { gte?: Date; lte?: Date } = {};
@@ -27,30 +51,24 @@ export async function getFinancePageData(filters: FinanceFilters = {}) {
       take: 120
     });
 
-    const totalOmzet = sales.reduce((sum, sale) => sum + sale.soldPrice, 0);
-    const totalModal = sales.reduce((sum, sale) => sum + sale.costPrice, 0);
-    const totalProfit = sales.reduce((sum, sale) => sum + sale.grossProfit, 0);
-    const totalWiradesaShare = sales.reduce((sum, sale) => sum + saleProfitSplit(sale.location, sale.grossProfit).wiradesaShare, 0);
-    const totalKajenShare = sales.reduce((sum, sale) => sum + saleProfitSplit(sale.location, sale.grossProfit).kajenShare, 0);
+    const laptopSales = sales.filter((sale) => sale.unitId !== null);
+    const nonLaptopSales = sales.filter((sale) => sale.unitId === null);
+    const shown = filters.jenis === "laptop" ? laptopSales : filters.jenis === "nonlaptop" ? nonLaptopSales : sales;
 
     return {
-      stats: {
-        totalOmzet,
-        totalModal,
-        totalProfit,
-        totalWiradesaShare,
-        totalKajenShare,
-        totalTransaksi: sales.length
-      },
-      sales: sales.map((sale) => {
+      stats: statsOf(shown),
+      laptopStats: statsOf(laptopSales),
+      nonLaptopStats: statsOf(nonLaptopSales),
+      sales: shown.map((sale) => {
         const split = saleProfitSplit(sale.location, sale.grossProfit);
         return {
           id: sale.id,
+          kind: sale.unitId ? "Laptop" : "Non-laptop",
           invoiceNumber: sale.invoiceNumber,
           soldAt: jakartaDateKey(sale.soldAt),
           location: sale.location === "WIRADESA" ? "Wiradesa" : "Kajen",
           unitNomor: sale.unit ? displayUnitNumber(sale.unit.nomorUnit) : "-",
-          model: sale.unit?.model ?? "Lisensi / software",
+          model: sale.unit?.model ?? (sale.items[0]?.name ? `${sale.items[0].name}${sale.items.length > 1 ? ` +${sale.items.length - 1} lainnya` : ""}` : "Non-laptop"),
           soldPrice: sale.soldPrice,
           costPrice: sale.costPrice,
           grossProfit: sale.grossProfit,
@@ -63,14 +81,9 @@ export async function getFinancePageData(filters: FinanceFilters = {}) {
     };
   } catch {
     return {
-      stats: {
-        totalOmzet: 0,
-        totalModal: 0,
-        totalProfit: 0,
-        totalWiradesaShare: 0,
-        totalKajenShare: 0,
-        totalTransaksi: 0
-      },
+      stats: EMPTY_STATS,
+      laptopStats: EMPTY_STATS,
+      nonLaptopStats: EMPTY_STATS,
       sales: []
     };
   }

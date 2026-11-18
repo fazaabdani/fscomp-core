@@ -58,6 +58,14 @@ function catalogFields(formData: FormData) {
   };
 }
 
+// Batch hanya dipakai bila id-nya benar-benar ada, supaya id ngawur tidak membuat error foreign key.
+async function validBatchId(formData: FormData) {
+  const id = text(formData, "batchId");
+  if (!id || !entityId.safeParse(id).success) return null;
+  const batch = await prisma.batchPSI.findUnique({ where: { id }, select: { id: true } });
+  return batch?.id ?? null;
+}
+
 export async function createInventoryItemAction(formData: FormData) {
   const user = await requireRole(["admin", "teknisi", "sales"]);
   if (!inventoryFormSchema.safeParse(formValues(formData)).success) redirect("/inventory?error=invalid-input");
@@ -100,6 +108,7 @@ export async function createInventoryItemAction(formData: FormData) {
       costPrice: Math.max(0, numberValue(formData, "costPrice")),
       notes: text(formData, "notes") || null,
       ...catalogFields(formData),
+      batchId: await validBatchId(formData),
       createdById: dbUser?.id ?? null
     }
   });
@@ -147,11 +156,13 @@ export async function updateInventoryItemAction(itemId: string, formData: FormDa
       buyerPhone: text(formData, "buyerPhone") || null,
       costPrice: Math.max(0, numberValue(formData, "costPrice")),
       notes: text(formData, "notes") || null,
-      ...catalogFields(formData)
+      ...catalogFields(formData),
+      batchId: await validBatchId(formData)
     }
   });
 
   revalidatePath("/inventory");
+  revalidatePath("/batch-psi");
   revalidatePath("/katalog/pc");
   revalidatePath(`/inventory/${itemId}/edit`);
   redirect("/inventory?success=updated");

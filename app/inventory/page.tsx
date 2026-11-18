@@ -34,7 +34,7 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
   // join) supaya angkanya tetap akurat walau daftar yang ditampilkan di bawah dibatasi
   // INVENTORY_LIST_LIMIT baris terbaru -- kalau dihitung dari array yang sudah dipotong, barang
   // lama yang STOCK/garansi mau habis bisa hilang diam-diam dari hitungan.
-  const [items, statsRows, totalCount, units] = await Promise.all([
+  const [items, statsRows, totalCount, units, batches] = await Promise.all([
     prisma.inventoryItem.findMany({
       include: {
         unit: { select: { nomorUnit: true, model: true } },
@@ -51,6 +51,11 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
       where: { soldAt: null },
       select: { id: true, nomorUnit: true, model: true },
       orderBy: [{ nomorUnit: "asc" }]
+    }),
+    prisma.batchPSI.findMany({
+      select: { id: true, nomorBatch: true, supplier: true },
+      orderBy: { tanggalMasuk: "desc" },
+      take: 80
     })
   ]);
 
@@ -152,6 +157,13 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
             </select>
           </label>
         </div>
+
+        <label>Datang dalam batch (opsional, untuk PC set / monitor dari kiriman supplier yang sama dengan laptop)
+          <select name="batchId" defaultValue="">
+            <option value="">Di luar batch</option>
+            {batches.map((batch) => <option value={batch.id} key={batch.id}>{batch.nomorBatch} - {batch.supplier}</option>)}
+          </select>
+        </label>
 
         <div className="numberGrid">
           <label>No invoice / nota<input name="invoiceNumber" placeholder="INV-001 / nomor nota supplier" /></label>

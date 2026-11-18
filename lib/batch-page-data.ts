@@ -1,6 +1,7 @@
 import type { BatchPSI } from "./api";
 import { chargerTypes } from "./charger-options";
 import { resolvePrimaryImageUrl } from "./media-data";
+import { inventoryStatusLabel } from "./inventory";
 import { prisma } from "./prisma";
 import { displayUnitNumber } from "./unit-number";
 
@@ -10,6 +11,13 @@ const paymentStatusLabel: Record<string, BatchPSI["statusPembayaran"]> = {
   BUTUH_FOLLOW_UP: "Butuh follow up",
   LUNAS: "Lunas"
 };
+
+const NON_LAPTOP_LABEL: Record<string, string> = {
+  PC_SET: "PC set", PC_ONLY: "PC only", AIO: "All-in-one", MONITOR: "Monitor", ACCESSORY: "Aksesoris", COMPONENT: "Komponen", AKSESORIS: "Aksesoris"
+};
+function nonLaptopLabel(value: string) {
+  return NON_LAPTOP_LABEL[value] ?? value;
+}
 
 function chargerCounts(value: unknown) {
   const raw = value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -27,6 +35,15 @@ type BatchForManagement = {
   chargerCounts: Record<string, number>;
   statusPembayaran: BatchPSI["statusPembayaran"];
   catatan: string;
+  nonLaptop: {
+    id: string;
+    name: string;
+    kindLabel: string;
+    spec: string;
+    costPrice: number;
+    status: string;
+    condition: string;
+  }[];
   units: {
     id: string;
     nomorUnit: string;
@@ -46,6 +63,7 @@ export async function getBatchesForManagementPage(): Promise<{ connected: boolea
   try {
     const dbBatches = await prisma.batchPSI.findMany({
       include: {
+        inventoryItems: { orderBy: { createdAt: "asc" } },
         units: {
           include: { unitPhotos: { orderBy: { order: "asc" }, take: 1, include: { asset: { select: { fileName: true } } } } }
         }
@@ -66,6 +84,15 @@ export async function getBatchesForManagementPage(): Promise<{ connected: boolea
         chargerCounts: chargerCounts(batch.chargerCounts),
         statusPembayaran: paymentStatusLabel[batch.statusPembayaran],
         catatan: batch.catatan ?? "",
+        nonLaptop: batch.inventoryItems.map((item) => ({
+          id: item.id,
+          name: item.name,
+          kindLabel: nonLaptopLabel(item.catalogKind ?? item.category),
+          spec: item.specification ?? item.brandModel ?? "",
+          costPrice: item.costPrice,
+          status: inventoryStatusLabel(item.status),
+          condition: item.condition === "NEW" ? "Baru" : "Second"
+        })),
         units: batch.units.map((unit) => ({
           id: unit.id,
           nomorUnit: displayUnitNumber(unit.nomorUnit),

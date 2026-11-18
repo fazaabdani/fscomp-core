@@ -146,7 +146,9 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                 <span><FileClock size={16} /> Tempo {batch.tanggalTempo}</span>
                 <span><ReceiptText size={16} /> Laptop datang {batch.jumlahLaptopDatang ?? batch.units.length}</span>
                 <span><ReceiptText size={16} /> Charger datang {batch.jumlahChargerDatang ?? 0}</span>
-                {canSeePrice ? <span><ReceiptText size={16} /> Modal {formatRupiah(totalModal)}</span> : null}
+                {canSeePrice ? <span><ReceiptText size={16} /> Modal laptop {formatRupiah(totalModal)}</span> : null}
+                {batch.nonLaptop.length > 0 ? <span><ReceiptText size={16} /> Non-laptop {batch.nonLaptop.length} barang</span> : null}
+                {canSeePrice && batch.nonLaptop.length > 0 ? <span><ReceiptText size={16} /> Modal non-laptop {formatRupiah(batch.nonLaptop.reduce((sum, item) => sum + item.costPrice, 0))}</span> : null}
                 {soldUnits.length > 0 ? <span><ReceiptText size={16} /> {soldUnits.length} unit terjual disembunyikan</span> : null}
                 {returnedUnits.length > 0 && statusFilter !== "RETUR DISTRIBUTOR" ? (
                   <Link href="/batch-psi?status=RETUR+DISTRIBUTOR"><ReceiptText size={16} /> {returnedUnits.length} unit retur disembunyikan</Link>
@@ -198,6 +200,25 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                     )
                   };
                 })} />
+
+              {batch.nonLaptop.length > 0 && !q && statusFilter === "semua" ? (
+                <div className="paymentRows" style={{ marginTop: 12 }}>
+                  <p className="eyebrow" style={{ margin: 0 }}>Non-laptop dalam batch ini (tidak ikut hitungan unit laptop)</p>
+                  {batch.nonLaptop.map((item) => (
+                    <div className="unitRow" key={item.id}>
+                      <span className="unitNumber">{item.kindLabel}</span>
+                      <span>
+                        <Link href={`/inventory/${item.id}/edit`}><strong>{item.name}</strong></Link>
+                        <small>{[item.condition, item.spec].filter(Boolean).join(" / ")}</small>
+                      </span>
+                      <div className="unitBadgeStack">
+                        <span className={`statusPill ${item.status === "Terjual" ? "green" : "yellow"}`}>{item.status}</span>
+                        {canSeePrice ? <span>{formatRupiah(item.costPrice)}</span> : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
 
               {canManageBatch ? (
                 <div className="buttonRow">

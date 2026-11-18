@@ -222,6 +222,8 @@ model BatchPSI {
   updatedAt        DateTime      @updatedAt
 
   units Unit[]
+  // Barang non-laptop (PC set, monitor, dst.) dari kiriman supplier yang sama; metrik laptop tidak ikut berubah.
+  inventoryItems InventoryItem[]
 }
 
 model Unit {
@@ -355,6 +357,10 @@ model InventoryItem {
   catalogWarrantyNote   String?
   catalogSort           Int                   @default(0)
 
+  // Opsional: barang ini datang dalam batch (kiriman supplier) tertentu. Kosong = beli di luar batch.
+  batchId               String?
+  batch                 BatchPSI?             @relation(fields: [batchId], references: [id], onDelete: SetNull)
+
   unit                  Unit?                 @relation(fields: [unitId], references: [id])
   createdBy             User?                 @relation(fields: [createdById], references: [id])
   pcComponent           PcComponent?
@@ -365,6 +371,7 @@ model InventoryItem {
   @@index([serialNumber])
   @@index([purchaseDate])
   @@index([catalogPublic, catalogKind])
+  @@index([batchId])
 }
 
 model PcComponent {

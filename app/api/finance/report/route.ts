@@ -17,14 +17,16 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const from = searchParams.get("from");
   const to = searchParams.get("to");
+  const jenis = searchParams.get("jenis");
   const sales = await prisma.sale.findMany({
-    where: { voidedAt: null, ...dateFilter(from, to) },
+    where: { voidedAt: null, ...dateFilter(from, to), ...(jenis === "laptop" ? { unitId: { not: null } } : jenis === "nonlaptop" ? { unitId: null } : {}) },
     include: { unit: true, items: true },
     orderBy: { soldAt: "desc" }
   });
 
   const headers = [
     "Tanggal",
+    "Jenis",
     "Invoice",
     "Lokasi",
     "Unit",
@@ -45,6 +47,7 @@ export async function GET(request: Request) {
     const split = saleProfitSplit(sale.location, sale.grossProfit);
     return [
       jakartaDateKey(sale.soldAt),
+      sale.unitId ? "Laptop" : "Non-laptop",
       sale.invoiceNumber,
       sale.location,
       sale.unit?.nomorUnit ?? "-",

@@ -32,6 +32,14 @@ export default async function BatchPaymentPage({ params }: { params: { id: strin
           <strong>{formatRupiah(summary.totalModal)}</strong>
         </div>
         <div>
+          <span>Modal laptop</span>
+          <strong>{formatRupiah(summary.totalLaptopModal)}</strong>
+        </div>
+        <div>
+          <span>Modal non-laptop</span>
+          <strong>{formatRupiah(summary.totalNonLaptop)}</strong>
+        </div>
+        <div>
           <span>Modal unit normal</span>
           <strong>{formatRupiah(summary.totalNormal)}</strong>
         </div>
@@ -67,6 +75,29 @@ export default async function BatchPaymentPage({ params }: { params: { id: strin
         </div>
       </section>
 
+      {summary.nonLaptopItems.length > 0 ? (
+        <section className="panel">
+          <div className="panelHeader">
+            <div>
+              <p className="eyebrow">Non-laptop</p>
+              <h2>PC / monitor / aksesoris dalam kiriman ini</h2>
+            </div>
+          </div>
+          <div className="paymentRows">
+            {summary.nonLaptopItems.map((item) => (
+              <div className="paymentRow" key={item.id}>
+                <span>{item.condition}</span>
+                <div>
+                  <strong>{item.name}</strong>
+                  {item.spec ? <small>{item.spec}</small> : null}
+                </div>
+                <b>{formatRupiah(item.costPrice)}</b>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="panel">
         <div className="panelHeader">
           <div>
@@ -94,7 +125,7 @@ export default async function BatchPaymentPage({ params }: { params: { id: strin
 
       <section className="paymentNote">
         <strong>Catatan</strong>
-        <p>Nominal transfer dihitung dari total modal unit normal. Modal unit problem ditahan/dipotong sampai ada keputusan retur, potongan, atau perbaikan.</p>
+        <p>Nominal transfer dihitung dari modal unit laptop normal ditambah modal barang non-laptop dalam kiriman ini. Modal unit problem ditahan/dipotong sampai ada keputusan retur, potongan, atau perbaikan.</p>
       </section>
     </section>
   );

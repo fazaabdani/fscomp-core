@@ -31,12 +31,17 @@ export default async function EditInventoryItemPage({
 }) {
   await requireRole(["admin", "sales"]);
 
-  const [item, units] = await Promise.all([
+  const [item, units, batches] = await Promise.all([
     prisma.inventoryItem.findUnique({ where: { id: params.id } }),
     prisma.unit.findMany({
       where: { soldAt: null },
       select: { id: true, nomorUnit: true, model: true },
       orderBy: [{ nomorUnit: "asc" }]
+    }),
+    prisma.batchPSI.findMany({
+      select: { id: true, nomorBatch: true, supplier: true },
+      orderBy: { tanggalMasuk: "desc" },
+      take: 80
     })
   ]);
 
@@ -112,6 +117,13 @@ export default async function EditInventoryItemPage({
             </select>
           </label>
         </div>
+
+        <label>Datang dalam batch (opsional)
+          <select name="batchId" defaultValue={item.batchId ?? ""}>
+            <option value="">Di luar batch</option>
+            {batches.map((batch) => <option value={batch.id} key={batch.id}>{batch.nomorBatch} - {batch.supplier}</option>)}
+          </select>
+        </label>
 
         <div className="numberGrid">
           <label>No invoice / nota<input name="invoiceNumber" defaultValue={item.invoiceNumber ?? ""} /></label>

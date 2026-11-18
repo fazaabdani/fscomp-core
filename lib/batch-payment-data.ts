@@ -15,6 +15,7 @@ export async function getBatchPaymentSummary(batchId: string) {
     const batch = await prisma.batchPSI.findUnique({
       where: { id: batchId },
       include: {
+        inventoryItems: { orderBy: { createdAt: "asc" } },
         units: {
           orderBy: { nomorUnit: "asc" },
           include: {
@@ -32,9 +33,14 @@ export async function getBatchPaymentSummary(batchId: string) {
 
     const normalUnits = batch.units.filter((unit) => payableStatuses.includes(unit.statusObservasi));
     const problemUnits = batch.units.filter((unit) => heldStatuses.includes(unit.statusObservasi));
-    const totalModal = batch.units.reduce((sum, unit) => sum + unit.hargaModal, 0);
+    const totalLaptopModal = batch.units.reduce((sum, unit) => sum + unit.hargaModal, 0);
     const totalNormal = normalUnits.reduce((sum, unit) => sum + unit.hargaModal, 0);
     const totalProblem = problemUnits.reduce((sum, unit) => sum + unit.hargaModal, 0);
+
+    // Barang non-laptop (PC set, monitor, dst.) di batch yang sama: modalnya ikut ditagih supplier,
+    // tapi dipisah dari angka laptop supaya metrik laptop tidak bergeser. Yang rusak/hilang tidak ikut dibayar.
+    const nonLaptopPayable = batch.inventoryItems.filter((item) => item.status !== "DAMAGED" && item.status !== "LOST" && item.status !== "RETURNED");
+    const totalNonLaptop = nonLaptopPayable.reduce((sum, item) => sum + item.costPrice, 0);
 
     return {
       id: batch.id,
@@ -44,10 +50,19 @@ export async function getBatchPaymentSummary(batchId: string) {
       tanggalTempo: batch.tanggalTempo.toISOString().slice(0, 10),
       statusPembayaran: paymentStatusLabel[batch.statusPembayaran] ?? batch.statusPembayaran,
       catatan: batch.catatan ?? "",
-      totalModal,
+      totalModal: totalLaptopModal + totalNonLaptop,
+      totalLaptopModal,
       totalNormal,
       totalProblem,
-      netTransfer: totalNormal,
+      totalNonLaptop,
+      netTransfer: totalNormal + totalNonLaptop,
+      nonLaptopItems: nonLaptopPayable.map((item) => ({
+        id: item.id,
+        name: item.name,
+        spec: item.specification ?? item.brandModel ?? "",
+        condition: item.condition === "NEW" ? "Baru" : "Second",
+        costPrice: item.costPrice
+      })),
       normalUnits: normalUnits.map((unit) => ({
         id: unit.id,
         nomorUnit: unit.nomorUnit,
