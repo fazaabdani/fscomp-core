@@ -1067,6 +1067,7 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
           <span className="catalogHeroPill catalogSocialProofPill"><TrendingUp size={16} /> {STORE_SOLD_CLAIM}</span>
           <div className="buttonRow">
             <a className="primaryButton" href="#produk-ready">Lihat Katalog</a>
+            <Link className="secondaryButton" href="/katalog/pc">Katalog PC</Link>
             <Link className="secondaryButton" href="/katalog/rakit-pc">Rakit PC</Link>
             <a className="greenButton" href="https://wa.me/62816660056" target="_blank" rel="noreferrer">Chat Admin</a>
             <a className="secondaryButton" href="https://fscomp.id" target="_blank" rel="noreferrer">fscomp.id</a>
