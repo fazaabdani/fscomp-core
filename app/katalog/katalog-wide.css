@@ -1,0 +1,105 @@
+/* Katalog laptop: pakai lebar layar besar dengan rapi (bukan sekadar melebar).
+   - Layar >= 1100px : kontainer lebih lebar, kartu otomatis jadi lebih banyak kolom
+     (grid kartu sudah auto-fit, jadi cukup melebarkan kontainernya).
+   - Layar >= 1500px : filter pindah ke kolom kiri (ikut menempel saat gulir), daftar laptop di kanan,
+     blok info (cara belanja, garansi, testimoni) dipindah ke bawah daftar dan dipersempit supaya enak dibaca.
+   HP/tablet (< 1100px) tidak berubah sama sekali.
+   Hanya berlaku untuk halaman yang punya .dynamicCatalogPage (tidak menyentuh halaman lain). */
+
+@media (min-width: 1100px) {
+  main:has(.dynamicCatalogPage) {
+    max-width: 1320px;
+  }
+}
+
+@media (min-width: 1500px) {
+  main:has(.dynamicCatalogPage) {
+    max-width: 1600px;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  main section.dynamicCatalogPage {
+    grid-template-columns: 290px minmax(0, 1fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+
+  /* Bagian atas tetap selebar penuh. */
+  main section.dynamicCatalogPage > .catalogLandingHero,
+  main section.dynamicCatalogPage > .catalogTicker,
+  main section.dynamicCatalogPage > .catalogFeatureStrip,
+  main section.dynamicCatalogPage > .catalogSectionTitle {
+    grid-column: 1 / -1;
+  }
+
+  /* Urutan tampil: hero -> ringkasan -> PRODUK (inti halaman) -> info belanja & testimoni.
+     Hanya visual; urutan DOM/SEO tidak berubah. */
+  main section.dynamicCatalogPage > .catalogLandingHero { order: 1; }
+  main section.dynamicCatalogPage > .catalogTicker { order: 2; }
+  main section.dynamicCatalogPage > .catalogTicker + .catalogFeatureStrip { order: 3; }
+  main section.dynamicCatalogPage > #produk-ready { order: 4; }
+  main section.dynamicCatalogPage > .catalogFilterShell { order: 5; }
+  main section.dynamicCatalogPage > .catalogResultBar { order: 5; }
+  main section.dynamicCatalogPage > .catalogPublicSection { order: 5; }
+
+  /* Filter di kolom kiri. Kolomnya setinggi daftar produk (3 baris), isinya yang menempel saat gulir.
+     Menempelkan isi (bukan kolomnya) menjaga filter berhenti di akhir daftar, tidak menimpa blok info. */
+  main section.dynamicCatalogPage > .catalogFilterShell {
+    grid-column: 1;
+    grid-row: span 3;
+    align-self: stretch;
+  }
+
+  main section.dynamicCatalogPage > .catalogFilterShell > .catalogFilterDrawer {
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  main section.dynamicCatalogPage > .catalogFilterShell .catalogFilterPanel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  main section.dynamicCatalogPage > .catalogResultBar,
+  main section.dynamicCatalogPage > .catalogPublicSection {
+    grid-column: 2;
+  }
+
+  /* Kartu laptop: 4 kolom di layar lebar (bentuk Ringkas/Daftar tetap pakai aturan aslinya). */
+  main section.dynamicCatalogPage .catalogPublicGrid:not(.catalogView-list):not(.catalogView-compact) {
+    grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  }
+
+  /* Panel angka di hero: kotak ikut mengisi tinggi panel, tidak ada ruang kosong. */
+  main section.dynamicCatalogPage .catalogHeroStatsPanel {
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-content: stretch;
+  }
+
+  main section.dynamicCatalogPage .catalogHeroStatsGrid {
+    grid-auto-rows: 1fr;
+  }
+
+  main section.dynamicCatalogPage .catalogStatBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  main section.dynamicCatalogPage .catalogStatBox strong {
+    font-size: clamp(34px, 3vw, 52px);
+  }
+
+  /* Info belanja & testimoni: di bawah daftar produk, kolom tengah yang lebih sempit. */
+  main section.dynamicCatalogPage > .catalogSectionTitle:not(#produk-ready),
+  main section.dynamicCatalogPage > .catalogSectionTitle + .catalogFeatureStrip,
+  main section.dynamicCatalogPage > .catalogTestimonials {
+    grid-column: 1 / -1;
+    order: 9;
+    width: min(100%, 1100px);
+    justify-self: center;
+  }
+}
