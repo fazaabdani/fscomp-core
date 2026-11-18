@@ -1195,6 +1195,9 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
       <div className="catalogSectionTitle catalogReveal" id="produk-ready">
         <p className="eyebrow">Produk Ready</p>
         <h2>Pilih laptop sesuai kebutuhan panjenengan</h2>
+        <p className="catalogPcHint" style={{ margin: "6px 0 0", fontSize: 14, color: "var(--muted)" }}>
+          Butuh PC atau monitor juga? <Link href="/katalog/pc" style={{ color: "var(--blue)", fontWeight: 700 }}>Lihat katalog PC</Link>
+        </p>
       </div>
 
       <CatalogFilterShell

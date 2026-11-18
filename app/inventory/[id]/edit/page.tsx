@@ -5,14 +5,20 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatDateInput, formatDateWib, inventoryStatusLabel, warrantyInfo, warrantyUnitLabel } from "@/lib/inventory";
 import { requireRole } from "@/lib/session";
+import { CATALOG_KINDS, KIND_LABEL } from "@/lib/katalog-pc";
 import { updateInventoryItemAction } from "../../actions";
 
-const categories = ["SSD", "RAM", "CHARGER", "BATERAI", "LCD", "KEYBOARD", "AKSESORIS", "LAINNYA"];
+const categories = ["SSD", "RAM", "CHARGER", "BATERAI", "LCD", "KEYBOARD", "AKSESORIS", "PC_SET", "PC_ONLY", "AIO", "MONITOR", "LAINNYA"];
+const catalogKinds = CATALOG_KINDS;
 const statuses: InventoryItemStatus[] = ["STOCK", "USED_IN_UNIT", "SOLD", "RETURNED", "DAMAGED", "LOST"];
 const warrantyUnits: WarrantyDurationUnit[] = ["DAY", "WEEK", "MONTH", "YEAR"];
 
 function categoryLabel(category: string) {
   if (category === "LAINNYA") return "Lainnya";
+  if (category === "PC_SET") return "PC set";
+  if (category === "PC_ONLY") return "PC only";
+  if (category === "AIO") return "All-in-one";
+  if (category === "MONITOR") return "Monitor";
   return category;
 }
 
@@ -116,6 +122,38 @@ export default async function EditInventoryItemPage({
           <label>Pembeli / pemakai barang<input name="buyerName" defaultValue={item.buyerName ?? ""} /></label>
           <label>WA pembeli<input name="buyerPhone" defaultValue={item.buyerPhone ?? ""} /></label>
         </div>
+
+        <div className="panelHeader">
+          <div>
+            <p className="eyebrow">Katalog PC</p>
+            <h2>Tampil di fscomp.id/pc</h2>
+          </div>
+        </div>
+        <label className="checkTile">
+          <input type="checkbox" name="catalogPublic" defaultChecked={item.catalogPublic} />
+          <span>Tampilkan di katalog PC (butuh status Stok dan harga jual lebih dari 0)</span>
+        </label>
+        <div className="numberGrid">
+          <label>Jenis di katalog
+            <select name="catalogKind" defaultValue={item.catalogKind ?? ""}>
+              <option value="">Pilih jenis</option>
+              {catalogKinds.map((kind) => <option value={kind} key={kind}>{KIND_LABEL[kind]}</option>)}
+            </select>
+          </label>
+          <label>Kondisi
+            <select name="condition" defaultValue={item.condition}>
+              <option value="SECOND">Second</option>
+              <option value="NEW">Baru</option>
+            </select>
+          </label>
+        </div>
+        <div className="numberGrid">
+          <label>Harga jual (Rp)<input name="salePrice" inputMode="numeric" type="number" min="0" step="1000" defaultValue={item.salePrice ?? ""} /></label>
+          <label>Urutan tampil (kecil dulu)<input name="catalogSort" inputMode="numeric" type="number" min="0" max="9999" defaultValue={item.catalogSort} /></label>
+        </div>
+        <label>Isi paket (mis. monitor 22 inci, keyboard, mouse)<input name="catalogIncludes" maxLength={300} defaultValue={item.catalogIncludes ?? ""} /></label>
+        <label>Garansi (teks singkat untuk pembeli, kosongkan bila tidak mau ditampilkan)<input name="catalogWarrantyNote" maxLength={200} defaultValue={item.catalogWarrantyNote ?? ""} /></label>
+        <label>Link foto (alamat /api/media/file/... dari Pustaka Media, atau link Google Drive)<input name="catalogImageUrl" maxLength={500} defaultValue={item.catalogImageUrl ?? ""} /></label>
 
         <label>Catatan<textarea name="notes" defaultValue={item.notes ?? ""} /></label>
 

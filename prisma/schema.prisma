@@ -74,6 +74,12 @@ enum WarrantyDurationUnit {
   YEAR
 }
 
+// Kondisi barang untuk katalog non-laptop (PC, monitor, aksesoris): second atau baru.
+enum ProductCondition {
+  SECOND
+  NEW
+}
+
 enum LicenseType {
   OFFICE
   WINDOWS
@@ -338,6 +344,17 @@ model InventoryItem {
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 
+  // Katalog non-laptop (PC set, PC only, monitor, aksesoris) di /katalog/pc. Semua opsional/berdefault supaya
+  // barang lama tidak berubah; barang hanya tampil bila catalogPublic = true, status STOCK, dan salePrice > 0.
+  salePrice             Int?
+  condition             ProductCondition      @default(SECOND)
+  catalogKind           String?
+  catalogPublic         Boolean               @default(false)
+  catalogIncludes       String?
+  catalogImageUrl       String?
+  catalogWarrantyNote   String?
+  catalogSort           Int                   @default(0)
+
   unit                  Unit?                 @relation(fields: [unitId], references: [id])
   createdBy             User?                 @relation(fields: [createdById], references: [id])
   pcComponent           PcComponent?
@@ -347,6 +364,7 @@ model InventoryItem {
   @@index([supplier])
   @@index([serialNumber])
   @@index([purchaseDate])
+  @@index([catalogPublic, catalogKind])
 }
 
 model PcComponent {

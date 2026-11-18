@@ -9,13 +9,17 @@ import { formatRupiah } from "@/lib/api";
 import { createInventoryItemAction } from "./actions";
 import { FlashNotice } from "../FlashNotice";
 
-const categories = ["SSD", "RAM", "CHARGER", "BATERAI", "LCD", "KEYBOARD", "AKSESORIS", "LAINNYA"];
+const categories = ["SSD", "RAM", "CHARGER", "BATERAI", "LCD", "KEYBOARD", "AKSESORIS", "PC_SET", "PC_ONLY", "AIO", "MONITOR", "LAINNYA"];
 
 const statuses: InventoryItemStatus[] = ["STOCK", "USED_IN_UNIT", "SOLD", "RETURNED", "DAMAGED", "LOST"];
 const warrantyUnits: WarrantyDurationUnit[] = ["DAY", "WEEK", "MONTH", "YEAR"];
 
 function categoryLabel(category: string) {
   if (category === "LAINNYA") return "Lainnya";
+  if (category === "PC_SET") return "PC set";
+  if (category === "PC_ONLY") return "PC only";
+  if (category === "AIO") return "All-in-one";
+  if (category === "MONITOR") return "Monitor";
   return category;
 }
 

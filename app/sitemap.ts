@@ -8,14 +8,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
   const base: MetadataRoute.Sitemap = [
     { url: "https://core.fscomp.id/katalog", lastModified, changeFrequency: "daily", priority: 1 },
-    { url: "https://core.fscomp.id/katalog/rakit-pc", lastModified, changeFrequency: "daily", priority: 0.9 }
+    { url: "https://core.fscomp.id/katalog/rakit-pc", lastModified, changeFrequency: "daily", priority: 0.9 },
+    { url: "https://core.fscomp.id/katalog/pc", lastModified, changeFrequency: "daily", priority: 0.8 }
   ];
 
   try {
     // Syarat yang sama dengan getCatalogPageData: hanya unit yang benar-benar tampil di /katalog
     // (terverifikasi, belum terjual, QC harian terakhir ada dan tidak "TIDAK_LOLOS"). Tanpa query string.
     const units = await prisma.unit.findMany({
-      where: { soldAt: null, statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] } },
+      where: { soldAt: null, statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] }, NOT: { model: { startsWith: "PC SET", mode: "insensitive" } } },
       select: {
         id: true,
         updatedAt: true,

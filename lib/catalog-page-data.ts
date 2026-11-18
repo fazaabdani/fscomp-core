@@ -82,6 +82,7 @@ export async function getCatalogPageData() {
       prisma.unit.findMany({
         where: {
           soldAt: null,
+          NOT: { model: { startsWith: "PC SET", mode: "insensitive" } },
           statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] },
           stockLocation: "WIRADESA"
         },
@@ -92,6 +93,7 @@ export async function getCatalogPageData() {
       prisma.unit.findMany({
         where: {
           soldAt: null,
+          NOT: { model: { startsWith: "PC SET", mode: "insensitive" } },
           statusObservasi: { in: ["VERIFIED", "VERIFIED_WITH_NOTES"] },
           stockLocation: "KAJEN"
         },
