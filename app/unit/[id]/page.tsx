@@ -260,8 +260,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
                 "Garansi toko: software 3 bulan, hardware 3 minggu.",
                 "Pengiriman dari Pekalongan. Unit hanya 1, stok bisa habis sewaktu-waktu.",
                 "Foto unit asli, bukan gambar contoh."
-              ].join("
-")}
+              ].join("\n")}
             />
           ) : null}
           {isInternalUser && !unit.soldAt ? <ShareUnitButton model={unit.model} spec={`${unit.processor} / ${unit.ram} / ${unit.ssd}`} price={formatRupiah(unit.hargaJualRekomendasi)} medium="admin" /> : null}
