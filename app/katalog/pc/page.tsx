@@ -28,10 +28,10 @@ export const metadata: Metadata = {
 const WA = "https://wa.me/62816660056";
 const rupiah = (value: number) => `Rp${new Intl.NumberFormat("id-ID").format(Math.round(value))}`;
 
-function Card({ item }: { item: PcCatalogItem }) {
+function Card({ item, big = false }: { item: PcCatalogItem; big?: boolean }) {
   const image = item.image ? displayCatalogImageUrl(item.image) : "";
   return (
-    <article className="pcCatCard">
+    <article className={`pcCatCard ${image ? "" : "noPhoto"} ${big ? "isSet" : ""}`}>
       <div className="pcCatPhoto">
         {image ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -77,7 +77,7 @@ function Section({ id, title, hint, items }: { id: string; title: string; hint: 
       <p className="pcCatHint">{hint}</p>
       <div className="pcCatGrid">
         {items.map((item) => (
-          <Card item={item} key={item.key} />
+          <Card item={item} key={item.key} big={id === "pc-set"} />
         ))}
       </div>
     </section>

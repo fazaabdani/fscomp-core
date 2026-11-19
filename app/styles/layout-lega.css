@@ -2,7 +2,8 @@
    dan jarak antar bagian dirapatkan supaya tidak banyak scroll. Hanya di layar; cetak dan HP tidak tersentuh. */
 @media screen and (min-width: 1100px) {
   html .appShell .appShellMain > main {
-    max-width: min(1840px, 100%);
+    width: 100%; /* tanpa ini isi menyusut mengikuti kontennya (margin auto di kolom flex), batas lebar tak berguna */
+    max-width: min(2200px, 100%);
     padding: 22px 28px 44px;
   }
   html .appShell .pageStack {

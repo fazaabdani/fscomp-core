@@ -25,7 +25,7 @@
   font-weight: 700;
 }
 
-.pcCatNav { display: flex; gap: 8px; flex-wrap: wrap; position: sticky; top: 0; z-index: 5; padding: 8px 0; }
+.pcCatNav { display: flex; gap: 8px; flex-wrap: wrap; position: sticky; top: 0; z-index: 5; padding: 8px 10px; margin: 0 -10px; border-radius: 12px; background: color-mix(in srgb, var(--surface-strong) 94%, transparent); backdrop-filter: blur(10px); }
 .pcCatNav a {
   display: inline-flex;
   gap: 6px;
@@ -47,7 +47,7 @@
 .pcCatSectionHead span { color: var(--muted); font-size: 13px; }
 .pcCatHint { margin: 0; color: var(--muted); font-size: 14px; }
 
-.pcCatGrid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.pcCatGrid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
 .pcCatCard {
   display: flex;
   flex-direction: column;
@@ -97,3 +97,9 @@
   white-space: nowrap;
 }
 .pcCatNote { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+
+/* Barang tanpa foto: tidak perlu kotak gambar kosong yang besar. Diganti ikon kecil di samping label sehingga kartu ringkas. */
+.pcCatCard.noPhoto .pcCatPhoto { display: none; }
+.pcCatCard.noPhoto .pcCatBody { padding: 12px 14px; gap: 6px; }
+.pcCatCard.noPhoto h3 { font-size: 16px; }
+.pcCatCard.isSet.noPhoto .pcCatPhoto { display: grid; aspect-ratio: 16 / 7; }
