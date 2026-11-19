@@ -1,3 +1,4 @@
+import { CopyWaButton } from "@/app/CopyWaButton";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -243,6 +244,26 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
           <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
           {isInternalUser ? <ShareUnitButton model={unit.model} /> : null}
           {isInternalUser ? <Link className="primaryButton" href={`/label?unit=${unit.id}`}><QrCode size={17} /> Generate Label</Link> : null}
+          {isInternalUser && !unit.soldAt ? (
+            <CopyWaButton
+              label="Salin teks marketplace"
+              text={[
+                `Laptop Second ${unit.model} ${unit.processor} ${unit.ram} ${unit.ssd} Garansi Toko`,
+                "",
+                `${unit.model}`,
+                `Prosesor: ${unit.processor}`,
+                `RAM: ${unit.ram}`,
+                `Penyimpanan: ${unit.ssd}`,
+                `Layar: ${unit.lcdSize}`,
+                `Sistem operasi: ${publicWindows}`,
+                "Kondisi: second, sudah melalui QC (keyboard, layar, baterai, port, dan fungsi dasar dicek).",
+                "Garansi toko: software 3 bulan, hardware 3 minggu.",
+                "Pengiriman dari Pekalongan. Unit hanya 1, stok bisa habis sewaktu-waktu.",
+                "Foto unit asli, bukan gambar contoh."
+              ].join("
+")}
+            />
+          ) : null}
           {isInternalUser && !unit.soldAt ? <ShareUnitButton model={unit.model} spec={`${unit.processor} / ${unit.ram} / ${unit.ssd}`} price={formatRupiah(unit.hargaJualRekomendasi)} medium="admin" /> : null}
         </div>
       </div>
