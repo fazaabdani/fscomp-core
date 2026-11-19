@@ -1,7 +1,8 @@
 /* Batch: daftar ringkas satu baris per batch. Isi (unit, tombol) terbuka bila baris diklik. */
 .batchFilter { display: flex; flex-wrap: wrap; gap: 8px; }
 .batchFilter input[type="search"] { flex: 1 1 280px; min-height: 42px; padding: 0 14px; }
-.batchFilter select { min-height: 42px; }
+.batchFilter select { width: auto; min-width: 200px; min-height: 42px; }
+.batchFilter .primaryButton, .batchFilter .secondaryButton { width: auto; }
 
 .batchManagement { display: grid; gap: 8px; }
 .batchCard { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }

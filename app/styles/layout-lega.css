@@ -50,3 +50,9 @@
     font-size: 14px;
   }
 }
+
+/* Keuangan: kartu angka tidak lagi memotong nominal besar. */
+@media screen {
+  html .appShell .financeStatsGrid { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  html .appShell .financeStatsGrid .metric strong { font-size: clamp(18px, 1.5vw, 26px); white-space: nowrap; }
+}
