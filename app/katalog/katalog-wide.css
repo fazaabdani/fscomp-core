@@ -226,7 +226,7 @@ main section.dynamicCatalogPage .catalogSectionTitle h2 { font-size: clamp(22px,
   main section.dynamicCatalogPage .catalogView-list .catalogPrice { font-size: 16px; }
 }
 
-/* Koreksi berdasarkan data: ±70% klik WhatsApp terjadi langsung dari kartu di daftar, bukan dari halaman detail.
+/* Koreksi berdasarkan data: lebih dari separuh klik WhatsApp (41 dari 77) terjadi langsung dari kartu di daftar, bukan dari halaman detail.
    Maka tombol "Tanya Unit" tetap ada di kartu HP (kecil, di atas link kartu); "Lihat Detail" cukup lewat mengetuk kartu. */
 @media (max-width: 820px) {
   main section.dynamicCatalogPage .catalogPublicCard .catalogCardActions { display: flex; position: relative; z-index: 4; margin-top: 4px; }
