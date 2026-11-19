@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { CheckCircle2, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, MessageSquareQuote, PackageCheck, Search, ShieldCheck, SlidersHorizontal, Sparkles, Star, TrendingUp, Truck, Wallet } from "lucide-react";
+import { CheckCircle2, Grid2X2, LayoutGrid, List, MapPin, MessageCircle, MessageSquareQuote, Search, ShieldCheck, SlidersHorizontal, Sparkles, Star, TrendingUp, Truck, Wallet } from "lucide-react";
 import { CopyWaButton } from "@/app/CopyWaButton";
 import { CatalogPhoto } from "@/app/components/CatalogPhoto";
 import { formatRupiah } from "@/lib/api";
@@ -98,6 +98,32 @@ function ramLabel(value: string) {
 function storageLabel(value: string) {
   const size = capacityNumber(value);
   return size ? `${size}GB` : value;
+}
+
+const MODEL_CASE: Record<string, string> = {
+  THINKPAD: "ThinkPad", IDEAPAD: "IdeaPad", MACBOOK: "MacBook", ELITEBOOK: "EliteBook", PROBOOK: "ProBook",
+  ZENBOOK: "ZenBook", VIVOBOOK: "VivoBook", EXPERTBOOK: "ExpertBook", CHROMEBOOK: "Chromebook", IMAC: "iMac"
+};
+const KEEP_UPPER = new Set(["HP", "MSI", "LG", "AIO", "LCD", "SSD", "RAM", "PC", "AMD", "FHD", "HD", "UHD", "IPS", "OLED", "NVIDIA", "RTX", "GTX"]);
+
+// Hanya untuk tampilan: "LENOVO THINKPAD X13 GEN 2" menjadi "Lenovo ThinkPad X13 Gen 2". Data di database tidak berubah.
+function prettyText(value: string) {
+  return value
+    .split(/\s+/)
+    .map((word) => {
+      if (/[a-z]/.test(word)) return word; // sudah campuran huruf besar-kecil, biarkan
+      const upper = word.toUpperCase();
+      if (MODEL_CASE[upper]) return MODEL_CASE[upper];
+      if (/^I[3579]|^I[3579]-/.test(upper)) return `i${upper.slice(1)}`;
+      if (/\d/.test(upper) || KEEP_UPPER.has(upper)) return upper;
+      return upper.charAt(0) + upper.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
+
+function prettyScreen(lcdSize: string, resolution: string) {
+  const size = lcdSize.replace(/\s*(inch|inci)/i, '"').trim();
+  return [size, resolution].filter(Boolean).join(" ");
 }
 
 function distinctResolution(lcdSize: string, lcdResolution: string) {
@@ -281,24 +307,22 @@ function CatalogSection({
               <span className="statusPill green">{unit.stockLocation}</span>
             </div>
             <div>
-              <span className="catalogBrand">{brandOf(unit.model)}</span>
-              <h3>{unit.model}</h3>
+              <h3>{prettyText(unit.model)}</h3>
             </div>
-            <p>{unit.processor}</p>
-            {unit.descriptionHighlight ? <p className="catalogCardHighlight">{unit.descriptionHighlight}</p> : null}
-            <div className="miniMetrics">
+            <p className="catalogSpecLine">
+              <strong>{prettyText(unit.processor)}</strong>
               <span>{unit.ram}</span>
               <span>{unit.ssd}</span>
-              <span>{unit.isTouchscreen ? "Touchscreen" : "Non-touchscreen"}</span>
-            </div>
-            <div className="catalogSpecList">
-              <span>{unit.windowsVersion}</span>
-              <span>LCD {unit.lcdSize}{distinctResolution(unit.lcdSize, unit.lcdResolution) ? ` / ${distinctResolution(unit.lcdSize, unit.lcdResolution)}` : ""}</span>
-            </div>
+              {unit.isTouchscreen ? <em>Touchscreen</em> : null}
+            </p>
+            <p className="catalogScreenLine">
+              {prettyScreen(unit.lcdSize, distinctResolution(unit.lcdSize, unit.lcdResolution))}
+              {unit.windowsVersion ? <span>{unit.windowsVersion}</span> : null}
+            </p>
+            {unit.descriptionHighlight ? <p className="catalogCardHighlight">{unit.descriptionHighlight}</p> : null}
             <div className="catalogTrustRow">
               <span><CheckCircle2 size={14} /> QC {unit.latestQcAt}</span>
               <span><ShieldCheck size={14} /> Garansi toko</span>
-              <span><PackageCheck size={14} /> Stok aktual</span>
             </div>
             <strong className="catalogPrice">{formatRupiah(unit.hargaJualRekomendasi)}</strong>
             <div className="buttonRow catalogCardActions">
