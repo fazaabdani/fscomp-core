@@ -84,6 +84,17 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
         <label>Nama pembeli<input name="buyerName" placeholder="Nama pembeli" /></label>
         <label>No. WhatsApp pembeli<input name="buyerPhone" placeholder="08xxxxxxxxxx" /></label>
         <label>Alamat pembeli<input name="buyerAddress" placeholder="Alamat pembeli untuk nota" /></label>
+        <label>Asal pembeli
+          <select name="leadSource" defaultValue="">
+            <option value="">Pilih (opsional)</option>
+            <option value="KATALOG">Katalog online</option>
+            <option value="WHATSAPP">WhatsApp</option>
+            <option value="TOKO">Datang ke toko</option>
+            <option value="MARKETPLACE">Marketplace</option>
+            <option value="REFERRAL">Teman / referral</option>
+            <option value="LAINNYA">Lainnya</option>
+          </select>
+        </label>
       </div>
 
       <NonLaptopItems

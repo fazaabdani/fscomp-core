@@ -359,15 +359,7 @@ export function FesiWidget() {
     reduced.current = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
     setReady(true);
     const timer = timers.current;
-    // Pengunjung baru: Fesi muncul sendiri. Yang pernah menutup di sesi ini tidak diganggu lagi.
-    if (!safeGet("local", SEEN_KEY) && !safeGet("session", CLOSED_KEY)) {
-      const t = window.setTimeout(() => {
-        safeSet("local", SEEN_KEY, String(Date.now()));
-        track("open:auto");
-        setOpen(true);
-      }, 1800);
-      timer.push(t);
-    }
+    // Fesi tidak lagi muncul otomatis (63% ditutup langsung); pengunjung membukanya lewat tombol "Bantu pilih laptop".
     return () => timer.forEach((id) => window.clearTimeout(id));
   }, []);
 
@@ -413,10 +405,10 @@ export function FesiWidget() {
   return (
     <div className={styles.root} data-fesi>
       {!open ? (
-        <button type="button" className={`${styles.launcher} ${entered ? "" : styles.launcherIn}`} onClick={openByClick} aria-label="Tanya Fesi, asisten FS Comp">
+        <button type="button" className={`${styles.launcher} ${entered ? "" : styles.launcherIn}`} onClick={openByClick} aria-label="Bantu pilih laptop, asisten FS Comp">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={pose("salam")} alt="" width={96} height={100} className={styles.launcherImg} draggable={false} />
-          <span className={styles.tip}>Tanya Fesi</span>
+          <span className={styles.tip}>Bantu pilih laptop</span>
           <span className={styles.ping} aria-hidden="true" />
         </button>
       ) : (

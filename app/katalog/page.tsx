@@ -285,6 +285,13 @@ function catalogHref(filters: CatalogFilters, overrides: Partial<CatalogFilters>
   return `/katalog${text ? `?${text}` : ""}#produk-ready`;
 }
 
+// Tambahkan tanda utm (sebelum #fragment) supaya klik dari daftar yang dibagikan admin terlihat di Analitik Katalog.
+function trackedCatalogLink(catalogPath: string) {
+  const [path, hash] = catalogPath.split("#");
+  const joiner = path.includes("?") ? "&" : "?";
+  return `https://core.fscomp.id${path}${joiner}utm_source=wa&utm_medium=admin&utm_campaign=daftar-unit${hash ? `#${hash}` : ""}`;
+}
+
 function catalogShareText(units: CatalogUnit[], filters: CatalogFilters, catalogPath: string) {
   const shownUnits = units.slice(0, 30);
   const lines = [
@@ -292,7 +299,7 @@ function catalogShareText(units: CatalogUnit[], filters: CatalogFilters, catalog
     `Filter: ${activeFilterText(filters)}`,
     `Urutan: ${sortLabel(filters.sort)}`,
     `Total: ${units.length} unit`,
-    `Link katalog: https://core.fscomp.id${catalogPath}`,
+    `Link katalog: ${trackedCatalogLink(catalogPath)}`,
     "",
     ...shownUnits.map((unit, index) => [
       `${index + 1}. ${unit.nomorUnit} - ${unit.model}`,

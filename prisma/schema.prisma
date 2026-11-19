@@ -699,6 +699,8 @@ model QcHarian {
 
 model Sale {
   id            String       @id @default(cuid())
+  // Asal pembeli (Katalog, WhatsApp, Toko, Marketplace, Referral, Lainnya) untuk menutup lubang klik katalog -> terjual.
+  leadSource    String?
   unitId        String?
   invoiceNumber String       @unique
   location      SaleLocation

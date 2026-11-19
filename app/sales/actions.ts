@@ -182,6 +182,11 @@ async function notifySaleToN8n(payload: {
   }
 }
 
+const LEAD_SOURCES = ["KATALOG", "WHATSAPP", "TOKO", "MARKETPLACE", "REFERRAL", "LAINNYA"];
+function leadSourceValue(value: string) {
+  return LEAD_SOURCES.includes(value) ? value : null;
+}
+
 export async function createSaleAction(formData: FormData) {
   const currentUser = await requireRole(["admin", "teknisi", "sales"]);
   const standalone = text(formData, "saleMode") === "STANDALONE";
@@ -352,6 +357,7 @@ export async function createSaleAction(formData: FormData) {
           grossProfit,
           marketplaceName: marketplaceName || null,
           marketplaceFee,
+          leadSource: leadSourceValue(text(formData, "leadSource")),
           packageMode,
           paymentMethod,
           buyerName: buyerName || null,

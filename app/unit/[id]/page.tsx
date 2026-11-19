@@ -125,7 +125,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
           </div>
           <div className="unitHeroActions">
             <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
-            <ShareUnitButton model={unit.model} />
+            <ShareUnitButton model={unit.model} spec={`${unit.processor} / ${unit.ram} / ${unit.ssd}`} price={formatRupiah(unit.hargaJualRekomendasi)} medium="buyer" />
             <a className="greenButton" href={publicWaLink} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Unit</a>
           </div>
         </div>
@@ -243,6 +243,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
           <span className={`statusPill ${statusTone[unit.statusObservasi as keyof typeof statusTone] ?? "yellow"}`}>{unit.statusObservasi}</span>
           {isInternalUser ? <ShareUnitButton model={unit.model} /> : null}
           {isInternalUser ? <Link className="primaryButton" href={`/label?unit=${unit.id}`}><QrCode size={17} /> Generate Label</Link> : null}
+          {isInternalUser && !unit.soldAt ? <ShareUnitButton model={unit.model} spec={`${unit.processor} / ${unit.ram} / ${unit.ssd}`} price={formatRupiah(unit.hargaJualRekomendasi)} medium="admin" /> : null}
         </div>
       </div>
 
