@@ -47,3 +47,61 @@
 
 .kasirFilter { display: flex; flex-wrap: wrap; gap: 8px; }
 .kasirFilter input[name="q"] { flex: 1 1 240px; }
+
+/* ===== Formulir berbentuk nota (NotaKasir): memakai gaya .notaSheet, kolomnya bisa diketik langsung ===== */
+.notaForm { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3); }
+.notaForm .nf {
+  width: 100%; min-width: 0; min-height: 0; padding: 4px 6px; margin: 0;
+  border: 0; border-bottom: 1px dashed rgba(10, 24, 49, 0.35); border-radius: 4px 4px 0 0;
+  background: rgba(22, 70, 184, 0.05); color: var(--nota-navy);
+  font: inherit; font-size: 13px; box-shadow: none; appearance: auto;
+}
+.notaForm .nf::placeholder { color: rgba(10, 24, 49, 0.4); }
+.notaForm .nf:hover { background: rgba(22, 70, 184, 0.09); }
+.notaForm .nf:focus { outline: 2px solid var(--nota-blue); outline-offset: 0; background: #fff; border-bottom-color: transparent; }
+.notaForm .nf option { color: #0a1831; background: #fff; }
+.notaForm .nfStrong { font-weight: 700; font-size: 14px; }
+.notaForm .nfNum { text-align: right; font-variant-numeric: tabular-nums; }
+.notaForm .nfShort { width: 64px; }
+.notaForm .nfTiny { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--nota-muted); background: transparent; border-bottom-style: dotted; padding: 2px 6px; margin-top: 2px; }
+
+.nfInvoicePending { font-size: 17px !important; color: var(--nota-muted) !important; font-weight: 700 !important; }
+.nfInline { gap: 6px; }
+.nfInline .nf { width: auto; font-weight: 600; font-size: 12px; }
+.nfQr { color: rgba(10, 24, 49, 0.28); }
+
+.nfCol { display: grid; gap: 6px; align-content: start; }
+.nfCol .notaEyebrow { margin-bottom: 2px; }
+.nfLine { display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 8px; font-size: 11px; color: var(--nota-muted); }
+.nfPair { display: grid; grid-template-columns: 70px 64px minmax(0, 1fr); align-items: center; gap: 6px; font-size: 12px; color: var(--nota-muted); }
+.nfSum { color: var(--nota-blue) !important; font-weight: 800; font-size: 12px !important; }
+
+.nfUnit > div { flex: 1; min-width: 0; }
+.nfUnit .nf { background: #fff; }
+
+.nfTableWrap { overflow-x: auto; }
+.nfTable { min-width: 640px; }
+.nfRow { grid-template-columns: minmax(200px, 1fr) 64px 140px 120px 110px !important; }
+.nfItemCell { display: grid; gap: 2px; }
+.nfCostHead { opacity: 0.7; }
+.nfCostCell { font-size: 11px; color: var(--nota-muted); }
+.nfTableTools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.nfTableTools small { color: var(--nota-muted); font-size: 11px; flex: 1 1 260px; }
+.nfAdd { background: #fff !important; color: var(--nota-navy) !important; border: 1px solid var(--nota-line) !important; }
+.nfCheck { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--nota-navy); }
+.nfCheck input { width: 16px; height: 16px; }
+
+.nfLicense { margin-top: 8px; font-size: 12px; color: var(--nota-navy); }
+.nfLicense summary { cursor: pointer; font-weight: 700; }
+.nfLicense summary small { color: var(--nota-muted); font-weight: 400; }
+.nfLicenseGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 8px; }
+.nfLicenseGrid label { display: grid; gap: 3px; font-size: 11px; color: var(--nota-muted); }
+.nfWide { grid-column: 1 / -1; }
+
+.nfSubmitBar { position: sticky; bottom: 8px; z-index: 3; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; border-radius: 10px; background: var(--nota-navy); color: #fff; font-size: 13px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
+
+@media (max-width: 720px) {
+  .notaForm { padding: 16px; }
+  .notaForm .notaInfoGrid { grid-template-columns: minmax(0, 1fr); }
+  .notaForm .notaFooterRow { grid-template-columns: minmax(0, 1fr); }
+}

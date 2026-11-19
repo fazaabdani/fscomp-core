@@ -1,4 +1,4 @@
-import { Gift, MapPin, Receipt, ShoppingCart } from "lucide-react";
+import { MapPin, Receipt, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { formatRupiah } from "@/lib/api";
 import { getSalesPageData } from "@/lib/sales-page-data";
@@ -8,7 +8,8 @@ import { SubmitButton } from "../SubmitButton";
 import { createSaleAction, restoreSaleAction, voidSaleAction } from "./actions";
 import { RestoreSaleButton } from "./RestoreSaleButton";
 import { VoidSaleButton } from "./VoidSaleButton";
-import { SaleUnitFields } from "./SaleUnitFields";
+import { NotaKasir } from "./NotaKasir";
+import { storeByLocation } from "@/lib/sale-receipt-data";
 import { FlashNotice } from "../FlashNotice";
 import "./kasir.css";
 
@@ -73,12 +74,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
 
   const filterActive = Boolean(q || lokasi !== "semua" || status !== "semua");
   const isAdmin = currentUser.role === "admin";
-  const defaultItems = [
-    { name: "Tas laptop", category: "BONUS", qty: 1 },
-    { name: "Mouse wireless", category: "BONUS", qty: 1 },
-    { name: "Microsoft Office", category: "SOFTWARE", qty: 1 },
-    { name: "", category: "LAINNYA", qty: 0 }
-  ];
+  const todayLabel = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" }).format(new Date());
 
   return (
     <section className="pageStack kasirPage">
@@ -110,114 +106,7 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
 
       <div className="kasirLayout">
         <form className="kasirForm" action={createSaleAction}>
-          <section className="kasirStep">
-            <h2><span className="kasirNum">1</span> Laptop dan harga</h2>
-            <div className="kasirFields kasirFields3">
-              <SaleUnitFields units={readyUnits} />
-            </div>
-            {readyUnits.length === 0 ? <div className="emptyState">Belum ada unit siap jual. Transaksi lisensi/software tanpa laptop tetap dapat dicatat.</div> : null}
-          </section>
-
-          <section className="kasirStep">
-            <h2><span className="kasirNum">2</span> Pembayaran</h2>
-            <div className="kasirFields kasirFields4">
-              <label>Metode bayar
-                <select name="paymentMethod" defaultValue="Cash">
-                  <option>Cash</option>
-                  <option>Transfer</option>
-                  <option>DP</option>
-                </select>
-              </label>
-              <label>DP / uang masuk
-                <input name="dpAmount" type="number" inputMode="numeric" min="0" step="1000" placeholder="Kosongkan bila lunas" />
-              </label>
-              <label>Channel penjualan
-                <select name="marketplaceName" defaultValue="">
-                  <option value="">Langsung (toko)</option>
-                  {MARKETPLACES.map((marketplace) => <option key={marketplace}>{marketplace}</option>)}
-                </select>
-              </label>
-              <label>Potongan admin marketplace (Rp)
-                <input name="marketplaceFee" type="number" inputMode="numeric" min="0" step="1000" placeholder="Hanya bila lewat marketplace" />
-              </label>
-            </div>
-            <small className="formHint">Pelunasan DP dicatat di nota nanti, bukan transaksi baru.</small>
-          </section>
-
-          <section className="kasirStep">
-            <h2><span className="kasirNum">3</span> Pembeli</h2>
-            <div className="kasirFields kasirFields3">
-              <label>Nama pembeli<input name="buyerName" placeholder="Nama pembeli" /></label>
-              <label>No. WhatsApp<input name="buyerPhone" placeholder="08xxxxxxxxxx" /></label>
-              <label>Alamat (untuk nota)<input name="buyerAddress" placeholder="Alamat pembeli" /></label>
-            </div>
-          </section>
-
-          <section className="kasirStep">
-            <h2><span className="kasirNum">4</span> Bonus, software, dan aksesoris <small>opsional</small></h2>
-            <div className="kasirItems">
-              <div className="kasirItemRow kasirItemHead">
-                <span>Item</span><span>Kategori</span><span>Qty</span><span>Jual/pcs</span><span>Modal/pcs</span>
-              </div>
-              {defaultItems.map((item) => (
-                <div className="kasirItemRow" key={item.name || "custom-item"}>
-                  <input name="itemName" defaultValue={item.name} placeholder="Item tambahan" aria-label="Nama item" />
-                  <input name="itemCategory" defaultValue={item.category} aria-label="Kategori item" />
-                  <input name="itemQty" type="number" min="0" defaultValue={item.qty} aria-label={`${item.name || "Item"} qty`} />
-                  <input name="itemPrice" type="number" inputMode="numeric" min="0" step="1000" defaultValue={0} aria-label={`${item.name || "Item"} harga jual`} />
-                  <input name="itemCost" type="number" inputMode="numeric" min="0" step="1000" defaultValue={0} aria-label={`${item.name || "Item"} modal`} />
-                </div>
-              ))}
-            </div>
-            <small className="formHint">Qty 0 = item tidak ikut. Ketik angka rupiah tanpa titik (contoh 4100000). Item yang dijual berharga wajib punya modal.</small>
-            <label className="checkTile"><input type="checkbox" name="confirmZeroCost" /> Modal item tambahan memang Rp 0 (gratis)</label>
-          </section>
-
-          <section className="kasirStep">
-            <h2><span className="kasirNum">5</span> Garansi nota</h2>
-            <div className="kasirFields kasirFields4">
-              <label>Garansi software<input name="warrantySoftwareAmount" type="number" min="1" defaultValue={3} /></label>
-              <label>Periode
-                <select name="warrantySoftwareUnit" defaultValue="bulan"><option value="minggu">Minggu</option><option value="bulan">Bulan</option></select>
-              </label>
-              <label>Garansi hardware<input name="warrantyHardwareAmount" type="number" min="1" defaultValue={3} /></label>
-              <label>Periode
-                <select name="warrantyHardwareUnit" defaultValue="minggu"><option value="minggu">Minggu</option><option value="bulan">Bulan</option></select>
-              </label>
-            </div>
-            <details className="kasirMore">
-              <summary><Gift size={15} /> Data lisensi (Office, Windows, antivirus) <small>opsional, bisa diisi nanti di menu Lisensi</small></summary>
-              <div className="kasirFields kasirFields4">
-                <label>Tipe lisensi
-                  <select name="licenseType" defaultValue="AUTO">
-                    <option value="AUTO">Otomatis dari item</option>
-                    <option value="OFFICE">Office</option>
-                    <option value="WINDOWS">Windows</option>
-                    <option value="ANTIVIRUS">Antivirus</option>
-                    <option value="OTHER">Lainnya</option>
-                  </select>
-                </label>
-                <label>Versi<input name="licenseVersion" placeholder="Office 2021 / Windows 11 Pro" defaultValue="2021" /></label>
-                <label>Durasi
-                  <select name="licenseDurationType" defaultValue="LIFETIME">
-                    <option value="LIFETIME">Lifetime</option>
-                    <option value="YEARLY">Tahunan</option>
-                    <option value="CUSTOM">Custom</option>
-                  </select>
-                </label>
-                <label>Berlaku sampai<input name="licenseValidUntil" type="date" /></label>
-              </div>
-              <label>Product key / kode lisensi<input name="licenseProductKey" placeholder="Opsional" /></label>
-              <small className="formHint">Lisensi otomatis masuk menu Lisensi bila item tambahan berisi Office, Windows, software, atau kategori LISENSI/SOFTWARE.</small>
-            </details>
-          </section>
-
-          <div className="kasirSubmitBar">
-            <label className="kasirNote">Catatan (opsional)
-              <input name="notes" placeholder="Contoh: DP, transfer BCA, aksesoris tambahan" />
-            </label>
-            <SubmitButton pendingLabel="Menyimpan transaksi...">Simpan Penjualan</SubmitButton>
-          </div>
+          <NotaKasir units={readyUnits} marketplaces={MARKETPLACES} stores={storeByLocation} todayLabel={todayLabel} />
         </form>
 
         <aside className="kasirAside">
