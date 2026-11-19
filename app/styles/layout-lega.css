@@ -1,0 +1,32 @@
+/* Layar lebar: isi halaman admin memakai ruang yang tersedia (dulu dibatasi 1180-1320px sehingga kiri-kanan kosong),
+   dan jarak antar bagian dirapatkan supaya tidak banyak scroll. Hanya di layar; cetak dan HP tidak tersentuh. */
+@media screen and (min-width: 1100px) {
+  html .appShell .appShellMain > main {
+    max-width: min(1840px, 100%);
+    padding: 22px 28px 44px;
+  }
+  html .appShell .pageStack {
+    gap: 16px;
+  }
+  html .appShell .numberGrid {
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  }
+  html .appShell .statGrid,
+  html .appShell .statsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+}
+
+@media screen and (min-width: 1500px) {
+  html .appShell .appShellMain > main {
+    padding-left: 36px;
+    padding-right: 36px;
+  }
+}
+
+/* Tanpa sidebar (menu atas): ikut dilebarkan, tetap ada batas wajar. */
+@media screen and (min-width: 1100px) {
+  html body > main {
+    max-width: min(1680px, 100%);
+  }
+}
