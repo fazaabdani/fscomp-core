@@ -143,22 +143,57 @@ function uniqueSorted(values: string[]) {
   return Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.localeCompare(b, "id", { numeric: true }));
 }
 
-function filterUnits(units: CatalogUnit[], filters: CatalogFilters) {
-  const q = filters.q.toLowerCase();
-  return units.filter((unit) => {
-    const searchText = [
-      unit.nomorUnit,
-      unit.model,
-      unit.processor,
-      unit.ram,
-      unit.ssd,
-      unit.lcdSize,
-      unit.lcdResolution,
-      unit.stockLocation,
-      unit.windowsVersion
-    ].join(" ").toLowerCase();
+// ===== Pencarian katalog: kalimat biasa harus ketemu =====
+// Dulu seluruh ketikan dicocokkan sebagai satu potongan teks, sehingga "ram 8 prosesor i5" atau "laptop" tidak menemukan apa pun.
+// Sekarang ketikan dipecah: angka RAM/SSD dibaca sebagai spek, kata umum diabaikan, sisanya dicocokkan satu per satu.
+const SEARCH_STOP_WORDS = new Set([
+  "laptop", "notebook", "komputer", "pc", "second", "seken", "bekas", "murah", "harga", "unit", "tipe", "type", "yang", "untuk", "buat",
+  "dengan", "dan", "atau", "di", "ke", "ada", "cari", "mau", "butuh", "prosesor", "processor", "cpu", "core", "intel", "windows", "win", "layar", "inch", "inci", "ram", "ssd", "hdd", "gb", "tb", "storage"
+]);
 
-    if (q && !searchText.includes(q)) return false;
+type ParsedQuery = { ram: number | null; ssd: number | null; gen: number | null; touch: boolean; words: string[] };
+
+function parseSearchQuery(raw: string): ParsedQuery {
+  let text = ` ${raw.toLowerCase().replace(/[,;]/g, " ")} `;
+  let ram: number | null = null;
+  let ssd: number | null = null;
+  let gen: number | null = null;
+  let touch = false;
+
+  text = text.replace(/\bram\s*(\d{1,2})\s*(?:gb|g)?\b/g, (_m, n) => { ram = Number(n); return " "; });
+  text = text.replace(/\b(?:ssd|hdd|storage|penyimpanan|memori)\s*(\d{2,4})\s*(?:gb|g)?\b/g, (_m, n) => { ssd = Number(n); return " "; });
+  text = text.replace(/\bgen(?:erasi)?\s*(\d{1,2})\b/g, (_m, n) => { gen = Number(n); return " "; });
+  text = text.replace(/\b(?:touch\s*screen|touchscreen|touch|sentuh|layar sentuh)\b/g, () => { touch = true; return " "; });
+
+  const words = text.split(/\s+/).filter((w) => w && !SEARCH_STOP_WORDS.has(w));
+  return { ram, ssd, gen, touch, words };
+}
+
+function unitSearchText(unit: CatalogUnit) {
+  return [unit.nomorUnit, unit.model, unit.processor, unit.ram, unit.ssd, unit.lcdSize, unit.lcdResolution, unit.stockLocation, unit.windowsVersion]
+    .join(" ")
+    .toLowerCase();
+}
+
+// Mengembalikan { total syarat, syarat terpenuhi } untuk satu unit.
+function queryMatch(unit: CatalogUnit, parsed: ParsedQuery) {
+  const text = unitSearchText(unit);
+  let total = 0;
+  let hit = 0;
+  const check = (ok: boolean) => { total += 1; if (ok) hit += 1; };
+  if (parsed.ram !== null) check(capacityNumber(unit.ram) === parsed.ram);
+  if (parsed.ssd !== null) check(capacityNumber(unit.ssd) === parsed.ssd);
+  if (parsed.gen !== null) check(new RegExp(`gen\\s*${parsed.gen}\\b`, "i").test(unit.processor));
+  if (parsed.touch) check(unit.isTouchscreen);
+  for (const word of parsed.words) check(text.includes(word));
+  return { total, hit };
+}
+
+function filterUnits(units: CatalogUnit[], filters: CatalogFilters) {
+  const parsed = parseSearchQuery(filters.q);
+  return units.filter((unit) => {
+    const match = queryMatch(unit, parsed);
+    if (match.total > 0 && match.hit < match.total) return false;
     if (filters.lokasi !== "semua" && unit.stockLocation.toLowerCase() !== filters.lokasi) return false;
     if (filters.merek && brandOf(unit.model).toLowerCase() !== filters.merek.toLowerCase()) return false;
     if (filters.processor && processorFamily(unit.processor) !== filters.processor) return false;
@@ -1058,6 +1093,21 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
   const allRawUnits = [...wiradesaUnits, ...kajenUnits];
   const featuredUnits = pickFeaturedUnits(allRawUnits, 4);
   const visibleUnits = sortUnits(filterUnits(allRawUnits, filters), filters.sort);
+  // Bila tidak ada yang persis cocok, tampilkan yang paling mendekati (memenuhi sebagian syarat) supaya pembeli tidak buntu.
+  const parsedSearch = parseSearchQuery(filters.q);
+  const similarUnits = filters.q && visibleUnits.length === 0
+    ? filterUnits(allRawUnits, { ...filters, q: "" })
+        .map((unit) => ({ unit, match: queryMatch(unit, parsedSearch) }))
+        .filter((entry) => entry.match.total > 0 && entry.match.hit > 0)
+        .sort((a, b) => b.match.hit / b.match.total - a.match.hit / a.match.total)
+        .slice(0, 6)
+        .map((entry) => entry.unit)
+    : [];
+  const searchWaText = encodeURIComponent(
+    filters.q
+      ? `Assalamu'alaikum FS Comp. Saya mencari laptop: "${filters.q}". Apakah ada atau bisa dicarikan?`
+      : "Assalamu'alaikum FS Comp. Saya belum menemukan laptop yang sesuai di katalog."
+  );
   const visibleWiradesa = filters.lokasi === "kajen" ? [] : visibleUnits.filter((unit) => unit.stockLocation === "Wiradesa");
   const visibleKajen = filters.lokasi === "wiradesa" ? [] : visibleUnits.filter((unit) => unit.stockLocation === "Kajen");
   const returnTo = catalogHref(filters);
@@ -1359,14 +1409,15 @@ export default async function KatalogPage({ searchParams }: { searchParams?: Rec
       {visibleUnits.length === 0 ? (
         <div className="panel catalogEmptyState">
           <Search size={28} />
-          <h3>Belum menemukan laptop yang cocok</h3>
-          <p>Coba hapus beberapa filter, lihat semua unit ready, atau tanyakan kebutuhan langsung ke admin.</p>
+          <h3>{filters.q ? `Belum ada laptop untuk "${filters.q}"` : "Belum menemukan laptop yang cocok"}</h3>
+          <p>{filters.q ? "Kami bisa carikan. Kirim pencarian Anda ke admin, atau lihat yang paling mendekati di bawah." : "Coba hapus beberapa filter, lihat semua unit ready, atau tanyakan kebutuhan langsung ke admin."}</p>
           <div className="buttonRow">
-            <Link className="primaryButton" href="/katalog#produk-ready">Lihat Semua Laptop</Link>
-            <a className="greenButton" href="https://wa.me/62816660056?text=Assalamu%27alaikum%20FS%20Comp.%20Saya%20belum%20menemukan%20laptop%20yang%20sesuai%20di%20katalog." target="_blank" rel="noreferrer"><MessageCircle size={17} /> Tanya Admin</a>
+            <a className="greenButton" href={`https://wa.me/62816660056?text=${searchWaText}`} target="_blank" rel="noreferrer"><MessageCircle size={17} /> {filters.q ? "Carikan lewat WhatsApp" : "Tanya Admin"}</a>
+            <Link className="secondaryButton" href="/katalog#produk-ready">Lihat Semua Laptop</Link>
           </div>
         </div>
       ) : null}
+      {similarUnits.length > 0 ? <CatalogSection title="Paling mendekati pencarian Anda" subtitle="Belum persis, tapi mirip" units={similarUnits} returnTo={returnTo} view={filters.view} /> : null}
       {visibleWiradesa.length > 0 ? <CatalogSection title="Stok Wiradesa" subtitle="Lokasi utama" units={visibleWiradesa} returnTo={returnTo} view={filters.view} /> : null}
       {visibleKajen.length > 0 ? <CatalogSection title="Stok Kajen" subtitle="Lokasi secondary" units={visibleKajen} returnTo={returnTo} view={filters.view} /> : null}
     </section>
