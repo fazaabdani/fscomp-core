@@ -872,3 +872,45 @@ model Supplier {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
+
+// Stok sparepart (LED laptop, baterai, keyboard, charger, dst.): SATU baris = SATU jenis barang dengan jumlah (qty).
+// Beda dengan InventoryItem yang satu baris = satu barang fisik. Setiap perubahan qty dicatat di SparepartMove.
+model SparepartItem {
+  id         String   @id @default(cuid())
+  category   String
+  name       String
+  brand      String?
+  spec       String?
+  sizeInch   String?
+  resolution String?
+  pins       String?
+  thickness  String?
+  compat     String?
+  qty        Int      @default(0)
+  minQty     Int      @default(2)
+  costPrice  Int      @default(0)
+  salePrice  Int?
+  location   String?
+  shared     Boolean  @default(true)
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  moves SparepartMove[]
+
+  @@index([category])
+  @@index([shared, category])
+}
+
+model SparepartMove {
+  id        String        @id @default(cuid())
+  itemId    String
+  delta     Int
+  qtyAfter  Int
+  reason    String?
+  byName    String?
+  createdAt DateTime      @default(now())
+  item      SparepartItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId, createdAt])
+}

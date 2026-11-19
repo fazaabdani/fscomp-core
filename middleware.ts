@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 function isPublicPath(pathname: string) {
   if (pathname === "/login") return true;
   if (pathname === "/register") return true;
+  if (pathname === "/sparepart") return true; // link berbagi stok sparepart (baca saja)
   if (pathname === "/katalog" || pathname.startsWith("/katalog/")) return true;
   const parts = pathname.split("/").filter(Boolean);
   if (parts.length === 2 && parts[0] === "unit" && parts[1] !== "new") return true;

@@ -32,6 +32,7 @@ export function getNavEntries(currentUser: NavUser): NavEntry[] {
   ];
   const operationLinks: NavLink[] = [
     { href: "/inventory", label: "Inventaris", show: true },
+    { href: "/kelola-sparepart", label: "Stok Sparepart", show: !isMagang },
     { href: "/supplier", label: "Supplier", show: !isMagang && currentUser.role !== "sales" },
     { href: "/retur", label: "Retur ke Supplier", show: !isMagang && currentUser.role !== "sales" },
     { href: "/media", label: "Media Foto Produk", show: currentUser.role === "admin" || currentUser.role === "teknisi" },
