@@ -301,6 +301,7 @@ function CatalogSection({
         {units.map((unit, index) => (
           <article className="catalogPublicCard catalogReveal" key={unit.id}>
             <span className="catalogCardShine" aria-hidden="true" />
+            <Link className="catalogCardCover" href={{ pathname: `/unit/${unit.id}`, query: { from: returnTo } }} aria-hidden="true" tabIndex={-1} />
             {featured ? (
               <span className="catalogHeroPill catalogCardFeaturedTag"><Star size={13} /> Rekomendasi</span>
             ) : null}
