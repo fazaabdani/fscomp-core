@@ -103,3 +103,43 @@
     justify-self: center;
   }
 }
+
+/* ===== Bagian pembuka katalog laptop dibuat ringkas =====
+   Dulu judul 76px + kotak statistik besar + strip info memakan satu layar penuh sebelum laptop terlihat.
+   Sekarang pembuka cukup ±260px sehingga daftar laptop mulai tampak di layar pertama. Hanya visual, isi tidak berubah. */
+main section.dynamicCatalogPage { gap: 14px; }
+
+main section.dynamicCatalogPage .catalogLandingHero { gap: 14px; grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr); }
+main section.dynamicCatalogPage .catalogHeroCopyPanel,
+main section.dynamicCatalogPage .catalogHeroStatsPanel { padding: 18px 22px; gap: 12px; }
+main section.dynamicCatalogPage .catalogHeroCopyPanel h1 {
+  max-width: none;
+  margin: 10px 0 8px;
+  font-size: clamp(28px, 2.6vw, 42px);
+  line-height: 1.08;
+}
+main section.dynamicCatalogPage .catalogHeroCopyPanel h1 span { display: inline; }
+main section.dynamicCatalogPage .catalogHeroCopyPanel p,
+main section.dynamicCatalogPage .catalogHeroStatsPanel p { max-width: 720px; margin: 0 0 8px; font-size: 14px; line-height: 1.55; }
+main section.dynamicCatalogPage .catalogHeroCopyPanel .catalogHeroPill { min-height: 30px; padding: 0 12px; font-size: 13px; }
+main section.dynamicCatalogPage .catalogHeroCopyPanel .buttonRow { margin-top: 6px; }
+
+main section.dynamicCatalogPage .catalogHeroStatsGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+main section.dynamicCatalogPage .catalogStatBox { min-height: 0; padding: 10px 12px; gap: 4px; }
+main section.dynamicCatalogPage .catalogStatBox strong { font-size: 26px; }
+main section.dynamicCatalogPage .catalogStatBox span { font-size: 12px; line-height: 1.25; }
+main section.dynamicCatalogPage .catalogHeroStatsPanel { align-content: center; }
+
+main section.dynamicCatalogPage .catalogTicker { min-height: 0; }
+main section.dynamicCatalogPage .catalogTickerTrack span { padding-top: 6px; padding-bottom: 6px; font-size: 13px; }
+main section.dynamicCatalogPage .catalogFeatureStrip { padding: 8px 14px; gap: 10px; }
+main section.dynamicCatalogPage .catalogFeatureItem span { width: 26px; height: 26px; font-size: 13px; }
+main section.dynamicCatalogPage .catalogFeatureItem strong { font-size: 13px; }
+main section.dynamicCatalogPage .catalogFeatureItem small { font-size: 12px; }
+main section.dynamicCatalogPage .catalogSectionTitle { margin-top: 2px; }
+main section.dynamicCatalogPage .catalogSectionTitle h2 { font-size: clamp(22px, 2vw, 30px); margin: 2px 0; }
+
+@media (max-width: 900px) {
+  main section.dynamicCatalogPage .catalogLandingHero { grid-template-columns: minmax(0, 1fr); }
+  main section.dynamicCatalogPage .catalogHeroStatsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
