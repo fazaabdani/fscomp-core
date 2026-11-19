@@ -41,7 +41,7 @@ export function SaleUnitFields({ units }: { units: SaleUnit[] }) {
           <option value="WIRADESA">Wiradesa / FS Comp</option>
           <option value="KAJEN">Kajen / FS.ID</option>
         </select>
-        <small className="formHint">Default ikut lokasi stok unit yang dipilih, tapi ubah kalau laptopnya sebenarnya dijual di toko lain (pindah stok dulu, atau dibawa ke cabang lain).</small>
+        <small className="formHint">Otomatis ikut lokasi stok unit. Ubah bila dijual di toko lain.</small>
       </label>
       <label>
         Harga jual final
