@@ -16,11 +16,12 @@ export const metadata: Metadata = {
 export default async function SparepartPublicPage() {
   const rows = await prisma.sparepartItem.findMany({
     where: { shared: true },
-    orderBy: [{ category: "asc" }, { name: "asc" }]
+    orderBy: [{ category: "asc" }, { no: "asc" }]
   });
 
   const items: PublicSparepart[] = rows.map((r) => ({
     id: r.id,
+    no: r.no,
     category: r.category,
     categoryLabel: sparepartCategoryLabel(r.category),
     name: r.name,

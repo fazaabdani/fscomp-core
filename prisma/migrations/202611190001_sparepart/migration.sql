@@ -37,3 +37,7 @@ CREATE INDEX IF NOT EXISTS "SparepartMove_itemId_createdAt_idx" ON "SparepartMov
 DO $$ BEGIN
   ALTER TABLE "SparepartMove" ADD CONSTRAINT "SparepartMove_itemId_fkey" FOREIGN KEY ("itemId") REFERENCES "SparepartItem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Nomor urut tetap per barang (1, 2, 3, ...) untuk disebut saat chat.
+ALTER TABLE "SparepartItem" ADD COLUMN IF NOT EXISTS "no" SERIAL;
+CREATE UNIQUE INDEX IF NOT EXISTS "SparepartItem_no_key" ON "SparepartItem"("no");

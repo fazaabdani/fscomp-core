@@ -31,12 +31,12 @@ export default async function KelolaSparepartPage({ searchParams }: { searchPara
   const k = searchParams?.k && isSparepartCategory(searchParams.k) ? searchParams.k : "";
   const s = searchParams?.s === "menipis" || searchParams?.s === "habis" ? searchParams.s : "";
 
-  const all = await prisma.sparepartItem.findMany({ orderBy: [{ category: "asc" }, { name: "asc" }] });
+  const all = await prisma.sparepartItem.findMany({ orderBy: [{ category: "asc" }, { no: "asc" }] });
 
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
   const matchesText = (item: (typeof all)[number]) => {
     if (words.length === 0) return true;
-    const hay = [item.name, item.brand, item.spec, item.sizeInch, item.pins, item.resolution, item.thickness, item.compat, item.location]
+    const hay = [`#${item.no}`, item.name, item.brand, item.spec, item.sizeInch, item.pins, item.resolution, item.thickness, item.compat, item.location]
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
@@ -131,7 +131,7 @@ export default async function KelolaSparepartPage({ searchParams }: { searchPara
                   return (
                     <tr key={item.id} className={state === "habis" ? "out" : state === "menipis" ? "low" : ""}>
                       <td>
-                        <div className="spName">{item.name}</div>
+                        <div className="spName"><span className="spNo">#{item.no}</span> {item.name}</div>
                         <div className="spMeta">
                           <span className="spTag">{sparepartCategoryLabel(item.category)}</span>
                           {tags.map((t) => <span className="spTag" key={t}>{t}</span>)}

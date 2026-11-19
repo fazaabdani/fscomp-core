@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 export type PublicSparepart = {
   id: string;
+  no: number;
   category: string;
   categoryLabel: string;
   name: string;
@@ -28,7 +29,7 @@ export function SparepartBrowser({ items, categories }: { items: PublicSparepart
       if (cat && i.category !== cat) return false;
       if (onlyReady && i.state === "habis") return false;
       if (words.length === 0) return true;
-      const hay = `${i.name} ${i.tags.join(" ")} ${i.compat ?? ""} ${i.categoryLabel}`.toLowerCase();
+      const hay = `#${i.no} ${i.name} ${i.tags.join(" ")} ${i.compat ?? ""} ${i.categoryLabel}`.toLowerCase();
       return words.every((w) => hay.includes(w));
     });
   }, [items, q, cat, onlyReady]);
@@ -51,10 +52,10 @@ export function SparepartBrowser({ items, categories }: { items: PublicSparepart
       ) : (
         <div className="spPubGrid">
           {shown.map((i) => {
-            const msg = encodeURIComponent(`Halo FS Comp, saya mau tanya sparepart: ${i.name}`);
+            const msg = encodeURIComponent(`Halo FS Comp, saya mau tanya sparepart #${i.no}: ${i.name}`);
             return (
               <article key={i.id} className={`spCard ${i.state === "habis" ? "out" : ""}`}>
-                <h3>{i.name}</h3>
+                <h3><span className="spNo">#{i.no}</span> {i.name}</h3>
                 <div className="spMeta">
                   <span className="spTag">{i.categoryLabel}</span>
                   {i.tags.map((t) => <span className="spTag" key={t}>{t}</span>)}

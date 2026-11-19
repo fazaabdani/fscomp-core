@@ -877,6 +877,7 @@ model Supplier {
 // Beda dengan InventoryItem yang satu baris = satu barang fisik. Setiap perubahan qty dicatat di SparepartMove.
 model SparepartItem {
   id         String   @id @default(cuid())
+  no         Int      @unique @default(autoincrement())
   category   String
   name       String
   brand      String?
