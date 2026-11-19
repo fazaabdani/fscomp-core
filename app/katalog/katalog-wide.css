@@ -163,3 +163,4 @@ main section.dynamicCatalogPage .catalogSectionTitle h2 { font-size: clamp(22px,
 /* Tombol: Tanya Unit jadi aksi utama, Lihat Detail lebih tenang. */
 .catalogCardActions .greenButton { flex: 1.35; }
 .catalogCardActions .secondaryButton { flex: 1; background: transparent; border-color: rgba(123, 175, 226, 0.3); }
+.catalogTouchTag { color: #22d3ee; font-weight: 700; }

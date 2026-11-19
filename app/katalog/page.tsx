@@ -121,9 +121,12 @@ function prettyText(value: string) {
     .join(" ");
 }
 
-function prettyScreen(lcdSize: string, resolution: string) {
-  const size = lcdSize.replace(/\s*(inch|inci)/i, '"').trim();
-  return [size, resolution].filter(Boolean).join(" ");
+// "14 INCH FHD" -> '14" FHD'. Kata Touchscreen dan keterangan dalam kurung dibuang karena ditampilkan terpisah.
+function prettyScreen(lcdSize: string) {
+  const raw = lcdSize.replace(/touchscreen/gi, "").replace(/\([^)]*\)/g, "").trim();
+  const match = raw.match(/^(\d+(?:[.,]\d+)?)\s*(?:inch|inci)?\s*(.*)$/i);
+  if (!match) return raw;
+  return [`${match[1]}"`, match[2].trim()].filter(Boolean).join(" ");
 }
 
 function distinctResolution(lcdSize: string, lcdResolution: string) {
@@ -313,11 +316,11 @@ function CatalogSection({
               <strong>{prettyText(unit.processor)}</strong>
               <span>{unit.ram}</span>
               <span>{unit.ssd}</span>
-              {unit.isTouchscreen ? <em>Touchscreen</em> : null}
             </p>
             <p className="catalogScreenLine">
-              {prettyScreen(unit.lcdSize, distinctResolution(unit.lcdSize, unit.lcdResolution))}
+              {prettyScreen(unit.lcdSize)}
               {unit.windowsVersion ? <span>{unit.windowsVersion}</span> : null}
+              {unit.isTouchscreen ? <span className="catalogTouchTag">Touchscreen</span> : null}
             </p>
             {unit.descriptionHighlight ? <p className="catalogCardHighlight">{unit.descriptionHighlight}</p> : null}
             <div className="catalogTrustRow">
