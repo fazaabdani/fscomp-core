@@ -11,6 +11,7 @@ import { DeleteBatchButton } from "./DeleteBatchButton";
 import { DeleteUnitButton } from "./DeleteUnitButton";
 import { BatchUnitSorter } from "./BatchUnitSorter";
 import { FlashNotice } from "../FlashNotice";
+import "./batch.css";
 
 const paymentTone: Record<string, string> = {
   Lunas: "green",
@@ -82,33 +83,18 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
         <div className="infoBox dangerInfo">Database belum tersambung. Data batch tidak bisa dimuat — coba muat ulang halaman ini sebentar lagi, atau hubungi admin teknis kalau berlanjut.</div>
       ) : null}
 
-      <form className="panel formGrid" action="/batch-psi">
-        <div className="panelHeader">
-          <div>
-            <p className="eyebrow">Filter batch</p>
-            <h2>Cari batch atau unit</h2>
-          </div>
-          <Search size={22} />
-        </div>
-        <div className="numberGrid">
-          <label>Cari
-            <input name="q" defaultValue={searchParams?.q ?? ""} placeholder="Nomor batch, supplier, unit, model, spek, charger" />
-          </label>
-          <label>Status unit
-            <select name="status" defaultValue={statusFilter}>
-              <option value="semua">Semua status</option>
-              <option value="VERIFIED">Verified</option>
-              <option value="VERIFIED WITH NOTES">Verified with notes</option>
-              <option value="RECHECK">Recheck</option>
-              <option value="CANDIDATE RETUR">Candidate retur</option>
-              <option value="RETUR DISTRIBUTOR">Retur distributor</option>
-            </select>
-          </label>
-        </div>
-        <div className="buttonRow noMargin">
-          <button className="secondaryButton" type="submit">Terapkan Filter</button>
-          <Link className="secondaryButton" href="/batch-psi">Reset</Link>
-        </div>
+      <form className="batchFilter" action="/batch-psi" role="search">
+        <input name="q" type="search" defaultValue={searchParams?.q ?? ""} placeholder="Cari nomor batch, supplier, unit, model, spek, charger" aria-label="Cari batch atau unit" />
+        <select name="status" defaultValue={statusFilter} aria-label="Status unit">
+          <option value="semua">Semua status unit</option>
+          <option value="VERIFIED">Verified</option>
+          <option value="VERIFIED WITH NOTES">Verified with notes</option>
+          <option value="RECHECK">Recheck</option>
+          <option value="CANDIDATE RETUR">Candidate retur</option>
+          <option value="RETUR DISTRIBUTOR">Retur distributor</option>
+        </select>
+        <button className="primaryButton" type="submit"><Search size={16} /> Cari</button>
+        {q || statusFilter !== "semua" ? <Link className="secondaryButton" href="/batch-psi">Reset</Link> : null}
       </form>
 
       <div className="batchManagement">
@@ -132,15 +118,17 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
             .map((chargerType) => ({ type: chargerType, count: batch.chargerCounts?.[chargerType] ?? 0 }))
             .filter((item) => item.count > 0);
           return (
-            <article className="panel" key={batch.id}>
-              <div className="panelHeader">
-                <div>
-                  <p className="eyebrow">{batch.nomorBatch}</p>
-                  <h2>{batch.supplier}</h2>
-                </div>
+            <details className="batchCard" key={batch.id} open={Boolean(q) || statusFilter !== "semua"}>
+              <summary className="batchSummary">
+                <span className="batchSumCode">{batch.nomorBatch}</span>
+                <strong className="batchSumName">{batch.supplier}</strong>
+                <span className="batchSumDates">Masuk {batch.tanggalMasuk} · Tempo {batch.tanggalTempo}</span>
+                <span className="batchSumCount">{batchUnits.length} unit{batch.nonLaptop.length > 0 ? ` + ${batch.nonLaptop.length} non-laptop` : ""}</span>
+                {canSeePrice ? <span className="batchSumModal">{formatRupiah(totalModal)}</span> : null}
                 <span className={`statusPill ${paymentTone[batch.statusPembayaran] ?? "yellow"}`}>{batch.statusPembayaran}</span>
-              </div>
-
+                <span className="batchSumChevron" aria-hidden="true" />
+              </summary>
+              <div className="batchBody">
               <div className="batchMeta">
                 <span><CalendarDays size={16} /> Masuk {batch.tanggalMasuk}</span>
                 <span><FileClock size={16} /> Tempo {batch.tanggalTempo}</span>
@@ -159,7 +147,7 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                   {chargerSummary.map((item) => <span key={item.type}>{item.type}: {item.count}</span>)}
                 </div>
               ) : null}
-              <p className="bodyText">{batch.catatan}</p>
+              {batch.catatan ? <p className="bodyText">{batch.catatan}</p> : null}
 
               <BatchUnitSorter initialSort={activeSort} units={batchUnits.map((unit) => {
                   const isReady = unit.statusObservasi === "VERIFIED" || unit.statusObservasi === "VERIFIED WITH NOTES";
@@ -221,24 +209,33 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
               ) : null}
 
               {canManageBatch ? (
-                <div className="buttonRow">
+                <div className="batchActions">
+                  <Link className="primaryButton" href={`/batch-psi/${batch.id}/payment`}>Rekap Pembayaran</Link>
                   <Link className="secondaryButton" href={`/batch-psi/${batch.id}/edit`}>Edit Batch</Link>
                   <Link className="secondaryButton" href={`/unit/new?batch=${batch.id}`}>Tambah Unit</Link>
-                  <Link className="secondaryButton" href={`/batch-psi/${batch.id}/history`}>Histori QC</Link>
-                  <Link className="secondaryButton" href={`/batch-psi/${batch.id}/payment`}>Rekap Pembayaran</Link>
-                  <Link className="secondaryButton" href={`/batch-psi/${batch.id}/sold`}>Unit Terjual</Link>
-                  <Link className="secondaryButton" href={`/retur?batch=${batch.id}`}>Resi Retur</Link>
-                  <a className="secondaryButton" href={`/api/batch-psi/${batch.id}/export`}>Export Spek CSV</a>
-                  {canDeleteBatch && currentUser ? (
-                    <form action={deleteBatchAction.bind(null, batch.id)}>
-                      <DeleteBatchButton batchLabel={batch.nomorBatch} currentUsername={currentUser.username} unitCount={batch.units.length} />
-                    </form>
-                  ) : null}
+                  <details className="batchMore">
+                    <summary className="secondaryButton">Lainnya</summary>
+                    <div className="batchMoreMenu">
+                      <Link href={`/batch-psi/${batch.id}/history`}>Histori QC</Link>
+                      <Link href={`/batch-psi/${batch.id}/sold`}>Unit Terjual</Link>
+                      <Link href={`/retur?batch=${batch.id}`}>Resi Retur</Link>
+                      <a href={`/api/batch-psi/${batch.id}/export`}>Export Spek CSV</a>
+                    </div>
+                  </details>
                 </div>
               ) : (
                 <div className="infoBox">Login sebagai admin atau teknisi untuk edit batch dan tambah unit.</div>
               )}
-            </article>
+              {canManageBatch && canDeleteBatch && currentUser ? (
+                <div className="batchDanger">
+                  <span>Hapus batch ini beserta unit aktif dan data QC-nya (tidak bisa dibatalkan).</span>
+                  <form action={deleteBatchAction.bind(null, batch.id)}>
+                    <DeleteBatchButton batchLabel={batch.nomorBatch} currentUsername={currentUser.username} unitCount={batch.units.length} />
+                  </form>
+                </div>
+              ) : null}
+              </div>
+            </details>
           );
         })}
       </div>

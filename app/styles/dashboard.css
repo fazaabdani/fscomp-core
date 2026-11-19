@@ -1,0 +1,9 @@
+/* Dashboard: tiga pekerjaan utama berdampingan, daftar panjang terlipat. */
+.dashTasks { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); align-items: start; }
+.dashTasks > .panel { min-width: 0; }
+.dashTasks .panelHeader h2 { font-size: 19px; }
+.dashHint { margin: 0 0 8px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.dashMore { margin-top: 4px; }
+.dashMore > summary { cursor: pointer; padding: 9px 12px; border: 1px dashed var(--line); border-radius: 10px; font-size: 14px; font-weight: 700; color: var(--blue); list-style: none; text-align: center; }
+.dashMore > summary::-webkit-details-marker { display: none; }
+.dashMore[open] > summary { margin-bottom: 8px; }

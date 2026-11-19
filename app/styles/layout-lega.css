@@ -31,3 +31,22 @@
     max-width: min(1680px, 100%);
   }
 }
+
+/* Tulisan minimum 13px di area admin (layar saja; label, nota, dan cetak tidak berubah).
+   Sebelumnya banyak chip, label, dan keterangan berukuran 10-12px sehingga sulit dibaca. */
+@media screen {
+  html .appShell :is(
+    .eyebrow, .statusPill, .batchCode, .dataTable th, .compactButton, .miniMetrics span, .formHint,
+    .salesControlBar span, .batchUnitSortBar > span, .archiveFilter label, .archiveTableHeader,
+    .archiveTableRow small, .archivePagination, .qcForm label, .qcForm .eyebrow, .qcForm .infoBox,
+    .waAiHint, .waAiRawSettings summary, .waAiRowAdvanced summary, .salesStatsGrid .metric span,
+    .paymentPage .paymentRow span, .paymentPage .paymentRow small, .paymentPage .paymentRow b,
+    .paymentPage .paymentRow strong, .paymentPage .paymentSummary span, .paymentPage .paymentNote,
+    .licenseCardKeyBox span
+  ) {
+    font-size: 13px;
+  }
+  html .appShell :is(.qcForm input:not([type]), .qcForm textarea) {
+    font-size: 14px;
+  }
+}

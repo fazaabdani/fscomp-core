@@ -8,6 +8,7 @@ import { requireRole } from "@/lib/session";
 import { formatRupiah } from "@/lib/api";
 import { createInventoryItemAction } from "./actions";
 import { FlashNotice } from "../FlashNotice";
+import "../kelola-sparepart/sparepart.css";
 
 const categories = ["SSD", "RAM", "CHARGER", "BATERAI", "LCD", "KEYBOARD", "AKSESORIS", "PC_SET", "PC_ONLY", "AIO", "MONITOR", "LAINNYA"];
 
@@ -23,9 +24,10 @@ function categoryLabel(category: string) {
   return category;
 }
 
-const INVENTORY_LIST_LIMIT = 300;
+const PAGE_STEP = 50;
+const INVENTORY_LIST_MAX = 400;
 
-export default async function InventoryPage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
+export default async function InventoryPage({ searchParams }: { searchParams?: { error?: string; success?: string; q?: string; k?: string; s?: string; lim?: string } }) {
   const currentUser = await requireRole(["admin", "teknisi", "sales"]);
   const canEditInventory = currentUser.role === "admin" || currentUser.role === "sales";
   const canSeePrice = canViewPrice(currentUser);
@@ -34,19 +36,40 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
   // join) supaya angkanya tetap akurat walau daftar yang ditampilkan di bawah dibatasi
   // INVENTORY_LIST_LIMIT baris terbaru -- kalau dihitung dari array yang sudah dipotong, barang
   // lama yang STOCK/garansi mau habis bisa hilang diam-diam dari hitungan.
-  const [items, statsRows, totalCount, units, batches] = await Promise.all([
+  const q = (searchParams?.q ?? "").trim();
+  const kategori = categories.includes(searchParams?.k ?? "") ? (searchParams?.k as string) : "";
+  const onlyStock = searchParams?.s === "stok";
+  const limit = Math.min(INVENTORY_LIST_MAX, Math.max(PAGE_STEP, Number(searchParams?.lim) || PAGE_STEP));
+  const words = q.split(/\s+/).filter(Boolean).slice(0, 6);
+  const where = {
+    ...(kategori ? { category: kategori } : {}),
+    ...(onlyStock ? { status: "STOCK" as InventoryItemStatus } : {}),
+    // Setiap kata harus cocok di salah satu kolom, jadi "ssd samsung 256" menyempitkan hasil.
+    AND: words.map((word) => ({
+      OR: [
+        { name: { contains: word, mode: "insensitive" as const } },
+        { brandModel: { contains: word, mode: "insensitive" as const } },
+        { specification: { contains: word, mode: "insensitive" as const } },
+        { serialNumber: { contains: word, mode: "insensitive" as const } },
+        { supplier: { contains: word, mode: "insensitive" as const } },
+        { invoiceNumber: { contains: word, mode: "insensitive" as const } }
+      ]
+    }))
+  };
+  const [items, statsRows, matchCount, units, batches] = await Promise.all([
     prisma.inventoryItem.findMany({
+      where,
       include: {
         unit: { select: { nomorUnit: true, model: true } },
         createdBy: { select: { name: true } }
       },
       orderBy: [{ arrivedAt: "desc" }, { createdAt: "desc" }],
-      take: INVENTORY_LIST_LIMIT
+      take: limit
     }),
     prisma.inventoryItem.findMany({
-      select: { status: true, purchaseDate: true, warrantyDuration: true, warrantyDurationUnit: true }
+      select: { status: true, category: true, purchaseDate: true, warrantyDuration: true, warrantyDurationUnit: true }
     }),
-    prisma.inventoryItem.count(),
+    prisma.inventoryItem.count({ where }),
     prisma.unit.findMany({
       where: { soldAt: null },
       select: { id: true, nomorUnit: true, model: true },
@@ -59,11 +82,27 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
     })
   ]);
 
+  const totalCount = statsRows.length;
+  const countByCategory = new Map<string, number>();
+  for (const row of statsRows) countByCategory.set(row.category, (countByCategory.get(row.category) ?? 0) + 1);
+  const listHref = (extra: { k?: string; s?: string; lim?: number }) => {
+    const sp = new URLSearchParams();
+    if (q) sp.set("q", q);
+    const kk = extra.k !== undefined ? extra.k : kategori;
+    const ss = extra.s !== undefined ? extra.s : onlyStock ? "stok" : "";
+    if (kk) sp.set("k", kk);
+    if (ss) sp.set("s", ss);
+    if (extra.lim) sp.set("lim", String(extra.lim));
+    const text = sp.toString();
+    return text ? `/inventory?${text}` : "/inventory";
+  };
+
   const activeWarrantyCount = statsRows.filter((item) => warrantyInfo(item).tone === "green").length;
   const expiringWarrantyCount = statsRows.filter((item) => warrantyInfo(item).label === "Garansi mau habis").length;
   const stockCount = statsRows.filter((item) => item.status === "STOCK").length;
   const problemCount = statsRows.filter((item) => item.status === "DAMAGED" || item.status === "RETURNED").length;
-  const isTruncated = totalCount > items.length;
+  const isTruncated = matchCount > items.length;
+  const filterActive = Boolean(q || kategori || onlyStock);
 
   const message =
     searchParams?.error === "required"
@@ -89,12 +128,6 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
 
       <FlashNotice message={message} tone={searchParams?.error ? "error" : "success"} queryKeys={["error", "success"]} />
 
-      {isTruncated ? (
-        <div className="infoBox">
-          Menampilkan {items.length} dari {totalCount} barang terbaru. Barang lebih lama tidak ditampilkan di daftar ini (angka di kartu statistik tetap menghitung semua barang).
-        </div>
-      ) : null}
-
       <section className="statGrid">
         <article className="statCard"><PackagePlus size={19} /><span>Stok barang</span><strong>{stockCount}</strong></article>
         <article className="statCard"><ShieldCheck size={19} /><span>Garansi aktif</span><strong>{activeWarrantyCount}</strong></article>
@@ -102,7 +135,26 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
         <article className="statCard"><ClipboardList size={19} /><span>Problem/retur</span><strong>{problemCount}</strong></article>
       </section>
 
-      <form className="panel formGrid" action={createInventoryItemAction}>
+      <form className="spSearch" action="/inventory" role="search">
+        <input type="search" name="q" defaultValue={q} placeholder="Cari nama, merk, spek, serial, supplier, nomor nota..." aria-label="Cari barang" />
+        {kategori ? <input type="hidden" name="k" value={kategori} /> : null}
+        {onlyStock ? <input type="hidden" name="s" value="stok" /> : null}
+        <button className="primaryButton" type="submit">Cari</button>
+        {filterActive ? <Link className="secondaryButton" href="/inventory">Reset</Link> : null}
+      </form>
+
+      <div className="spChips">
+        <Link className={`spChip ${!kategori ? "on" : ""}`} href={listHref({ k: "" })}>Semua <small>{totalCount}</small></Link>
+        {categories.filter((c) => (countByCategory.get(c) ?? 0) > 0).map((c) => (
+          <Link key={c} className={`spChip ${kategori === c ? "on" : ""}`} href={listHref({ k: c })}>{categoryLabel(c)} <small>{countByCategory.get(c)}</small></Link>
+        ))}
+        <Link className={`spChip ${onlyStock ? "on" : ""}`} href={listHref({ s: onlyStock ? "" : "stok" })}>Hanya yang stok</Link>
+      </div>
+
+      <details className="spFold" open={searchParams?.error ? true : undefined}>
+        <summary>Tambah barang masuk</summary>
+        <div className="spFoldBody">
+          <form className="formGrid" action={createInventoryItemAction}>
         <div className="panelHeader">
           <div>
             <p className="eyebrow">Barang masuk</p>
@@ -178,6 +230,8 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
         <label>Catatan<textarea name="notes" placeholder="Contoh: klaim garansi via sales distributor A, barang dari invoice gabungan, dll." /></label>
         <button className="primaryButton" type="submit"><PackagePlus size={16} /> Simpan Barang Masuk</button>
       </form>
+        </div>
+      </details>
 
       <section className="panel">
         <div className="panelHeader">
@@ -189,7 +243,7 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
         </div>
 
         {items.length === 0 ? (
-          <div className="emptyState">Belum ada barang masuk. Input barang pertama dari form di atas.</div>
+          <div className="emptyState">{filterActive ? "Tidak ada barang yang cocok. Coba kata lain atau klik Reset." : "Belum ada barang masuk. Buka Tambah barang masuk di atas."}</div>
         ) : (
           <div className="tableScroll">
             <table className="dataTable">
@@ -251,6 +305,13 @@ export default async function InventoryPage({ searchParams }: { searchParams?: {
             </table>
           </div>
         )}
+        {items.length > 0 ? (
+          <div className="spListFoot">
+            <span>Menampilkan {items.length} dari {matchCount} barang{filterActive ? " yang cocok" : ""}.</span>
+            {isTruncated && limit < INVENTORY_LIST_MAX ? <Link className="secondaryButton" href={listHref({ lim: limit + PAGE_STEP })}>Tampilkan {Math.min(PAGE_STEP, matchCount - items.length)} lagi</Link> : null}
+            {isTruncated && limit >= INVENTORY_LIST_MAX ? <span>Persempit dengan pencarian untuk melihat sisanya.</span> : null}
+          </div>
+        ) : null}
       </section>
     </section>
   );

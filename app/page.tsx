@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+import "./styles/dashboard.css";
 import { Camera, ClipboardCheck, MonitorCog, Sparkles, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -10,6 +12,23 @@ import { CopyWaButton } from "./CopyWaButton";
 import { AutoRefresh } from "./AutoRefresh";
 
 export const dynamic = "force-dynamic";
+
+// Tampilkan 3 baris pertama; sisanya terlipat supaya dashboard tidak panjang.
+function FoldList<T>({ items, visible = 3, children }: { items: T[]; visible?: number; children: (item: T) => ReactNode }) {
+  const head = items.slice(0, visible);
+  const rest = items.slice(visible);
+  return (
+    <div className="listStack">
+      {head.map(children)}
+      {rest.length > 0 ? (
+        <details className="dashMore">
+          <summary>Tampilkan {rest.length} lainnya</summary>
+          <div className="listStack">{rest.map(children)}</div>
+        </details>
+      ) : null}
+    </div>
+  );
+}
 
 export default async function DashboardPage() {
   const currentUser = await getCurrentUser();
@@ -86,8 +105,8 @@ export default async function DashboardPage() {
       <div className="heroPanel">
         <div>
           <p className="eyebrow">Operasional hari ini</p>
-          <h1>Kontrol unit FS Comp dari PSI sampai siap jual.</h1>
-          <p>Pantau input batch, QC harian lengkap, status batch, reminder OS/aplikasi, dan rekomendasi AI sebelum unit masuk katalog.</p>
+          <h1>Kontrol unit FS Comp, dari PSI sampai siap jual</h1>
+          <p>Mulai dari tiga pekerjaan di bawah, urut dari yang paling mendesak.</p>
         </div>
         <div className="heroActions">
           <Link className="primaryButton" href="/qc-harian">Input QC Harian</Link>
@@ -109,6 +128,7 @@ export default async function DashboardPage() {
         <article className="statCard"><MonitorCog size={19} /><span>QC harian hari ini</span><strong>{stats.qcHarian}</strong></article>
       </div>
 
+      <div className="dashTasks">
       <section className="panel dangerPanel">
         <div className="panelHeader">
           <div>
@@ -120,11 +140,8 @@ export default async function DashboardPage() {
             <Link className="secondaryButton" href="/qc-harian">Input QC</Link>
           </div>
         </div>
-        <div className="infoBox">
-          Unit wajib QC harian maksimal {dueDailyQc.dueHours} jam sekali. Unit di bawah ini QC-nya sudah lewat batas itu — tetap tampil di katalog dan tetap bisa dijual, tapi mohon segera di-QC ulang.
-        </div>
-        <div className="listStack">
-          {dueDailyQc.units.length === 0 ? <div className="emptyState">Semua unit aktif masih dalam jadwal QC harian.</div> : dueDailyQc.units.map((unit) => (
+        <p className="dashHint">Batas QC harian {dueDailyQc.dueHours} jam. Unit di bawah sudah lewat batas, tetap tampil di katalog dan bisa dijual, tapi segera di-QC ulang.</p>
+        {dueDailyQc.units.length === 0 ? <div className="emptyState">Semua unit aktif masih dalam jadwal QC harian.</div> : <FoldList items={dueDailyQc.units}>{(unit) => (
             <Link href={`/qc-harian?unit=${unit.id}`} className="unitListItem" key={unit.id}>
               <div>
                 <strong>Unit {unit.nomorUnit} - {unit.model}</strong>
@@ -134,8 +151,7 @@ export default async function DashboardPage() {
               </div>
               <span className="statusPill yellow">Wajib QC</span>
             </Link>
-          ))}
-        </div>
+          )}</FoldList>}
       </section>
 
       <section className="panel">
@@ -149,8 +165,7 @@ export default async function DashboardPage() {
             <Link className="secondaryButton" href="/batch-psi?sort=foto">Lihat Unit</Link>
           </div>
         </div>
-        <div className="listStack">
-          {missingPhotos.units.length === 0 ? <div className="emptyState">Semua unit aktif sudah punya foto katalog.</div> : missingPhotos.units.slice(0, 8).map((unit) => (
+        {missingPhotos.units.length === 0 ? <div className="emptyState">Semua unit aktif sudah punya foto katalog.</div> : <FoldList items={missingPhotos.units.slice(0, 8)}>{(unit) => (
             <Link href={`/unit/${unit.id}/edit`} className="unitListItem" key={unit.id}>
               <div>
                 <strong>Unit {unit.nomorUnit} - {unit.model}</strong>
@@ -159,8 +174,7 @@ export default async function DashboardPage() {
               </div>
               <span className="statusPill yellow"><Camera size={14} /> Perlu foto</span>
             </Link>
-          ))}
-        </div>
+          )}</FoldList>}
       </section>
 
       <section className="panel dangerPanel">
@@ -174,11 +188,8 @@ export default async function DashboardPage() {
             <Link className="secondaryButton" href="/qc-harian">Input QC</Link>
           </div>
         </div>
-        <div className="infoBox">
-          Ini khusus reminder software seperti OS, driver, jam, aplikasi, partisi, dan Office belum install. Office bajakan tidak masuk daftar perlu dibereskan.
-        </div>
-        <div className="listStack">
-          {softwareResolution.units.length === 0 ? <div className="emptyState">Belum ada unit aktif yang punya PR software.</div> : softwareResolution.units.slice(0, 8).map((unit) => (
+        <p className="dashHint">Reminder software: OS, driver, jam, aplikasi, partisi, Office belum install. Office bajakan tidak masuk daftar.</p>
+        {softwareResolution.units.length === 0 ? <div className="emptyState">Belum ada unit aktif yang punya PR software.</div> : <FoldList items={softwareResolution.units.slice(0, 8)}>{(unit) => (
             <Link href={`/qc-harian?unit=${unit.id}`} className="unitListItem" key={unit.id}>
               <div>
                 <strong>Unit {unit.nomorUnit} - {unit.model}</strong>
@@ -187,9 +198,10 @@ export default async function DashboardPage() {
               </div>
               <span className="statusPill yellow">Perlu software</span>
             </Link>
-          ))}
-        </div>
+          )}</FoldList>}
       </section>
+
+      </div>
 
       <div className="twoColumn">
         <section className="panel dangerPanel">
