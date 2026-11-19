@@ -222,18 +222,15 @@ export default async function BatchPsiPage({ searchParams }: { searchParams?: { 
                       <a href={`/api/batch-psi/${batch.id}/export`}>Export Spek CSV</a>
                     </div>
                   </details>
+                  {canDeleteBatch && currentUser ? (
+                    <form className="batchTrash" action={deleteBatchAction.bind(null, batch.id)}>
+                      <DeleteBatchButton batchLabel={batch.nomorBatch} currentUsername={currentUser.username} unitCount={batch.units.length} />
+                    </form>
+                  ) : null}
                 </div>
               ) : (
                 <div className="infoBox">Login sebagai admin atau teknisi untuk edit batch dan tambah unit.</div>
               )}
-              {canManageBatch && canDeleteBatch && currentUser ? (
-                <div className="batchDanger">
-                  <span>Hapus batch ini beserta unit aktif dan data QC-nya (tidak bisa dibatalkan).</span>
-                  <form action={deleteBatchAction.bind(null, batch.id)}>
-                    <DeleteBatchButton batchLabel={batch.nomorBatch} currentUsername={currentUser.username} unitCount={batch.units.length} />
-                  </form>
-                </div>
-              ) : null}
               </div>
             </details>
           );

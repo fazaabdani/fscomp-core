@@ -1,5 +1,7 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
+
 export function DeleteBatchButton({
   batchLabel,
   currentUsername,
@@ -13,8 +15,10 @@ export function DeleteBatchButton({
     <>
       <input name="confirmUsername" type="hidden" />
       <button
-        className="secondaryButton dangerButton"
+        className="batchTrashButton"
         type="submit"
+        aria-label={`Hapus batch ${batchLabel}`}
+        title="Hapus batch ini (perlu konfirmasi)"
         onClick={(event) => {
           const typedUsername = window.prompt(
             `Hapus batch ${batchLabel}?\n\n${unitCount} unit aktif di batch ini akan ikut dihapus beserta data QC-nya. Unit yang punya nota/transaksi tidak bisa dihapus.\n\nKetik username login Anda untuk konfirmasi: ${currentUsername}`
@@ -30,7 +34,7 @@ export function DeleteBatchButton({
           if (confirmationInput instanceof HTMLInputElement) confirmationInput.value = typedUsername;
         }}
       >
-        Hapus Batch
+        <Trash2 size={18} />
       </button>
     </>
   );

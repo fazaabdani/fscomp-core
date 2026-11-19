@@ -40,3 +40,8 @@
   .batchSumName { grid-column: 1 / -1; grid-row: 2; }
   .batchSumDates, .batchSumCount, .batchSumModal { grid-column: 1 / -1; text-align: left; }
 }
+
+/* Hapus batch: ikon tempat sampah di ujung kanan baris tombol (tetap perlu konfirmasi ketik username). */
+.batchTrash { margin-left: auto; }
+.batchTrashButton { display: inline-grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 1px solid color-mix(in srgb, var(--red) 45%, var(--line)); border-radius: 10px; background: transparent; color: var(--red); cursor: pointer; }
+.batchTrashButton:hover { background: color-mix(in srgb, var(--red) 14%, transparent); }
