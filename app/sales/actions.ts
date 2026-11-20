@@ -182,7 +182,7 @@ async function notifySaleToN8n(payload: {
   }
 }
 
-const LEAD_SOURCES = ["KATALOG", "WHATSAPP", "TOKO", "MARKETPLACE", "REFERRAL", "LAINNYA"];
+const LEAD_SOURCES = ["KATALOG", "WHATSAPP", "INSTAGRAM", "TIKTOK_FB", "TOKO", "MARKETPLACE", "REFERRAL", "LAINNYA"];
 function leadSourceValue(value: string) {
   return LEAD_SOURCES.includes(value) ? value : null;
 }
@@ -203,6 +203,8 @@ export async function createSaleAction(formData: FormData) {
     notes: optionalText(1000)
   }).safeParse(formValues(formData));
   if (!validation.success) redirect(`${errorPath}?error=invalid-input`);
+  // Asal pembeli wajib (dipilih lewat popup di kasir) supaya pelacakan klik katalog -> terjual tidak bolong.
+  if (!leadSourceValue(text(formData, "leadSource"))) redirect(`${errorPath}?error=asal-pembeli`);
 
   const unitId = text(formData, "unitId");
   const soldPrice = numberValue(formData, "soldPrice");

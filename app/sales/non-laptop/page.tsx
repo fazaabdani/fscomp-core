@@ -7,7 +7,8 @@ import { warrantyLabel } from "@/lib/pc-package";
 import { NonLaptopItems } from "./NonLaptopItems";
 import { formatRupiah } from "@/lib/api";
 import { jakartaDateKey } from "@/lib/inventory";
-import { SubmitButton } from "../../SubmitButton";
+import { LeadSourceSubmit } from "../LeadSourceSubmit";
+import "../kasir.css";
 import { createSaleAction } from "../actions";
 import { FlashNotice } from "../../FlashNotice";
 
@@ -30,7 +31,9 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
     prisma.saleItem.count({ where: { sale: { unitId: null, voidedAt: null } } })
   ]);
   const soldItemsTruncated = soldItemsTotalCount > soldItems.length;
-  const message = searchParams?.error === "item-wajib"
+  const message = searchParams?.error === "asal-pembeli"
+    ? "Asal pembeli wajib dipilih sebelum transaksi disimpan."
+    : searchParams?.error === "item-wajib"
     ? "Isi minimal satu item dengan qty dan harga jual lebih dari nol."
     : searchParams?.error === "inventaris-sudah-terjual"
       ? "Salah satu barang inventaris yang dipilih ternyata sudah terjual duluan. Periksa ulang pilihan barang."
@@ -84,17 +87,6 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
         <label>Nama pembeli<input name="buyerName" placeholder="Nama pembeli" /></label>
         <label>No. WhatsApp pembeli<input name="buyerPhone" placeholder="08xxxxxxxxxx" /></label>
         <label>Alamat pembeli<input name="buyerAddress" placeholder="Alamat pembeli untuk nota" /></label>
-        <label>Asal pembeli
-          <select name="leadSource" defaultValue="">
-            <option value="">Pilih (opsional)</option>
-            <option value="KATALOG">Katalog online</option>
-            <option value="WHATSAPP">WhatsApp</option>
-            <option value="TOKO">Datang ke toko</option>
-            <option value="MARKETPLACE">Marketplace</option>
-            <option value="REFERRAL">Teman / referral</option>
-            <option value="LAINNYA">Lainnya</option>
-          </select>
-        </label>
       </div>
 
       <NonLaptopItems
@@ -128,7 +120,7 @@ export default async function NonLaptopCashierPage({ searchParams }: { searchPar
           </div>
           <small className="formHint">Kosongkan Garansi hardware kalau barang/jasa ini memang tidak ada garansi.</small>
           <label>Catatan<textarea name="notes" placeholder="Detail barang, layanan, garansi, atau informasi aktivasi." /></label>
-          <SubmitButton icon={<Receipt size={16} />} pendingLabel="Menyimpan transaksi...">Simpan dan Buat Nota</SubmitButton>
+          <LeadSourceSubmit icon={<Receipt size={16} />} label="Simpan dan Buat Nota" pendingLabel="Menyimpan transaksi..." />
         </div>
       </div>
     </form>

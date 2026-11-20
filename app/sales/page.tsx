@@ -66,7 +66,9 @@ export default async function SalesPage({ searchParams }: { searchParams?: { sav
       ? "Transaksi dibatalkan. Unit kembali ke stok siap jual."
       : searchParams?.restored
         ? "Transaksi aktif kembali dan unit ditandai terjual."
-        : searchParams?.error === "modal-kosong"
+        : searchParams?.error === "asal-pembeli"
+          ? "Asal pembeli wajib dipilih sebelum transaksi disimpan."
+          : searchParams?.error === "modal-kosong"
           ? `Modal belum diisi untuk: ${searchParams.detail ?? "item berbayar"}. Isi kolom Modal/pcs, atau centang "Modal memang Rp 0" kalau barangnya gratis.`
           : searchParams?.error
             ? `Transaksi gagal: ${searchParams.error}`

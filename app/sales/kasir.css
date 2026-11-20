@@ -105,3 +105,17 @@
   .notaForm .notaInfoGrid { grid-template-columns: minmax(0, 1fr); }
   .notaForm .notaFooterRow { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ===== Popup asal pembeli (wajib) ===== */
+.leadModalBackdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 16px; background: rgba(4, 10, 22, 0.7); backdrop-filter: blur(3px); }
+.leadModal { width: min(640px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface-strong); color: var(--ink); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5); }
+.leadModal h2 { margin: 0 0 6px; font-size: 21px; }
+.leadModal p { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+.leadGrid { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.leadOption { display: grid; gap: 3px; justify-items: start; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+.leadOption svg { color: var(--blue); margin-bottom: 4px; }
+.leadOption strong { font-size: 15px; }
+.leadOption small { color: var(--muted); font-size: 12.5px; }
+.leadOption:hover, .leadOption:focus-visible { border-color: var(--blue); background: var(--band); outline: none; }
+.leadCancel { width: 100%; margin-top: 14px; }
+@media (max-width: 480px) { .leadGrid { grid-template-columns: minmax(0, 1fr); } }

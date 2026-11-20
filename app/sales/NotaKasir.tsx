@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Calendar, Globe, Laptop2, MapPin, Phone, Plus, QrCode } from "lucide-react";
 import { formatRupiah } from "@/lib/api";
-import { SubmitButton } from "../SubmitButton";
+import { LeadSourceSubmit } from "./LeadSourceSubmit";
 import type { storeByLocation } from "@/lib/sale-receipt-data";
 
 type Unit = {
@@ -123,17 +123,6 @@ export function NotaKasir({
           <input className="nf nfStrong" name="buyerName" placeholder="Nama pembeli" aria-label="Nama pembeli" />
           <input className="nf" name="buyerPhone" placeholder="No. WhatsApp (08xxxxxxxxxx)" aria-label="No. WhatsApp pembeli" inputMode="tel" />
           <input className="nf" name="buyerAddress" placeholder="Alamat (untuk nota)" aria-label="Alamat pembeli" />
-          <label className="nfLine">Asal pembeli
-            <select className="nf" name="leadSource" defaultValue="" aria-label="Asal pembeli">
-              <option value="">Pilih (opsional)</option>
-              <option value="KATALOG">Katalog online</option>
-              <option value="WHATSAPP">WhatsApp</option>
-              <option value="TOKO">Datang ke toko</option>
-              <option value="MARKETPLACE">Marketplace</option>
-              <option value="REFERRAL">Teman / referral</option>
-              <option value="LAINNYA">Lainnya</option>
-            </select>
-          </label>
         </div>
         <div className="nfCol">
           <Eyebrow>PEMBAYARAN</Eyebrow>
@@ -280,7 +269,7 @@ export function NotaKasir({
 
       <div className="nfSubmitBar">
         <span>{units.length === 0 ? "Belum ada unit siap jual." : "Periksa kembali, lalu simpan. Nota langsung dibuat."}</span>
-        <SubmitButton pendingLabel="Menyimpan transaksi...">Simpan Penjualan</SubmitButton>
+        <LeadSourceSubmit label="Simpan Penjualan" pendingLabel="Menyimpan transaksi..." />
       </div>
     </article>
   );
