@@ -283,6 +283,7 @@ export default async function UnitDetailPage({ params, searchParams }: { params:
             placeholderClassName="publicUnitPhoto placeholderPhoto"
             priority
             downloadNamePrefix={slugifyFileName(unit.model)}
+            editUnitId={currentUser?.role === "admin" ? unit.id : undefined}
           />
         ) : (
           <CatalogPhoto

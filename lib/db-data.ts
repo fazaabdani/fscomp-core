@@ -150,6 +150,7 @@ export const getUnitForDetail = cache(async (id: string) => {
     if (!unit) return null;
 
     const gallery = unit.unitPhotos.map((photo) => ({
+      assetId: photo.assetId,
       url: mediaAssetUrl(photo.asset.fileName),
       thumbUrl: mediaThumbUrl(photo.asset.fileName)
     }));

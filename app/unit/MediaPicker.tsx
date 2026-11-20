@@ -1,7 +1,8 @@
 "use client";
 
-import { Images, Loader2, Trash2, Upload, X } from "lucide-react";
+import { Images, Loader2, SlidersHorizontal, Trash2, Upload, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { PhotoEditor, type PhotoItem } from "./PhotoEditor";
 
 type MediaAssetItem = { id: string; url: string; thumbUrl: string; originalName: string };
 type MediaFolderItem = { id: string; name: string; folderCount: number; assetCount: number };
@@ -25,6 +26,7 @@ export function MediaPicker({
   const [data, setData] = useState<BrowseData | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editing, setEditing] = useState<PhotoItem | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -78,12 +80,28 @@ export function MediaPicker({
         {selected.map((photo) => (
           <div className="mediaThumb" key={photo.id}>
             <img src={photo.thumbUrl} alt="Foto terpilih" />
-            <button type="button" className="iconButton" onClick={() => removeSelected(photo.id)} aria-label="Hapus foto dari pilihan">
-              <Trash2 size={14} />
-            </button>
+            <div className="mediaThumbTools">
+              <button type="button" className="iconButton" onClick={() => setEditing(photo)} aria-label="Edit foto (kecerahan, kontras, saturasi)" title="Edit foto">
+                <SlidersHorizontal size={14} />
+              </button>
+              <button type="button" className="iconButton" onClick={() => removeSelected(photo.id)} aria-label="Hapus foto dari pilihan" title="Hapus dari pilihan">
+                <Trash2 size={14} />
+              </button>
+            </div>
           </div>
         ))}
       </div>
+
+      {editing ? (
+        <PhotoEditor
+          photo={editing}
+          onClose={() => setEditing(null)}
+          onSaved={(asset) => {
+            setSelected((current) => current.map((item) => (item.id === editing.id ? asset : item)));
+            setEditing(null);
+          }}
+        />
+      ) : null}
 
       <button type="button" className="secondaryButton" onClick={() => setOpen(true)}>
         <Images size={16} /> {selected.length > 0 ? `Ubah Foto (${selected.length} dipilih)` : "Pilih dari Galeri"}

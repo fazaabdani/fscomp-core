@@ -1,11 +1,13 @@
 "use client";
 
-import { Check, ChevronLeft, ChevronRight, Download, Maximize2, Share2, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Download, Maximize2, Share2, SlidersHorizontal, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { slugifyFileName } from "@/lib/file-naming";
+import { PhotoEditor } from "./PhotoEditor";
 
-type GalleryPhoto = { url: string; thumbUrl: string };
+type GalleryPhoto = { url: string; thumbUrl: string; assetId?: string };
 
 export function UnitGallery({
   photos,
@@ -13,7 +15,8 @@ export function UnitGallery({
   className,
   placeholderClassName = "catalogImagePlaceholder",
   priority = false,
-  downloadNamePrefix
+  downloadNamePrefix,
+  editUnitId
 }: {
   photos: GalleryPhoto[];
   alt: string;
@@ -22,7 +25,11 @@ export function UnitGallery({
   priority?: boolean;
   /** Kalau diisi, tampilkan tombol unduh foto kualitas penuh dengan nama file "<prefix>-<nomor>.webp". */
   downloadNamePrefix?: string;
+  /** Khusus admin: kalau diisi (id unit), muncul tombol Edit Foto (brightness/kontras/saturasi) yang langsung mengganti foto di unit. */
+  editUnitId?: string;
 }) {
+  const router = useRouter();
+  const [editing, setEditing] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -143,8 +150,25 @@ export function UnitGallery({
             {shareStatus === "shared" ? <Check size={16} /> : <Share2 size={16} />}
             {shareStatus === "shared" ? "Foto Terkirim" : shareStatus === "saved" ? "Foto Dibuka" : "Bagikan Foto"}
           </button>
+          {editUnitId && photos[activeIndex].assetId ? (
+            <button type="button" className="secondaryButton galleryEditButton" onClick={() => setEditing(true)} aria-label={`Edit ${alt}`}>
+              <SlidersHorizontal size={16} /> Edit Foto
+            </button>
+          ) : null}
         </div>
       </div>
+
+      {editing && editUnitId && photos[activeIndex].assetId ? (
+        <PhotoEditor
+          photo={{ id: photos[activeIndex].assetId as string, url: photos[activeIndex].url, thumbUrl: photos[activeIndex].thumbUrl }}
+          unitId={editUnitId}
+          onClose={() => setEditing(false)}
+          onSaved={() => {
+            setEditing(false);
+            router.refresh();
+          }}
+        />
+      ) : null}
 
       {photos.length > 1 ? (
         <div className="mediaGrid">
