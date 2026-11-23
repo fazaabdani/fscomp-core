@@ -28,8 +28,12 @@ export function ReceiptDocument({ sale, publicReceiptUrl }: { sale: SaleReceipt;
       <div className="notaHeaderRow">
         <div className="notaBrandBlock">
           <img className={sale.location === "Kajen" ? "notaLogo notaLogoRound" : "notaLogo"} src={sale.store.logo} alt={sale.store.name} />
-          <h2 className="notaBrandName">{sale.store.name}</h2>
-          <p className="notaBrandSlogan">{sale.store.slogan}</p>
+          {sale.location === "Kajen" ? null : (
+            <>
+              <h2 className="notaBrandName">{sale.store.name}</h2>
+              <p className="notaBrandSlogan">{sale.store.slogan}</p>
+            </>
+          )}
         </div>
 
         <div className="notaContactBlock">

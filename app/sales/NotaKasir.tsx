@@ -88,8 +88,12 @@ export function NotaKasir({
         <div className="notaBrandBlock">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={location === "KAJEN" ? "notaLogo notaLogoRound" : "notaLogo"} src={store.logo} alt={store.name} />
-          <h2 className="notaBrandName">{store.name}</h2>
-          <p className="notaBrandSlogan">{store.slogan}</p>
+          {location === "KAJEN" ? null : (
+            <>
+              <h2 className="notaBrandName">{store.name}</h2>
+              <p className="notaBrandSlogan">{store.slogan}</p>
+            </>
+          )}
         </div>
 
         <div className="notaContactBlock">

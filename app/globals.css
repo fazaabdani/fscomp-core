@@ -2916,8 +2916,16 @@ textarea {
   margin-bottom: 6px;
 }
 
+.notaBrandBlock:has(.notaLogoRound) {
+  width: 120px;
+}
+
 .notaLogoRound {
-  max-width: 96px;
+  width: 116px;
+  height: 116px;
+  max-width: 116px;
+  object-fit: contain;
+  margin-bottom: 0;
 }
 
 .notaBrandName {
@@ -3393,8 +3401,14 @@ textarea {
     margin-bottom: 4px;
   }
 
+  .notaBrandBlock:has(.notaLogoRound) {
+    width: 66px;
+  }
+
   .notaLogoRound {
-    max-width: 52px;
+    width: 62px;
+    height: 62px;
+    max-width: 62px;
   }
 
   .notaBrandName {

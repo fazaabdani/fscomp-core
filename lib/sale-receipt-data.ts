@@ -20,7 +20,7 @@ export const storeByLocation = {
     address: "Jalan Diponegoro No. 204B (Utara Rumah Dinas Wakil Bupati), Kec. Kajen, Kab. Pekalongan Jawa Tengah",
     phone: "0851-8266-1773",
     website: "fs.id",
-    logo: "/branding/fs-id-logo.jpg",
+    logo: "/branding/fs-id-logo-round.webp",
     slogan: "Pusat laptop berkualitas"
   }
 } as const;
