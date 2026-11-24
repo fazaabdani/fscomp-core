@@ -10,6 +10,20 @@ const paymentStatusLabel: Record<string, string> = {
 const payableStatuses = ["VERIFIED", "VERIFIED_WITH_NOTES"];
 const heldStatuses = ["RECHECK", "CANDIDATE_RETUR", "RETUR_DISTRIBUTOR"];
 
+/**
+ * Problem unit untuk rekap supplier: hanya catatan saat unit masuk (tanpa QC harian).
+ * Catatan form masuk kadang berformat "Merk: .. Seri: .. Charger: .. Minus: <problem> Windows masuk: .. Status alur: ..";
+ * dalam kasus itu yang ditampilkan hanya bagian Minus, plus keterangan "Retur distributor <tanggal>" bila ada.
+ */
+export function problemText(entryNotes: string | null | undefined) {
+  const text = (entryNotes ?? "").replace(/\s+/g, " ").trim();
+  if (!text) return "Belum ada keterangan problem.";
+  const minus = text.match(/Minus:\s*(.*?)(?=\s*(?:Windows masuk:|Status alur:)|$)/i)?.[1]?.trim();
+  if (!minus) return text;
+  const retur = text.match(/Retur distributor\s+\d{1,2}\/\d{1,2}\/\d{4}/i)?.[0];
+  return retur && !minus.includes(retur) ? `${minus} — ${retur}` : minus;
+}
+
 export async function getBatchPaymentSummary(batchId: string) {
   try {
     const batch = await prisma.batchPSI.findUnique({
@@ -18,13 +32,6 @@ export async function getBatchPaymentSummary(batchId: string) {
         inventoryItems: { orderBy: { createdAt: "asc" } },
         units: {
           orderBy: { nomorUnit: "asc" },
-          include: {
-            qcAwal: true,
-            qcHarian: {
-              orderBy: { tanggal: "desc" },
-              take: 1
-            }
-          }
         }
       }
     });
@@ -82,11 +89,7 @@ export async function getBatchPaymentSummary(batchId: string) {
         ssd: unit.ssd,
         hargaModal: unit.hargaModal,
         statusObservasi: unit.statusObservasi.replaceAll("_", " "),
-        problem: [
-          unit.entryNotes ? `Input batch: ${unit.entryNotes}` : "",
-          unit.qcHarian[0]?.kondisiHariIni ? `QC harian: ${unit.qcHarian[0].kondisiHariIni}` : ""
-        ].filter(Boolean).join(" | ") || "Belum ada keterangan problem.",
-        catatan: unit.qcHarian[0]?.catatan || unit.entryNotes || "-"
+        problem: problemText(unit.entryNotes)
       }))
     };
   } catch {
