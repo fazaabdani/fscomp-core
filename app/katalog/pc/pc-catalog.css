@@ -96,6 +96,15 @@
   text-decoration: none;
   white-space: nowrap;
 }
+.pcCatBudget { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-strong); scroll-margin-top: 64px; }
+.pcCatBudgetGrid { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pcCatBudgetBtn { display: grid; gap: 3px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--band); color: var(--ink); text-decoration: none; }
+.pcCatBudgetBtn strong { font-size: 17px; }
+.pcCatBudgetBtn small { color: var(--muted); font-size: 13px; }
+.pcCatBudgetBtn span { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; color: var(--green); font-size: 13px; font-weight: 700; }
+.pcCatBudgetBtn:hover, .pcCatBudgetBtn:focus-visible { border-color: var(--green); outline: none; }
+@media (max-width: 640px) { .pcCatBudgetGrid { grid-template-columns: minmax(0, 1fr); } }
+
 .pcCatNote { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
 
 /* Barang tanpa foto: tidak perlu kotak gambar kosong yang besar. Diganti ikon kecil di samping label sehingga kartu ringkas. */

@@ -84,13 +84,29 @@ function Section({ id, title, hint, items }: { id: string; title: string; hint: 
   );
 }
 
+const BUDGETS = [
+  { label: "Sampai Rp3 juta", note: "Ketik, internet, administrasi", wa: "sampai Rp3 juta" },
+  { label: "Rp3 – 6 juta", note: "Kantor, sekolah, usaha kecil", wa: "Rp3 sampai 6 juta" },
+  { label: "Di atas Rp6 juta", note: "Desain, editing, game", wa: "di atas Rp6 juta" }
+];
+
+function budgetLink(wa: string) {
+  const text = [`Halo FS Comp, saya cari PC dengan budget ${wa}.`, "Untuk keperluan: ", "Mohon rekomendasi yang sesuai dan apakah ada yang ready."].join("\n");
+  return `${WA}?text=${encodeURIComponent(text)}`;
+}
+
 export default async function KatalogPcPage() {
   const data = await getPcCatalogData();
+  // PC yang benar-benar siap diambil tampil paling atas. Paket rakitan dan komponen (pre-order) dipisah supaya
+  // halaman tidak terlihat seperti daftar spare part ketika stok PC jadi sedang tipis.
+  const readySets = data.sets.filter((item) => item.availability === "READY");
+  const builtSets = data.sets.filter((item) => item.availability !== "READY");
+  const buildItems = [...builtSets, ...data.parts];
   const nav = [
-    { id: "pc-set", label: "PC set", count: data.sets.length },
+    { id: "pc-set", label: "PC siap pakai", count: readySets.length },
     { id: "monitor", label: "Monitor", count: data.monitors.length },
-    { id: "komponen", label: "Komponen", count: data.parts.length },
-    { id: "aksesoris", label: "Aksesoris", count: data.accessories.length }
+    { id: "aksesoris", label: "Aksesoris", count: data.accessories.length },
+    { id: "rakit", label: "Rakit sendiri", count: buildItems.length }
   ].filter((entry) => entry.count > 0);
   const total = data.sets.length + data.monitors.length + data.parts.length + data.accessories.length;
 
@@ -128,16 +144,38 @@ export default async function KatalogPcPage() {
       ) : null}
 
       {!data.connected ? <div className="infoBox dangerInfo">Data katalog PC belum tersedia untuk saat ini. Silakan chat admin.</div> : null}
+      {data.connected && total > 0 && readySets.length === 0 ? (
+        <div className="infoBox">
+          <PackageCheck size={16} /> PC siap pakai sedang habis. Pilih budget di bawah, kami carikan yang sesuai, atau rakit sendiri.
+        </div>
+      ) : null}
       {data.connected && total === 0 ? (
         <div className="infoBox">
-          <PackageCheck size={16} /> Stok PC sedang kosong. Chat admin untuk PC sesuai budget, atau rakit sendiri lewat Rakit PC custom.
+          <PackageCheck size={16} /> Stok PC sedang kosong. Pilih budget di bawah atau rakit sendiri lewat Rakit PC custom.
         </div>
       ) : null}
 
-      <Section id="pc-set" title="PC set dan rakitan" hint="Siap pakai. Isi paket tertera di tiap kartu." items={data.sets} />
+      <Section id="pc-set" title="PC siap pakai" hint="Ready di toko. Isi paket tertera di tiap kartu." items={readySets} />
+
+      <section className="pcCatBudget" id="budget" aria-label="Cari PC sesuai budget">
+        <div className="pcCatSectionHead">
+          <h2>Cari PC sesuai budget</h2>
+        </div>
+        <p className="pcCatHint">Pilih kisaran budget, admin bantu pilihkan yang paling pas dan cek ketersediaannya.</p>
+        <div className="pcCatBudgetGrid">
+          {BUDGETS.map((budget) => (
+            <a className="pcCatBudgetBtn" href={budgetLink(budget.wa)} target="_blank" rel="noreferrer" key={budget.label}>
+              <strong>{budget.label}</strong>
+              <small>{budget.note}</small>
+              <span><MessageCircle size={14} /> Tanya admin</span>
+            </a>
+          ))}
+        </div>
+      </section>
+
       <Section id="monitor" title="Monitor" hint="Bisa dibeli terpisah atau ditambahkan ke PC." items={data.monitors} />
-      <Section id="komponen" title="Komponen satuan" hint="Untuk upgrade atau rakit sendiri. Barang berlabel pre-order dipesan dulu." items={data.parts} />
       <Section id="aksesoris" title="Aksesoris" hint="Pelengkap PC dan laptop." items={data.accessories} />
+      <Section id="rakit" title="Rakit sendiri (pre-order)" hint="Paket rakitan dan komponen satuan untuk upgrade. Barang berlabel pre-order dipesan dulu, estimasi 5–7 hari." items={buildItems} />
 
       <p className="pcCatNote">Harga dapat berubah mengikuti stok. Tanya admin untuk memastikan ketersediaan sebelum datang ke toko.</p>
     </section>
